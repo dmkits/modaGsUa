@@ -1,0 +1,136 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="dir_products_PageContainer" style="width: 100%; height: 100%;">
+    <div id="dir_products_ContentPaneLeft" style="width:170px;height:100%; margin:0;padding:0;">
+        <table style="width:100%;">
+            <tr><th>Товарные номенклатуры</th></tr>
+            <tr><td>
+                <button id="dir_products_Btn_viewProducts">Товарные номенклатуры</button>
+                <br><br>
+                <button id="dir_products_Btn_viewTypes">Типы номенклатур</button>
+                <button id="dir_products_Btn_viewKinds">Виды номенклатур</button>
+                <button id="dir_products_Btn_viewLines">Линии номенклатур</button>
+                <br><br>
+            </td></tr>
+        </table>
+    </div>
+    <div id="dir_products_ContentContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/Button", "tDocumentSimpleTableEditable"],
+            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocumentSimpleTableEditable) {
+                var dir_products_PageContainer=
+                        APP.instanceForID("dir_products_PageContainer", BorderContainer, {});
+                APP.instanceForID("dir_products_ContentPaneLeft", ContentPane, {region:'left', splitter:false});
+                var dir_products_Btn_viewProducts=
+                        APP.instanceForID("dir_products_Btn_viewProducts", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewProducts", "width", "155px");
+                var dir_products_Btn_viewTypes=
+                        APP.instanceForID("dir_products_Btn_viewTypes", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewTypes", "width", "155px");
+                var dir_products_Btn_viewKinds=
+                        APP.instanceForID("dir_products_Btn_viewKinds", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewKinds", "width", "155px");
+                var dir_products_Btn_viewLines=
+                        APP.instanceForID("dir_products_Btn_viewLines", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewLines", "width", "155px");
+                var dir_products_ContentContainer=
+                        APP.instanceForID("dir_products_ContentContainer", StackContainer, {region:'center'});
+
+                dir_products_Btn_viewProducts.onClick= function(){
+                    if (!dir_products_Btn_viewProducts.document){
+                        dir_products_Btn_viewProducts.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProducts",
+                                        TDocumentSimpleTableEditable, {titleText:"Товарные номенклатуры", rightPane:{width:150},
+                                            dataURL:"/dir/products/getDataForDirProductsTable",
+                                            dataStoreURL:"/dir/products/storeDirProductsTableData"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addToolPane({title:"Действия"})
+                                        .addToolPaneTableActionButton("Изменить строку", {btnStyle:"width:145px;", actionName:"allowEditTableSelectedRow"})
+                                        .addToolPaneTableActionButton("Сохранить строку", {btnStyle:"width:145px;", actionName:"storeTableSelectedRow"})
+//                                        .addToolPaneTableActionButton("Удалить строку", {btnStyle:"width:145px;", actionName:"deleteTableSelectedRow"})
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewProducts.document);
+                };
+                dir_products_Btn_viewTypes.onClick= function(){
+                    if (!dir_products_Btn_viewTypes.document){
+                        dir_products_Btn_viewTypes.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsTypes",
+                                        TDocumentSimpleTableEditable, {titleText:"Типы номенклатур", rightPane:{width:150},
+                                            dataURL:"/dir/products/getDataForProductsTypesTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForProductsTypesTable",
+                                            dataStoreURL:"/dir/products/storeProductsTypesTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsTypesTableData"
+                                        })
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addToolPane({title:"Действия"})
+                                        .addToolPaneTableActionButton("Добавить", {btnStyle:"width:115px;", actionName:"insertTableRow"})
+                                        .addToolPaneTableActionButton("Изменить", {btnStyle:"width:115px;", actionName:"allowEditTableSelectedRow"})
+                                        .addToolPaneTableActionButton("Сохранить", {btnStyle:"width:115px;", actionName:"storeTableSelectedRow"})
+                                        .addToolPaneTableActionButton("Удалить", {btnStyle:"width:115px;", actionName:"deleteTableSelectedRow"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewTypes.document);
+                };
+                dir_products_Btn_viewKinds.onClick= function(){
+                    if (!dir_products_Btn_viewKinds.document){
+                        dir_products_Btn_viewKinds.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsKinds",
+                                        TDocumentSimpleTableEditable, {titleText:"Виды номенклатур", rightPane:{width:150},
+                                            dataURL:"/dir/products/getDataForProductsKindsTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForProductsKindsTable",
+                                            dataStoreURL:"/dir/products/storeProductsKindsTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsKindsTableData"
+                                        })
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addToolPane({title:"Действия"})
+                                        .addToolPaneTableActionButton("Добавить", {btnStyle:"width:115px;", actionName:"insertTableRow"})
+                                        .addToolPaneTableActionButton("Изменить", {btnStyle:"width:115px;", actionName:"allowEditTableSelectedRow"})
+                                        .addToolPaneTableActionButton("Сохранить", {btnStyle:"width:115px;", actionName:"storeTableSelectedRow"})
+                                        .addToolPaneTableActionButton("Удалить", {btnStyle:"width:115px;", actionName:"deleteTableSelectedRow"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewKinds.document);
+                };
+                dir_products_Btn_viewLines.onClick= function(){
+                    if (!dir_products_Btn_viewLines.document){
+                        dir_products_Btn_viewLines.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsLines",
+                                        TDocumentSimpleTableEditable, {titleText:"Линии номенклатур", rightPane:{width:150},
+                                            dataURL:"/dir/products/getDataForProductsLinesTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForProductsLinesTable",
+                                            dataStoreURL:"/dir/products/storeProductsLinesTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsLinesTableData"
+                                        })
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addToolPane({title:"Действия"})
+                                        .addToolPaneTableActionButton("Добавить", {btnStyle:"width:115px;", actionName:"insertTableRow"})
+                                        .addToolPaneTableActionButton("Изменить", {btnStyle:"width:115px;", actionName:"allowEditTableSelectedRow"})
+                                        .addToolPaneTableActionButton("Сохранить", {btnStyle:"width:115px;", actionName:"storeTableSelectedRow"})
+                                        .addToolPaneTableActionButton("Удалить", {btnStyle:"width:115px;", actionName:"deleteTableSelectedRow"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewLines.document);
+                };
+                dir_products_PageContainer.layout();
+                dir_products_Btn_viewProducts.onClick();
+            });
+</script>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="reports_prods_moves_PageContainer" style="width:100%;height:100%;">
+    <div id="reports_prods_moves_ContentPaneLeft" style="width:165px;height:100%; margin:0;padding:0;">
+        <table style="width:100%;">
+            <tr><th height="25px">Движение по документам</th></tr>
+            <tr><td>
+                <button id="reports_prods_moves_Btn_ProdsMoves">Товарный отчет</button>
+                <br><br>
+                <button id="reports_prods_moves_Btn_ProdsMovesExt">Движение товаров</button>
+                <button id="reports_prods_moves_Btn_ProdsMovesBatches">Движение по партиям</button>
+                <br><br>
+                <button id="reports_prods_moves_Btn_ProdsPInvs">Приходные накладные</button>
+                <br><br>
+                <button id="reports_prods_moves_Btn_ProdsInvs">Расходные накладные</button>
+                <br><br>
+                <button id="reports_prods_moves_Btn_ProdsRetailAll">Розничные чеки</button>
+                <button id="reports_prods_moves_Btn_ProdsRetailTickets">Чеки продажи</button>
+                <button id="reports_prods_moves_Btn_ProdsRetailPTickets">Возвратные чеки</button>
+                <br><br>
+            </td></tr>
+        </table>
+    </div>
+    <div id="reports_prods_moves_DetailContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/Button", "tDocumentSimpleTable", "request"],
+            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocumentSimpleTable, Request) {
+                var reports_prods_moves_PageContainer=
+                        APP.instanceForID("reports_prods_moves_PageContainer", BorderContainer, {});
+                APP.instanceForID("reports_prods_moves_ContentPaneLeft", ContentPane, {region:'left', splitter:true});
+                var reports_prods_moves_Btn_ProdsMoves=
+                        APP.instanceForID("reports_prods_moves_Btn_ProdsMoves", Button, {style:"width:100px"});
+                domStyle.set("reports_prods_moves_Btn_ProdsMoves", "width", "150px");
+                var reports_prods_moves_Btn_ProdsMovesExt=
+                        APP.instanceForID("reports_prods_moves_Btn_ProdsMovesExt", Button, {style:"width:100px"});
+                domStyle.set("reports_prods_moves_Btn_ProdsMovesExt", "width", "150px");
+                var reports_prods_moves_Btn_ProdsMovesBatches=
+                        APP.instanceForID("reports_prods_moves_Btn_ProdsMovesBatches", Button, {style:"width:100px"});
+                domStyle.set("reports_prods_moves_Btn_ProdsMovesBatches", "width", "150px");
+                var reports_prods_moves_Btn_ProdsPInvs=
+                        APP.instanceForID("reports_prods_moves_Btn_ProdsPInvs", Button, {style:"width:100px"});
+                domStyle.set("reports_prods_moves_Btn_ProdsPInvs", "width", "150px");
+                var reports_prods_moves_Btn_ProdsInvs=
+                        APP.instanceForID("reports_prods_moves_Btn_ProdsInvs", Button, {style:"width:100px"});
+                domStyle.set("reports_prods_moves_Btn_ProdsInvs", "width", "150px");
+                var reports_prods_moves_Btn_ProdsRetailAll=
+                        APP.instanceForID("reports_prods_moves_Btn_ProdsRetailAll", Button, {style:"width:100px"});
+                domStyle.set("reports_prods_moves_Btn_ProdsRetailAll", "width", "150px");
+                var reports_prods_moves_Btn_ProdsRetailTickets=
+                        APP.instanceForID("reports_prods_moves_Btn_ProdsRetailTickets", Button, {style:"width:100px"});
+                domStyle.set("reports_prods_moves_Btn_ProdsRetailTickets", "width", "150px");
+                var reports_prods_moves_Btn_ProdsRetailPTickets=
+                        APP.instanceForID("reports_prods_moves_Btn_ProdsRetailPTickets", Button, {style:"width:100px"});
+                domStyle.set("reports_prods_moves_Btn_ProdsRetailPTickets", "width", "150px");
+                var reports_prods_moves_DetailContainer=
+                        APP.instanceForID("reports_prods_moves_DetailContainer", StackContainer, {region:'center'});
+
+                reports_prods_moves_Btn_ProdsMoves.onClick= function(){
+                    if (!reports_prods_moves_Btn_ProdsMoves.report){
+                        reports_prods_moves_Btn_ProdsMoves.report =
+                                APP.childFor(reports_prods_moves_DetailContainer, "reports_prods_moves_TableProdsMoves",
+                                        TDocumentSimpleTable, {titleText:"Товарный отчет",
+                                            dataURL:"/wrh/products_moves/get_products_moves"})
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate", contentTableCondition:"BDATE"}).addHeaderDateBox("по",{contentTableCondition:"EDATE"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 130, {style:"font-weight:bold;",inputStyle:"width:40px"})
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 850, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                                        .startUp();
+                    }
+                    reports_prods_moves_DetailContainer.selectChild(reports_prods_moves_Btn_ProdsMoves.report);
+                };
+
+                reports_prods_moves_Btn_ProdsMovesExt.onClick= function(){
+                    if (!reports_prods_moves_Btn_ProdsMovesExt.report){
+                        reports_prods_moves_Btn_ProdsMovesExt.report =
+                                APP.childFor(reports_prods_moves_DetailContainer, "reports_prods_moves_TableProdsMovesExt",
+                                        TDocumentSimpleTable, {titleText:"Движение товаров",
+                                            dataURL:"/wrh/products_moves/get_products_moves_ext"})
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate", contentTableCondition:"BDATE"}).addHeaderDateBox("по",{contentTableCondition:"EDATE"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 130, {style:"font-weight:bold;",inputStyle:"width:40px"})
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 850, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                                        .startUp();
+                    }
+                    reports_prods_moves_DetailContainer.selectChild(reports_prods_moves_Btn_ProdsMovesExt.report);
+                };
+
+                reports_prods_moves_Btn_ProdsMovesBatches.onClick= function(){
+                    if (!reports_prods_moves_Btn_ProdsMovesBatches.report){
+                        reports_prods_moves_Btn_ProdsMovesBatches.report =
+                                APP.childFor(reports_prods_moves_DetailContainer, "reports_prods_moves_TableProdsMovesByBatches",
+                                        TDocumentSimpleTable, {titleText:"Движение товаров по партиям",
+                                            dataURL:"/wrh/products_moves/get_products_moves_by_batches"})
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate", contentTableCondition:"BDATE"}).addHeaderDateBox("по",{contentTableCondition:"EDATE"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 130, {style:"font-weight:bold;",inputStyle:"width:40px"})
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 850, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+
+                                        .addContentTableRowAction("wroProductFromDate",
+                                            function(tableContentRowData, params, contentTableInstance, startNextAction){                console.log("wroProductFromDate action ",params);
+                                                var wroProdData= { "PRODUCT_CODE":tableContentRowData["PRODUCT_CODE"],"UNIT_NAME":tableContentRowData["UNIT_NAME"] };
+                                                wroProdData["DOCDATE"]=tableContentRowData["DOCDATE"];
+                                                wroProdData["DOCCODE"]=tableContentRowData["DOCCODE"];
+                                                wroProdData["DOCOPERID"]=tableContentRowData["DOCOPERID"];
+                                                Request.postJSONData({url:"/wrh/products_moves/wroProductFromDate", condition:null, data:wroProdData, consoleLog:true},
+                                                    function(result){                                       //console.log("dir_products_prices_documentProductsPrices setDiscountForRowData postData:",result);
+                                                        if (result&&result["resultItem"]) {
+                                                            var newData = result["resultItem"];
+                                                            contentTableInstance.updateRowData(tableContentRowData,newData);
+                                                        }
+                                                        startNextAction();
+                                                    });
+                                            })
+                                        .addPopupMenuItemForAction("wroTableSelectedProductsFromDate","Пересписать выбранные...", "wroProductFromDate")
+                                        .startUp();
+                    }
+                    reports_prods_moves_DetailContainer.selectChild(reports_prods_moves_Btn_ProdsMovesBatches.report);
+                };
+                reports_prods_moves_Btn_ProdsPInvs.onClick= function(){
+                    if (!reports_prods_moves_Btn_ProdsPInvs.report){
+                        reports_prods_moves_Btn_ProdsPInvs.report =
+                                APP.childFor(reports_prods_moves_DetailContainer, "reports_prods_moves_TableProdsPInvs",
+                                        TDocumentSimpleTable, {titleText:"Приходные накладные",
+                                            dataURL:"/wrh/products_moves/get_products_pinvs" })
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"BDATE"}).addHeaderDateBox("по", {contentTableCondition:"EDATE"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 130, {style:"font-weight:bold;",inputStyle:"width:40px"})
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 980, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 200, "POSSUM", {style:"font-weight:bold;",inputStyle:"width:80px",pattern:"###,###,##0.00######"})
+                                        .startUp();
+                    }
+                    reports_prods_moves_DetailContainer.selectChild(reports_prods_moves_Btn_ProdsPInvs.report);
+                };
+                reports_prods_moves_Btn_ProdsInvs.onClick= function(){
+                    if (!reports_prods_moves_Btn_ProdsInvs.report){
+                        reports_prods_moves_Btn_ProdsInvs.report =
+                                APP.childFor(reports_prods_moves_DetailContainer, "reports_prods_moves_TableProdsInvsWCC",
+                                        TDocumentSimpleTable, {titleText:"Расходные накладные",
+                                            dataURL:"/wrh/products_moves/get_products_invs_wcc" })
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate", contentTableCondition:"BDATE"}).addHeaderDateBox("по",{contentTableCondition:"EDATE"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 130, {style:"font-weight:bold;",inputStyle:"width:40px"})
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 930, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма СС:", 200, "PRODUCT_COST_SUM", {style:"font-weight:bold;",inputStyle:"width:80px",pattern:"###,###,##0.00######"})
+                                        .startUp();
+                    }
+                    reports_prods_moves_DetailContainer.selectChild(reports_prods_moves_Btn_ProdsInvs.report);
+                };
+                reports_prods_moves_Btn_ProdsRetailAll.onClick= function(){
+                    if (!reports_prods_moves_Btn_ProdsRetailAll.report){
+                        reports_prods_moves_Btn_ProdsRetailAll.report =
+                                APP.childFor(reports_prods_moves_DetailContainer, "reports_prods_moves_TableProdsTickets",
+                                        TDocumentSimpleTable, {titleText:"Розничные чеки",//Продажи по чекам
+                                            dataURL:"/wrh/products_moves/get_products_tickets_wcc" })
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate", contentTableCondition:"BDATE"}).addHeaderDateBox("по",{contentTableCondition:"EDATE"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 130, {style:"font-weight:bold;",inputStyle:"width:40px"})
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 930, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма СС:", 200, "PRODUCT_COST_SUM", {style:"font-weight:bold;",inputStyle:"width:80px",pattern:"###,###,##0.00######"})
+                                        .startUp();
+                    }
+                    reports_prods_moves_DetailContainer.selectChild(reports_prods_moves_Btn_ProdsRetailAll.report);
+                };
+
+                reports_prods_moves_PageContainer.layout();
+                reports_prods_moves_Btn_ProdsMoves.onClick();
+        });
+</script>
+</html>

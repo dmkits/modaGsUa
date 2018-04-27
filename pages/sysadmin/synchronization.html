@@ -1,0 +1,201 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="sysadmin_sync_PageContainer" style="width:100%;height:100%;display:none">
+    <div id="sysadmin_sync_ContentPaneHeader" style="width:100%;height:30px; margin:0;padding:0;">
+        <table>
+            <tr>
+                <td>
+                    <button id="sysadmin_sync_btnErrorsLog"></button>
+                    <button id="sysadmin_sync_btnIncomingData"></button>
+                    <button id="sysadmin_sync_btnOutputData"></button>
+                    <button id="sysadmin_sync_btnSyncPOSes"></button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="sysadmin_sync_ContentPaneDetailContainer" style="width:100%;height:auto; margin:0;padding:0;">
+        <div id="sysadmin_sync__errors_log" style="width:100%;height:auto;margin:0;padding:0;"></div>
+        <div id="sysadmin_sync__incoming_data" style="width:100%;height:auto;margin:0;padding:0;"></div>
+        <div id="sysadmin_sync__output_data" style="width:100%;height:auto;margin:0;padding:0;"></div>
+        <div id="sysadmin_sync__databases" style="width:100%;height:auto;margin:0;padding:0;"></div>
+    </div>
+    <div id="sysadmin_sync_RightContent" style="height:100%;width:200px; margin:0;padding:0;">
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/Button", "dijit/form/ToggleButton", "tDocumentSimpleTableEditable","request"],
+
+            function (APP, BorderContainer, StackContainer, ContentPane, Button, ToggleButton, TDocumentSimpleTable, Request) {
+                var pageContainer =
+                        APP.instanceForID("sysadmin_sync_PageContainer", BorderContainer, {});
+                var contentPaneHeader =
+                        APP.instanceForID("sysadmin_sync_ContentPaneHeader", ContentPane, {region: 'top', splitter: false});
+                var btnErrorsLog = APP.instanceForID("sysadmin_sync_btnErrorsLog",
+                        ToggleButton, {showLabel: true, checked: true, label: "Errors log", iconClass: 'dijitCheckBoxIcon'},{width:"150px"});
+                var btnIncomingData = APP.instanceForID("sysadmin_sync_btnIncomingData",
+                        ToggleButton, {showLabel: true, checked: true, label: "Incoming data", iconClass: 'dijitCheckBoxIcon'},{width:"150px"});
+                var btnOutputData = APP.instanceForID("sysadmin_sync_btnOutputData",
+                        ToggleButton, {showLabel: true, checked: true, label: "Output data", iconClass: 'dijitCheckBoxIcon'},{width:"150px"});
+                var btnSyncPOSes = APP.instanceForID("sysadmin_sync_btnSyncPOSes",
+                        ToggleButton, {showLabel: true, checked: true, label: "Sync POSes", iconClass: 'dijitCheckBoxIcon'},{width:"150px"});
+                var contentPaneDetailContainer =
+                        APP.instanceForID("sysadmin_sync_ContentPaneDetailContainer", StackContainer, {region: 'center'});
+                pageContainer.domNode.style.display = ""; pageContainer.startup();
+
+                btnErrorsLog.onClick = function () {
+                    this.set("checked", true);
+                    btnSyncPOSes.set("checked", false);
+                    btnIncomingData.set("checked", false);
+                    btnOutputData.set("checked", false);
+                    if (btnErrorsLog.document) {
+                        contentPaneDetailContainer.selectChild(btnErrorsLog.document);
+                        return;
+                    }
+                    btnErrorsLog.document =
+                            APP.childFor(contentPaneDetailContainer, "sysadmin_sync__TableErrorsLog",
+                                    TDocumentSimpleTable, {titleText: "Errors log synchronization",
+                                        dataURL: '/system/synchronization/getErrorLogDataForTable', dataURLCondition: {"1~": 1}, buttonPrint: false})
+                                    .addTotalCountNumberBox("ИТОГО строк:", 140, {style: "font-weight:bold;", inputStyle: "width:40px;"})
+                                    .startUp();
+                    contentPaneDetailContainer.selectChild(btnErrorsLog.document);
+                };
+
+                btnIncomingData.onClick = function () {
+                    this.set("checked", true);
+                    btnErrorsLog.set("checked", false);
+                    btnSyncPOSes.set("checked", false);
+                    btnOutputData.set("checked", false);
+                    if (btnIncomingData.document) {
+                        contentPaneDetailContainer.selectChild(btnIncomingData.document);
+                        return;
+                    }
+                    btnIncomingData.document =
+                            APP.childFor(contentPaneDetailContainer, "sysadmin_sync__TableIncomingData",
+                                    TDocumentSimpleTable, {titleText: "Incoming data synchronization", buttonPrint: false, rightPane:{ width:250 },
+                                        dataURL: '/system/synchronization/getIncomingDataForTable', dataURLCondition: {"1~": 1} })
+                                    .addTotalCountNumberBox("ИТОГО строк:", 140, {style: "font-weight:bold;", inputStyle: "width:40px;"})
+                                    .addToolPane({title:"Detail info",
+                                        contentTableAction:function(params){
+                                            if(!params.contentTableSelectedRow){
+                                                params.thisToolPane.set("content","");
+                                                return;
+                                            }
+                                            Request.postJSONData({url:"/system/synchronization/getInfoPaneDetailIncomingData",
+                                                        data:{"SYNC_INCOMING_DATA_ID=":params.contentTableSelectedRow["ID"]}, resultItemName:"items"},
+                                                    function(resultItems){
+                                                        if(!resultItems)return;
+                                                        var innerCont="";
+                                                        for (var i = 0; i < resultItems.length; i++) {
+                                                            var elem = resultItems[i];
+                                                            innerCont+="<b>"+elem["NAME"]+"</b>: "+elem["VALUE"]+"<br>";
+                                                        }
+                                                        params.thisToolPane.set("content",innerCont);
+                                                    });
+                                        } })
+                                    .addContentTableRowsAction("apply",{
+                                        tableRowAction:function(contentTableRowData, actionParams, contentTableUpdatedRowData, startNextAction, finishedAction){
+                                            Request.postJSONData({url:"/system/synchronization/applySyncIncomingData", data:contentTableRowData},
+                                                    function(result,error){
+                                                        var resultMsg="";
+                                                        if(!result) {
+                                                            contentTableUpdatedRowData["OPERATION_RESULT"]="No server result!";
+                                                            startNextAction();
+                                                            return;
+                                                        }
+                                                        if(error) resultMsg="Operation failed! Reason: "+error;
+                                                        if(result.updStateError) resultMsg+="\nOperation update state failed! Reason: "+result.updStateError;
+                                                        if(resultMsg==="") resultMsg="Success.";
+                                                        contentTableUpdatedRowData["OPERATION_RESULT"]=resultMsg;
+                                                        if(result.resultItem){
+                                                            for (var resultDataItem in result.resultItem) {
+                                                                contentTableUpdatedRowData[resultDataItem]=result.resultItem[resultDataItem];
+                                                            }
+                                                        }
+                                                        startNextAction();
+                                                    });
+                                        }
+                                    })
+                                    .addContentTablePopupMenuAction("Apply selected...", {contentTableActionName:"apply"})
+                                    .addContentTablePopupMenuAction("Apply all changes...", {
+                                        contentTableActionName:"apply",
+                                        beforeContentTableRowsAction:function(selectedTableContent, actionParams, startContentTableRowsAction){
+                                            startContentTableRowsAction(actionParams.thisInstance.getTableContent());
+                                        }
+                                    })
+                                    .startUp();
+                    contentPaneDetailContainer.selectChild(btnIncomingData.document);
+                };
+                btnOutputData.onClick = function () {
+                    this.set("checked", true);
+                    btnErrorsLog.set("checked", false);
+                    btnSyncPOSes.set("checked", false);
+                    btnIncomingData.set("checked", false);
+                    if (btnOutputData.document) {
+                        contentPaneDetailContainer.selectChild(btnOutputData.document);
+                        return;
+                    }
+                    btnOutputData.document =
+                            APP.childFor(contentPaneDetailContainer, "sysadmin_sync__TableOutputData",
+                                    TDocumentSimpleTable, {titleText: "Output data synchronization",
+                                        dataURL: '/system/synchronization/getOutputDataForTable', dataURLCondition: {"1~": 1},
+                                        buttonPrint: false, rightPane:{ width:250 } })
+                                    .addTotalCountNumberBox("ИТОГО строк:", 140, {style: "font-weight:bold;", inputStyle: "width:40px;"})
+                                    .addToolPane({title:"Detail info",
+                                        contentTableAction:function(params){
+                                            if(!params.contentTableSelectedRow){
+                                                params.thisToolPane.set("content","");
+                                                return;
+                                            }
+                                            Request.postJSONData({url:"/system/synchronization/getInfoPaneDetailOutputData",
+                                                        data:{"SYNC_OUTPUT_DATA_ID=":params.contentTableSelectedRow["ID"]}, resultItemName:"items"},
+                                                    function(resultItems){
+                                                        if(!resultItems)return;
+                                                        var innerCont="";
+                                                        for (var i = 0; i < resultItems.length; i++) {
+                                                            var elem = resultItems[i];
+                                                            innerCont+="<b>"+elem["NAME"]+"</b>: "+elem["VALUE"]+"<br>";
+                                                        }
+                                                        params.thisToolPane.set("content",innerCont);
+                                                    });
+                                        } })
+                                    .startUp();
+                    contentPaneDetailContainer.selectChild(btnOutputData.document);
+                };
+                btnSyncPOSes.onClick = function () {
+                    this.set("checked", true);
+                    btnErrorsLog.set("checked", false);
+                    btnIncomingData.set("checked", false);
+                    btnOutputData.set("checked", false);
+                    if (btnSyncPOSes.document) {
+                        contentPaneDetailContainer.selectChild(btnSyncPOSes.document);
+                        return;
+                    }
+                    btnSyncPOSes.document =
+                            APP.childFor(contentPaneDetailContainer, "sysadmin_sync__TableSyncPOSes",
+                                    TDocumentSimpleTable, {titleText: "Synchronization POSes",buttonPrint: false,
+                                        rightToolPane:{title:"Действия",
+                                            buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                                storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                        dataURL: '/system/synchronization/getSyncPOSesDataForTable', dataURLCondition: {"1~": 1},
+                                        dataNewURL:"/system/synchronization/newDataForSyncPOSesTable",
+                                        dataStoreURL:"/system/synchronization/storeSyncPOSesTableData",
+                                        dataDeleteURL:"/system/synchronization/deleteSyncPOSesTableData"})
+                                    .addTotalCountNumberBox("ИТОГО строк:", 140, {style: "font-weight:bold;", inputStyle: "width:40px;"})
+                                    .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected",rowPosName:"POS"})
+                                    .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                    .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                    .startUp();
+                    contentPaneDetailContainer.selectChild(btnSyncPOSes.document);
+                };
+                btnErrorsLog.onClick();
+                pageContainer.layout();
+            });
+</script>
+</html>

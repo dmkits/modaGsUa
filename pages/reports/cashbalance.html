@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="fin_cashbalancePageContainer" style="width:100%;height:100%;">
+    <div id="fin_cashbalanceContentPaneLeft" style="width:165px;height:100%; margin:0;padding:0;">
+        <table style="width:100%; margin:0;padding:0;">
+            <tr><th height="20px;">Касса</th></tr>
+            <tr><td>
+                <button id="fin_cashbalanceBtn_RetailCashbalance">Оперативная касса</button>
+                <br><br>
+                <button id="fin_cashbalanceBtn_Cashbalance">Касса</button>
+            </td></tr>
+        </table>
+    </div>
+    <div id="fin_cashbalanceContentPaneDetailContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/Button", "tDocumentSimpleTableEditable"],
+            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocumentSimpleTableEditable) {
+                var fin_cashbalancePageContainer=
+                        APP.instanceForID("fin_cashbalancePageContainer", BorderContainer, {});
+                APP.instanceForID("fin_cashbalanceContentPaneLeft", ContentPane, {region:'left', splitter:true});
+                var fin_cashbalanceBtn_RetailCashbalance=
+                        APP.instanceForID("fin_cashbalanceBtn_RetailCashbalance", Button, {style:"width:100px"});
+                domStyle.set("fin_cashbalanceBtn_RetailCashbalance", "width", "150px");
+                var fin_cashbalanceBtn_Cashbalance=
+                        APP.instanceForID("fin_cashbalanceBtn_Cashbalance", Button, {style:"width:100px"});
+                domStyle.set("fin_cashbalanceBtn_Cashbalance", "width", "150px");
+                var fin_cashbalanceContentPaneDetailContainer=
+                        APP.instanceForID("fin_cashbalanceContentPaneDetailContainer", StackContainer, {region:'center'});
+
+                fin_cashbalanceBtn_RetailCashbalance.onClick= function(){
+                    if (!fin_cashbalanceBtn_RetailCashbalance.document){
+                        fin_cashbalanceBtn_RetailCashbalance.document =
+                                APP.childFor(fin_cashbalanceContentPaneDetailContainer, "fin_cashbalanceTableRetailCashbalanceExt",
+                                        TDocumentSimpleTableEditable, {titleText:"Оперативная касса", rightPane:{width:180},
+                                            dataURL:"/fin/cashbalance/get_retail_cash_balance_ext",
+                                            dataStoreURL:"/fin/cashbalance/store_cashbalance_operation"})
+                                        .addHeaderDateBox("с",{initValueDate:"curMonthBDate",contentTableCondition:"BDATE"})
+                                        .addHeaderDateBox("по",{contentTableCondition:"EDATE"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма по чекам:", 250, "TICKETPAY1SUM", {style:"font-weight:bold;",inputStyle:"width:90px",pattern:"###,###,##0.00#######"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма по служебным чекам:", 330, "RECEIPTPAY1SUM", {style:"font-weight:bold;",inputStyle:"width:90px",pattern:"###,###,##0.00#######"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 230, "DOCSUM", {style:"font-weight:bold;",inputStyle:"width:90px",pattern:"###,###,##0.00#######"})
+
+                                        .addTotalSumNumberTextBox("ИТОГО сумма по служебным чекам:", 330, "RECEIPTPAY1SUM", {style:"font-weight:bold;",inputStyle:"width:90px",pattern:"###,###,##0.00#######"})
+                                        .addTotalEmpty()
+
+                                        .addToolPane({title:"Действия"})
+                                        .addToolPaneTableActionButton("Добавить строку", {action:"insertTableRow"}, "width:145px;")
+                                        .addToolPaneTableActionButton("Изменить строку", {action:"allowEditTableSelectedRow"}, "width:145px;")
+                                        .addToolPaneTableActionButton("Сохранить строку", {action:"storeTableSelectedRow"}, "width:145px;")
+                                        .addToolPaneTableActionButton("Удалить строку", {action:"deleteTableSelectedRow"}, "width:145px;")
+                                        .startUp();
+                    }
+                    fin_cashbalanceContentPaneDetailContainer.selectChild(fin_cashbalanceBtn_RetailCashbalance.document);
+                };
+                fin_cashbalancePageContainer.layout();
+                fin_cashbalanceBtn_RetailCashbalance.onClick();
+        });
+</script>
+</html>

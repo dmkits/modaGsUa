@@ -1,0 +1,144 @@
+.handsontable table thead th {
+    white-space: pre-line;
+}
+
+.hTableCurrentRow {
+    background-color: #E7E8EF !important;
+    border-color: black !important;
+    border-top: 1px solid !important;
+}
+/*.htDimmed {*/
+    /*background-color: #E7E8EF !important;*/
+/*}*/
+
+.hTableRowInEditMode {
+    /*border: 1px solid;*/
+    /*border-top: 1px solid !important;*/
+    /*border-color: green !important;*/
+    background-color: #dd99a6 !important;
+    color: black !important;
+    font-weight: bold;
+}
+.hTableErrorRow {
+    border: 1px solid;
+    border-top: 1px solid !important;
+    border-color: red !important;
+    color: black !important;
+    font-weight: bold;
+}
+
+.htCommentCell{
+    position: relative;
+}
+.htCommentCell:after{
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0px;
+    border-left: 10px solid transparent;
+    border-top: none;
+    border-bottom: 10px solid red;
+}
+.htComments{
+    text-align:right; !important;
+}
+.htCommentTextArea{
+    -moz-box-shadow: 1px 1px 2px #bbb;
+    -webkit-box-shadow: 1px 1px 2px #bbb;
+    width: 200px; height: 60px;
+    background-color: #FFFACD;
+    border: 1px solid #999;
+    box-shadow: 1px 1px 2px #bbb;
+    font-family: 'Arial';
+}
+/*TextRenderer readOnly cell*/
+.handsontable .htDimmed {
+    color: #000;
+    /*background-color: #f3f3f3;*/
+}
+
+/*header filter*/
+.changeTypeLbl {
+    color: black;
+    background: #eee;
+    border-radius: 2px;
+    padding-top: 4px;
+    font-size: 10px;
+
+    float: left;
+    line-height: 10px;
+    margin-left: 3px;
+    margin-top: 3px;
+    z-index: 100;
+}
+.changeTypeAccent {
+    font-weight: bold;
+}
+.changeTypeC {
+    border: 1px solid #bbb;
+    color: black;
+    background: #eee;
+    border-radius: 2px;
+    padding: 2px;
+    font-size: 10px;
+
+    float: left;
+    line-height: 10px;
+    margin-left: 3px;
+    margin-top: 3px;
+    z-index: 100;
+}
+.changeTypeC:hover {
+    border: 1px solid #777;
+    color: black;
+    cursor: pointer;
+}
+.changeTypeC.pressed {
+    background-color: #999;
+}
+.changeType {
+    border: 1px solid #bbb;
+    color: #bbb;
+    background: #eee;
+    border-radius: 2px;
+    padding: 2px;
+    font-size: 9px;
+
+    float: right;
+    line-height: 9px;
+    margin: 3px 3px 0 0;
+    z-index: 100;
+}
+.changeType:hover {
+    border: 1px solid #777;
+    color: #777;
+    cursor: pointer;
+}
+.changeType.pressed {
+    background-color: #999;
+}
+.changeTypeMenu {
+    position: absolute;
+    border: 1px solid #ccc;
+    margin-top: 18px;
+    box-shadow: 0 1px 3px -1px #323232;
+    background: white;
+    padding: 0;
+    display: none;
+    z-index: 1000;
+}
+.changeTypeMenu li {
+    text-align: left;
+    list-style: none;
+    padding: 2px 20px;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+.changeTypeMenu li.active:before {
+    content: "\2714";
+    margin-left: -15px;
+    margin-right: 3px;
+}
+.changeTypeMenu li:hover {
+    background: #eee;
+}

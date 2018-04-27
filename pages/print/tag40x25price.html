@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<body><div style="display:none" id="prodTagFirstChild"></div>
+    <div style="border:none; margin-left:0cm;margin-top:0.1cm; width:3.6cm;height:0.95cm; font-size:44px; text-align:center" id="prodPrice"></div>
+    <div style="border:none;margin-left:0cm;margin-top:0cm; padding:0;width:3.6cm;height:0.45cm;">
+        <div style="display:inline-block;float:left;border:none; margin-left:0.6cm;margin-top:0cm; width:2.4cm;height:0.6cm; font-size:26px; text-align:center" id="prodPriceCurr"></div>
+        <div style="display:inline-block;float:right; margin:0cm;margin-top:0.3cm; width:0.5cm;height:0.35cm; font-size:9px; text-align:left" id="pageNum" class="pageNum"></div>
+    </div>
+</body>
+<script type="text/javascript">
+    require(["dijit/registry"],
+            function(registry){
+                var firstHTML = document.getElementById("prodTagFirstChild");
+                var parentID=firstHTML.parentNode.id;
+                var parent= registry.byId(parentID);
+                if(!parent) return;
+                var parentHTML= parent.domNode;
+                parentHTML.style.width="3.6cm";parentHTML.style.height="2.1cm";
+                var prodTagContentData= parent["prodTagContentData"];                                                   console.log("tag40x25price PAGE prodTagContentData= ",prodTagContentData);
+                if (!prodTagContentData) prodTagContentData={};
+                var prodTagContentData= parent["prodTagContentData"];
+                parentHTML.children[1].innerHTML = "<b>"+prodTagContentData["SALE_PRICE"]+"</b>";
+                parentHTML.children[2].children[0].innerHTML = "<b>грн.</b>";
+                var pageNum = parent["printPageNumber"];
+                if(!pageNum) pageNum="";
+                parentHTML.children[2].children[1].innerHTML = pageNum;
+            });
+</script>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="dir_products_PageContainer" style="width: 100%; height: 100%;">
+    <div id="dir_products_ContentPaneLeft" style="width:170px;height:100%; margin:0;padding:0;">
+        <table style="width:100%;">
+            <tr><th>Товарные номенклатуры</th></tr>
+            <tr><td>
+                <button id="dir_products_Btn_viewGenders">Группы номенклатур</button>
+                <button id="dir_products_Btn_viewCategories">Категории номенклатур</button>
+                <button id="dir_products_Btn_viewSubcategories">Подкатегории номенклатур</button>
+                <br><br>
+                <button id="dir_products_Btn_viewCollestions">Коллекции</button>
+                <br><br>
+                <button id="dir_products_Btn_viewTypes">Типы</button>
+                <br><br>
+                <button id="dir_products_Btn_viewKinds">Виды</button>
+                <br><br>
+                <button id="dir_products_Btn_viewProducts">Товарные номенклатуры</button>
+            </td></tr>
+        </table>
+    </div>
+    <div id="dir_products_ContentContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/Button", "tDocumentSimpleTableEditable","request"],
+            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocumentSimpleTableEditable, Request) {
+                var dir_products_PageContainer=
+                        APP.instanceForID("dir_products_PageContainer", BorderContainer, {});
+                APP.instanceForID("dir_products_ContentPaneLeft", ContentPane, {region:'left', splitter:false});
+                var dir_products_Btn_viewGenders=
+                        APP.instanceForID("dir_products_Btn_viewGenders", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewGenders", "width", "155px");
+                var dir_products_Btn_viewCategories=
+                        APP.instanceForID("dir_products_Btn_viewCategories", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewCategories", "width", "155px");
+                var dir_products_Btn_viewSubcategories=
+                        APP.instanceForID("dir_products_Btn_viewSubcategories", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewSubcategories", "width", "155px");
+                var dir_products_Btn_viewCollestions=
+                        APP.instanceForID("dir_products_Btn_viewCollestions", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewCollestions", "width", "155px");
+                var dir_products_Btn_viewTypes=
+                        APP.instanceForID("dir_products_Btn_viewTypes", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewTypes", "width", "155px");
+                var dir_products_Btn_viewKinds=
+                        APP.instanceForID("dir_products_Btn_viewKinds", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewKinds", "width", "155px");
+                var dir_products_ContentContainer=
+                        APP.instanceForID("dir_products_ContentContainer", StackContainer, {region:'center'});
+                var dir_products_Btn_viewProducts=
+                        APP.instanceForID("dir_products_Btn_viewProducts", Button, {style:"width:100px"});
+                domStyle.set("dir_products_Btn_viewProducts", "width", "155px");
+
+                dir_products_Btn_viewGenders.onClick= function(){
+                    if (!dir_products_Btn_viewGenders.document){
+                        dir_products_Btn_viewGenders.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsGenders",
+                                        TDocumentSimpleTableEditable, {titleText:"Группы номенклатур", rightPane:{width:150},
+                                            rightToolPane:{title:"Действия",
+                                                buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                                    storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                            dataURL:"/dir/products/getDataForProductsGendersTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForProductsGendersTable",
+                                            dataStoreURL:"/dir/products/storeProductsGendersTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsGendersTableData"
+                                        })
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected"})
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewGenders.document);
+                };
+                dir_products_Btn_viewCategories.onClick= function(){
+                    if (!dir_products_Btn_viewCategories.document){
+                        dir_products_Btn_viewCategories.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsCategories",
+                                        TDocumentSimpleTableEditable, {titleText:"Категории номенклатур", rightPane:{width:150},
+                                            rightToolPane:{title:"Действия",
+                                                buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                                    storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                            dataURL:"/dir/products/getDataForProductsCategoriesTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForProductsCategoriesTable",
+                                            dataStoreURL:"/dir/products/storeProductsCategoriesTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsCategoriesTableData"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected"})
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .addContentTableRowChangeCallback(function(crd/*changedRowData*/, contentTable, params, nextCallback){
+                                            if(crd.item("GENDER_CODE").isChanged()&&!crd.item("GENDER_CODE").isUNDEFNULL()){
+                                                var genderValueForGenderCode=
+                                                        contentTable.getAutocompleteColumnValueForItem("GENDER_CODE",crd.item("GENDER_CODE").getValue(),"GENDER");
+                                                if(genderValueForGenderCode!=undefined) crd.item("GENDER").setValue(genderValueForGenderCode);
+                                            } else if(crd.item("GENDER").isChanged()&&!crd.item("GENDER").isUNDEFNULL()){
+                                                var genderCodeValueForGender=
+                                                        contentTable.getAutocompleteColumnValueForItem("GENDER",crd.item("GENDER").getValue(),"GENDER_CODE");
+                                                if(genderCodeValueForGender!=undefined) crd.item("GENDER_CODE").setValue(genderCodeValueForGender);
+                                            }
+                                            nextCallback();
+                                        })
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewCategories.document);
+                };
+                dir_products_Btn_viewSubcategories.onClick= function(){
+                    if (!dir_products_Btn_viewSubcategories.document){
+                        dir_products_Btn_viewSubcategories.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsSubCategories",
+                                        TDocumentSimpleTableEditable, {titleText:"Подкатегории номенклатур", rightPane:{width:150},
+                                            rightToolPane:{title:"Действия",
+                                                buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                                    storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                            dataURL:"/dir/products/getDataForDirProductsSubCategoriesTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForDirProductsSubCategoriesTable",
+                                            dataStoreURL:"/dir/products/storeProductsSubCategoriesTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsSubCategoriesTableData"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected"})
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .addContentTableRowChangeCallback(function(crd/*changedRowData*/, contentTable, params, nextCallback){
+                                            if (crd.item("CATEGORY_CODE").isChanged()&&!crd.item("CATEGORY_CODE").isUNDEFNULL()){
+                                                var categoryValueForCategoryCode=
+                                                        contentTable.getAutocompleteColumnValueForItem("CATEGORY_CODE",crd.item("CATEGORY_CODE").getValue(),"CATEGORY");
+                                                if(categoryValueForCategoryCode!=undefined) crd.item("CATEGORY").setValue(categoryValueForCategoryCode);
+                                            } else if(crd.item("CATEGORY").isChanged()&&!crd.item("CATEGORY").isUNDEFNULL()){
+                                                var categoryCodeValueForCategory=
+                                                        contentTable.getAutocompleteColumnValueForItem("CATEGORY",crd.item("CATEGORY").getValue(),"CATEGORY_CODE");
+                                                if(categoryCodeValueForCategory!=undefined) crd.item("CATEGORY_CODE").setValue(categoryCodeValueForCategory);
+                                            }
+                                            if (crd.item("SUBCATEGORY_CODE").isChanged()&&!crd.item("SUBCATEGORY_CODE").isUNDEFNULL()){
+                                                var subcategoryValueForSubcategoryCode=
+                                                        contentTable.getAutocompleteColumnValueForItem("SUBCATEGORY_CODE",crd.item("SUBCATEGORY_CODE").getValue(),"SUBCATEGORY");
+                                                if(subcategoryValueForSubcategoryCode!=undefined) crd.item("CATEGORY").setValue(subcategoryValueForSubcategoryCode);
+                                            } else if(crd.item("CATEGORY").isChanged()&&!crd.item("SUBCATEGORY").isUNDEFNULL()){
+                                                var subcategoryCodeValueForSubcategory=
+                                                        contentTable.getAutocompleteColumnValueForItem("SUBCATEGORY",crd.item("SUBCATEGORY").getValue(),"SUBCATEGORY_CODE");
+                                                if(subcategoryCodeValueForSubcategory!=undefined) crd.item("SUBCATEGORY_CODE").setValue(subcategoryCodeValueForSubcategory);
+                                            }
+                                            nextCallback();
+                                        })
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewSubcategories.document);
+                };
+
+                dir_products_Btn_viewCollestions.onClick= function(){
+                    if (!dir_products_Btn_viewCollestions.document){
+                        dir_products_Btn_viewCollestions.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsCollections",
+                                        TDocumentSimpleTableEditable, {titleText:"Коллекции номенклатур", rightPane:{width:150},
+                                            rightToolPane:{title:"Действия",
+                                                buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                                    storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                            dataURL:"/dir/products/getDataForProductsCollectionsTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForProductsCollectionsTable",
+                                            dataStoreURL:"/dir/products/storeProductsCollectionsTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsCollectionsTableData"
+                                        })
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected"})
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewCollestions.document);
+                };
+                dir_products_Btn_viewTypes.onClick= function(){
+                    if (!dir_products_Btn_viewTypes.document){
+                        dir_products_Btn_viewTypes.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsTypes",
+                                        TDocumentSimpleTableEditable, {titleText:"Типы номенклатур", rightPane:{width:150},
+                                            rightToolPane:{title:"Действия",
+                                                buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                                    storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                            dataURL:"/dir/products/getDataForProductsTypesTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForProductsTypesTable",
+                                            dataStoreURL:"/dir/products/storeProductsTypesTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsTypesTableData"
+                                        })
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected"})
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewTypes.document);
+                };
+                dir_products_Btn_viewKinds.onClick= function(){
+                    if (!dir_products_Btn_viewKinds.document){
+                        dir_products_Btn_viewKinds.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProductsKinds",
+                                        TDocumentSimpleTableEditable, {titleText:"Виды номенклатур", rightPane:{width:150},
+                                            rightToolPane:{title:"Действия",
+                                                buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                                    storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                            dataURL:"/dir/products/getDataForProductsKindsTable", dataURLCondition:{"1~":1},
+                                            dataNewURL:"/dir/products/newDataForProductsKindsTable",
+                                            dataStoreURL:"/dir/products/storeProductsKindsTableData",
+                                            dataDeleteURL:"/dir/products/deleteProductsKindsTableData"
+                                        })
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected"})
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .startUp();
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewKinds.document);
+                };
+                var deletedRows;
+                dir_products_Btn_viewProducts.onClick= function(){
+                    if (!dir_products_Btn_viewProducts.document){
+                        dir_products_Btn_viewProducts.document =
+                                APP.childFor(dir_products_ContentContainer, "dir_products_TableProducts",
+                                        TDocumentSimpleTableEditable, {titleText:"Товарные номенклатуры", rightPane:{width:150},
+                                            dataURL:"/dir/products/getDataForDirProductsTable", dataURLCondition:{"1~":1},
+                                            dataStoreURL:"/dir/products/storeDirProductsTableData"})
+                                        .addToolPane({title:"Информация"})
+                                        .addToolPane({title:"Действия"})
+                                        .addToolPaneTableActionButton("Изменить", {actionName:"allowEditTableSelectedRow",btnStyle:"width:95px;"})
+                                        .addToolPaneTableActionButton("Сохранить", {actionName:"storeTableSelectedRow",btnStyle:"width:95px;"})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addToolPane({title:"Очистка"})
+                                        .addToolPaneActionButton("Очистить </br> неиспользуемые </br>номенклатуры",{ actionFunction:function(params){
+                                            Request.postJSONData({url: "/dir/products/deleteUnusedProducts"},
+                                                    function (result, error) {
+                                                        if(result && !error){
+                                                            params.toolPanes[0].set("content","Удалено номенклатур: "+result.affectedRows);
+                                                        }
+                                                    });
+                                        } })
+                                        .addToolPaneActionButton("Очистить </br> неиспользуемые </br>артикулы",{ actionFunction:function(params){
+                                            Request.postJSONData({url: "/dir/products/deleteUnusedArticles"},
+                                                    function (result, error) {
+                                                        if(result && !error){
+                                                            params.toolPanes[0].set("content","Удалено артикулов: "+result.affectedRows);
+                                                        }
+                                                    });
+                                        } })
+                                        .addToolPaneActionButton("Очистить </br> неиспользуемые </br>виды",{ actionFunction:function(params){
+                                            Request.postJSONData({url: "/dir/products/deleteUnusedKinds"},
+                                                    function (result, error) {
+                                                        if(result && !error){
+                                                            params.toolPanes[0].set("content","Удалено видов: "+result.affectedRows);
+                                                        }
+                                                    });
+                                        } })
+                                        .addToolPaneActionButton("Очистить </br> неиспользуемый </br>состав",{ actionFunction:function(params){
+                                            Request.postJSONData({url: "/dir/products/deleteUnusedComposition"},
+                                                    function (result, error) {
+                                                        if(result && !error){
+                                                            params.toolPanes[0].set("content","Удалено составов: "+result.affectedRows);
+                                                        }
+                                                    });
+                                        } })
+                                        .addToolPaneActionButton("Очистить </br> неиспользуемые </br>размеры",{ actionFunction:function(params){
+                                            Request.postJSONData({url: "/dir/products/deleteUnusedSizes"},
+                                                    function (result, error) {
+                                                        if(result && !error){
+                                                            params.toolPanes[0].set("content","Удалено размеров: "+result.affectedRows);
+                                                        }
+                                                    });
+                                        } })
+                                        .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                        .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                        .startUp();
+//                                      .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected"})
+                    }
+                    dir_products_ContentContainer.selectChild(dir_products_Btn_viewProducts.document);
+                };
+
+                dir_products_PageContainer.layout();
+                dir_products_Btn_viewGenders.onClick();
+            });
+</script>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="wrhProductsBalance_PageContainer" style="width:100%;height:100%;">
+    <div id="wrhProductsBalance_ContentPaneLeft" style="width:180px;height:100%; margin:0;padding:0;">
+        <table style="width:100%; margin-bottom: 15px;">
+            <tr><th>Реестры</th></tr>
+            <tr><td>
+                <button id="wrhProductsBalance_btnProdsBalanceReg">Реестр остатков</button>
+                <button id="wrhProductsBalance_btnProdsBalanceRegByArts">Реестр остатков по артикулам</button>
+            </td></tr>
+        </table>
+
+        <table style="width:100%; margin-bottom: 15px;">
+            <tr><th>Отчеты с ценами продажи</th></tr>
+            <tr><td>
+                <button id="wrhProductsBalance_btnProdsBalance">Остатки товаров</button>
+                <button id="wrhProductsBalance_btnProdsBalanceByBatches">Остатки товаров по партиям</button>
+            </td></tr>
+        </table>
+        <table style="width:100%; margin-bottom: 15px;">
+            <tr><th>Отчеты по количеству</th></tr>
+            <tr><td>
+                <button id="wrhProductsBalance_btnProdsBalanceByGroups">Остатки по группам Bata</button>
+                <button id="wrhProductsBalance_btnProdsBalanceByKinds">Остатки по видам</button>
+                <button id="wrhProductsBalance_btnProdsBatchesBalance">Остатки партий товаров</button>
+            </td></tr>
+        </table>
+
+        <table style="width:100%;">
+            <tr><th>Отчеты с себестоимостью</th></tr>
+            <tr><td>
+                <button id="wrhProductsBalance_btnProdsBalanceWCC">Остатки товаров с СС</button>
+                <button id="wrhProductsBalance_btnProdsBatchesBalanceWCC">Остатки партий товаров с СС</button>
+            </td></tr>
+        </table>
+    </div>
+    <div id="wrhProductsBalance_ContentContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+               "dijit/form/Button", "tDocumentSimpleTable", "request","print"],
+            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocumentSimpleTable, Request, Print) {
+                var pageContainer= APP.instanceForID("wrhProductsBalance_PageContainer", BorderContainer, {});
+                APP.instanceForID("wrhProductsBalance_ContentPaneLeft", ContentPane, {region:'left', splitter:false});
+                var btnProdsBalanceReg= APP.instanceForID("wrhProductsBalance_btnProdsBalanceReg", Button, {style:"margin-right:1px"}, {"width":"164px",margin:0});
+                var btnProdsBalanceRegByArts= APP.instanceForID("wrhProductsBalance_btnProdsBalanceRegByArts", Button, {style:"margin-right:1px"}, {"width":"164px"});
+                var btnProdsBalance= APP.instanceForID("wrhProductsBalance_btnProdsBalance", Button, {style:"margin-right:1px"}, {"width":"164px"});
+                var btnProdsBalanceByBatches= APP.instanceForID("wrhProductsBalance_btnProdsBalanceByBatches", Button, {style:"margin-right:1px"}, {"width":"164px"});
+                var btnProdsBalanceByGroups= APP.instanceForID("wrhProductsBalance_btnProdsBalanceByGroups", Button, {style:"margin-right:1px"}, {"width":"164px"});
+                var btnProdsBalanceByKinds= APP.instanceForID("wrhProductsBalance_btnProdsBalanceByKinds", Button, {style:"margin-right:1px"}, {"width":"164px"});
+                var btnProdsBatchesBalance= APP.instanceForID("wrhProductsBalance_btnProdsBatchesBalance", Button, {style:"margin-right:1px"}, {"width":"164px"});
+                var btnProdsBalanceWCC= APP.instanceForID("wrhProductsBalance_btnProdsBalanceWCC", Button, {style:"margin-right:1px"}, {"width":"164px"});
+                var btnProdsBatchesBalanceWCC= APP.instanceForID("wrhProductsBalance_btnProdsBatchesBalanceWCC", Button, {style:"margin-right:1px"}, {"width":"164px"});
+                var contentContainer= APP.instanceForID("wrhProductsBalance_ContentContainer", StackContainer, {region:'center'});
+
+               function getSalePriceHistory(params){
+                   var contentTableSelectedRow= params.contentTable.getSelectedRow(); console.log("contentTableSelectedRow=",contentTableSelectedRow);
+                   if(contentTableSelectedRow) {
+                       var dataForPriceHistory={};
+                       dataForPriceHistory.unitName=contentTableSelectedRow["UNIT_NAME"];
+                       if(contentTableSelectedRow["PRODUCT_CODE"])dataForPriceHistory.productCode=contentTableSelectedRow["PRODUCT_CODE"];
+                       if(contentTableSelectedRow["BATCH_NUMBER"])dataForPriceHistory.prodBatchNum=contentTableSelectedRow["BATCH_NUMBER"];
+                       if(contentTableSelectedRow["PRODUCT_ARTICLE"])dataForPriceHistory.prodArticle=contentTableSelectedRow["PRODUCT_ARTICLE"];
+                       Request.postJSONData({url: "/wrh/productsBalance/getSalePriceHistory", data:dataForPriceHistory},
+                               function(result){
+                                   var rowData=result.items;
+                                   if(rowData && rowData.length>0){
+                                       var dataHeaders={"CHANGE_DATETIME":"Дата","PRICE":"Цена","DISCOUNT":"Скидка, %","PRICE_WITH_DISCOUNT":"Цена со скидкой"};
+                                       createPriceHistoryTable(dataHeaders,rowData,params.thisToolPane);
+                                   }
+                                   else params.thisToolPane.set("content","");
+                               });
+                   } else params.thisToolPane.set("content","");
+               }
+                function createPriceHistoryTable(colums, rowData,rightToolPane ){
+                    var table = document.createElement('TABLE');
+                    table.style.border="1px solid #b5bcc7";
+                    table.style.textAlign="center";
+                    var thead = document.createElement('thead');
+                    table.appendChild(thead);
+                    var trHead=document.createElement('tr');
+                    thead.appendChild(trHead);
+                    for(var i in colums){
+                        var th=document.createElement('th');
+                        th.style.border="1px solid #b5bcc7";
+                        th.style.padding="4px";
+                        th.style.textAlign="center";
+                        th.innerText=colums[i];
+                        trHead.appendChild(th);
+                    }
+                    var tbody=document.createElement('tbody');
+                    table.appendChild(tbody);
+                    for(var k in rowData){
+                        var tr = document.createElement('tr');
+                        tbody.appendChild(tr);
+                        var rowDataItem=rowData[k];
+                        for(var j in rowDataItem){
+                            if(j=="CHANGE_DATETIME"){
+                                rowDataItem[j]= moment(rowDataItem[j]).format("DD.MM.YYYY HH:mm:ss")
+                            }else if(rowDataItem[j]){
+                                rowDataItem[j]= numbro(rowDataItem[j]).format("0.00")
+                            }
+                            if(colums[j]){
+                                var td=document.createElement('td');
+                                td.style.border="1px solid #b5bcc7";
+                                td.style.padding="4px";
+                                td.style.textAlign="center";
+                                td.innerText=(!rowDataItem[j])?'':rowDataItem[j];
+                                tr.appendChild(td);
+                            }
+                        }
+                    }
+                    rightToolPane.set("content",table);
+                    var tableParent =table.parentNode;
+                    tableParent.style.padding=0;
+                }
+                btnProdsBalanceReg.onClick= function(){
+                    if (!btnProdsBalanceReg.report){
+                        btnProdsBalanceReg.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBalanceRegister",
+                                        TDocumentSimpleTable, {titleText:"Реестр остатков",
+                                            dataURL:"/wrh/productsBalance/getProductsBalanceRegister",rightPane:{width:200}})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="}).addBtnUpdate().addBtnPrint()
+                                        .addBtn("Печать ценников",150, function(contentTableContent,contentTableInstance){
+                                            Print.openPagePrintProductsTags({
+                                                prodTagsContentData:contentTableContent, pageProdTagType:"productTag58x30",
+                                                priceItemName:"SALE_PRICE_WD"});
+                                        })
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 550, "QTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма себестоимости:", 290, "COST_SUM", {style:"font-weight:bold;"})
+                                        .addToolPane({title:"История изменения цен",
+                                            contentTableAction:function(params){
+                                                getSalePriceHistory(params);
+                                            }
+                                        })
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBalanceReg.report);
+                };
+                btnProdsBalanceRegByArts.onClick= function(){
+                    if (!btnProdsBalanceRegByArts.report){
+                        btnProdsBalanceRegByArts.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBalanceRegisterByProductsArticles",
+                                        TDocumentSimpleTable, {titleText:"Реестр остатков по артикулам",
+                                            dataURL:"/wrh/productsBalance/getProductsBalanceRegisterByProductsArticles", rightPane:{ width:200}})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="})
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 660, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма себестоимости:", 290, "PRODUCT_COST_SUM", {style:"font-weight:bold;",inputStyle:"width:80px"})
+                                        .addToolPane({title:"История изменения цен",
+                                            contentTableAction:function(params){
+                                                getSalePriceHistory(params);
+                                            }})
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBalanceRegByArts.report);
+                };
+                btnProdsBalance.onClick= function(){
+                    if (!btnProdsBalance.report){
+                        btnProdsBalance.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBalance",
+                                        TDocumentSimpleTable, {titleText:"Остатки товаров",
+                                                dataURL:"/reports/productsBalance/getProductsBalance", rightPane:{ width:200 }})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="})
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 510, "SQTY", {style:"font-weight:bold;"})
+                                        .addToolPane({title:"История изменения цен",
+                                            contentTableAction:function(params){
+                                                getSalePriceHistory(params);
+                                            }})
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBalance.report);
+                };
+                btnProdsBalanceByBatches.onClick= function(){
+                    if (!btnProdsBalanceByBatches.report){
+                        btnProdsBalanceByBatches.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBalanceByBatches",
+                                        TDocumentSimpleTable, {titleText:"Остатки товаров по партиям",
+                                            dataURL:"/reports/productsBalance/getProductsBalanceByBatches", rightPane:{ width:200 }})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="})
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 510, "SQTY", {style:"font-weight:bold;"})
+                                        .addToolPane({title:"История изменения цен",
+                                            contentTableAction:function(params){
+                                                getSalePriceHistory(params);
+                                            }})
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBalanceByBatches.report);
+                };
+
+                btnProdsBalanceByGroups.onClick= function(){
+                    if (!btnProdsBalanceByGroups.report){
+                        btnProdsBalanceByGroups.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBalanceByBataGroups",
+                                        TDocumentSimpleTable, {titleText:"Остатки товаров по группам Bata",
+                                            dataURL:"/reports/productsBalance/getProductsBalanceByBataAttributes"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="})
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 610, "SQTY", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBalanceByGroups.report);
+                };
+                btnProdsBalanceByKinds.onClick= function(){
+                    if (!btnProdsBalanceByKinds.report){
+                        btnProdsBalanceByKinds.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBalanceByTypesKinds",
+                                        TDocumentSimpleTable, {titleText:"Остатки товаров по видам товара",
+                                            dataURL:"/reports/productsBalance/getProductsBalanceByTypesKinds"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="})
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:",340, "SQTY", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBalanceByKinds.report);
+                };
+
+                btnProdsBatchesBalance.onClick= function(){
+                    if (!btnProdsBatchesBalance.report){
+                        btnProdsBatchesBalance.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBatchesBalance",
+                                        TDocumentSimpleTable, {titleText:"Остатки партий товаров",
+                                            dataURL:"/reports/productsBalance/getProductsBatchesBalance"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="})
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 580, "SQTY", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBatchesBalance.report);
+                };
+
+                btnProdsBalanceWCC.onClick= function(){
+                    if (!btnProdsBalanceWCC.report){
+                        btnProdsBalanceWCC.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBalanceWCC",
+                                        TDocumentSimpleTable, {titleText:"Остатки товаров с себестоимостью",
+                                            dataURL:"/reports/productsBalance/getProductsBalanceWCC"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="})
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 300, "SQTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма себестоимости:", 290, "COST_SUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBalanceWCC.report);
+                };
+                btnProdsBatchesBalanceWCC.onClick= function(){
+                    if (!btnProdsBatchesBalanceWCC.report){
+                        btnProdsBatchesBalanceWCC.report =
+                                APP.childFor(contentContainer, "wrhProductsBalance_TableProdsBatchesBalanceWCC",
+                                        TDocumentSimpleTable, {titleText:"Остатки партий товаров с себестоимостью",
+                                            dataURL:"/reports/productsBalance/getProductsBatchesBalanceWCC"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("на",{contentTableCondition:"DOCDATE<="})
+                                        .addCheckBtnCondition("Не нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<>":0}})
+                                        .addCheckBtnCondition("Положительные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)>":0}})
+                                        .addCheckBtnCondition("Отрицательные",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<":0}})
+                                        .addCheckBtnCondition("Нулевые",{width:105,contentTableConditions:{"COALESCE(SUM(BATCH_QTY),0)<~":0}})
+                                        .addCheckBtnCondition("Все",{width:105,contentTableConditions:{"1~":1}})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО остаток:", 345, "SQTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма себестоимости:", 310, "COST_SUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentContainer.selectChild(btnProdsBatchesBalanceWCC.report);
+                };
+
+                pageContainer.layout();
+                btnProdsBalanceReg.onClick();
+        });
+</script>
+</html>

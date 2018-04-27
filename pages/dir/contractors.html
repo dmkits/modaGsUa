@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="dir_contractors_PageContainer" style="width: 100%; height: 100%;">
+    <div id="dir_contractors_ContentContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "tDocumentSimpleTableEditable"],
+            function (APP, BorderContainer, StackContainer, TDocumentSimpleTableEditable) {
+                var dir_contractors_PageContainer=
+                        APP.instanceForID("dir_contractors_PageContainer", BorderContainer, {});
+                var dir_contractors_ContentContainer=
+                        APP.instanceForID("dir_contractors_ContentContainer", StackContainer, {region:'center'});
+
+                dir_contractors_ContentContainer.docDirContractors =
+                        APP.childFor(dir_contractors_ContentContainer, "dir_contractors_TableDirContractors",
+                                TDocumentSimpleTableEditable, {titleText:"Контрагенты", rightPane:{width:150},
+                                    rightToolPane:{title:"Действия",
+                                        buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                            storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                    dataURL:"/dir/contractors/getDataForDirContractorsTable",
+                                    dataNewURL:"/dir/contractors/newDataForDirContractorsTable",
+                                    dataStoreURL:"/dir/contractors/storeDirContractorsTableData", dataDeleteURL:"/dir/contractors/deleteDirContractorsTableData"})
+                                .addCheckBtnCondition("Поставщики",{width:90,contentTableConditions:{"IS_SUPPLIER~":"1"}})
+                                .addCheckBtnCondition("Покупатели",{width:85,contentTableConditions:{"IS_BUYER~":"1"}})
+                                .addCheckBtnCondition("Прочие",{width:70,contentTableConditions:{"IS_SUPPLIER~":"0","IS_BUYER~":"0"}})
+                                .addTotalCountNumberBox("ИТОГО строк:", 150, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
+                                .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                .addContentTableRowChangeCallback(function(changedRowData, contentTable, params, nextCallback){
+                                   // changedRowData.item("NOT_USED").setValue(0);
+                                    nextCallback();
+                                })
+                                .startUp();
+                dir_contractors_PageContainer.layout();
+            })
+</script>
+</html>

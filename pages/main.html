@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" lang="ru" Accept-Language="ru"/>
+    <!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+    <![endif]-->
+
+    <!--<link rel="icon" type="image/gif" id="favicon_id"/>-->
+
+    <!--<link rel="icon" type="image/gif" href="/icons/moda32x32.ico"/>-->
+    <!--[if IE]>
+    <!---link rel="stylesheet" type="text/css" href="/css/main_ie.css"--!>
+    <!--<link rel="shortcut icon" href="icons/moda32x32.ico" />-->
+    <!--<![endif]&ndash;&gt;-->
+    <!--[if !IE]><!-->
+    <!--link rel="stylesheet" type="text/css" href="/css/main_nie.css"--!>
+    <!--<![endif]-->
+
+    <script src="/jslib/handsontable/handsontable.full.min.js"></script>
+    <link rel="stylesheet" media="screen" href="/jslib/handsontable/handsontable.full.min.css">
+    <script src="/jslib/handsontable/numbro/languages/ru-RU.min.js"></script>
+    <script src="/jslib/handsontable/moment/moment.js"></script>
+    <script src="/jslib/handsontable/moment/locale/ru.js"></script>
+
+    <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
+    <!--<link rel="stylesheet" href="/jslib/dijit/themes/soria/soria.css" media="screen">-->
+    <!--<link rel="stylesheet" href="/jslib/dijit/themes/nihilo/nihilo.css" media="screen">-->
+    <!--<link rel="stylesheet" href="/jslib/dijit/themes/tundra/tundra.css" media="screen">-->
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:true"></script>
+
+    <link rel="stylesheet" href="/jslib/htable.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/jslib/contentController.css" media="screen">
+    <script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
+    <!--<title>MODA.UA</title>-->
+</head>
+<body class="claro">
+    <div id="main_MainContainer">
+        <div id="main_TopContainer">
+            <div id="main_TopImg"></div>
+            <div id="main_MainMenu"></div>
+            <div id="main_TopInfoPane">
+                <div id="main_username" style="display:inline;margin-left:10px;"></div>
+                <div id="main_app_mode"  style="display:inline;margin-left:10px;"></div>
+            </div>
+        </div>
+        <div id="main_ContentContainer"></div>
+    </div>
+</body>
+<script type="text/javascript">
+    require(["app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane",
+                "dijit/MenuBar", "dijit/MenuBarItem", "dijit/PopupMenuBarItem", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator",
+                "dijit/form/ToggleButton", "dojox/layout/ContentPane",
+                "dialogs", "request", "dojo/domReady!"],
+            function (APP, BorderContainer, LayoutContainer, TabContainer, ContentPane,
+                      MenuBar, MenuBarItem, PopupMenuBarItem, Menu, MenuItem, MenuSeparator,
+                      ToggleButton, XContentPane, dialogs, Request) {                                               console.log("START MAIN PAGE...");//!!!IT'S FOR TESTING!!!
+
+
+                var main_MainContainer = APP.instanceForID("main_MainContainer", BorderContainer, {design: "headline"});
+                var main_TopContainer = APP.instanceForID("main_TopContainer", BorderContainer, {region: "top", design: "sidebar", class: "mainTopContent", gutters: true});
+                var main_TopImg = APP.instanceForID("main_TopImg", ContentPane, {region: "left", class: "mainTopContent"});
+                var main_MainMenu = APP.instanceForID("main_MainMenu", MenuBar, {region:"top", class: "mainTopContent"});
+                var main_TopInfoPane = APP.instanceForID("main_TopInfoPane", ContentPane, {region: "bottom", class: "mainTopContent"});
+                var main_ContentContainer = APP.instanceForID("main_ContentContainer", TabContainer, {region: "center", tabPosition: "top", class: "mainContent"});
+                main_MainContainer.startup();
+
+                main_MainContainer.getMainData = function(postaction){                                //getting main json data from server and run action parameter function
+                    Request.getJSONData({url:"/main/getMainData", consoleLog:true},
+                            function(result){                                        console.log("main_MainContainer.getMainData result=",result); //title,icon32x32,imageSmall,imageMain
+                                    if(result===undefined||result==null) result = [];
+                                    main_MainContainer.mainContentData = result;
+                                    main_ContentContainer.getMainContentData=function(){
+                                        return result;
+                                    };
+                                    var eAppMode = document.getElementById("main_app_mode");
+                                    if (result.mode && result.mode.indexOf("production")<0) {
+                                        var mode_str = result.mode_str;
+                                        if (!mode_str) mode_str= result.mode;
+                                        if (mode_str.toLocaleLowerCase().indexOf("test")>=0)
+                                            eAppMode.innerHTML = "<b style='color:red'>" + mode_str + "</b>";
+                                        else
+                                            eAppMode.innerHTML = "<b>" + mode_str + "</b>";
+                                    } else if (!result.mode)
+                                        eAppMode.innerHTML =  eAppMode.innerHTML+"<b>UNKNOWN MODE!!!</b>";
+
+                                    if(result.appUserName) document.getElementById("main_username").innerHTML =  "<b>"+result.appUserName+"</b>";
+
+                                    if(result.title)document.title=result.title;
+
+                                    if(result.icon32x32) changeFavicon(result.icon32x32);
+                                    if(result.imageSmall)main_TopImg.set("style","background-image: url(\""+result.imageSmall+"\")");
+                                if(postaction)postaction();
+                            });
+                };
+                main_MainContainer.createMainMenu = function(){
+                    var mainMenu = main_MainContainer.mainContentData.menuBar;
+                    for(var i in mainMenu) {// create and add main menu items
+                        var mainMenuItem=mainMenu[i];
+                        if (mainMenuItem.popupMenu == null || mainMenuItem.popupMenu.length == 0) {
+                            var mainMenuBarItem = APP.childFor(main_MainMenu, mainMenuItem.menuItemName, MenuBarItem, {label:mainMenuItem.menuTitle, itemData:mainMenuItem});
+                            mainMenuBarItem.onClick = function () { main_MainContainer.runMainAction(this.itemData); }
+                        } else {// make sub-menu
+                            var mainPopupMenuBarItem = APP.childFor(null, mainMenuItem.menuItemName, PopupMenuBarItem, {label: mainMenuItem.menuTitle});
+                            var popupMenu = new Menu({id: mainMenuItem.menuItemName + "_menu"});
+                            mainPopupMenuBarItem.set("popup", popupMenu); main_MainMenu.addChild(mainPopupMenuBarItem);
+                            for(var pi in mainMenuItem.popupMenu) {
+                                var popupMenuItem=mainMenuItem.popupMenu[pi];
+                                var popupMenuItemName = popupMenuItem.menuItemName;
+                                if (popupMenuItemName.indexOf("separator")==0) {
+                                    var popupMenuItem = APP.childFor(popupMenu, popupMenuItemName, MenuSeparator, {});
+                                } else {
+                                    var popupMenuItem = APP.childFor(popupMenu, popupMenuItemName, MenuItem, {label:popupMenuItem.menuTitle, itemData:popupMenuItem});
+                                    popupMenuItem.onClick = function () { main_MainContainer.runMainAction(this.itemData); };
+                                }
+                            }
+                            popupMenu.startup();
+                        }
+                    }
+                };
+
+                main_MainContainer.runMainAction = function(actionData) {                                       console.log("main_MainContainer.runMainAction: actionData=",actionData);//!!!IT'S FOR TESTING!!!
+                    if (actionData.action=="close") {
+                        main_MainMenu.destroy();
+                        main_ContentContainer.destroy();
+                        document.cookie="mduUser=";
+                        document.cookie="mduPswrd=";
+                        location.reload();
+                        Request.postJSONData({url:"/main/exit"},
+                                /*posaction*/function(result){
+                                    var resultContent;
+                                    if (result&&result.actionResult=="successfull") resultContent= "<div>Вы закрыли все окна и вышли из рабочей сессии.</div>";
+                                    else resultContent= "<div>Вы закрыли все окна.</div>";
+                                    main_MainContainer.addChild(new ContentPane({id:"finish", title:"finish", region:"center",content:resultContent}) );
+                                });
+                    } else if (actionData.action=="help_about") {
+                        dialogs.mainAboutDialog();
+                    } else if (actionData.action=="open") {
+                        var pageContentPane =
+                                APP.childFor(main_ContentContainer, "PageContentPane_"+actionData.pageId,
+                                        XContentPane, {title:actionData.pageTitle, closable:actionData.closable, parseOnLoad:false, style:"margin:0;padding:0;"});
+                        main_ContentContainer.selectChild(pageContentPane);
+                        pageContentPane.set("content","");
+                        pageContentPane.set("href",actionData.contentHref);
+
+                    } else {
+                        console.log("main_MainContainer.runMainAction: unknown action:\""+actionData.action+"\"!!! do nothing!!!");
+                    }
+                };
+
+                main_MainContainer.runAutorunActions = function() {
+                    if(!main_MainContainer.mainContentData||!main_MainContainer.mainContentData.autorun) return;
+                    var autorunActions = main_MainContainer.mainContentData.autorun;
+                    for(var autorunIndex in autorunActions){
+                        var autorunMenuItemName = autorunActions[autorunIndex];
+                        var mainMenu = main_MainContainer.mainContentData.menuBar;
+                        for(var i in mainMenu) {// create and add main menu items
+                            var item=mainMenu[i];
+                            if (item.popupMenu == null || item.popupMenu.length == 0) {
+                                if(item.menuItemName==autorunMenuItemName) main_MainContainer.runMainAction(item);
+                            } else {
+                                for(var pi in item.popupMenu) {
+                                    var pitem = item.popupMenu[pi];
+                                    if(pitem.menuItemName==autorunMenuItemName) main_MainContainer.runMainAction(pitem);
+                                }
+                            }
+                        }
+                    }
+                };
+                function changeFavicon(src) {
+                    document.head = document.head || document.getElementsByTagName('head')[0];
+                    var link = document.createElement('link'),
+                            oldLink = document.getElementById('dynamic-favicon');
+                    link.id = 'dynamic-favicon';
+                    link.rel = 'shortcut icon';
+                    link.href = src;
+                    if (oldLink) {
+                        document.head.removeChild(oldLink);
+                    }
+                    document.head.appendChild(link);
+                }
+                main_MainContainer.getMainData(
+                    /*postaction*/function(){
+                            main_MainContainer.createMainMenu();
+                            main_MainContainer.runAutorunActions();
+                    });
+            });
+</script>
+</html>

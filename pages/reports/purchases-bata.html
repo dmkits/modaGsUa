@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <title></title>
+    </head>
+    <body>
+    <div id="purchases_PageContainer" style="width:100%;height:100%;">
+    <div id="purchases_ContentPaneLeft" style="width:185px;height:100%; margin:0;padding:0;">
+    <table style="width:100%; margin:0;padding:0;">
+    <tr><th height="20px;">Отчеты</th></tr>
+<tr><td>
+    <button id="purchases_Btn_purchasesByPinv">Закупки по накладным</button><br><br>
+    <button id="purchases_Btn_purchasesByDays">Закупки по дням</button><br><br>
+    <button id="purchases_Btn_purchasesExt">Закупки по ПН с атрибутами</button><br><br>
+    <button id="purchases_Btn_pinvsList">Реестр приходных накладных</button>
+</td></tr>
+</table>
+</div>
+<div id="purchases_ContentPaneDetailContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+    </div>
+    </body>
+    <script type="text/javascript">
+    require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+            "dijit/form/Button", "tDocumentSimpleTable"],
+        function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocumentSimpleTable) {
+            var purchases_PageContainer=
+                APP.instanceForID("purchases_PageContainer", BorderContainer, {});
+            APP.instanceForID("purchases_ContentPaneLeft", ContentPane, {region:'left', splitter:true});
+            var purchases_Btn_purchasesByPinv= APP.instanceForID("purchases_Btn_purchasesByPinv", Button, {},{"width":"170px"});
+            var purchases_Btn_purchasesByDays= APP.instanceForID("purchases_Btn_purchasesByDays", Button, {},{"width":"170px"});
+            var purchases_Btn_purchasesExt= APP.instanceForID("purchases_Btn_purchasesExt", Button, {},{"width":"170px"});
+            var purchases_Btn_pinvsList= APP.instanceForID("purchases_Btn_pinvsList", Button, {},{"width":"170px"});
+            var purchases_ContentPaneDetailContainer= APP.instanceForID("purchases_ContentPaneDetailContainer", StackContainer, {region:'center'});
+
+            purchases_Btn_purchasesByPinv.onClick= function(){
+                if (!purchases_Btn_purchasesByPinv.document){
+                    purchases_Btn_purchasesByPinv.document =
+                        APP.childFor(purchases_ContentPaneDetailContainer, "purchases_TablePurchases",
+                            TDocumentSimpleTable, {titleText:"Закупки по приходным накладным", dataURL:"/reports/purchases/getPurchases"})
+                             .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                    loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                    contentTableCondition:"UNIT_NAME="})
+                             .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                            .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:40px"})
+                            .addTotalSumNumberTextBox("ИТОГО кол-во:", 685, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                            .addTotalSumNumberTextBox("ИТОГО сумма:", 200, "POSSUM", {style:"font-weight:bold;",inputStyle:"width:80px",pattern:"###,###,##0.00######"})
+                            .startUp();
+                }
+                purchases_ContentPaneDetailContainer.selectChild(purchases_Btn_purchasesByPinv.document);
+            };
+            purchases_Btn_purchasesByDays.onClick= function(){
+                if (!purchases_Btn_purchasesByDays.document){
+                    purchases_Btn_purchasesByDays.document =
+                        APP.childFor(purchases_ContentPaneDetailContainer, "purchases_TablepurchasesByDays",
+                            TDocumentSimpleTable, {titleText:"Закупки по дням", dataURL:"/reports/purchases/getPurchasesByDates"})
+                            .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                    loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                    contentTableCondition:"UNIT_NAME="})
+                            .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                            .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                            .addTotalSumNumberTextBox("ИТОГО кол-во:", 620, "SQTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                            .addTotalSumNumberTextBox("ИТОГО сумма:", 200, "SPOSSUM", {style:"font-weight:bold;",inputStyle:"width:90px",pattern:"###,###,##0.00#######"})
+                            .startUp();
+                }
+                purchases_ContentPaneDetailContainer.selectChild(purchases_Btn_purchasesByDays.document);
+            };
+            purchases_Btn_purchasesExt.onClick= function(){
+                if (!purchases_Btn_purchasesExt.document){
+                    purchases_Btn_purchasesExt.document =
+                        APP.childFor(purchases_ContentPaneDetailContainer, "purchases_TablePurchasesByBataAttributes",
+                            TDocumentSimpleTable, {titleText:"Закупки по ПН с аттрибутами", dataURL:"/reports/purchases/getPurchasesWithProdAttr"})
+                            .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                    loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                    contentTableCondition:"UNIT_NAME="})
+                            .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                            .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                            .addTotalSumNumberTextBox("ИТОГО кол-во:", 710, "QTY", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                            .addTotalSumNumberTextBox("ИТОГО сумма:", 220, "POSSUM", {style:"font-weight:bold;",inputStyle:"width:90px",pattern:"###,###,##0.00#######"})
+                            .startUp();
+                }
+                purchases_ContentPaneDetailContainer.selectChild(purchases_Btn_purchasesExt.document);
+            };
+
+            purchases_Btn_pinvsList.onClick= function(){
+                if (!purchases_Btn_pinvsList.document){
+                    purchases_Btn_pinvsList.document =
+                            APP.childFor(purchases_ContentPaneDetailContainer, "purchases_TablePurchasesPinvsList",
+                                    TDocumentSimpleTable, {titleText:"Реестр приходных накладных", dataURL:"/reports/purchases/getPInvsList"})
+                                    .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                        loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                        contentTableCondition:"UNIT_NAME="})
+                                    .addHeaderDateBox("с",{initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                                    .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                    .addTotalSumNumberTextBox("ИТОГО кол-во:", 425, "DOCQTYSUM", {style:"font-weight:bold;",inputStyle:"width:60px"})
+                                    .addTotalSumNumberTextBox("ИТОГО сумма:", 220, "DOCSUM", {style:"font-weight:bold;",inputStyle:"width:90px",pattern:"###,###,##0.00#######"})
+                                    .startUp();
+                }
+                purchases_ContentPaneDetailContainer.selectChild(purchases_Btn_pinvsList.document);
+            };
+            purchases_PageContainer.layout();
+            purchases_Btn_purchasesByPinv.onClick();
+        });
+</script>
+</html>

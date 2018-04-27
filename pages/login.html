@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--<link rel="icon" type="image/gif" href="/icons/moda32x32.ico"/>-->
+    <script src="/jslib/numeral/languages/ru.js"></script>
+    <script src="/jslib/moment/moment-with-locales.js"></script>
+    <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:false"></script>
+    <title>MODA.UA</title>
+</head>
+<body id="loginBody" class="claro">
+</body>
+<script type="text/javascript">
+    require(["request","dijit/ConfirmDialog","dojo/keys", "dojo/domReady!"],
+            function (Request, ConfirmDialog,keys) {
+                moment.locale("uk");
+
+                var loginDialog = new ConfirmDialog({
+                    autofocus:false,
+                    id: "loginDialog",
+                    content: '<table id="auth_admin_dialog_table">'+
+                    '<tr>'+
+                    '<td><label for="user_name">Имя:</label></td>'+
+                    '<td><input type="text" name="user_name" id="user_name"></td>'+
+                    '</tr>'+
+                    '<tr>'+
+                    '<td><label for="user_password">Пароль:</label></td>'+
+                    '<td><input type="password" name="user_password" id="user_password"></td>'+
+                    '</tr>'+
+                    '</table>',
+                    title: "Авторизация"
+                }, "loginDialog");
+                loginDialog.set("buttonOk","Войти");
+                loginDialog.set("buttonCancel","Отмена");
+                loginDialog.startup();
+
+//                loginDialog.onExecute  = function () {
+//                    var user=document.getElementById("user_name").value, pswrd=document.getElementById("user_password").value;
+//                    Request.postJSONData({url:  "/login", data: {user:user, pswrd:pswrd}, consoleLog: true},
+//                            function (result)   {
+//                                if (result && result["result"]=="success") window.location.replace(window.location.href);
+//                            });
+//                };
+                loginDialog.onExecute  = function () {
+                    var user=document.getElementById("user_name").value.trim(), pswrd=document.getElementById("user_password").value.trim();
+                    Request.postJSONData({url:  "/login", data: {user:user, pswrd:pswrd}, consoleLog: true},
+                            function (result) {
+                                if(result && !result.error) {
+                                    if(window.location.href.indexOf("/login")>=0)window.location.replace("/");
+                                    else window.location.replace(window.location.href);
+                                }
+                            });
+                };
+                loginDialog.on("keypress", function (event) {
+                    if (event.keyCode == keys.ENTER) loginDialog.onExecute();
+                });
+
+                loginDialog.show();
+            });
+</script>
+</html>

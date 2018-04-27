@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <div style="border:none; margin-left:0cm;margin-top:0.1cm; width:5.4cm;height:0.35cm; font-size:10px;  text-align:center"></div>
+    <div style="border:none; margin-left:0cm; width:5.4cm;height:0.35cm; font-size:12px; text-align:center" id="prodSupplier"></div>
+    <div style="border:none; margin-left:0cm; width:5.4cm;height:0.3cm; font-size:9px; text-align:center" id="prodCountry"></div>
+    <div style="border:none; margin-left:0cm;margin-top:0cm; width:5.4cm;height:0.45cm; font-size:14px; text-align:center" id="prodKind"></div>
+    <div style="border:none;margin-left:0cm;margin-top:0cm; padding:0;width:5.3cm;height:0.3cm;">
+        <div style="display:inline-block;float:left; margin-left:0cm; width:1.5cm;height:0.3cm; font-size:10px; text-align:center" id="prodSize"></div>
+        <div style="display:inline-block;float:left; margin:0cm; width:3.0cm;height:0.3cm; font-size:10px; text-align:left" id="prodComposition"></div>
+    </div>
+    <div style="border:none; margin-left:0cm;margin-top:0cm; width:5.4cm;height:0.6cm; font-size:22px; text-align:center" id="prodPrice"></div>
+    <svg style="margin-left:1cm;border:solid 0px;padding:0;" id="prodbarcode"></svg>
+    </table>
+</body>
+<script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
+<script type="text/javascript">
+    var printBarcode = function(barcodeElementID, barcodeValue){
+        if(!barcodeValue) return;
+        JsBarcode("#"+barcodeElementID, barcodeValue,{format:"EAN13", width:1, height:18, valueIsValid:true, margin:3,
+            valid:function(valid){
+                if(!valid) this.valueIsValid = false;
+                if(!this.valueIsValid){
+                    //this.background= "#ccffff";
+                    this.lineColor= "#990000"
+                }
+            }
+        });
+    };
+    require(["dijit/registry"],
+            function(registry){
+                var barcodeHTML = document.getElementById("prodbarcode");
+                var parentHTML= barcodeHTML.parentNode;
+                if(!parentHTML) return;
+                var parentID= parentHTML.id;
+                var parent= registry.byId(parentID);
+                if(!parent) return;
+                var prodTagContentData= parent["prodTagContentData"];                                                   console.log("productTag58x40 PAGE prodTagContentData= ",prodTagContentData);
+                parentHTML.children[0].innerHTML = "Товарный ярлык № "
+                        +prodTagContentData["PRODUCT_ARTICLE"]
+                        +"*"+prodTagContentData["PRODUCT_COLLECTION_CODE"]
+                        +"/"+prodTagContentData["PRODUCT_CODE"];
+                parentHTML.children[1].innerHTML = "BATA";
+                parentHTML.children[2].innerHTML = prodTagContentData["SUPPLIER_COUNTRY"];
+                parentHTML.children[3].innerHTML = prodTagContentData["PRODUCT_KIND"];
+                parentHTML.children[4].children[0].innerHTML = "<b>р."+prodTagContentData["PRODUCT_SIZE"]+"</b>";
+                parentHTML.children[4].children[1].innerHTML = prodTagContentData["PRODUCT_COMPOSITION"];
+                parentHTML.children[5].innerHTML = "<b>"+prodTagContentData["SALE_PRICE"]+" грн./"+prodTagContentData["PRODUCT_UM"]+"</b>";
+                var barcodeID = parentID+"_prodbarcode";
+                barcodeHTML.setAttribute("id",barcodeID);
+                var barcode=prodTagContentData["BARCODE"];
+                if(!barcode) barcode=prodTagContentData["PRODUCT_PBARCODE"];
+                if(barcode==undefined || barcode==null || barcode.toString().trim().length==0) barcode='0000000000000';
+                if(prodTagContentData) printBarcode(barcodeID,barcode);
+            });
+</script>
+</html>

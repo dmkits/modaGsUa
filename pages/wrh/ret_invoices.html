@@ -1,0 +1,264 @@
+<body>
+<div id="wrh_ret_inv_PageContainer" style="width:100%;height:100%;">
+    <div id="wrh_ret_inv_ListContainer" style="width:310px;height:100%; margin:0;padding:0;"></div>
+    <div id="wrh_ret_inv_DetailContainer" style="width:100%;height:100%; margin:0;padding:0;">
+        <div id="wrh_ret_inv_DetailHeader" style="width:100%;height:auto; margin:0;padding:0;"></div>
+        <div id="wrh_ret_inv_ProductsTable" style="width:100%;height:100%; margin:0;padding:0;"></div>
+        <div id="wrh_ret_inv_DetailTotal" style="width:100%;height:auto;; margin:0;padding:0;"></div>
+    </div>
+    <div id="wrh_ret_inv_RightContainer" style="width:250px;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app","tDocumentStandardTable", "request"],
+            function (APP, TDocumentStandardTable, Request) {
+    });
+    var wrh_ret_inv= APP.instanceForID("wrh_ret_inv_PageContainer", TDocumentStandardTable,
+            { idListContainer:"wrh_ret_inv_ListContainer",idDetailContainer:"wrh_ret_inv_DetailContainer",
+                idDetailHeader:"wrh_ret_inv_DetailHeader",idDetailTable:"wrh_ret_inv_ProductsTable",idDetailTotal:"wrh_ret_inv_DetailTotal",
+                idRightContainer:"wrh_ret_inv_RightContainer" })
+            .addListTable({getDataUrl:"/wrh/ret_invoices/getDataForRetInvsListTable",header:"Список накладных", bdatelabelText:"c",bdateCondition:"DOCDATE>=", edatelabelText:"по",edateCondition:"DOCDATE<="})
+            .setDetailHeaderParameters({dataIDName:"ID",
+                getDataUrl:"/wrh/ret_invoices/getRetInvData", getDataForNewUrl:"/wrh/ret_invoices/getNewRetInvData",
+                postDataUrl:"/wrh/ret_invoices/storeRetInvData", postForDeleteDataUrl:"/wrh/ret_invoices/deleteRetInvData"})
+            .addDetailHeaderTitle({title:"Возвратная накладная",titleForNew:"Новая возвратная накладная",
+                titleForNothing:"Возвратная накладная не выбрана", titleForFailedLoad:"Нет данных",
+                numberDataItemName:"NUMBER", dateDataItemName:"DOCDATE", titleDatePrefix:"от"},25)
+            .addDetailHeaderRow(25,true)
+            .addDetailHeaderSelect("UNIT_NAME","Подразделение", 330,
+            {inputStyle:"width:200px", loadDropDownURL:"/dir/units/getDirUnitsForSelect", labelDataItem:"UNIT_NAME"})
+            .addDetailHeaderTextBox("NUMBER", "Номер", 120, {inputStyle:"width:50px"})
+            .addDetailHeaderDateTextBox("DOCDATE", "Дата", 150, "width:80px")
+            .addDetailHeaderRow(25,true)
+            .addDetailHeaderSelect("BUYER_NAME","Покупатель", 280,
+            {inputStyle:"width:200px", loadDropDownURL:"/dir/contractors/getDirBuyersForSelect", labelDataItem:"BUYER_NAME"})
+            .addDetailHeaderSelect("CURRENCY_CODE","Валюта", 260,
+            {inputStyle:"width:200px", loadDropDownURL:"/sys/currency/getCurrencyForSelect", labelDataItem:"CURRENCY_CODENAME"})
+            .addDetailHeaderNumberTextBox("RATE", "Курс валюты", 130, {inputStyle:"width:40px", pattern:"########0.00"})
+            .addDetailHeaderRow(25,true)
+            .setDetailTableParameters({conditionIDName:"RET_INV_ID",
+                getDataUrl:"/wrh/ret_invoices/getDataForRetInvProductsTable",
+                storeDataUrl:"/wrh/ret_invoices/storeRetInvProductsTableData", deleteDataUrl:"/wrh/ret_invoices/deleteRetInvProductsTableData"})
+            .addDetailTotalRow()
+            .addDetailSubTotalCountNumberTextBox("ИТОГО СТРОК:", 190, {inputStyle:"width:40px;"})
+            .addDetailSubtotalNumberTextBox("ИТОГО КОЛИЧЕСТВО:", 700, "QTY", {pattern:"###,###,##0.#########", inputStyle:"width:50px;"})
+            .addDetailSubtotalNumberTextBox("ИТОГО СУММА:", 245, "POSSUM", {pattern:"###,###,##0.00#######", inputStyle:"width:80px;"})
+            .addDetailTotalRow(true)
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СТРОК:", 190, "DOCCOUNT",
+            {pattern:"###,###,##0.#########", inputStyle:"width:40px;", style:"font-weight:bold;", printLabel:"ИТОГО СТРОК:"})
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ КОЛИЧЕСТВО:", 700, "DOCQTYSUM",
+            {pattern:"###,###,##0.#########", inputStyle:"width:50px;", style:"font-weight:bold;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 245, "DOCSUM",
+            {pattern:"###,###,##0.00#######", inputStyle:"width:80px;", style:"font-weight:bold;", printLabel:"ИТОГО СУММА:"})
+            .addDetailTotalRow(true)
+            .addDetailTotalTextBox("Статус:", 1140, "DOCSTATE_NAME", {style:"font-weight:bold;", inputStyle:"width:200px", print:false})
+        //.addToolPane("Вид документа")
+        //.addToolPane("Текущий статус")
+            .addToolPane({title:"Действия"})
+            .addToolPaneActionButton("Новая накладная", {detailTableActionName:"loadHeaderNewValues", btnStyle: "width:200px;"})
+            .addToolPaneActionButton("Сохранить накладную", {detailTableActionName:"storeHeaderValues", btnStyle: "width:200px;"})
+            .addToolPaneActionButton("Отменить изменения", {detailTableActionName:"loadHeaderLastValues", btnStyle: "width:200px;"})
+            .addToolPaneActionButton("Удалить накладную", {detailTableActionName:"deleteHeader", btnStyle: "width:200px;"})
+            .addToolPaneBR()
+            .addToolPaneActionButton("Добавить строку", {detailTableActionName:"insertDetailTableRow",rowPosIndexName:"POSIND",rowPosName:"POS", btnStyle: "width:200px;"})
+            .addToolPaneActionButton("Копировать строку", {detailTableActionName:"insertDetailTableCopySelectedRow", btnStyle: "width:200px;"})
+            .addToolPaneActionButton("Изменить строку", {detailTableActionName:"allowEditDetailTableSelectedRow", btnStyle: "width:200px;"})
+            .addToolPaneActionButton("Сохранить строку", {detailTableActionName:"storeDetailTableSelectedRow", btnStyle: "width:200px;"})
+            .addToolPaneActionButton("Удалить строку", {detailTableActionName:"deleteDetailTableSelectedRow", btnStyle: "width:200px;"})
+            .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
+            .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
+            .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
+            .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
+                crd.item("PRODUCT_COLLECTION").setValue(thisInstance.detailHeader.getContentDataItem("PRODUCT_COLLECTION"));
+                //var supplierOrderNum= thisInstance.detailHeader.getContentDataItem("BUYER_ORDER_NUM");
+//                            if (supplierOrderNum && supplierOrderNum.trim().length>0
+//                                    && crd.item("PRODUCT_ARTICLE").isChanged() && !crd.item("PRODUCT_ARTICLE").isEMPTY()){              console.log("INV detailTableRowChangeCallback1 prod article from order bata ");
+                //   var condition={};
+                //     condition["BUYER_ORDER_NUM"]= supplierOrderNum;
+                if ( crd.item("PRODUCT_ARTICLE").isChanged() && !crd.item("PRODUCT_ARTICLE").isEMPTY()){              console.log("RET_INV detailTableRowChangeCallback1 prod article from order bata ");
+                    var condition={};
+                    condition["PRODUCT_ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
+                    Request.getJSONData({url:"/wrh/order_bata/get_order_bata_details_by_article", condition:condition, resultItemName:"item"},
+                            function(prodDataFromOrderBata){
+                                if (prodDataFromOrderBata) {                                                 //console.log("RET_INV detailTableRowChangeCallback2 getJSONData success ",result);
+                                    crd.item("PRODUCT_GENDER_CODE").setValue(prodDataFromOrderBata["PRODUCT_GENDER_CODE"]);
+                                    crd.item("PRODUCT_GENDER").setValue(prodDataFromOrderBata["PRODUCT_GENDER"]);
+                                    crd.item("PRODUCT_CATEGORY_CODE").setValue(prodDataFromOrderBata["PRODUCT_CATEGORY_CODE"]);
+                                    crd.item("PRODUCT_CATEGORY").setValue(prodDataFromOrderBata["PRODUCT_CATEGORY"]);
+                                    crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(prodDataFromOrderBata["PRODUCT_SUBCATEGORY_CODE"]);
+                                    crd.item("PRODUCT_SUBCATEGORY").setValue(prodDataFromOrderBata["PRODUCT_SUBCATEGORY"]);
+                                    crd.item("PRICE").setValue(prodDataFromOrderBata["PRICE"]);
+                                    if (crd.item("QTY").isEMPTYZERO()) crd.item("QTY").setValue(prodDataFromOrderBata["QTY"]);
+                                    crd.item("PRODUCT_CODE").setValue(null);
+                                    crd.item("PRODUCT_NAME").setValue(null);
+                                    crd.item("PRODUCT_UM").setValue(null);
+                                    crd.item("PRODUCT_PBARCODE").setValue(null);
+                                    crd.item("BARCODE").setValue(null);
+                                }
+                                nextCallback();
+                            });
+                    return;
+                } else {
+                    //wrh_inv_invproductslisthst.setProdDataByArticleFromInv(changedRow,newProdData);
+                }
+                nextCallback();
+            })
+            .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+                var setCRDProductData= function(crd, prodData){
+                    crd.item("PRODUCT_CODE").setValue((prodData)?prodData["CODE"]:null);
+                    crd.item("PRODUCT_NAME").setValue((prodData)?prodData["NAME"]:null);
+                    crd.item("PRODUCT_UM").setValue((prodData)?prodData["UM"]:null);
+                    crd.item("PRODUCT_ARTICLE").setValue((prodData)?prodData["ARTICLE"]:null);
+                    crd.item("PRODUCT_PBARCODE").setValue((prodData)?prodData["PBARCODE"]:null);
+                    crd.item("PRODUCT_GENDER").setValue((prodData)?prodData["GENDER"]:null);
+                    crd.item("PRODUCT_GENDER_CODE").setValue((prodData)?prodData["GENDER_CODE"]:null);
+                    crd.item("PRODUCT_CATEGORY").setValue((prodData)?prodData["CATEGORY"]:null);
+                    crd.item("PRODUCT_CATEGORY_CODE").setValue((prodData)?prodData["CATEGORY_CODE"]:null);
+                    crd.item("PRODUCT_SUBCATEGORY").setValue((prodData)?prodData["SUBCATEGORY"]:null);
+                    crd.item("PRODUCT_SUBCATEGORY_CODE").setValue((prodData)?prodData["SUBCATEGORY_CODE"]:null);
+                    crd.item("PRODUCT_COLLECTION").setValue((prodData)?prodData["COLLECTION"]:null);
+                    crd.item("PRODUCT_COLLECTION_CODE").setValue((prodData)?prodData["COLLECTION_CODE"]:null);
+                    crd.item("PRODUCT_KIND").setValue((prodData)?prodData["KIND"]:null);
+                    crd.item("PRODUCT_COMPOSITION").setValue((prodData)?prodData["COMPOSITION"]:null);
+                    crd.item("PRODUCT_SIZE").setValue((prodData)?prodData["SIZE"]:null);
+                    crd.item("BARCODE").setValue((prodData)?prodData["PBARCODE"]:null);
+                };
+                if ( crd.item("PRODUCT_ARTICLE").isChanged() || crd.item("PRODUCT_KIND").isChanged()
+                        || crd.item("PRODUCT_COMPOSITION").isChanged() || crd.item("PRODUCT_SIZE").isChanged()
+                        || crd.item("PRODUCT_GENDER").isChanged() || crd.item("PRODUCT_GENDER_CODE").isChanged()
+                        || crd.item("PRODUCT_CATEGORY").isChanged() || crd.item("PRODUCT_CATEGORY_CODE").isChanged()
+                        || crd.item("PRODUCT_SUBCATEGORY").isChanged() || crd.item("PRODUCT_SUBCATEGORY_CODE").isChanged()
+                        || crd.item("PRODUCT_COLLECTION").isChanged() ) {                                   console.log("RET_INV detailTableRowChangeCallback1 prod code name",crd.data());
+                    var condition = {};
+                    condition["ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
+                    condition["KIND"]= crd.item("PRODUCT_KIND").getValue();
+                    condition["COMPOSITION"]= crd.item("PRODUCT_COMPOSITION").getValue();
+                    condition["SIZE"]= crd.item("PRODUCT_SIZE").getValue();
+                    crd.item("PRODUCT_CODE").setValue(null);
+                    crd.item("PRODUCT_NAME").setValue(null);
+                    crd.item("PRODUCT_UM").setValue(null);
+                    crd.item("PRODUCT_PBARCODE").setValue(null);
+                    crd.item("BARCODE").setValue(null);
+                    Request.getJSONData({url:"/dir/products/get_prod_code_name_by_article_kind_compos_size", condition:condition, resultItemName:"item"},
+                            function(resultItem){
+                                if (resultItem) {
+                                    nextCallback();
+                                    return;
+                                }
+                                setCRDProductData(crd,resultItem);
+                                nextCallback(true);
+                            });
+                    return;
+                }
+                nextCallback();
+            })
+            .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){          //console.log("INV detailTableRowChangeCallback1 ",crd.data());
+                var prevPOS=detailTable.getPrevRowDataItemValue(crd.data(),"POS");
+                if(prevPOS===undefined||prevPOS===null||isNaN(prevPOS/1)) prevPOS=0;
+                if (crd.item("POS").isUNDEFNULL()) crd.item("POS").setValue(prevPOS+1);
+                else if (crd.item("POS").getValue()===prevPOS) crd.item("POS").setValue(prevPOS+1);
+                if(crd.item("POS").isChanged()) crd.item("POSIND").setValue(crd.item("POS").getValue());
+                if (crd.item("POSIND").isUNDEFNULL()&&!crd.item("POS").isUNDEFNULLZERO()) crd.item("POSIND").setValue(crd.item("POS").getValue());
+
+                if (crd.item("QTY").isUNDEFNULL()) crd.item("QTY").setValue(1);
+                if (crd.item("PRICE").isUNDEFNULL()) crd.item("PRICE").setValue(0);
+                if (crd.item("POSSUM").isUNDEFNULL()) crd.item("POSSUM").setValue(0);
+                if (crd.item("POSSUM").isChanged()&&!crd.item("POSSUM").isUNDEFNULL()){                                         //console.log("detailTableRowChangeCallback POSSUM changed",crd);
+                    if (crd.item("QTY").isEMPTY()&&!crd.item("PRICE").isEMPTYZERO())
+                        crd.item("QTY").setValue( crd.item("POSSUM").getValue()/crd.item("PRICE").getValue() );
+                    else if (crd.item("QTY").isEMPTYZERO()) crd.item("PRICE").setValue( 0 );
+                    else crd.item("PRICE").setValue( crd.item("POSSUM").getValue()/crd.item("QTY").getValue() )
+                } else if (crd.item("PRICE").isChanged()||crd.item("QTY").isChanged()){                                         //console.log("detailTableRowChangeCallback PRICE QTY changed",crd);
+                    if (crd.item("QTY").isUNDEFNULLZERO()||crd.item("PRICE").isUNDEFNULLZERO()) crd.item("POSSUM").setValue(0);
+                    else crd.item("POSSUM").setValue( crd.item("PRICE").getValue()*crd.item("QTY").getValue() )
+                } else if (!crd.item("POSSUM").isEMPTY()) {
+                    if (crd.item("QTY").isEMPTYZERO()) crd.item("PRICE").setValue(0);
+                    else crd.item("PRICE").setValue( crd.item("POSSUM").getValue()/crd.item("QTY").getValue() )
+                }
+
+                if(crd.item("FACTOR").isEMPTYZERO()) crd.item("FACTOR").setValue(thisInstance.detailHeader.getContentDataItem("BASE_FACTOR"));
+                var posrate = thisInstance.detailHeader.getContentDataItem("RATE");
+                if (crd.item("SALE_PRICE").isChanged()) {                                                   console.log("ret_inv detailTableRowChangeCallback1 SALE_PRICE isChanged");
+                    if (!crd.item("QTY").isEMPTY()
+                            && !crd.item("PRICE").isEMPTYZERO()
+                            && posrate!==0) {
+                        crd.item("FACTOR").setValue( crd.item("SALE_PRICE").getValue() / posrate / crd.item("PRICE").getValue() );
+                    } else
+                        crd.item("FACTOR").setValue("");
+                } else if (crd.item("PRICE").isChanged() || crd.item("FACTOR").isChanged()) {               console.log("ret_INV detailTableRowChangeCallback1 PRICE or FACTOR isChanged");
+                    if (!crd.item("PRICE").isEMPTY() && !crd.item("FACTOR").isEMPTY()) {
+                        crd.item("SALE_PRICE").setValue( crd.item("PRICE").getValue() * posrate * crd.item("FACTOR").getValue() );
+                    } else
+                        crd.item("SALE_PRICE").setValue("");
+                }
+                if (crd.item("SALE_PRICE").isChanged() && !crd.item("SALE_PRICE").isEMPTYZERO()){
+                    var posSelPrice = crd.item("SALE_PRICE").getValue();                                    console.log("ret_INV detailTableRowChangeCallback1 SALE_PRICE correct 0.49 ",posSelPrice);
+                    posSelPrice = Math.round(posSelPrice+0.49);
+                    crd.item("SALE_PRICE").setValue(posSelPrice);
+                    var price = crd.item("PRICE").getValue();
+                    if (price!==0)
+                        crd.item("FACTOR").setValue( posSelPrice / posrate / price );
+                }
+                nextCallback();
+            })
+            .addDetailTableMenuItemAction("Применить цены продажи",{action:"storeDetailTableSelectedRowsPrice"}, function(selRowsData){
+                if(!selRowsData) return;
+                for(var selRowInd in selRowsData){
+                    var selRowData= selRowsData[selRowInd], data={};
+                    data["PRICELIST_ID"]= 0;
+                    data["PRODUCT_CODE"]= selRowData["PRODUCT_CODE"];
+                    data["PRICE"]= selRowData["SALE_PRICE"];
+                    data["DISCOUNT_PECENT"]= 0;
+                    data["PRICE_WITH_DISCOUNT"]= selRowData["SALE_PRICE"];
+                    data["CHANGE_DATETIME"]= moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+                    Request.postJSONData({url:"/dir/products_prices/store_product_price", data:data, resultItemName:"item"},
+                            function(resultItem){                                                       console.log("ret_INV detailTableMenuItemAction postJSONData ", success,result);
+                                if (resultItem) {
+                                    //var prodDataFromOrderBata = result.item;
+                                }
+                            });
+                }
+            })
+            .addToolPane({title:"Печать"})
+            .addToolPaneActionButton("Печать ценников", {detailTableActionName:"printProdTags", btnStyle: "width:200px;",
+                actionFunction:function(){
+                    var printWindow= window.open("/print/prod_tags");                                           //console.log("printProdTags.onClick printWindow=",printWindow);
+                    //window.open("/print?invid="+wrh_inv_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
+                    printWindow["prodTagsContentData"]= this.detailTable.getContent();
+                    printWindow["pageProdTagType"]= "tag58X30";}
+            })
+            .addToolPaneActionButton("Печать цен", {detailTableActionName:"printProdPricesTags", btnStyle: "width:200px;",
+                actionFunction:function(){
+                    var printWindow= window.open("/print/prod_tags");                                           //console.log("printProdPricesTags.onClick printWindow=",printWindow);
+                    //window.open("/print?invid="+wrh_inv_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
+                    printWindow["prodTagsContentData"]= this.detailTable.getContent();
+                    printWindow["pageProdTagType"]= "tag40X25";}
+            })
+//                        .addToolPane("Доп")
+//                        .addToolPaneActionButton("Сохранить в прайс-лист", { btnStyle: "width:200px;"})
+//                        .addToolPaneActionButton("Синхронизация цен", { btnStyle: "width:200px;"})
+            .addToolPane({title:"Информация о товаре", detailTableAction:function(toolPane, detailHeader,detailTable,thisInstance){
+                var detailTableSelectedRow= detailTable.getSelectedRow();
+                if(detailTableSelectedRow) {
+                    var htCols = detailTable.getColumns(); var prodInfoHtml = "";
+                    for(var c=0;c<htCols.length;c++){
+                        var colItem = htCols[c]; var colData = colItem["data"];
+                        var colValue = detailTableSelectedRow[colData];
+                        if(colData.indexOf('PRODUCT')>=0 || colData.indexOf('BARCODE')>=0)
+                            prodInfoHtml = prodInfoHtml + "<tr><td>"+"<b>"+colItem["name"]+":</b> "+((!colValue)?'':colValue)+"</td></tr>";
+                    }
+                    toolPane.set("content","<table style=\"margin:0;padding:0;\">"+prodInfoHtml+"</table>");
+                } else toolPane.set("content","");
+            }})
+            .addToolXPane("Ценник товара", function(toolPane, detailHeader,detailTable,thisInstance){
+                toolPane.set("content","");
+                var detailTableSelectedRow= detailTable.getSelectedRow();
+                if(detailTableSelectedRow) {
+                    var prodTagContentData = {};
+                    for(var rowItemName in detailTableSelectedRow) prodTagContentData[rowItemName]= detailTableSelectedRow[rowItemName];
+                    toolPane.set("prodTagContentData", prodTagContentData);
+                    toolPane.set("href","/pages/print/product_tag_58x30.html");
+                }
+            })
+            .startUp();
+</script>

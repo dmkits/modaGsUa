@@ -1,0 +1,6 @@
+/* ContentController makr element style */
+.contentControllerMarkedElement{
+    color: red !important;/*IT'S NOT WORK!!! color red setted in code*/
+    font-weight: bold;
+    border: 1px solid red !important;
+}

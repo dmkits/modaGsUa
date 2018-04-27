@@ -1,0 +1,169 @@
+<?php
+    ....code....
+?>
+<body>
+<div id="wrh_order_bata_PageContainer" style="width:100%;height:100%;">
+    <div id="wrh_order_bata_LeftContainer" style="width:310px;height:100%; margin:0;padding:0;"></div>
+    <div id="wrh_order_bata_DetailContainer" style="width:100%;height:100%; margin:0;padding:0;">
+        <div id="wrh_order_bata_DetailHeader" style="width:100%;height:auto;; margin:0;padding:0;"></div>
+        <div id="wrh_order_bata_DetailTable" style="width:100%;height:auto; margin:0;padding:0;"></div>
+        <div id="wrh_order_bata_DetailTotal" style="width:100%;height:auto;; margin:0;padding:0;"></div>
+    </div>
+    <div id="wrh_order_bata_RightPane" style="width:180px;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "tDocumentStandardTable","dialogs", "request"],
+            function (APP, TDocumentStandardTable, Dialogs,  Request) {
+                var wrh_order_bata= APP.instanceForID("wrh_order_bata_PageContainer", TDocumentStandardTable,
+                            { idListContainer:"wrh_order_bata_LeftContainer",idDetailContainer:"wrh_order_bata_DetailContainer",
+                                idDetailHeader:"wrh_order_bata_DetailHeader",idDetailTable:"wrh_order_bata_DetailTable",idDetailTotal:"wrh_order_bata_DetailTotal",
+                                idRightContainer:"wrh_order_bata_RightPane" })
+                        .addListTable({getDataUrl:"/wrh/ordersBata/getDataForOrdersBataListTable",header:"Список заказов",
+                            bdatelabelText:"c",bdateCondition:"DOCDATE>=", edatelabelText:"по",edateCondition:"DOCDATE<="})
+                        .setDetailHeaderParameters({dataIDName:"ID",
+                            getDataUrl:"/wrh/ordersBata/getOrderBataData", getDataForNewUrl:"/wrh/ordersBata/getNewOrderBataData",
+                            postDataUrl:"/wrh/ordersBata/storeOrderBataData", postForDeleteDataUrl:"/wrh/ordersBata/deleteOrderBataData"})
+                        .addDetailHeaderTitle({title:"Заказ поставщику",titleForNew:"Новый заказ поставщику",
+                            titleForNothing:"Заказ не выбран", titleForFailedLoad:"Нет данных",
+                            numberDataItemName:"NUMBER", dateDataItemName:"DOCDATE", titleDatePrefix:"от"},25)
+                        .addDetailHeaderRow(25,true)
+                        .addDetailHeaderSelect("UNIT_NAME","Подразделение", 330,
+                            {inputStyle:"width:200px", loadDropDownURL:"/dir/units/getDirUnitsForSelect", labelDataItem:"UNIT_NAME"})
+                        .addDetailHeaderTextBox("NUMBER", "Номер", 120, {inputStyle:"width:50px"})
+                        .addDetailHeaderDateTextBox("DOCDATE", "Дата", 150, "width:80px")
+                        .addDetailHeaderRow(25,true)
+                        .addDetailHeaderSelect("SUPPLIER_NAME","Поставщик", 300,
+                            {inputStyle:"width:200px", loadDropDownURL:"/dir/contractors/getDirContractorsForSelect", labelDataItem:"SUPPLIER_NAME"})
+                        .addDetailHeaderTextBox("SUPPLIER_ORDER_NUM", "Номер заказа. поставщика", 220, {inputStyle:"width:60px"})
+                        .addDetailHeaderSelect("CURRENCY_CODE","Валюта", 280,
+                            {inputStyle:"width:220px", loadDropDownURL:"/sys/currency/getCurrencyForSelect", labelDataItem:"CURRENCY_CODENAME"})
+                        .setDetailTableParameters({conditionIDName:"ORDER_BATA_ID",
+                            getDataUrl:"/wrh/ordersBata/getDataForOrdersBataDetailsTable",
+                            storeDataUrl:"/wrh/ordersBata/storeOrdersBataDetailsTable", deleteDataUrl:"/wrh/ordersBata/deleteOrdersBataDetailsTable"})
+                        .addDetailTotalRow()
+                        .addDetailSubTotalCountNumberTextBox("ИТОГО СТРОК:", 190, {inputStyle:"width:40px;"})
+                        .addDetailSubtotalNumberTextBox("ИТОГО КОЛИЧЕСТВО:", 640, "QTY", {pattern:"###,###,##0.#########", inputStyle:"width:50px;"})
+                        .addDetailSubtotalNumberTextBox("ИТОГО СУММА:", 220, "POSSUM", {pattern:"###,###,##0.00#######", inputStyle:"width:80px;"})
+                        .addDetailTotalRow(true)
+                        .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СТРОК:", 190, "DOCCOUNT",
+                            {pattern:"###,###,##0.#########", inputStyle:"width:40px;", style:"font-weight:bold;", printLabel:"ИТОГО СТРОК:"})
+                        .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ КОЛИЧЕСТВО:", 640, "DOCQTYSUM",
+                            {pattern:"###,###,##0.#########", inputStyle:"width:50px;", style:"font-weight:bold;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
+                        .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 220, "DOCSUM",
+                            {pattern:"###,###,##0.00#######", inputStyle:"width:80px;", style:"font-weight:bold;", printLabel:"ИТОГО СУММА:"})
+                        .addDetailTotalRow(true)
+                        .addDetailTotalTextBox("Статус:", 1040, "DOCSTATE_NAME", {style:"font-weight:bold;", inputStyle:"width:200px", print:false})
+                        //.addToolPane("Вид документа")
+                        //.addToolPane("Текущий статус")
+                        .addToolPane({title:"Действия"})
+                        .addToolPaneActionButton("Новый заказ", {detailTableActionName:"loadHeaderNewValues", btnStyle:"width:145px;"})
+                        .addToolPaneActionButton("Сохранить заказ", {detailTableActionName:"storeHeaderValues", btnStyle:"width:145px;"})
+                        .addToolPaneActionButton("Отменить изменения", {detailTableActionName:"loadHeaderLastValues", btnStyle:"width:145px;"})
+                        .addToolPaneActionButton("Удалить заказ", {detailTableActionName:"deleteHeader", btnStyle:"width:145px;"})
+                        .addToolPaneBR()
+                        .addToolPaneActionButton("Добавить строку", {detailTableActionName:"insertDetailTableRow",rowPosName:"POS", btnStyle:"width:145px;"})//rowPosIndexName:"POSIND"
+                        .addToolPaneActionButton("Копировать строку", {detailTableActionName:"insertDetailTableCopySelectedRow", btnStyle:"width:145px;"})
+                        .addToolPaneActionButton("Изменить строку", {detailTableActionName:"allowEditDetailTableSelectedRow", btnStyle:"width:145px;"})
+                        .addToolPaneActionButton("Сохранить строку", {detailTableActionName:"storeDetailTableSelectedRow", btnStyle:"width:145px;"})
+                        .addToolPaneActionButton("Удалить строку", {detailTableActionName:"deleteDetailTableSelectedRow", btnStyle:"width:145px;"})
+                        .addToolPane({title:"Импорт"})
+                        .addToolPaneFileUploader({label:"Импортировать из Excel", url:"/wrh/ordersBata/importOrderFromFile",
+                              name:"newOrder", btnStyle:"width:145px;",acceptFileExt:".xlsx"}, function(result, thisInstance){
+                            if(result.error){
+                                console.log("ERROR!!! ", result.error);
+                                if(result.userErrorMsg) Dialogs.doSimpleDialog({content:result.userErrorMsg+"<br>"});
+                                return;
+                            }
+                            if(!result.items ||result.items.length==0){
+                                console.log("NO data for table!");
+                                Dialogs.doSimpleDialog({content:"Нет данных для оформления заказа.<br>"});
+                                return;
+                            }
+                            var items=result.items;
+                            for (var i = 0; i < items.length; i++) {
+                                var item = items[i];
+                                thisInstance.detailTable.insertRowAfterSelected(item);
+                            }
+                        })
+                        .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
+                        .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
+                        .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){ //console.log("ORB detailTableRowChangeCallback QTY PRICE POSSUM",crd);
+                            if (crd.item("QTY").isUNDEFNULL()) crd.item("QTY").setValue(1);
+                            if (crd.item("RETAIL_PRICE").isUNDEFNULL()) crd.item("RETAIL_PRICE").setValue(0);
+                            if (crd.item("POSSUM").isChanged()&&!crd.item("POSSUM").isUNDEFNULL()){                                //console.log("ORB detailTableRowChangeCallback POSSUM changed",crd);
+                                if (crd.item("QTY").isEMPTY()&&!crd.item("PRICE").isEMPTYZERO())
+                                    crd.item("QTY").setValue( crd.item("POSSUM").getValue()/crd.item("PRICE").getValue() );
+                                else if (crd.item("QTY").isEMPTYZERO()) crd.item("PRICE").setValue( 0 );
+                                else crd.item("PRICE").setValue( crd.item("POSSUM").getValue()/crd.item("QTY").getValue() )
+                            } else if (crd.item("PRICE").isChanged()||crd.item("QTY").isChanged()){                                //console.log("ORB detailTableRowChangeCallback PRICE QTY changed",crd);
+                                if (crd.item("QTY").isUNDEFNULLZERO()||crd.item("PRICE").isUNDEFNULLZERO()) crd.item("POSSUM").setValue(0);
+                                else crd.item("POSSUM").setValue( crd.item("PRICE").getValue()*crd.item("QTY").getValue() )
+                            } else if (!crd.item("POSSUM").isEMPTY()) {
+                                if (crd.item("QTY").isEMPTYZERO()) crd.item("PRICE").setValue(0);
+                                else crd.item("PRICE").setValue( crd.item("POSSUM").getValue()/crd.item("QTY").getValue() )
+                            }
+                            if (crd.item("PRICE").isUNDEFNULL()) crd.item("PRICE").setValue(0);
+                            if (crd.item("POSSUM").isUNDEFNULL()) crd.item("POSSUM").setValue(0);
+                            nextCallback();
+                        })
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
+                            if(crd.item("PRODUCT_GENDER_CODE").isChanged()&&!crd.item("PRODUCT_GENDER_CODE").isUNDEFNULL()){
+                                var genderValueForGenderCode=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_GENDER_CODE",crd.item("PRODUCT_GENDER_CODE").getValue(),"PRODUCT_GENDER");
+                                if(genderValueForGenderCode==undefined) genderValueForGenderCode=null;
+                                crd.item("PRODUCT_GENDER").setValue(genderValueForGenderCode);
+                            } else if(crd.item("PRODUCT_GENDER").isChanged()&&!crd.item("PRODUCT_GENDER").isUNDEFNULL()){
+                                var genderCodeValueForGender=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_GENDER",crd.item("PRODUCT_GENDER").getValue(),"PRODUCT_GENDER_CODE");
+                                if(genderCodeValueForGender==undefined) genderCodeValueForGender=null;
+                                crd.item("PRODUCT_GENDER_CODE").setValue(genderCodeValueForGender);
+                            }
+                            nextCallback();
+                        })
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
+                            var genderValue,genderCode;
+                            if(crd.item("PRODUCT_CATEGORY_CODE").isChanged()&&!crd.item("PRODUCT_CATEGORY_CODE").isUNDEFNULL()){
+                                var categoryValueForCategoryCode=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_CATEGORY");
+                                if(categoryValueForCategoryCode==undefined) categoryValueForCategoryCode=null;
+                                crd.item("PRODUCT_CATEGORY").setValue(categoryValueForCategoryCode);
+                                genderValue=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_GENDER");
+                                genderCode=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_GENDER_CODE");
+
+                            } else if(crd.item("PRODUCT_CATEGORY").isChanged()&&!crd.item("PRODUCT_CATEGORY").isUNDEFNULL()){
+                                var categoryCodeValueForCategory=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_CATEGORY_CODE");
+                                if(categoryCodeValueForCategory==undefined) categoryCodeValueForCategory=null;
+                                crd.item("PRODUCT_CATEGORY_CODE").setValue(categoryCodeValueForCategory);
+                                genderValue=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_GENDER");
+                                genderCode=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_GENDER_CODE");
+                            }
+                            if(genderValue!==undefined&&crd.item("PRODUCT_GENDER").isEMPTY())
+                                crd.item("PRODUCT_GENDER").setValue(genderValue);
+                            if(genderCode!==undefined&&crd.item("PRODUCT_GENDER_CODE").isEMPTY())
+                                crd.item("PRODUCT_GENDER_CODE").setValue(genderCode);
+                            nextCallback();
+                        })
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
+                            if(crd.item("PRODUCT_SUBCATEGORY_CODE").isChanged()&&!crd.item("PRODUCT_SUBCATEGORY_CODE").isUNDEFNULL()){
+                                var subcategoryValueForSubcategoryCode=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_SUBCATEGORY_CODE",crd.item("PRODUCT_SUBCATEGORY_CODE").getValue(),"PRODUCT_SUBCATEGORY");
+                                if(subcategoryValueForSubcategoryCode==undefined) subcategoryValueForSubcategoryCode=null;
+                                crd.item("PRODUCT_SUBCATEGORY").setValue(subcategoryValueForSubcategoryCode);
+                            } else if(crd.item("PRODUCT_SUBCATEGORY").isChanged()&&!crd.item("PRODUCT_SUBCATEGORY").isUNDEFNULL()){
+                                var subcategoryCodeValueForSubcategory=
+                                        detailTable.getAutocompleteColumnValueForItem("PRODUCT_SUBCATEGORY",crd.item("PRODUCT_SUBCATEGORY").getValue(),"PRODUCT_SUBCATEGORY_CODE");
+                                if(subcategoryCodeValueForSubcategory==undefined) subcategoryCodeValueForSubcategory=null;
+                                crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(subcategoryCodeValueForSubcategory);
+                            }
+                            nextCallback();
+                        })
+                        .startUp();
+    });
+</script>

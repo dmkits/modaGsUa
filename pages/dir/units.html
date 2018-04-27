@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <div id="dir_units_PageContainer" style="width: 100%; height: 100%;">
+        <div id="dir_units_ContentContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+    </div>
+</body>
+<script type="text/javascript">
+    require(["app", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "tDocumentSimpleTableEditable"],
+            function (APP, BorderContainer, StackContainer, TDocumentSimpleTableEditable) {
+                var dir_units_PageContainer=
+                        APP.instanceForID("dir_units_PageContainer", BorderContainer, {});
+                var dir_units_ContentContainer=
+                        APP.instanceForID("dir_units_ContentContainer", StackContainer, {region:'center'});
+
+                dir_units_ContentContainer.docDirUnits =
+                        APP.childFor(dir_units_ContentContainer, "dir_units_TableDirUnits",
+                                TDocumentSimpleTableEditable, {titleText:"Подразделения",
+                                    rightToolPane:{title:"Действия",
+                                        buttons:{insertTableRow:"Добавить", allowEditTableSelectedRow:"Изменить",
+                                            storeTableSelectedRow:"Сохранить",deleteTableSelectedRow:"Удалить"}},
+                                    dataURL:"/dir/units/getDataForDirUnitsTable",
+                                    dataNewURL:"/dir/units/newDataForDirUnitsTable",
+                                    dataStoreURL:"/dir/units/storeDirUnitsTableData", dataDeleteURL:"/dir/units/deleteDirUnitsTableData"})
+                                .addCheckBtnCondition("Используемые",{width:105,contentTableConditions:{"NOT_USED~":0}})
+                                .addCheckBtnCondition("Не используемые",{width:122,contentTableConditions:{"NOT_USED~":1}})
+                                .addTotalCountNumberBox("ИТОГО строк:", 150, {style:"font-weight:bold;",inputStyle:"width:50px"})
+                                .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
+                                .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+                                .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+                                .addContentTableRowChangeCallback(function(changedRowData,contentTable, params, nextCallback){
+                                    if(changedRowData.item("NOT_USED").isUNDEFNULL()) changedRowData.item("NOT_USED").setValue(0);
+                                    nextCallback();
+                                })
+                                .startUp();
+                dir_units_PageContainer.layout();
+            })
+</script>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/gif" href="<%-icon%>"/>
+    <script src="/jslib/numeral/languages/ru.js"></script>
+    <script src="/jslib/moment/moment-with-locales.js"></script>
+    <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:false"></script>
+    <title><%-title%></title>
+    <style>
+        body {
+            background-image: url("<%-bigImg%>");
+            background-size:cover;
+        }
+    </style>
+</head>
+<body class="claro">
+<div style=" color: black; text-align: center; background: rgba(255, 255, 255, .9); border: 1px solid black; margin:200px; padding:60px;">
+<div style="font-size:30px; font-weight: 300; ">
+    <%-errorReason%>
+    <br/>Обратитесь к системному администратору!
+</div>
+<div id="auth_as_sysadmin"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["dijit/form/Button", "dojo/domReady!"],
+                function (Button) {
+                    moment.locale("uk");
+
+                    var authAsAdminBtn = new Button({
+                        id: "auth_as_sysadmin",
+                        label: "Войти как админ",
+                        style:"padding-top: 40px"
+                    }, "auth_as_sysadmin");
+                    authAsAdminBtn.startup();
+
+                    authAsAdminBtn.onClick = function () { console.log("btn clicked");
+                        window.location.replace("/login");
+                    };
+                });
+
+</script>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="retailSales_PageContainer" style="width:100%;height:100%;">
+    <div id="retailSales_ContentPaneLeft" style="width:185px;height:100%; margin:0;padding:0;">
+        <table style="width:100%; margin:0;padding:0;">
+            <tr><th height="20px;">Отчеты</th></tr>
+            <tr><td>
+                <button id="retailSales_btnSalesRetail">Продажи по чекам</button><br>
+                <button id="retailSales_btnSalesByDays">Продажи по дням</button><br>
+                <br>
+                <button id="retailSales_btnSalesRetailByProdsAttrs">Продажи по чекам с атрибутами</button><br>
+                <br>
+                <button id="retailSales_btnSalesByArticles">Продажи по артикулам</button><br>
+                <button id="retailSales_btnSalesByCollections">Продажи по коллекциям</button><br>
+                <button id="retailSales_btnSalesByBataAttributes">Продажи по группам Bata</button><br>
+                <br>
+                <button id="retailSales_btnTicketList">Реестр чеков</button>
+            </td></tr>
+        </table>
+    </div>
+    <div id="retailSales_ContentPaneDetailContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/Button", "tDocumentSimpleTable"],
+            function (APP, BorderContainer, StackContainer, ContentPane, Button, TDocumentSimpleTable) {
+                var pageContainer= APP.instanceForID("retailSales_PageContainer", BorderContainer, {});
+                APP.instanceForID("retailSales_ContentPaneLeft", ContentPane, {region:'left', splitter:true});
+                var btnSalesRetail= APP.instanceForID("retailSales_btnSalesRetail", Button, {},{"width":"170px"});
+                var btnSalesByDays= APP.instanceForID("retailSales_btnSalesByDays", Button, {},{"width":"170px"});
+                var btnSalesRetailByProdsAttrs= APP.instanceForID("retailSales_btnSalesRetailByProdsAttrs", Button, {},{"width":"170px"});
+                var btnSalesByArticles= APP.instanceForID("retailSales_btnSalesByArticles", Button, {},{"width":"170px"});
+                var btnSalesByCollections= APP.instanceForID("retailSales_btnSalesByCollections", Button, {},{"width":"170px"});
+                var btnSalesByBataAttributes= APP.instanceForID("retailSales_btnSalesByBataAttributes", Button, {},{"width":"170px"});
+                var retailSales_btnTicketList= APP.instanceForID("retailSales_btnTicketList", Button, {},{"width":"170px"});
+                var contentPaneDetailContainer= APP.instanceForID("retailSales_ContentPaneDetailContainer", StackContainer, {region:'center'});
+                btnSalesRetail.onClick= function(){
+                    if (!btnSalesRetail.document){
+                        btnSalesRetail.document =
+                                APP.childFor(contentPaneDetailContainer, "retailSales_TableSalesRetail",
+                                        TDocumentSimpleTable, {titleText:"Продажи по чекам", dataURL:"/reports/retailSales/getRetailSales"})
+                                        .addSelectBox("Подразделение",{width:280, valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("с", {width:105,initValueDate:"curMonthBDate", contentTableCondition:"DOCDATE>="})
+                                        .addHeaderDateBox("по",{width:150, contentTableCondition:"DOCDATE<="})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 600, "QTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 200, "POSSUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(btnSalesRetail.document);
+                };
+                btnSalesByDays.onClick= function(){
+                    if (!btnSalesByDays.document){
+                        btnSalesByDays.document =
+                                APP.childFor(contentPaneDetailContainer, "retailSales_TableSalesByDays",
+                                        TDocumentSimpleTable, {titleText:"Продажи по дням", dataURL:"/reports/retailSales/getSalesByDates"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 500, "SQTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 200, "SPOSSUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(btnSalesByDays.document);
+                };
+                btnSalesRetailByProdsAttrs.onClick= function(){
+                    if (!btnSalesRetailByProdsAttrs.document){
+                        btnSalesRetailByProdsAttrs.document =
+                                APP.childFor(contentPaneDetailContainer, "retailSales_TableSalesRetailByProdsAttrs",
+                                        TDocumentSimpleTable, {titleText:"Продажи по чекам с атрибутами", dataURL:"/reports/retailSales/getRetailSalesWithProductsAttrs"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 700, "QTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 200, "POSSUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(btnSalesRetailByProdsAttrs.document);
+                };
+                btnSalesByArticles.onClick= function(){
+                    if (!btnSalesByArticles.document){
+                        btnSalesByArticles.document =
+                                APP.childFor(contentPaneDetailContainer, "retailSales_TableSalesByArticles",
+                                        TDocumentSimpleTable, {titleText:"Продажи по артикулам", dataURL:"/reports/retailSales/getSalesByArticles"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 210, "SQTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 200, "SPOSSUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(btnSalesByArticles.document);
+                };
+                btnSalesByCollections.onClick= function(){
+                    if (!btnSalesByCollections.document){
+                        btnSalesByCollections.document =
+                                APP.childFor(contentPaneDetailContainer, "retailSales_TableSalesByCollections",
+                                        TDocumentSimpleTable, {titleText:"Продажи по коллекциям", dataURL:"/reports/retailSales/getSalesByCollections"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("с",{initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 370, "SQTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 220, "SPOSSUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(btnSalesByCollections.document);
+                };
+                btnSalesByBataAttributes.onClick= function(){
+                    if (!btnSalesByBataAttributes.document){
+                        btnSalesByBataAttributes.document =
+                                APP.childFor(contentPaneDetailContainer, "retailSales_TableSalesByBataAttributes",
+                                        TDocumentSimpleTable, {titleText:"Продажи по группам Bata", dataURL:"/reports/retailSales/getSalesByBataAttributes"})
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 605, "SQTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 220, "SPOSSUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(btnSalesByBataAttributes.document);
+                };
+
+                retailSales_btnTicketList.onClick= function(){
+                    if (!retailSales_btnTicketList.document){
+                        retailSales_btnTicketList.document =
+                                APP.childFor(contentPaneDetailContainer, "retailSales_TableTicketList",
+                                        TDocumentSimpleTable, {titleText:"Реестр чеков", dataURL:"/reports/retailSales/getTicketsList"})
+                                        .addSelectBox("Подразделение",{valueItemName:"UNIT_NAME", labelItemName:"UNIT_NAME",
+                                            loadDropDownURL:"/dir/units/getDirUnitsForSelect",
+                                            contentTableCondition:"UNIT_NAME="})
+                                        .addHeaderDateBox("с", {initValueDate:"curMonthBDate",contentTableCondition:"DOCDATE>="}).addHeaderDateBox("по",{contentTableCondition:"DOCDATE<="})
+                                        .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                        .addTotalSumNumberTextBox("ИТОГО кол-во:", 215, "SQTY", {style:"font-weight:bold;"})
+                                        .addTotalSumNumberTextBox("ИТОГО сумма:", 220, "SPOSSUM", {style:"font-weight:bold;"})
+                                        .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(retailSales_btnTicketList.document);
+                };
+                pageContainer.layout();
+                btnSalesRetail.onClick();
+        });
+</script>
+</html>
