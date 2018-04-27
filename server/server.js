@@ -164,10 +164,10 @@ server.post("/login", function (req, res) {                        log.info("app
                 return;
             }
         }
-        appModules.validateModules(function(errs, errMessage){
+        appModules.validateModules(req.uuid,function(errs,errMessage,uuid){
             //if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
             //}
-            appModules.init(server,errs);
+            appModules.init(uuid,server,errs);
             if(Object.keys(errs).length>0&&!errMessage){
                 var eCount=0;
                 for(var errItem in errs){

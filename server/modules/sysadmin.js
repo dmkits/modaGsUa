@@ -14,11 +14,12 @@ var changeLog= require(appDataModelPath+"change_log");
 //var sys_currency= require(appDataModelPath+"sys_currency"),
 //    sys_docstates= require(appDataModelPath+"sys_docstates");
 
-module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    //dataModel.initValidateDataModels([changeLog/*, sys_docstates,sys_currency*/], errs,
-    //    function(){
-    //        nextValidateModuleCallback();
-    //    });
+module.exports.validateModule = function(uuid, errs, nextValidateModuleCallback){
+    console.log('!!!!!!!!!!validateModule=',uuid, module.id);
+    dataModel.initValidateDataModels(uuid,[changeLog/*, sys_docstates,sys_currency*/], errs,
+        function(){
+            nextValidateModuleCallback();
+        });
     nextValidateModuleCallback();
 };
 
@@ -151,7 +152,7 @@ module.exports.init = function(app){
         var loadInitModulesError=getLoadInitModulesError();
         if(loadInitModulesError) outData.modulesFailures = loadInitModulesError;
         if (revalidateModules) {
-            appModules.validateModules(function(errs, errMessage){
+            appModules.validateModules(req.uuid,function(errs, errMessage){
                 if(errMessage) outData.dbValidation = errMessage; else outData.dbValidation = "success";
                 res.send(outData);
             });
@@ -228,7 +229,7 @@ module.exports.init = function(app){
                             res.send(outData);
                             return;
                         }
-                        appModules.validateModules(function(errs, errMessage){
+                        appModules.validateModules(req.uuid,function(errs, errMessage){
                             if(errMessage) outData.dbValidation = errMessage;
                             res.cookie("uuid", recordset.uuid);
                             res.send(outData);

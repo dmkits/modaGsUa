@@ -8,12 +8,12 @@ var dataModel= require("../datamodel");
 /**
  * resultCallback = function(errs, errMessage), errs - object of validate errors
  */
-module.exports.validateModules= function(resultCallback){
-    console.log('!!!!!!!! validateModules');
+module.exports.validateModules= function(uuid,resultCallback){
+    console.log('!!!!!!!! validateModules uuid',uuid, module.id);
     var modules= server.getConfigModules();
     if (!modules) return;
     var errs={};
-    var validateModuleCallback= function(modules, index, errs){
+    var validateModuleCallback= function(uuid,modules, index, errs){
         var moduleName= modules[index];
         if (!moduleName) {
             var errMsg;
@@ -33,7 +33,7 @@ module.exports.validateModules= function(resultCallback){
             module=require("./"+moduleName);
         }catch(e){                                                                                          log.error('FAILED validate module:'+moduleName+"! Reason:",e.message);//test
             errs[moduleName+"_validateError"]="Failed validate module:"+moduleName+"! Reason:"+e.message;
-            validateModuleCallback(modules, index + 1, errs);
+            validateModuleCallback(uuid,modules, index + 1, errs);
             return;
         }
         var validateModule=module.validateModule;
@@ -42,8 +42,8 @@ module.exports.validateModules= function(resultCallback){
             validateModuleCallback(modules, index + 1, errs);
             return;
         }
-        module.validateModule(errs, function () {
-            validateModuleCallback(modules, index + 1, errs);
+        module.validateModule(uuid,errs, function () {
+            validateModuleCallback(uuid,modules, index + 1, errs);
         });
     };
     dataModel.resetModelChanges();
@@ -51,7 +51,7 @@ module.exports.validateModules= function(resultCallback){
     validateModuleCallback(modules, 0, errs);
 };
 
-module.exports.init = function(app,errs){
+module.exports.init = function(uuid,app,errs){
     console.log('!!!!!!!!!!!54  modules init');
     var modules= server.getConfigModules();
     if (!modules) return;

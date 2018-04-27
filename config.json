@@ -11,16 +11,16 @@
   ],
   */
   "modules":[
-    "sysadmin",
-    "main",
+    "sysadmin"
+    /*"main",*/
     /*"print",*/
-    "mainPage",
+    /*"mainPage",*/
     /*"system",*/
     /*"dirPriceLists",
     "dirUnits",
     "dirContractors",
     "dirProducts",*/
-    "wrhPInvoices"
+    /*"wrhPInvoices"*/
    /* "wrhInvoices",
     "wrhRetInvoices",
     "wrhRetPInvoices"*/

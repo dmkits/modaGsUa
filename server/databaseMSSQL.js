@@ -220,24 +220,25 @@ module.exports.selectMSSQLQuery=selectMSSQLQuery;
 // * paramsObj={<paramName>:<paramValue>, ... }
 // * callback = function(err, recordset, count)
 // */
-//function selectParamsMSSQLQuery(query, paramsObj, callback) {                                      log.debug("database selectParamsMSSQLQuery query:",query," parameters:",paramsObj,{});
-//    var request = new mssql.Request();
-//    for(var param in paramsObj){
-//        //if(param.toLocaleLowerCase().indexOf("date")==param-5){
-//        //reqSql.input(param,mssql.Date, paramsObj[param]);
-//        request.input(param,paramsObj[param]);
-//    }
-//    request.query(query,
-//        function (err, result) {
-//            if (err) {                                                                              log.error('database: selectParamsMSSQLQuery error:',err.message,{});
-//                if(err.name=="ConnectionError")dbConnectError=err.message;
-//                callback(err);
-//                return;
-//            }
-//            callback(null, result.recordset ,result.rowsAffected.length);
-//        });
-//}
-//module.exports.selectParamsMSSQLQuery=selectParamsMSSQLQuery;
+function selectParamsMSSQLQuery(uuid,query, paramsObj, callback) {                                      log.debug("database selectParamsMSSQLQuery query:",query," parameters:",paramsObj,{});
+    var connection=connections[uuid].connection;
+    var request = new mssql.Request(connection);
+    for(var param in paramsObj){
+        //if(param.toLocaleLowerCase().indexOf("date")==param-5){
+        //reqSql.input(param,mssql.Date, paramsObj[param]);
+        request.input(param,paramsObj[param]);
+    }
+    request.query(query,
+        function (err, result) {
+            if (err) {                                                                              log.error('database: selectParamsMSSQLQuery error:',err.message,{});
+                if(err.name=="ConnectionError")dbConnectError=err.message;
+                callback(err);
+                return;
+            }
+            callback(null, result.recordset ,result.rowsAffected.length);
+        });
+}
+module.exports.selectParamsMSSQLQuery=selectParamsMSSQLQuery;
 //
 ///**
 // * params = { source,

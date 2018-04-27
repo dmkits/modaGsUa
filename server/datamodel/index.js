@@ -14,7 +14,7 @@ var database= require("../databaseMSSQL");
  * created for data model fields: sourceType, source, fields, idField, fieldsMetadata
  * created data model functions
  */
-function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataModelCallback){              log.info('InitValidateDataModel: dataModel:'+dataModelName+"...");//test
+function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidateDataModelCallback){              log.info('InitValidateDataModel: dataModel:'+dataModelName+"...");//test
     if(!dataModel.changeLog&&!dataModel.modelData){
         errs[dataModelName+"_initError"]="Failed init dataModel:"+dataModelName
             +"! Reason: no model data and no change log!";                                                  log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model data and no change log!");//test
@@ -110,7 +110,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     var idIsNullCondition=tableFieldsList[0]+" is NULL";
     var validateCondition={}; validateCondition[idIsNullCondition]=null;
     dataModel.doValidate= function(errs, resultCallback){
-        dataModel.getDataItems({conditions:validateCondition},function(result){
+        dataModel.getDataItems(uuid,{conditions:validateCondition},function(result){
             if(result.error) {                                                                          log.error('FAILED validate data model:'+dataModelName+"! Reason:"+result.error+"!");//test
                 errs[dataModelName+"_validateError"]="Failed validate dataModel:"+dataModelName+"! Reason:"+result.error;
             }
@@ -120,23 +120,24 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.doValidate(errs, nextValidateDataModelCallback);
 }
 
-module.exports.initValidateDataModels=function(dataModelsList, errs, resultCallback){
-    var validateDataModelCallback= function(dataModelsList, index, errs){
+module.exports.initValidateDataModels=function(uuid,dataModelsList, errs, resultCallback){
+    console.log('initValidateDataModels uuid',uuid, module.id);
+    var validateDataModelCallback = function(uuid,dataModelsList, index, errs){
         var dataModelInstance= dataModelsList[index];
         if (!dataModelInstance) {
-            resultCallback(errs);
+            resultCallback(uuid,errs);
             return;
         }
         if(!dataModelInstance.id){                                                                      log.error('FAILED validate data model without id! Data model instance:',dataModelInstance,{});//test
-            resultCallback(errs);
+            resultCallback(uuid,errs);
             return;
         }
         var dataModelName=path.basename(dataModelInstance.id).replace('.js','');
-        initValidateDataModel(dataModelName, dataModelInstance, errs, function(){
-            validateDataModelCallback(dataModelsList, index+1, errs);
+        initValidateDataModel(uuid,dataModelName, dataModelInstance, errs, function(){
+            validateDataModelCallback(uuid,dataModelsList, index+1, errs);
         });
     };
-    validateDataModelCallback(dataModelsList, 0, errs);
+    validateDataModelCallback(uuid,dataModelsList, 0, errs);
 };
 
 /**
@@ -157,7 +158,7 @@ module.exports.initValidateDataModels=function(dataModelsList, errs, resultCallb
  * fieldsFunctions[].function: "maxPlus1" / "concat"
  * resultCallback = function(err, recordset)
  */
-function _getSelectItems(params, connection, resultCallback){                                                       //log.debug("_getSelectItems params:",params,{});//test
+function _getSelectItems(uuid, params,resultCallback){                                                       //log.debug("_getSelectItems params:",params,{});//test
     if(!params){                                                                                        log.error("FAILED _getSelectItems! Reason: no function parameters!");//test
         resultCallback("FAILED _getSelectItems! Reason: no function parameters!");
         return;
@@ -267,7 +268,7 @@ function _getSelectItems(params, connection, resultCallback){                   
                 resultCallback(null,recordset);
         });
     else
-        database.selectParamsQuery(selectQuery,coditionValues, function(err, recordset, count, fields){
+        database.selectParamsMSSQLQuery(uuid,selectQuery,coditionValues, function(err, recordset, count, fields){
             if(err) {                                                                                       log.error("FAILED _getSelectItems selectParamsQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             } else
@@ -283,7 +284,7 @@ module.exports.getSelectItems=_getSelectItems;
  * }
  * resultCallback = function(result = { items:[ {<tableFieldName>:<value>,...}, ... ], error, errorCode } )
  */
-function _getDataItems(params,uuid, resultCallback){                                                             //log.debug('_getDataItems: params:',params,{});//test
+function _getDataItems(uuid,params, resultCallback){                                                             //log.debug('_getDataItems: params:',params,{});//test
     if(!params) params={};
     if(!params.source) params.source= this.source;
     if(!params.fields) params.fields=this.fields;
@@ -303,7 +304,7 @@ function _getDataItems(params,uuid, resultCallback){                            
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!"});
         return;
     }
-    _getSelectItems(params,uuid,function(err,recordset){
+    _getSelectItems(uuid,params,function(err,recordset){
         var selectResult={};
         if(err) {
             selectResult.error="Failed get data items! Reason:"+err.message;
