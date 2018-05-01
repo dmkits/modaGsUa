@@ -14,11 +14,11 @@ module.exports= function(app) {
         return (headers && headers["content-type"] == "application/x-www-form-urlencoded" && headers["x-requested-with"] == "XMLHttpRequest");
     };
     app.use(function (req, res, next) {                     logger.info("ACCESS CONTROLLER  req.path=", req.path, " params:",req.query,{});
-        if (req.originalUrl.indexOf("/login") >= 0) {
+        if (req.originalUrl.indexOf("/login") >= 0) { console.log('if req.originalUrl.indexOf("/login")');
             next();
             return;
         }
-        if (req.cookies.uuid) {
+        if (req.cookies.uuid) { console.log('req.cookies.uuid');
             var uuid=req.cookies.uuid;
             var connData=database.getConnData();
             if(connData && connData[uuid] && connData[uuid].connection
@@ -29,7 +29,7 @@ module.exports= function(app) {
                 next();
                 return;
             }
-            if(req.cookies.sysadmin){
+            if(req.cookies.sysadmin){  console.log('req.cookies.sysadmin');
                 var sysAdminUUIDArr = common.getSysAdminConnArr();
                 for (var i in sysAdminUUIDArr) {
                     if (sysAdminUUIDArr[i][req.cookies.uuid]) {
@@ -40,7 +40,7 @@ module.exports= function(app) {
                     }
                 }
             }
-            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {  console.log("reqIsJSON(req.headers) || reqIsAJAX(req.headers)=");
                 res.send({
                     error: "Failed to connect to database!",
                     userErrorMsg: "Не удалось подключиться к базе данных."
@@ -177,13 +177,14 @@ module.exports= function(app) {
         //    });
         //    return;
         //}
-        if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+        if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {   console.log("(reqIsJSON(req.headers) || reqIsAJAX(req.headers 180");
             res.send({
                 error: "Failed to get data! Reason: user is not authorized!",
                 userErrorMsg: "Не удалось плучить данные. Пользователь не авторизирован."
             });
             return;
         }
+        console.log("access sendFile");
         res.sendFile(path.join(__dirname, '../pages', 'login.html'));
     });
 };

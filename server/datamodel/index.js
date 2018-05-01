@@ -15,6 +15,7 @@ var database= require("../databaseMSSQL");
  * created data model functions
  */
 function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidateDataModelCallback){              log.info('InitValidateDataModel: dataModel:'+dataModelName+"...");//test
+  console.log("initValidateDataModel uuid=",uuid,module.id);
     if(!dataModel.changeLog&&!dataModel.modelData){
         errs[dataModelName+"_initError"]="Failed init dataModel:"+dataModelName
             +"! Reason: no model data and no change log!";                                                  log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model data and no change log!");//test
@@ -158,7 +159,8 @@ module.exports.initValidateDataModels=function(uuid,dataModelsList, errs, result
  * fieldsFunctions[].function: "maxPlus1" / "concat"
  * resultCallback = function(err, recordset)
  */
-function _getSelectItems(uuid, params,resultCallback){                                                       //log.debug("_getSelectItems params:",params,{});//test
+function _getSelectItems(uuid, params,resultCallback){
+                                                      console.log("_getSelectItems uuid=",uuid, module.id);//log.debug("_getSelectItems params:",params,{});//test
     if(!params){                                                                                        log.error("FAILED _getSelectItems! Reason: no function parameters!");//test
         resultCallback("FAILED _getSelectItems! Reason: no function parameters!");
         return;
@@ -284,7 +286,7 @@ module.exports.getSelectItems=_getSelectItems;
  * }
  * resultCallback = function(result = { items:[ {<tableFieldName>:<value>,...}, ... ], error, errorCode } )
  */
-function _getDataItems(uuid,params, resultCallback){                                                             //log.debug('_getDataItems: params:',params,{});//test
+function _getDataItems(uuid,params, resultCallback){         console.log("_getDataItems =uuid",uuid, module.id);                                                    //log.debug('_getDataItems: params:',params,{});//test
     if(!params) params={};
     if(!params.source) params.source= this.source;
     if(!params.fields) params.fields=this.fields;

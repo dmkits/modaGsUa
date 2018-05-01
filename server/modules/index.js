@@ -14,6 +14,7 @@ module.exports.validateModules= function(uuid,resultCallback){
     if (!modules) return;
     var errs={};
     var validateModuleCallback= function(uuid,modules, index, errs){
+        console.log("validateModuleCallback uuid=",uuid, module);
         var moduleName= modules[index];
         if (!moduleName) {
             var errMsg;
@@ -24,7 +25,7 @@ module.exports.validateModules= function(uuid,resultCallback){
                 }
                 errMsg=errs[errItem];
             }
-            resultCallback(errs,errMsg);
+            resultCallback(errs,errMsg,uuid);
             validateError=errMsg;
             return;
         }
@@ -39,7 +40,7 @@ module.exports.validateModules= function(uuid,resultCallback){
         var validateModule=module.validateModule;
         if(!validateModule){                                                                                log.warn('ValidateModule PASSED for Module:'+moduleName+"! Reason: no validate function.");//test
             errs[moduleName+"_validateError"]="Failed validate module:"+moduleName+"! Reason: no validate function!";
-            validateModuleCallback(modules, index + 1, errs);
+            validateModuleCallback(uuid,modules, index + 1, errs);
             return;
         }
         module.validateModule(uuid,errs, function () {
@@ -48,7 +49,7 @@ module.exports.validateModules= function(uuid,resultCallback){
     };
     dataModel.resetModelChanges();
     dataModel.resetValidatedDataModels();
-    validateModuleCallback(modules, 0, errs);
+    validateModuleCallback(uuid, modules, 0, errs);
 };
 
 module.exports.init = function(uuid,app,errs){

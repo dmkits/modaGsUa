@@ -108,33 +108,53 @@ module.exports.getConnData=function(){
  * @param userData
  * @param callback (err,uuid)
  */
-module.exports.connectWithPool=function(userData, callback){
+module.exports.connectWithPool=function(userData, callback){ console.log("!!!!connectWithPool=");
     if (connections && connections[userData.uuid]
-        && connections[userData.uuid].connection){
+        && connections[userData.uuid].connection){   console.log("connectWithPool if connections");
         callback(null,{uuid:uuid});
         return;
     }
-    const pool = new mssql.ConnectionPool({
-        user: userData.login,
-        password: userData.password,
-        server: getDBConfig().host,
-        database: getDBConfig().database
+    //const pool = new mssql.ConnectionPool({
+    //    user: userData.login,
+    //    password: userData.password,
+    //    server: getDBConfig().host,
+    //    database: getDBConfig().database
+    //});
+    var pool = new mssql.ConnectionPool({
+        user: "sa",
+        password: "GMSgms123",
+        server:   "localhost",
+        database: "GMSSample38btkKlnk"
+    }, function(err){
+        console.log("after ConnectionPool");
+        if(err){
+            console.log("ConnectionPool err",err);
+            callback(err.message);
+                    return;
+        }
+        var uuid=common.getUIDNumber();
+            connections[uuid]={};
+            connections[uuid].connection=pool;
+            connections[uuid].user=userData.login;
+        console.log("after ConnectionPool connections=",connections);
+            callback(null,{uuid:uuid})
     });
+    //console.log("pool=",pool);
     pool.on('error', function(err){
         console.log('pool on error=', err.message);
     });
-    pool.connect(function(err){
-        if(err){
-            log.error("FAILED to connect to DB. Reason: "+err.message);
-            callback(err.message);
-            return;
-        }
-        var uuid=common.getUIDNumber();
-        connections[uuid]={};
-        connections[uuid].connection=pool;
-        connections[uuid].user=userData.login;
-        callback(null,{uuid:uuid})
-    })
+    //pool.connect(function(err){     console.log("pool.connect");
+    //    if(err){                    console.log("if(err) err=",err);
+    //        log.error("FAILED to connect to DB. Reason: "+err.message);
+    //        callback(err.message);
+    //        return;
+    //    }
+    //    var uuid=common.getUIDNumber();
+    //    connections[uuid]={};
+    //    connections[uuid].connection=pool;
+    //    connections[uuid].user=userData.login;
+    //    callback(null,{uuid:uuid})
+    //})
 };
 
 //module.exports.mySQLAdminConnection = function (connParams, callback) {                                     log.info("database mySQLAdminConnection connParams=",connParams);
@@ -174,8 +194,9 @@ module.exports.connectWithPool=function(userData, callback){
 //};
 //
 
-function selectMSSQLQuery(query, uuid, callback) {                                                    log.debug("database selectMSSQLQuery query:",query);
+function selectMSSQLQuery(query, uuid, callback) {   console.log("selectMSSQLQuery uuid=",uuid);                                                  log.debug("database selectMSSQLQuery query:",query);
     //var request = new mssql.Request();
+    console.log("selectMSSQLQuery connections=",connections);
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     request.query(query,

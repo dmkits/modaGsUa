@@ -164,7 +164,7 @@ server.post("/login", function (req, res) {                        log.info("app
                 return;
             }
         }
-        appModules.validateModules(req.uuid,function(errs,errMessage,uuid){
+        appModules.validateModules(recordset.uuid,function(errs,errMessage,uuid){ console.log("validateModules 167 uuid=",uuid, module.id);
             //if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
             //}
             appModules.init(uuid,server,errs);
