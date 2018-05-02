@@ -15,7 +15,6 @@ var database= require("../databaseMSSQL");
  * created data model functions
  */
 function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidateDataModelCallback){              log.info('InitValidateDataModel: dataModel:'+dataModelName+"...");//test
-  console.log("initValidateDataModel uuid=",uuid,module.id);
     if(!dataModel.changeLog&&!dataModel.modelData){
         errs[dataModelName+"_initError"]="Failed init dataModel:"+dataModelName
             +"! Reason: no model data and no change log!";                                                  log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model data and no change log!");//test
@@ -122,7 +121,6 @@ function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidate
 }
 
 module.exports.initValidateDataModels=function(uuid,dataModelsList, errs, resultCallback){
-    console.log('initValidateDataModels uuid',uuid, module.id);
     var validateDataModelCallback = function(uuid,dataModelsList, index, errs){
         var dataModelInstance= dataModelsList[index];
         if (!dataModelInstance) {
@@ -263,8 +261,6 @@ function _getSelectItems(params,resultCallback){                    log.debug("_
     }
     if(hConditionQuery)selectQuery+=" having "+hConditionQuery;
     if (params.order) selectQuery+=" order by "+params.order;
-
-    console.log('!!!!!!!!!! 268  selectQuery=', selectQuery, "coditionValues=",coditionValues);
     if (coditionValues.length==0)
         database.selectMSSQLQuery(params.uuid,selectQuery, function(err, recordset, count, fields){
             if(err) {                                                                                       log.error("FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
@@ -633,6 +629,7 @@ function _getTableColumnsDataForHTable(tableColumns){
         if(tableColData.readOnly!==undefined) tableColumnsDataItemForHTable.readOnly=tableColData.readOnly;
         if(tableColData.visible!==undefined) tableColumnsDataItemForHTable.visible=tableColData.visible;
         if(tableColData.format!==undefined) tableColumnsDataItemForHTable.format=tableColData.format;
+        if(tableColData.dateFormat!==undefined) tableColumnsDataItemForHTable.dateFormat=tableColData.dateFormat;
         if(tableColData.datetimeFormat!==undefined) tableColumnsDataItemForHTable.datetimeFormat=tableColData.datetimeFormat;
         if(tableColData.format!==undefined) tableColumnsDataItemForHTable.format=tableColData.format;
         if(tableColData.language!==undefined) tableColumnsDataItemForHTable.language=tableColData.language;
@@ -660,6 +657,10 @@ function _getTableColumnsDataForHTable(tableColumns){
         } else if(tableColumnsDataItemForHTable.type=="checkbox"){
             if(!tableColumnsDataItemForHTable.checkedTemplate) tableColumnsDataItemForHTable.checkedTemplate="1";
             if(!tableColumnsDataItemForHTable.uncheckedTemplate) tableColumnsDataItemForHTable.uncheckedTemplate="0";
+        } else if(tableColumnsDataItemForHTable.type=="checkboxMSSQL"){
+            tableColumnsDataItemForHTable.type="checkbox";
+            if(!tableColumnsDataItemForHTable.checkedTemplate) tableColumnsDataItemForHTable.checkedTemplate="true";
+            if(!tableColumnsDataItemForHTable.uncheckedTemplate) tableColumnsDataItemForHTable.uncheckedTemplate="false";
         } else if(tableColumnsDataItemForHTable.type=="combobox"||tableColumnsDataItemForHTable.type=="comboboxWN") {
             tableColumnsDataItemForHTable.strict= true;
             if(tableColumnsDataItemForHTable.type=="combobox") tableColumnsDataItemForHTable.allowInvalid=false; else tableColumnsDataItemForHTable.allowInvalid=true;

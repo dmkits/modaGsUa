@@ -4,9 +4,7 @@ var common=require('./common');
 var database=require('./databaseMSSQL');
 var logger=require('./server').log;
 
-console.log('sysadmin module');
 module.exports= function(app) {
-    console.log('sysadmin module module.exports');
     app.get("/sysadmin", function(req, res){
         res.sendFile(path.join(__dirname, '../pages', 'sysadmin.html'));
     });
@@ -26,7 +24,6 @@ module.exports= function(app) {
             outData.dbConnection= app.DBConnectError;
         else
             outData.dbConnection='Connected';
-        console.log('!!! /sysadmin/app_state outData=', outData);
         res.send(outData);
     });
     app.get("/sysadmin/startup_parameters", function (req, res) {
@@ -34,7 +31,6 @@ module.exports= function(app) {
     });
 
     app.get("/sysadmin/startup_parameters/get_app_config", function (req, res) {
-        console.log('!!!!!! req.dbConnection 34 =', req.dbConnection);
         if (app.ConfigurationError) {
             res.send({error:app.ConfigurationError});
             return;
@@ -68,7 +64,7 @@ module.exports= function(app) {
             res.send({dbList:recordset});
         });
     });
-    app.get("/sysadmin/startup_parameters/load_app_config", function (req, res) { //+
+    app.get("/sysadmin/startup_parameters/load_app_config", function (req, res) {
         common.tryLoadConfiguration(app);
         if (app.ConfigurationError) {
             res.send({error:app.ConfigurationError});

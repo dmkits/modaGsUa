@@ -9,12 +9,10 @@ var dataModel= require("../datamodel");
  * resultCallback = function(errs, errMessage), errs - object of validate errors
  */
 module.exports.validateModules= function(uuid,resultCallback){
-    console.log('!!!!!!!! validateModules uuid',uuid, module.id);
     var modules= server.getConfigModules();
     if (!modules) return;
     var errs={};
     var validateModuleCallback= function(uuid,modules, index, errs){
-        console.log("validateModuleCallback uuid=",uuid, module);
         var moduleName= modules[index];
         if (!moduleName) {
             var errMsg;
@@ -53,7 +51,6 @@ module.exports.validateModules= function(uuid,resultCallback){
 };
 
 module.exports.init = function(uuid,app,errs){
-    console.log('!!!!!!!!!!!54  modules init');
     var modules= server.getConfigModules();
     if (!modules) return;
     for(var i=0; i<modules.length; i++){
@@ -93,7 +90,6 @@ function fillMainMenuItemModuleData(menuItem){
     menuItem.contentHref = loadedModules[moduleName].modulePageURL;
 }
 function fillMainMenuModuleData(appMenu){
-    console.log('!!!!!!fillMainMenuModuleData=');
     for(var mainMenuItemIndex in appMenu) {
         var mainMenuItem= appMenu[mainMenuItemIndex];
         fillMainMenuItemModuleData(mainMenuItem);

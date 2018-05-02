@@ -15,7 +15,6 @@ var changeLog= require(appDataModelPath+"change_log");
 //    sys_docstates= require(appDataModelPath+"sys_docstates");
 
 module.exports.validateModule = function(uuid, errs, nextValidateModuleCallback){
-    console.log('!!!!!!!!!!validateModule=',uuid, module.id);
     dataModel.initValidateDataModels(uuid,[changeLog/*, sys_docstates,sys_currency*/], errs,
         function(){
             nextValidateModuleCallback();
@@ -610,7 +609,7 @@ module.exports.init = function(app){
      */
     var matchChangeLogFields= function(changeData, logData) {
         if (logData["ID"]!=changeData.changeID) return false;
-        if (logData["CHANGE_DATETIME"]!= new Date(changeData.changeDatetime).toString()) return false;
+        if (moment(new Date(changeData.changeDatetime)).format("YYYY-MM-DD HH:mm:ss")!= changeData.changeDatetime) return false;
         if (logData["CHANGE_VAL"]!=changeData.changeVal) return false;
         if (logData["CHANGE_OBJ"]!=changeData.changeObj) return false;
         return true;
@@ -656,7 +655,7 @@ module.exports.init = function(app){
 
     app.get("/sysadmin/database/getCurrentChanges", function (req, res) {
         var outData = { columns:changesTableColumns, identifier:changesTableColumns[0].data, items:[] };
-        checkIfChangeLogExists(req.uuid,function(tableData) {;
+        checkIfChangeLogExists(req.uuid,function(tableData) {
             if (tableData.error&&  tableData.error.indexOf("Invalid object name")>=0) {  log.info("checkIfChangeLogExists resultCallback tableData.error:",tableData.error);
                 outData.noTable = true;
                 var arr=dataModel.getModelChanges();
@@ -692,9 +691,11 @@ module.exports.init = function(app){
     var changeLogTableColumns=[
         {data: "ID", name: "changeID", width: 200, type: "text"},
         {data: "CHANGE_DATETIME", name: "changeDatetime", width: 120, type: "datetimeAsText"},
+      //  {data: "CHANGE_DATETIME", name: "changeDatetime", width: 120, type: "date", dateFormat:"DD.MM.YYYY", correctFormat:true, align:"center"},
         {data: "CHANGE_OBJ", name: "changeObj", width: 200, type: "text"},
         {data: "CHANGE_VAL", name: "changeVal", width: 450, type: "text"},
-        {data: "APPLIED_DATETIME", name: "appliedDatetime", width: 120, type: "datetimeAsText"}
+        {data: "APPLIED_DATETIME", name: "appliedDatetime", width: 120, type: "date", dateFormat:"DD.MM.YYYY", correctFormat:true, align:"center"}
+        //{data: "APPLIED_DATETIME", name: "appliedDatetime", width: 120, type: "datetimeAsText"}
     ];
     /**
      * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
@@ -785,7 +786,7 @@ module.exports.init = function(app){
     app.get("/sysadmin/database/getChangeLog", function (req, res) {
         changeLog.getDataForTable({uuid:req.uuid,tableColumns:changeLogTableColumns, identifier:changeLogTableColumns[0].data,
             conditions:req.query,
-            order:"CHANGE_DATETIME, CHANGE_OBJ, ID"}, function(result){
+            order:"CHANGE_DATETIME, CHANGE_OBJ, ID"}, function(result){            console.log('getChangeLog result=', result);
             res.send(result);
         });
     });
