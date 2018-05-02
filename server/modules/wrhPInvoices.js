@@ -4,12 +4,12 @@ var dirUnits= require(appDataModelPath+"dir_units"), dirContractors= require(app
     sysCurrency= require(appDataModelPath+"sys_currency"), sysDocStates= require(appDataModelPath+"sys_docstates"),
     dirProdsCollections= require(appDataModelPath+"dir_products_collections");
 
-module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    //dataModel.initValidateDataModels([wrh_pinvs,wrh_pinvs_products], errs,
-    //    function(){
-    //        nextValidateModuleCallback();
-    //    });
-    nextValidateModuleCallback();
+module.exports.validateModule = function(uuid,errs, nextValidateModuleCallback){
+    dataModel.initValidateDataModels(uuid,[wrh_pinvs,wrh_pinvs_products], errs,
+        function(){
+            nextValidateModuleCallback();
+        });
+  //  nextValidateModuleCallback();
 };
 
 module.exports.modulePageURL = "/wrh/pinvoices";
@@ -37,7 +37,7 @@ module.exports.init = function(app){
     app.get("/wrh/pInvoices/getDataForPInvsListTable", function(req, res){
         var conditions={};
         for(var condItem in req.query) conditions["wrh_pinvs."+condItem]=req.query[condItem];
-        wrh_pinvs.getDataForTable({tableColumns:wrhPInvsListTableColumns,
+        wrh_pinvs.getDataForTable(req.uuid,{tableColumns:wrhPInvsListTableColumns,
                 identifier:wrhPInvsListTableColumns[0].data,
                 conditions:conditions},
             function(result){
@@ -47,33 +47,33 @@ module.exports.init = function(app){
     app.get("/wrh/pInvoices/getPInvData", function(req, res){
         var conditions={};
         for(var condItem in req.query) conditions["wrh_pinvs."+condItem]=req.query[condItem];
-        wrh_pinvs.getDataItemForTable({tableColumns:wrhPInvsListTableColumns,
+        wrh_pinvs.getDataItemForTable(req.uuid,{tableColumns:wrhPInvsListTableColumns,
                 conditions:conditions},
             function(result){
                 res.send(result);
             });
     });
     app.get("/wrh/pInvoices/getNewPInvData", function(req, res){
-        wrh_pinvs.getDataItem({fields:["MAXNUMBER"],fieldsFunctions:{"MAXNUMBER":{function:"maxPlus1", sourceField:"NUMBER"}},
+        wrh_pinvs.getDataItem(req.uuid,{fields:["MAXNUMBER"],fieldsFunctions:{"MAXNUMBER":{function:"maxPlus1", sourceField:"NUMBER"}},
                 conditions:{"1=1":null}},
             function(result){
                 var newNumber=(result&&result.item)?result.item["MAXNUMBER"]:"", docDate=dateFormat(new Date(),"yyyy-mm-dd");
-                dirUnits.getDataItem({fields:["NAME"],conditions:{"ID=":"0"}}, function(result){
+                dirUnits.getDataItem(req.uuid,{fields:["NAME"],conditions:{"ID=":"0"}}, function(result){
                     var unitName=(result&&result.item)?result.item["NAME"]:"";
-                    dirContractors.getDataItem({fields:["NAME"],conditions:{"ID=":"1"}}, function(result){
+                    dirContractors.getDataItem(req.uuid,{fields:["NAME"],conditions:{"ID=":"1"}}, function(result){
                         var supplierName=(result&&result.item)?result.item["NAME"]:"";
-                        sysCurrency.getDataItem({ fields:["CODE","CODENAME"],
+                        sysCurrency.getDataItem(req.uuid,{ fields:["CODE","CODENAME"],
                                 fieldsFunctions:{"CODENAME":{function:"concat",fields:["CODE","' ('","NAME","')'"]}},
                                 conditions:{"ID=":"0"} },
                             function(result){
                                 var sysCurrencyCode=(result&&result.item)?result.item["CODE"]:"";
                                 var sysCurrencyCodeName=(result&&result.item)?result.item["CODENAME"]:"";
-                                dirProdsCollections.getDataItem({ fields:["NAME"], conditions:{"ID=":"1"} },
+                                dirProdsCollections.getDataItem(req.uuid,{ fields:["NAME"], conditions:{"ID=":"1"} },
                                     function(result){
                                         var dirProductsCollectionName=(result&&result.item)?result.item["NAME"]:"";
                                         //sysDocStates.getDataItem({fields:["NAME"],conditions:{"ID=":"0"}}, function(result){
                                         //});
-                                        wrh_pinvs.setDataItem({
+                                        wrh_pinvs.setDataItem(req.uuid,{
                                                 fields:["NUMBER","DOCDATE","UNIT_NAME","SUPPLIER_NAME","SUPPLIER_ORDER_NUM","SUPPLIER_INV_NUM",
                                                     "CURRENCY_CODE","CURRENCY_CODENAME", "PRODUCT_COLLECTION", "DOCSTATE_NAME", "DOCCOUNT","DOCQTYSUM","DOCSUM",
                                                     "RATE","BASE_FACTOR"],
@@ -91,31 +91,31 @@ module.exports.init = function(app){
     });
     app.post("/wrh/pInvoices/storePInvData", function(req, res){
         var storeData=req.body;
-        dirUnits.getDataItem({fields:["ID"],conditions:{"NAME=":storeData["UNIT_NAME"]}}, function(result){
+        dirUnits.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["UNIT_NAME"]}}, function(result){
             if(!result.item){
                 res.send({ error:"Cannot finded unit by name!"});
                 return;
             }
             storeData["UNIT_ID"]=result.item["ID"];
-            dirContractors.getDataItem({fields:["ID"],conditions:{"NAME=":storeData["SUPPLIER_NAME"]}}, function(result){
+            dirContractors.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["SUPPLIER_NAME"]}}, function(result){
                 if(!result.item){
                     res.send({ error:"Cannot finded conractor by name!"});
                     return;
                 }
                 storeData["SUPPLIER_ID"]=result.item["ID"];
-                sysCurrency.getDataItem({fields:["ID"],conditions:{"CODE=":storeData["CURRENCY_CODE"]}}, function(result){
+                sysCurrency.getDataItem(req.uuid,{fields:["ID"],conditions:{"CODE=":storeData["CURRENCY_CODE"]}}, function(result){
                     if(!result.item){
                         res.send({ error:"Cannot finded currency by code!"});
                         return;
                     }
                     storeData["CURRENCY_ID"]=result.item["ID"];
-                    dirProdsCollections.getDataItem({fields:["ID"],conditions:{"NAME=":storeData["PRODUCT_COLLECTION"]}}, function(result){
+                    dirProdsCollections.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["PRODUCT_COLLECTION"]}}, function(result){
                         storeData["COLLECTION_ID"]=result.item["ID"];
                         var docStateID=0;
-                        sysDocStates.getDataItem({fields:["ID"],conditions:{"NAME=":storeData["DOCSTATE_NAME"]}}, function(result){
+                        sysDocStates.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["DOCSTATE_NAME"]}}, function(result){
                             if(result.item) docStateID=result.item["ID"];
                             storeData["DOCSTATE_ID"]=docStateID;
-                            wrh_pinvs.storeTableDataItem({tableColumns:wrhPInvsListTableColumns, idFieldName:"ID", storeTableData:storeData},
+                            wrh_pinvs.storeTableDataItem(req.uuid,{tableColumns:wrhPInvsListTableColumns, idFieldName:"ID", storeTableData:storeData},
                                 function(result){
                                     res.send(result);
                                 });
@@ -127,7 +127,7 @@ module.exports.init = function(app){
     });
     app.post("/wrh/pInvoices/deletePInvData", function(req, res){
         var delData=req.body;
-        wrh_pinvs.delTableDataItem({idFieldName:"ID", delTableData:delData},
+        wrh_pinvs.delTableDataItem(req.uuid,{idFieldName:"ID", delTableData:delData},
             function(result){
                 res.send(result);
             });
@@ -152,7 +152,7 @@ module.exports.init = function(app){
         {data: "BATCH_NUMBER", name: "BATCH_NUMBER", width: 60, type: "numeric", visible:false}
     ];
     app.get("/wrh/pInvoices/getDataForPInvProductsTable", function(req, res){
-        wrh_pinvs_products.getDataForTable({tableColumns:wrhPInvProductsTableColumns,
+        wrh_pinvs_products.getDataForTable(req.uuid,{tableColumns:wrhPInvProductsTableColumns,
                 identifier:wrhPInvProductsTableColumns[0].data,
                 conditions:req.body},
             function(result){
@@ -160,13 +160,13 @@ module.exports.init = function(app){
             });
     });
     app.post("/wrh/pInvoices/storePInvProductsTableData", function(req, res){
-        wrh_pinvs_products.storeTableDataItem({tableColumns:wrhPInvProductsTableColumns, idFieldName:"ID"},
+        wrh_pinvs_products.storeTableDataItem(req.uuid,{tableColumns:wrhPInvProductsTableColumns, idFieldName:"ID"},
             function(result){
                 res.send(result);
             });
     });
     app.post("/wrh/pInvoices/deletePInvProductsTableData", function(req, res){
-        wrh_pinvs_products.delTableDataItem({idFieldName:"ID"},
+        wrh_pinvs_products.delTableDataItem(req.uuid,{idFieldName:"ID"},
             function(result){
                 res.send(result);
             });

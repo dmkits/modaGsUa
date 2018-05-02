@@ -194,7 +194,7 @@ module.exports.connectWithPool=function(userData, callback){ console.log("!!!!co
 //};
 //
 
-function selectMSSQLQuery(query, uuid, callback) {   console.log("selectMSSQLQuery uuid=",uuid);                                                  log.debug("database selectMSSQLQuery query:",query);
+function selectMSSQLQuery(query, uuid, callback) {   console.log("selectMSSQLQuery uuid=",uuid);        log.info("database selectMSSQLQuery query:",query);
     //var request = new mssql.Request();
     console.log("selectMSSQLQuery connections=",connections);
     var connection=connections[uuid].connection;

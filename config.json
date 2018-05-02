@@ -11,8 +11,8 @@
   ],
   */
   "modules":[
-    "sysadmin"
-    /*"main",*/
+    "sysadmin",
+    "main",
     /*"print",*/
     /*"mainPage",*/
     /*"system",*/
@@ -20,7 +20,7 @@
     "dirUnits",
     "dirContractors",
     "dirProducts",*/
-    /*"wrhPInvoices"*/
+    "wrhPInvoices"
    /* "wrhInvoices",
     "wrhRetInvoices",
     "wrhRetPInvoices"*/

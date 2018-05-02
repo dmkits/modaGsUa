@@ -179,12 +179,10 @@ server.post("/login", function (req, res) {                        log.info("app
                 res.send({error:loadInitModulesErrorMsg});
                 return;
             }
+            // server.DBConnectError=null;
             res.cookie("uuid", recordset.uuid);
             res.send({result: "success"});
         });
-       // server.DBConnectError=null;
-        res.cookie("uuid", recordset.uuid);
-        res.send({result: "success"});
     });
 });
 //server.get("/", function(req, res){                                                                     log.info("app.get /");

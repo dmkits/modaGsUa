@@ -486,7 +486,7 @@ function _setDataItem(params, resultCallback){
  * resultCallback = function( tableData = { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...],
  *      error:errorMessage } )
  */
-function _getDataItemsForTable(params, resultCallback){
+function _getDataItemsForTable(uuid,params, resultCallback){
     var tableData={};
     if(!params){                                                                                        log.error("FAILED _getDataItemsForTable! Reason: no function parameters!");//test
         tableData.error="FAILED _getDataItemsForTable! Reason: no function parameters!";
@@ -496,7 +496,7 @@ function _getDataItemsForTable(params, resultCallback){
     if(params.tableData) tableData=params.tableData;
     if(!params.tableColumns){                                                                           log.error("FAILED _getDataItemsForTable! Reason: no table columns!");//test
         tableData.error="FAILED _getDataItemsForTable! Reason: no table columns!";
-        resultCallback(tableData);
+        resultCallback(uuid,tableData);
         return;
     }
     if(!params.source&&this.source) params.source=this.source;
@@ -576,14 +576,14 @@ function _getDataItemsForTable(params, resultCallback){
     }
     params.fieldsFunctions=fieldsFunctions;
     if(groupedFieldsList.length>0)params.groupedFields=groupedFieldsList;
-    _getSelectItems(params,uuid, function(err, recordset){
+    _getSelectItems(uuid, params, function(err, recordset){
         if(err) tableData.error="Failed get data for table! Reason:"+err.message;
         tableData.items= recordset;
         resultCallback(tableData);
     });
 }
-function _getDataItemForTable(params, resultCallback){
-    this.getDataItemsForTable(params,function(tableData){
+function _getDataItemForTable(uuid,params, resultCallback){
+    this.getDataItemsForTable(uuid,params,function(tableData){
         var tableDataItem={};
         for(var itemName in tableData){
             if(itemName!="items"){
@@ -686,7 +686,7 @@ function _getTableColumnsDataForHTable(tableColumns){
  * resultCallback = function( tableData = { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...],
  *      error:errorMessage } )
  */
-function _getDataForTable(params, resultCallback){
+function _getDataForTable(uuid,params, resultCallback){
     var tableData={};
     if(!params){                                                                                        log.error("FAILED _getDataForTable! Reason: no function parameters!");//test
         tableData.error="FAILED _getDataForTable! Reason: no function parameters!";
@@ -709,11 +709,11 @@ function _getDataForTable(params, resultCallback){
         hasConditions=true; break;
     }
     if (!hasConditions) {
-        resultCallback(tableData);
+        resultCallback(uuid,tableData);
         return;
     }
     params.tableData=tableData;
-    this.getDataItemsForTable(params, resultCallback);
+    this.getDataItemsForTable(uuid,params, resultCallback);
 }
 /**
  * set column width and type for tableColumnItem.data containing "QTY"/"PRICE"/"SUM"/"NUMBER"/"DATE"
@@ -747,7 +747,7 @@ function _getTableColumnsDataForDocHTable(tableColumns){
     }
     return tableColumns;
 }
-function _getDataForDocTable(params, resultCallback){
+function _getDataForDocTable(uuid,params, resultCallback){
     var tableData={};
     if(!params){                                                                                        log.error("FAILED _getDataForDocTable! Reason: no function parameters!");//test
         tableData.error="FAILED _getDataForDocTable! Reason: no function parameters!";
@@ -782,7 +782,7 @@ function _getDataForDocTable(params, resultCallback){
     }
     params.conditions=tableConditions;
     params.tableData=tableData;
-    this.getDataItemsForTable(params, resultCallback);
+    this.getDataItemsForTable(uuid,params, resultCallback);
 }
 /**
  * params = {
@@ -1099,7 +1099,7 @@ function _insTableDataItem(params, resultCallback) {
         var resultFields=[];
         for(var fieldName in params.insTableData) resultFields.push(fieldName);
         var getResultConditions={}; getResultConditions[params.tableName+"."+idFieldName+"="]=params.insTableData[idFieldName];
-        thisInstance.getDataItemForTable({source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
+        thisInstance.getDataItemForTable(uuid,{source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
             function(result){
                 if(result.error) insResult.error="Failed get result inserted data item! Reason:"+result.error;
                 if (result.item) insResult.resultItem= result.item;
@@ -1115,7 +1115,7 @@ function _insTableDataItem(params, resultCallback) {
  * }
  * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
  */
-function _updTableDataItem(params, resultCallback) {
+function _updTableDataItem(uuid,params, resultCallback) {
     if (!params) {                                                                                      log.error("FAILED _updTableDataItem! Reason: no parameters!");//test
         resultCallback({ error:"Failed update table data item! Reason:no function parameters!"});
         return;
@@ -1154,7 +1154,7 @@ function _updTableDataItem(params, resultCallback) {
         var resultFields=[];
         for(var fieldName in params.updTableData) resultFields.push(fieldName);
         var getResultConditions={}; getResultConditions[params.tableName+"."+idFieldName+"="]=params.updTableData[idFieldName];
-        thisInstance.getDataItemForTable({source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
+        thisInstance.getDataItemForTable(uuid,{source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
             function(result){
                 if(result.error) updResult.error="Failed get result updated data item! Reason:"+result.error;
                 if (result.item) updResult.resultItem= result.item;

@@ -20,7 +20,7 @@ module.exports.validateModule = function(uuid, errs, nextValidateModuleCallback)
         function(){
             nextValidateModuleCallback();
         });
-    nextValidateModuleCallback();
+    //nextValidateModuleCallback();
 };
 
 module.exports.modulePageURL = "/sysadmin";
@@ -656,7 +656,7 @@ module.exports.init = function(app){
 
     app.get("/sysadmin/database/getCurrentChanges", function (req, res) {
         var outData = { columns:changesTableColumns, identifier:changesTableColumns[0].data, items:[] };
-        checkIfChangeLogExists(function(tableData) {
+        checkIfChangeLogExists(req.uuid,function(tableData) {
             if (tableData.error&& (tableData.errorCode=="ER_NO_SUCH_TABLE")) {                              log.info("checkIfChangeLogExists resultCallback errorCode=='ER_NO_SUCH_TABLE' tableData.error:",tableData.error);
                 outData.noTable = true;
                 var arr=dataModel.getModelChanges();
@@ -685,8 +685,8 @@ module.exports.init = function(app){
     /**
      * resultCallback = function(result={ item, error, errorCode })
      */
-    var checkIfChangeLogExists= function(resultCallback) {
-        changeLog.getDataItems({conditions:{"ID IS NULL":null}}, resultCallback);
+    var checkIfChangeLogExists= function(uuid,resultCallback) {
+        changeLog.getDataItems(uuid,{conditions:{"ID IS NULL":null}}, resultCallback);
     };
 
     var changeLogTableColumns=[
@@ -716,7 +716,7 @@ module.exports.init = function(app){
                 break;
             }
         }
-        checkIfChangeLogExists(function(result) {
+        checkIfChangeLogExists(req.uuid,function(result) {
             if (result.error && (result.errorCode == "ER_NO_SUCH_TABLE")) {
                 database.executeQuery(CHANGE_VAL, function (err) {
                     if (err) {
@@ -782,7 +782,7 @@ module.exports.init = function(app){
         });
     });
     app.get("/sysadmin/database/getChangeLog", function (req, res) {
-        changeLog.getDataForTable({tableColumns:changeLogTableColumns, identifier:changeLogTableColumns[0].data,
+        changeLog.getDataForTable(req.uuid,{tableColumns:changeLogTableColumns, identifier:changeLogTableColumns[0].data,
             conditions:req.query,
             order:"CHANGE_DATETIME, CHANGE_OBJ, ID"}, function(result){
             res.send(result);

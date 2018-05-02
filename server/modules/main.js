@@ -2,7 +2,7 @@ var server= require("../server"), log= server.log, appParams= server.getAppStart
 
 var database= require("../databaseMSSQL");
 
-module.exports.validateModule = function(errs, nextValidateModuleCallback){
+module.exports.validateModule = function(uuid,errs, nextValidateModuleCallback){
 
     nextValidateModuleCallback();
 };

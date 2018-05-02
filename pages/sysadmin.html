@@ -33,8 +33,8 @@
                 <tr>
                     <td><button id="sysadmin_btnServerConfig">Server configuration</button></td>
                     <td><button id="sysadmin_btnDatabase">Database</button></td>
-                    <td><button id="sysadmin_btnAppModelSettings">AppModelSettings</button></td>
-                    <td><button id="sysadmin_btnSynchronization">Synchronization</button></td>
+                    <!--<td><button id="sysadmin_btnAppModelSettings">AppModelSettings</button></td>-->
+                    <!--<td><button id="sysadmin_btnSynchronization">Synchronization</button></td>-->
                     <td><button id="sysadmin_btnLogs">Logs</button></td>
                     <td width="500px"></td>
                     <td><button id="btnLogout">Logout</button></td>
@@ -64,10 +64,10 @@
                 functionalButtons.push(sysadmin_btnServerConfig);
                 var sysadmin_btnDatabase = new ToggleButton({id:"sysadmin_btnDatabase",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnDatabase");
                 functionalButtons.push(sysadmin_btnDatabase);
-                var sysadmin_btnAppModelSettings = new ToggleButton({id:"sysadmin_btnAppModelSettings",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnAppModelSettings");
-                functionalButtons.push(sysadmin_btnAppModelSettings);
-                var sysadmin_btnSynchronization=new ToggleButton({id:"sysadmin_btnSynchronization",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnSynchronization" );
-                functionalButtons.push(sysadmin_btnSynchronization);
+//                var sysadmin_btnAppModelSettings = new ToggleButton({id:"sysadmin_btnAppModelSettings",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnAppModelSettings");
+//                functionalButtons.push(sysadmin_btnAppModelSettings);
+//                var sysadmin_btnSynchronization=new ToggleButton({id:"sysadmin_btnSynchronization",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnSynchronization" );
+//                functionalButtons.push(sysadmin_btnSynchronization);
                 var sysadmin_btnLogs=new ToggleButton({id:"sysadmin_btnLogs",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogs" );
                 functionalButtons.push(sysadmin_btnLogs);
                 var btnLogout = new ToggleButton({id:"btnLogout"},"btnLogout");
@@ -201,16 +201,16 @@
                             "Database", false, "/sysadmin/database");
                     checkButton(this);
                 };
-                sysadmin_btnAppModelSettings.onClick=function(){
-                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnAppModelSettings, "sysadmin_btnAppModelSettings",
-                            "Application model settings", false, "/sysadmin/appModelSettings");
-                    checkButton(this);
-                };
-                sysadmin_btnSynchronization.onClick=function(){
-                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnSynchronization, "sysadmin_btnSynchronization",
-                            "Synchronization", false, "/system/synchronization");
-                    checkButton(this);
-                };
+//                sysadmin_btnAppModelSettings.onClick=function(){
+//                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnAppModelSettings, "sysadmin_btnAppModelSettings",
+//                            "Application model settings", false, "/sysadmin/appModelSettings");
+//                    checkButton(this);
+//                };
+//                sysadmin_btnSynchronization.onClick=function(){
+//                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnSynchronization, "sysadmin_btnSynchronization",
+//                            "Synchronization", false, "/system/synchronization");
+//                    checkButton(this);
+//                };
                 sysadmin_btnLogs.onClick=function(){
                     sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnLogs, "sysadmin_btnLogs",
                             "Logs", false, "/sysadmin/logs");

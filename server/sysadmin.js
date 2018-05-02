@@ -265,7 +265,7 @@ module.exports= function(app) {
         })
     });
     app.get('/sysadmin/employeeLoginTable/getDataForRoleCombobox', function(req,res){  //ShiftPostID
-        database.getDataItemsForTableCombobox({ comboboxFields:{"ShiftPostName":"RefName","ShiftPostID":"RefID" },
+        database.getDataItemsForTableCombobox(req.uuid,{ comboboxFields:{"ShiftPostName":"RefName","ShiftPostID":"RefID" },
                 source:"r_Uni",fields:["RefID","RefName"],
                 order:"RefName",
             conditions:{"RefTypeID=":10606}},
