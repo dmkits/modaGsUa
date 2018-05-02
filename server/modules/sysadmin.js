@@ -187,11 +187,11 @@ module.exports.init = function(app){
         res.send(serverConfig);
     });
     app.get("/sysadmin/server/getDBList", function (req, res) {
-        database.selectMSSQLQuery("select	name "+
+        database.selectMSSQLQuery(req.uuid,"select	name "+
             "from	sys.databases "+
             "where	name not in ('master','tempdb','model','msdb') "+
             "and is_distributor = 0 "+
-            "and source_database_id is null",req.uuid, function(err,recordset){
+            "and source_database_id is null", function(err,recordset){
             if(err){
                 res.send({error:err.message});
                 return;
@@ -602,8 +602,8 @@ module.exports.init = function(app){
     /**
      * resultCallback = function(result={ item, error, errorCode })
      */
-    var getChangeLogItemByID= function(id, resultCallback) {
-        changeLog.getDataItem({ conditions:{"ID=":id} }, resultCallback);
+    var getChangeLogItemByID= function(uuid,id, resultCallback) {
+        changeLog.getDataItem({uuid:uuid,conditions:{"ID=":id} }, resultCallback);
     };
     /**
      * result = true/false
@@ -615,32 +615,32 @@ module.exports.init = function(app){
         if (logData["CHANGE_OBJ"]!=changeData.changeObj) return false;
         return true;
     };
-    var matchLogData=function(changesData, outData, ind, callback){
+    var matchLogData=function(uuid,changesData, outData, ind, callback){
         var changeData = changesData?changesData[ind]:null;
         if (!changeData) {
             callback(outData);
             return;
         }
-        getChangeLogItemByID(changeData.changeID, function (result) {
+        getChangeLogItemByID(uuid,changeData.changeID, function (result) {
             if (result.error) {
                 outData.error = "ERROR FOR ID:"+changeData.changeID+" Error msg: "+result.error;
-                matchLogData(null, outData, ind+1, callback);
+                matchLogData(uuid,null, outData, ind+1, callback);
                 return;
             }
             if (!result.item) {
                 changeData.type = "new";
                 changeData.message = "not applied";
                 outData.items.push(changeData);
-                matchLogData(changesData, outData, ind+1,callback);
+                matchLogData(uuid,changesData, outData, ind+1,callback);
                 return;
             }
             if (!matchChangeLogFields(changeData,result.item)){
                 changeData.type = "warning";
                 changeData.message = "Current update has not identical fields in change_log!";
                 outData.items.push(changeData);
-                matchLogData(changesData, outData, ind+1,callback);
+                matchLogData(uuid,changesData, outData, ind+1,callback);
             } else {
-                matchLogData(changesData, outData, ind+1,callback);
+                matchLogData(uuid,changesData, outData, ind+1,callback);
             }
         });
     };
@@ -677,7 +677,7 @@ module.exports.init = function(app){
             }
             var arr=dataModel.getModelChanges();
             var logsData= util.sortArray(arr);
-            matchLogData(logsData, outData, 0, function(outData){
+            matchLogData(req.uuid,logsData, outData, 0, function(outData){
                 res.send(outData);
             });
         });
@@ -686,7 +686,7 @@ module.exports.init = function(app){
      * resultCallback = function(result={ item, error, errorCode })
      */
     var checkIfChangeLogExists= function(uuid,resultCallback) {
-        changeLog.getDataItems(uuid,{conditions:{"ID IS NULL":null}}, resultCallback);
+        changeLog.getDataItems({uuid:uuid,conditions:{"ID IS NULL":null}}, resultCallback);
     };
 
     var changeLogTableColumns=[
@@ -699,8 +699,8 @@ module.exports.init = function(app){
     /**
      * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
      */
-    var insertToChangeLog= function(itemData, resultCallback) {
-        changeLog.insTableDataItem({tableColumns:changeLogTableColumns,idFieldName:"ID", insTableData:itemData}, resultCallback);
+    var insertToChangeLog= function(uuid,itemData, resultCallback) {
+        changeLog.insTableDataItem({uuid:uuid,tableColumns:changeLogTableColumns,idFieldName:"ID", insTableData:itemData}, resultCallback);
     };
     app.post("/sysadmin/database/applyChange", function (req, res) {
         var outData={};
@@ -719,13 +719,13 @@ module.exports.init = function(app){
         checkIfChangeLogExists(req.uuid,function(result) {
            // if (result.error && (result.errorCode == "ER_NO_SUCH_TABLE")) {
             if (result.error&&  result.error.indexOf("Invalid object name")>=0) {  log.info("checkIfChangeLogExists  tableData.error:",result.error);
-                database.executeMSSQLQuery(CHANGE_VAL, function (err) {
+                database.executeMSSQLQuery(req.uuid,CHANGE_VAL, function (err) {
                     if (err) {
                         outData.error = err.message;
                         res.send(outData);
                         return;
                     }
-                    insertToChangeLog({"ID":modelChange.changeID,
+                    insertToChangeLog(req.uuid,{"ID":modelChange.changeID,
                             "CHANGE_DATETIME":modelChange.changeDatetime, "CHANGE_OBJ":modelChange.changeObj,
                             "CHANGE_VAL":modelChange.changeVal, "APPLIED_DATETIME":appliedDatetime},
                         function (result) {
@@ -747,7 +747,7 @@ module.exports.init = function(app){
                 res.send(outData);
                 return;
             }
-            getChangeLogItemByID(ID, function (result) {
+            getChangeLogItemByID(req.uuid,ID, function (result) {
                 if (result.error) {
                     outData.error = result.error;
                     res.send(outData);
@@ -758,13 +758,13 @@ module.exports.init = function(app){
                     res.send(outData);
                     return;
                 }
-                database.executeMSSQLQuery(CHANGE_VAL, function (err) {
+                database.executeMSSQLQuery(req.uuid,CHANGE_VAL, function (err) {
                     if (err) {
                         outData.error = err.message;
                         res.send(outData);
                         return;
                     }
-                    insertToChangeLog({"ID":modelChange.changeID,
+                    insertToChangeLog(req.uuid,{"ID":modelChange.changeID,
                             "CHANGE_DATETIME":modelChange.changeDatetime, "CHANGE_OBJ":modelChange.changeObj,
                             "CHANGE_VAL":modelChange.changeVal, "APPLIED_DATETIME":appliedDatetime},
                         function (result) {
@@ -783,7 +783,7 @@ module.exports.init = function(app){
         });
     });
     app.get("/sysadmin/database/getChangeLog", function (req, res) {
-        changeLog.getDataForTable(req.uuid,{tableColumns:changeLogTableColumns, identifier:changeLogTableColumns[0].data,
+        changeLog.getDataForTable({uuid:req.uuid,tableColumns:changeLogTableColumns, identifier:changeLogTableColumns[0].data,
             conditions:req.query,
             order:"CHANGE_DATETIME, CHANGE_OBJ, ID"}, function(result){
             res.send(result);
@@ -799,24 +799,24 @@ module.exports.init = function(app){
         {data: "NAME", name: "NAME", width: 200, type: "text"},
         {data: "NOTE", name: "NOTE", width: 450, type: "text"}
     ];
-    app.get("/sysadmin/appModelSettings/getSysCurrencyDataForTable", function(req, res){
-        sys_currency.getDataForTable({tableColumns:sysCurrencyTableColumns, identifier:sysCurrencyTableColumns[0].data,
-            order:"ID", conditions:req.query}, function(result){
-            res.send(result);
-        });
-    });
+    //app.get("/sysadmin/appModelSettings/getSysCurrencyDataForTable", function(req, res){
+    //    sys_currency.getDataForTable({tableColumns:sysCurrencyTableColumns, identifier:sysCurrencyTableColumns[0].data,
+    //        order:"ID", conditions:req.query}, function(result){
+    //        res.send(result);
+    //    });
+    //});
     var sysDocsStatesTableColumns=[
         {data: "ID", name: "ID", width: 200, type: "text", visible:false},
         {data: "ALIAS", name: "ALIAS", width: 120, type: "text"},
         {data: "NAME", name: "NAME", width: 200, type: "text"},
         {data: "NOTE", name: "NOTE", width: 450, type: "text"}
     ];
-    app.get("/sysadmin/appModelSettings/getSysDocumentsStatesDataForTable", function(req, res){
-        sys_docstates.getDataForTable({tableColumns:sysDocsStatesTableColumns, identifier:sysCurrencyTableColumns[0].data,
-            order:"ID", conditions:req.query}, function(result){
-            res.send(result);
-        });
-    });
+    //app.get("/sysadmin/appModelSettings/getSysDocumentsStatesDataForTable", function(req, res){
+    //    sys_docstates.getDataForTable({tableColumns:sysDocsStatesTableColumns, identifier:sysCurrencyTableColumns[0].data,
+    //        order:"ID", conditions:req.query}, function(result){
+    //        res.send(result);
+    //    });
+    //});
 
     app.get("/sysadmin/logs", function (req, res) {
         res.sendFile(appViewsPath+'sysadmin/logs.html');
@@ -986,7 +986,7 @@ module.exports.init = function(app){
             callback("Data model data cannot be deleted!");
             return;
         }
-        database.executeMSSQLQuery("DELETE FROM "+tableName,
+        database.executeMSSQLQuery(req.uuid,"DELETE FROM "+tableName,
             function(err,updateCount){
                 var deletedResult;
                 if(err) deletedResult="Failed delete data! Reason:"+err.message;

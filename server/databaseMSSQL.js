@@ -194,7 +194,7 @@ module.exports.connectWithPool=function(userData, callback){ console.log("!!!!co
 //};
 //
 
-function selectMSSQLQuery(query, uuid, callback) {   console.log("selectMSSQLQuery uuid=",uuid);        log.info("database selectMSSQLQuery query:",query);
+function selectMSSQLQuery(uuid,query, callback) {   console.log("selectMSSQLQuery uuid=",uuid);        log.info("database selectMSSQLQuery query:",query);
     //var request = new mssql.Request();
     console.log("selectMSSQLQuery connections=",connections);
     var connection=connections[uuid].connection;
@@ -219,8 +219,9 @@ module.exports.selectMSSQLQuery=selectMSSQLQuery;
  * query= <MS SQL queryStr>
  * callback = function(err, updateCount)
  */
-module.exports.executeMSSQLQuery=function(query,callback){                                      log.debug("database executeMSSQLQuery:",query);
-    var request = new mssql.Request();
+module.exports.executeMSSQLQuery=function(uuid,query,callback){                                      log.debug("database executeMSSQLQuery:",query);
+    var connection=connections[uuid].connection;
+    var request = new mssql.Request(connection);
     request.query(query,
         function(err,result){
             if(err){                                                                            log.error('database: executeMSSQLQuery error:',err.message,{});//test
@@ -277,6 +278,27 @@ function selectParamsMSSQLQuery(uuid,query, parameters, callback) {             
         });
 }
 module.exports.selectParamsMSSQLQuery=selectParamsMSSQLQuery;
+/**
+ * for MS SQL database query insert/update/delete
+ * query= <MS SQL queryStr>
+ * paramsValueObj = {<paramName>:<paramValue>,...}
+ * callback = function(err, updateCount)
+ */
+module.exports.executeParamsMSSQLQuery= function(uuid, query, parameters, callback) {                 log.debug("database executeMSSQLParamsQuery:",query,parameters);
+    var connection=connections[uuid].connection;
+    var request = new mssql.Request(connection);
+    for(var i in parameters){
+        request.input('p'+i,parameters[i]);
+    }
+    request.query(query,
+        function (err, result) {
+            if (err) {                                                                          log.error('database: executeMSSQLParamsQuery error:',err.message,{});//test
+                callback(err);
+                return;
+            }                                                                                   log.debug('database: executeMSSQLParamsQuery recordset:',result.recordset,{});//test
+            callback(null, result.rowsAffected.length);
+        });
+};
 
 //
 ///**

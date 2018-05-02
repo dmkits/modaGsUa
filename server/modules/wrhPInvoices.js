@@ -37,7 +37,7 @@ module.exports.init = function(app){
     app.get("/wrh/pInvoices/getDataForPInvsListTable", function(req, res){
         var conditions={};
         for(var condItem in req.query) conditions["wrh_pinvs."+condItem]=req.query[condItem];
-        wrh_pinvs.getDataForTable(req.uuid,{tableColumns:wrhPInvsListTableColumns,
+        wrh_pinvs.getDataForTable({uuid:req.uuid,tableColumns:wrhPInvsListTableColumns,
                 identifier:wrhPInvsListTableColumns[0].data,
                 conditions:conditions},
             function(result){
@@ -47,7 +47,7 @@ module.exports.init = function(app){
     app.get("/wrh/pInvoices/getPInvData", function(req, res){
         var conditions={};
         for(var condItem in req.query) conditions["wrh_pinvs."+condItem]=req.query[condItem];
-        wrh_pinvs.getDataItemForTable(req.uuid,{tableColumns:wrhPInvsListTableColumns,
+        wrh_pinvs.getDataItemForTable({uuid:req.uuid,tableColumns:wrhPInvsListTableColumns,
                 conditions:conditions},
             function(result){
                 res.send(result);
@@ -152,7 +152,7 @@ module.exports.init = function(app){
         {data: "BATCH_NUMBER", name: "BATCH_NUMBER", width: 60, type: "numeric", visible:false}
     ];
     app.get("/wrh/pInvoices/getDataForPInvProductsTable", function(req, res){
-        wrh_pinvs_products.getDataForTable(req.uuid,{tableColumns:wrhPInvProductsTableColumns,
+        wrh_pinvs_products.getDataForTable({uuid:req.uuid,tableColumns:wrhPInvProductsTableColumns,
                 identifier:wrhPInvProductsTableColumns[0].data,
                 conditions:req.body},
             function(result){

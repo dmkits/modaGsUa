@@ -111,7 +111,7 @@ function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidate
     var idIsNullCondition=tableFieldsList[0]+" is NULL";
     var validateCondition={}; validateCondition[idIsNullCondition]=null;
     dataModel.doValidate= function(errs, resultCallback){
-        dataModel.getDataItems(uuid,{conditions:validateCondition},function(result){
+        dataModel.getDataItems({uuid:uuid,conditions:validateCondition},function(result){
             if(result.error) {                                                                          log.error('FAILED validate data model:'+dataModelName+"! Reason:"+result.error+"!");//test
                 errs[dataModelName+"_validateError"]="Failed validate dataModel:"+dataModelName+"! Reason:"+result.error;
             }
@@ -159,8 +159,7 @@ module.exports.initValidateDataModels=function(uuid,dataModelsList, errs, result
  * fieldsFunctions[].function: "maxPlus1" / "concat"
  * resultCallback = function(err, recordset)
  */
-function _getSelectItems(uuid, params,resultCallback){
-                                                      console.log("_getSelectItems uuid=",uuid, module.id);//log.debug("_getSelectItems params:",params,{});//test
+function _getSelectItems(params,resultCallback){                    log.debug("_getSelectItems params:",params,{});//test
     if(!params){                                                                                        log.error("FAILED _getSelectItems! Reason: no function parameters!");//test
         resultCallback("FAILED _getSelectItems! Reason: no function parameters!");
         return;
@@ -267,14 +266,14 @@ function _getSelectItems(uuid, params,resultCallback){
 
     console.log('!!!!!!!!!! 268  selectQuery=', selectQuery, "coditionValues=",coditionValues);
     if (coditionValues.length==0)
-        database.selectMSSQLQuery(selectQuery,uuid, function(err, recordset, count, fields){
+        database.selectMSSQLQuery(params.uuid,selectQuery, function(err, recordset, count, fields){
             if(err) {                                                                                       log.error("FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             } else
                 resultCallback(null,recordset);
         });
     else
-        database.selectParamsMSSQLQuery(uuid,selectQuery,coditionValues, function(err, recordset, count, fields){
+        database.selectParamsMSSQLQuery(params.uuid,selectQuery,coditionValues, function(err, recordset, count, fields){
             if(err) {                                                                                       log.error("FAILED _getSelectItems selectParamsQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             } else
@@ -290,7 +289,7 @@ module.exports.getSelectItems=_getSelectItems;
  * }
  * resultCallback = function(result = { items:[ {<tableFieldName>:<value>,...}, ... ], error, errorCode } )
  */
-function _getDataItems(uuid,params, resultCallback){         console.log("_getDataItems =uuid",uuid, module.id);                                                    //log.debug('_getDataItems: params:',params,{});//test
+function _getDataItems(params, resultCallback){                                                          //log.debug('_getDataItems: params:',params,{});//test
     if(!params) params={};
     if(!params.source) params.source= this.source;
     if(!params.fields) params.fields=this.fields;
@@ -310,7 +309,7 @@ function _getDataItems(uuid,params, resultCallback){         console.log("_getDa
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!"});
         return;
     }
-    _getSelectItems(uuid,params,function(err,recordset){
+    _getSelectItems(params,function(err,recordset){
         var selectResult={};
         if(err) {
             selectResult.error="Failed get data items! Reason:"+err.message;
@@ -490,7 +489,7 @@ function _setDataItem(params, resultCallback){
  * resultCallback = function( tableData = { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...],
  *      error:errorMessage } )
  */
-function _getDataItemsForTable(uuid,params, resultCallback){
+function _getDataItemsForTable(params, resultCallback){
     var tableData={};
     if(!params){                                                                                        log.error("FAILED _getDataItemsForTable! Reason: no function parameters!");//test
         tableData.error="FAILED _getDataItemsForTable! Reason: no function parameters!";
@@ -500,7 +499,7 @@ function _getDataItemsForTable(uuid,params, resultCallback){
     if(params.tableData) tableData=params.tableData;
     if(!params.tableColumns){                                                                           log.error("FAILED _getDataItemsForTable! Reason: no table columns!");//test
         tableData.error="FAILED _getDataItemsForTable! Reason: no table columns!";
-        resultCallback(uuid,tableData);
+        resultCallback(tableData);
         return;
     }
     if(!params.source&&this.source) params.source=this.source;
@@ -580,14 +579,14 @@ function _getDataItemsForTable(uuid,params, resultCallback){
     }
     params.fieldsFunctions=fieldsFunctions;
     if(groupedFieldsList.length>0)params.groupedFields=groupedFieldsList;
-    _getSelectItems(uuid, params, function(err, recordset){
+    _getSelectItems(params, function(err, recordset){
         if(err) tableData.error="Failed get data for table! Reason:"+err.message;
         tableData.items= recordset;
         resultCallback(tableData);
     });
 }
-function _getDataItemForTable(uuid,params, resultCallback){
-    this.getDataItemsForTable(uuid,params,function(tableData){
+function _getDataItemForTable(params, resultCallback){
+    this.getDataItemsForTable(params,function(tableData){
         var tableDataItem={};
         for(var itemName in tableData){
             if(itemName!="items"){
@@ -690,7 +689,7 @@ function _getTableColumnsDataForHTable(tableColumns){
  * resultCallback = function( tableData = { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...],
  *      error:errorMessage } )
  */
-function _getDataForTable(uuid,params, resultCallback){
+function _getDataForTable(params, resultCallback){
     var tableData={};
     if(!params){                                                                                        log.error("FAILED _getDataForTable! Reason: no function parameters!");//test
         tableData.error="FAILED _getDataForTable! Reason: no function parameters!";
@@ -713,11 +712,11 @@ function _getDataForTable(uuid,params, resultCallback){
         hasConditions=true; break;
     }
     if (!hasConditions) {
-        resultCallback(uuid,tableData);
+        resultCallback(tableData);
         return;
     }
     params.tableData=tableData;
-    this.getDataItemsForTable(uuid,params, resultCallback);
+    this.getDataItemsForTable(params, resultCallback);
 }
 /**
  * set column width and type for tableColumnItem.data containing "QTY"/"PRICE"/"SUM"/"NUMBER"/"DATE"
@@ -751,7 +750,7 @@ function _getTableColumnsDataForDocHTable(tableColumns){
     }
     return tableColumns;
 }
-function _getDataForDocTable(uuid,params, resultCallback){
+function _getDataForDocTable(params, resultCallback){
     var tableData={};
     if(!params){                                                                                        log.error("FAILED _getDataForDocTable! Reason: no function parameters!");//test
         tableData.error="FAILED _getDataForDocTable! Reason: no function parameters!";
@@ -786,7 +785,7 @@ function _getDataForDocTable(uuid,params, resultCallback){
     }
     params.conditions=tableConditions;
     params.tableData=tableData;
-    this.getDataItemsForTable(uuid,params, resultCallback);
+    this.getDataItemsForTable(params, resultCallback);
 }
 /**
  * params = {
@@ -839,7 +838,7 @@ function _insDataItem(params, resultCallback) {
         queryInputParams.push(insDataItemValue);
     }
     var insQuery="insert into "+params.tableName+"("+queryFields+") values("+queryFieldsValues+")";
-    database.executeParamsQuery(insQuery,queryInputParams,function(err, updateCount){
+    database.executeParamsMSSQLQuery(params.uuid,insQuery,queryInputParams,function(err, updateCount){
         var insResult={};
         if(err) {
             insResult.error="Failed insert data item! Reason:"+err.message;
@@ -916,7 +915,7 @@ function _updDataItem(params, resultCallback) {
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     updQuery+= " where "+queryConditions;
-    database.executeParamsQuery(updQuery,fieldsValues,function(err, updateCount){
+    database.executeParamsMSSQLQuery(params.uuid,updQuery,fieldsValues,function(err, updateCount){
         var updResult={};
         if(err) {
             updResult.error="Failed update data item! Reason:"+err.message;
@@ -999,7 +998,7 @@ function _delDataItem(params, resultCallback) {
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     delQuery+= " where "+queryConditions;
-    database.executeParamsQuery(delQuery,fieldsValues,function(err, updateCount){
+    database.executeParamsMSSQLQuery(params.uuid,delQuery,fieldsValues,function(err, updateCount){
         var delResult={};
         if(err) {
             delResult.error="Failed delete data item! Reason:"+err.message;
@@ -1105,7 +1104,7 @@ function _insTableDataItem(params, resultCallback) {
         var resultFields=[];
         for(var fieldName in params.insTableData) resultFields.push(fieldName);
         var getResultConditions={}; getResultConditions[params.tableName+"."+idFieldName+"="]=params.insTableData[idFieldName];
-        thisInstance.getDataItemForTable(uuid,{source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
+        thisInstance.getDataItemForTable({uuid:params.uuid,source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
             function(result){
                 if(result.error) insResult.error="Failed get result inserted data item! Reason:"+result.error;
                 if (result.item) insResult.resultItem= result.item;
@@ -1121,7 +1120,7 @@ function _insTableDataItem(params, resultCallback) {
  * }
  * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
  */
-function _updTableDataItem(uuid,params, resultCallback) {
+function _updTableDataItem(params, resultCallback) {
     if (!params) {                                                                                      log.error("FAILED _updTableDataItem! Reason: no parameters!");//test
         resultCallback({ error:"Failed update table data item! Reason:no function parameters!"});
         return;
@@ -1160,7 +1159,7 @@ function _updTableDataItem(uuid,params, resultCallback) {
         var resultFields=[];
         for(var fieldName in params.updTableData) resultFields.push(fieldName);
         var getResultConditions={}; getResultConditions[params.tableName+"."+idFieldName+"="]=params.updTableData[idFieldName];
-        thisInstance.getDataItemForTable(uuid,{source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
+        thisInstance.getDataItemForTable({uuid:params.uuid,source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
             function(result){
                 if(result.error) updResult.error="Failed get result updated data item! Reason:"+result.error;
                 if (result.item) updResult.resultItem= result.item;
@@ -1206,7 +1205,7 @@ function _storeTableDataItem(params, resultCallback) {
         return;
     }
     //update
-    this.updTableDataItem({tableName:params.tableName, idFieldName:idFieldName, tableColumns:params.tableColumns,
+    this.updTableDataItem({uuid:params.uuid, tableName:params.tableName, idFieldName:idFieldName, tableColumns:params.tableColumns,
         updTableData:params.storeTableData}, resultCallback);
 }
 

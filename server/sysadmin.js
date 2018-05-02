@@ -233,44 +233,44 @@ module.exports= function(app) {
         }
     });
 
-    app.get("/sysadmin/employees_login", function (req, res) {
-        res.sendFile(path.join(__dirname, '../pages/sysadmin', 'employees_login.html'));
-    });
+    //app.get("/sysadmin/employees_login", function (req, res) {
+    //    res.sendFile(path.join(__dirname, '../pages/sysadmin', 'employees_login.html'));
+    //});
 
-    var employeeLoginColumns=[
-        {data: "ChID", name: "ChID", width: 120, type: "text", visible:false},
-        {data: "EmpName", name: "Имя сотрудника", width: 250, type: "text"},
-        {data: "Login", name: "Login", width: 120, type: "text", align:"center"},
-        {data: "LPass", name: "Password", width: 120, type: "text"},
-        {data: "ShiftPostID", name: "ShiftPostID", width: 120, type: "text", visible:false},
-        {data: "ShiftPostName", name: "Роль", width: 120,
-            dataSource:"r_Uni", sourceField:"RefName", linkCondition:"r_Uni.RefTypeID=10606 and r_Uni.RefID=r_Emps.ShiftPostID",
-            type: "combobox", sourceURL:"/sysadmin/employeeLoginTable/getDataForRoleCombobox"}
-    ];
-    app.get('/sysadmin/employeeLoginTable/getDataForTable', function (req, res) {
-        res.connection.setTimeout(0);
-        var conditions=req.query;
-        conditions["1=1"]=null;
-        database.getDataForTable({source:"r_Emps",
-                tableColumns:employeeLoginColumns, identifier:employeeLoginColumns[0].data, conditions:conditions, order:"EmpID"} ,
-            function(result){
-                res.send(result);
-            });
-    });
-    app.post("/sysadmin/employeeLoginTable/storeTableData", function(req, res){
-        res.connection.setTimeout(0);
-        database.storeTableDataItem({tableName:"r_Emps",idFieldName:"ChID",tableColumns:employeeLoginColumns,
-            storeTableData:req.body}, function(result){
-            res.send(result);
-        })
-    });
-    app.get('/sysadmin/employeeLoginTable/getDataForRoleCombobox', function(req,res){  //ShiftPostID
-        database.getDataItemsForTableCombobox(req.uuid,{ comboboxFields:{"ShiftPostName":"RefName","ShiftPostID":"RefID" },
-                source:"r_Uni",fields:["RefID","RefName"],
-                order:"RefName",
-            conditions:{"RefTypeID=":10606}},
-        function(result){
-            res.send(result);
-        })
-    })
+    //var employeeLoginColumns=[
+    //    {data: "ChID", name: "ChID", width: 120, type: "text", visible:false},
+    //    {data: "EmpName", name: "Имя сотрудника", width: 250, type: "text"},
+    //    {data: "Login", name: "Login", width: 120, type: "text", align:"center"},
+    //    {data: "LPass", name: "Password", width: 120, type: "text"},
+    //    {data: "ShiftPostID", name: "ShiftPostID", width: 120, type: "text", visible:false},
+    //    {data: "ShiftPostName", name: "Роль", width: 120,
+    //        dataSource:"r_Uni", sourceField:"RefName", linkCondition:"r_Uni.RefTypeID=10606 and r_Uni.RefID=r_Emps.ShiftPostID",
+    //        type: "combobox", sourceURL:"/sysadmin/employeeLoginTable/getDataForRoleCombobox"}
+    //];
+    //app.get('/sysadmin/employeeLoginTable/getDataForTable', function (req, res) {
+    //    res.connection.setTimeout(0);
+    //    var conditions=req.query;
+    //    conditions["1=1"]=null;
+    //    database.getDataForTable({source:"r_Emps",
+    //            tableColumns:employeeLoginColumns, identifier:employeeLoginColumns[0].data, conditions:conditions, order:"EmpID"} ,
+    //        function(result){
+    //            res.send(result);
+    //        });
+    //});
+    //app.post("/sysadmin/employeeLoginTable/storeTableData", function(req, res){
+    //    res.connection.setTimeout(0);
+    //    database.storeTableDataItem({tableName:"r_Emps",idFieldName:"ChID",tableColumns:employeeLoginColumns,
+    //        storeTableData:req.body}, function(result){
+    //        res.send(result);
+    //    })
+    //});
+    //app.get('/sysadmin/employeeLoginTable/getDataForRoleCombobox', function(req,res){  //ShiftPostID
+    //    database.getDataItemsForTableCombobox(req.uuid,{ comboboxFields:{"ShiftPostName":"RefName","ShiftPostID":"RefID" },
+    //            source:"r_Uni",fields:["RefID","RefName"],
+    //            order:"RefName",
+    //        conditions:{"RefTypeID=":10606}},
+    //    function(result){
+    //        res.send(result);
+    //    })
+    //})
 };
