@@ -656,8 +656,8 @@ module.exports.init = function(app){
 
     app.get("/sysadmin/database/getCurrentChanges", function (req, res) {
         var outData = { columns:changesTableColumns, identifier:changesTableColumns[0].data, items:[] };
-        checkIfChangeLogExists(req.uuid,function(tableData) {
-            if (tableData.error&& (tableData.errorCode=="ER_NO_SUCH_TABLE")) {                              log.info("checkIfChangeLogExists resultCallback errorCode=='ER_NO_SUCH_TABLE' tableData.error:",tableData.error);
+        checkIfChangeLogExists(req.uuid,function(tableData) {;
+            if (tableData.error&&  tableData.error.indexOf("Invalid object name")>=0) {  log.info("checkIfChangeLogExists resultCallback tableData.error:",tableData.error);
                 outData.noTable = true;
                 var arr=dataModel.getModelChanges();
                 var items=util.sortArray(arr);
@@ -717,8 +717,9 @@ module.exports.init = function(app){
             }
         }
         checkIfChangeLogExists(req.uuid,function(result) {
-            if (result.error && (result.errorCode == "ER_NO_SUCH_TABLE")) {
-                database.executeQuery(CHANGE_VAL, function (err) {
+           // if (result.error && (result.errorCode == "ER_NO_SUCH_TABLE")) {
+            if (result.error&&  result.error.indexOf("Invalid object name")>=0) {  log.info("checkIfChangeLogExists  tableData.error:",result.error);
+                database.executeMSSQLQuery(CHANGE_VAL, function (err) {
                     if (err) {
                         outData.error = err.message;
                         res.send(outData);
@@ -757,7 +758,7 @@ module.exports.init = function(app){
                     res.send(outData);
                     return;
                 }
-                database.executeQuery(CHANGE_VAL, function (err) {
+                database.executeMSSQLQuery(CHANGE_VAL, function (err) {
                     if (err) {
                         outData.error = err.message;
                         res.send(outData);
@@ -985,7 +986,7 @@ module.exports.init = function(app){
             callback("Data model data cannot be deleted!");
             return;
         }
-        database.executeQuery("DELETE FROM "+tableName,
+        database.executeMSSQLQuery("DELETE FROM "+tableName,
             function(err,updateCount){
                 var deletedResult;
                 if(err) deletedResult="Failed delete data! Reason:"+err.message;

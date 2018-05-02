@@ -5,7 +5,7 @@ var mssql = require('mssql');   console.log('module for databaseMSSQL.js mssql')
    console.log('module for databaseMSSQL.js ./app');
 
 var common=require('./common');
-//var logger=require('./logger')();
+//var log=require('./log')();
 var server = require('./server');
 var log =server.log;
 //var app=server.getApp();
@@ -79,7 +79,7 @@ module.exports.getDBConnectError= function(){ return dbConnectError; };
 //    mssql.connect(dbConfig, function(err){
 //        if(err){
 //            dbConnectError=err.message;
-//            logger.error("FAILED to connect to DB. Reason: "+dbConnectError);
+//            log.error("FAILED to connect to DB. Reason: "+dbConnectError);
 //            callback(err.message);
 //            return;
 //        }
@@ -121,10 +121,10 @@ module.exports.connectWithPool=function(userData, callback){ console.log("!!!!co
     //    database: getDBConfig().database
     //});
     var pool = new mssql.ConnectionPool({
-        user: "sa",
-        password: "GMSgms123",
-        server:   "localhost",
-        database: "GMSSample38btkKlnk"
+        user: userData.login,
+        password: userData.password,
+        server:   getDBConfig().host,
+        database: getDBConfig().database
     }, function(err){
         console.log("after ConnectionPool");
         if(err){
@@ -201,6 +201,7 @@ function selectMSSQLQuery(query, uuid, callback) {   console.log("selectMSSQLQue
     var request = new mssql.Request(connection);
     request.query(query,
         function (err, result) {
+            console.log('selectMSSQLQuery err=', err);
             if (err) {
                 //err.name="ConnectionError";
                 //err.message="err message test";
@@ -212,14 +213,32 @@ function selectMSSQLQuery(query, uuid, callback) {   console.log("selectMSSQLQue
             callback(null, result.recordset, result.rowsAffected.length);
         });
 }
-
 module.exports.selectMSSQLQuery=selectMSSQLQuery;
 /**
  * for MS SQL database query insert/update/delete
  * query= <MS SQL queryStr>
- * paramsObj = {<paramName>:<paramValue>,...}
  * callback = function(err, updateCount)
  */
+module.exports.executeMSSQLQuery=function(query,callback){                                      log.debug("database executeMSSQLQuery:",query);
+    var request = new mssql.Request();
+    request.query(query,
+        function(err,result){
+            if(err){                                                                            log.error('database: executeMSSQLQuery error:',err.message,{});//test
+                callback(err);
+                return;
+            }
+            callback(null, result.rowsAffected.length);
+        });
+};
+
+
+
+///**
+// * for MS SQL database query insert/update/delete
+// * query= <MS SQL queryStr>
+// * paramsObj = {<paramName>:<paramValue>,...}
+// * callback = function(err, updateCount)
+// */
 //module.exports.executeMSSQLParamsQuery= function(query, paramsObj, callback) {               log.debug("database executeMSSQLParamsQuery:",query,paramsObj);
 //    var request = new mssql.Request();
 //    for(var param in paramsObj){
@@ -241,13 +260,11 @@ module.exports.selectMSSQLQuery=selectMSSQLQuery;
 // * paramsObj={<paramName>:<paramValue>, ... }
 // * callback = function(err, recordset, count)
 // */
-function selectParamsMSSQLQuery(uuid,query, paramsObj, callback) {                                      log.debug("database selectParamsMSSQLQuery query:",query," parameters:",paramsObj,{});
+function selectParamsMSSQLQuery(uuid,query, parameters, callback) {                                      log.debug("database selectParamsMSSQLQuery query:",query," parameters:",parameters,{});
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
-    for(var param in paramsObj){
-        //if(param.toLocaleLowerCase().indexOf("date")==param-5){
-        //reqSql.input(param,mssql.Date, paramsObj[param]);
-        request.input(param,paramsObj[param]);
+    for(var i in parameters){
+        request.input('p'+i,parameters[i]);
     }
     request.query(query,
         function (err, result) {
@@ -260,6 +277,7 @@ function selectParamsMSSQLQuery(uuid,query, paramsObj, callback) {              
         });
 }
 module.exports.selectParamsMSSQLQuery=selectParamsMSSQLQuery;
+
 //
 ///**
 // * params = { source,

@@ -227,7 +227,8 @@ function _getSelectItems(uuid, params,resultCallback){
     if (params.conditions&&typeof(params.conditions)=="object"&&params.conditions.length===undefined) {//object
         for(var conditionItem in params.conditions) {
             var conditionItemValue=params.conditions[conditionItem];
-            var conditionItemValueQuery= (conditionItemValue===null)?conditionItem:conditionItem+"?";
+            //var conditionItemValueQuery= (conditionItemValue===null)?conditionItem:conditionItem+"?";
+            var conditionItemValueQuery= (conditionItemValue===null||conditionItemValue==='null')?conditionItem:conditionItem+"@p"+coditionValues.length;
             conditionItemValueQuery= conditionItemValueQuery.replace("~","=");
             if(conditionItem.indexOf("SUM(")>=0)
                 hConditionQuery= (!hConditionQuery)?conditionItemValueQuery:hConditionQuery+" and "+conditionItemValueQuery;
@@ -242,7 +243,8 @@ function _getSelectItems(uuid, params,resultCallback){
             if(params.fieldsSources&&params.fieldsSources[conditionFieldName])
                 conditionFieldName= params.fieldsSources[conditionFieldName];
             var conditionItemValueQuery=
-                (conditionItem.value===null)?conditionFieldName+conditionItem.condition:conditionFieldName+conditionItem.condition+"?";
+                //(conditionItem.value===null)?conditionFieldName+conditionItem.condition:conditionFieldName+conditionItem.condition+"?";
+                (conditionItem.value===null)?conditionFieldName+conditionItem.condition:conditionFieldName+conditionItem.condition+"@p"+coditionValues.length;
             wConditionQuery= (!wConditionQuery)?conditionItemValueQuery:wConditionQuery+" and "+conditionItemValueQuery;
             if (conditionItem.value!==null) coditionValues.push(conditionItem.value);
         }
@@ -262,6 +264,8 @@ function _getSelectItems(uuid, params,resultCallback){
     }
     if(hConditionQuery)selectQuery+=" having "+hConditionQuery;
     if (params.order) selectQuery+=" order by "+params.order;
+
+    console.log('!!!!!!!!!! 268  selectQuery=', selectQuery, "coditionValues=",coditionValues);
     if (coditionValues.length==0)
         database.selectMSSQLQuery(selectQuery,uuid, function(err, recordset, count, fields){
             if(err) {                                                                                       log.error("FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
@@ -821,20 +825,21 @@ function _insDataItem(params, resultCallback) {
         resultCallback({ error:"Failed insert data item! Reason:no data for insert!"});
         return;
     }
-    var queryFields="", queryFieldsValues="", fieldsValues=[];
+    var queryFields="", queryInputParams=[], queryFieldsValues="";
     for(var fieldName in params.insData) {
         if (queryFields!="") queryFields+= ",";
         if (queryFieldsValues!="") queryFieldsValues+= ",";
         queryFields+= fieldName;
-        queryFieldsValues+= "?";
+        queryFieldsValues+= "@p"+queryInputParams.length;
         var insDataItemValue=params.insData[fieldName];
         if(insDataItemValue&&(insDataItemValue instanceof Date)) {
             insDataItemValue=dateFormat(insDataItemValue,"yyyy-mm-dd HH:MM:ss");
         }
-        fieldsValues.push(insDataItemValue);
+        //  queryInputParamsObj[fieldName]=insDataItemValue;
+        queryInputParams.push(insDataItemValue);
     }
     var insQuery="insert into "+params.tableName+"("+queryFields+") values("+queryFieldsValues+")";
-    database.executeParamsQuery(insQuery,fieldsValues,function(err, updateCount){
+    database.executeParamsQuery(insQuery,queryInputParams,function(err, updateCount){
         var insResult={};
         if(err) {
             insResult.error="Failed insert data item! Reason:"+err.message;
@@ -896,7 +901,7 @@ function _updDataItem(params, resultCallback) {
     var queryFields="", fieldsValues=[];
     for(var fieldName in params.updData) {
         if (queryFields!="") queryFields+= ",";
-        queryFields+= fieldName+"=?";
+        queryFields+= fieldName+"=@p"+fieldsValues.length;
         var updDataItemValue=params.updData[fieldName];
         if(updDataItemValue&&(updDataItemValue instanceof Date)) {
             updDataItemValue=dateFormat(updDataItemValue,"yyyy-mm-dd HH:MM:ss");
@@ -907,7 +912,7 @@ function _updDataItem(params, resultCallback) {
     var queryConditions="";
     for(var fieldNameCondition in params.conditions) {
         if (queryConditions!="") queryConditions+= " and ";
-        queryConditions+= fieldNameCondition.replace("~","=")+"?";
+        queryConditions+= fieldNameCondition.replace("~","=")+"@p"+fieldsValues.length;
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     updQuery+= " where "+queryConditions;
@@ -989,7 +994,8 @@ function _delDataItem(params, resultCallback) {
     var queryConditions="";
     for(var fieldNameCondition in params.conditions) {
         if (queryConditions!="") queryConditions+= " and ";
-        queryConditions+= fieldNameCondition.replace("~","=")+"?";
+       // queryConditions+= fieldNameCondition.replace("~","=")+"?";
+        queryConditions+= fieldNameCondition.replace("~","=")+"@p"+fieldsValues.length;
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     delQuery+= " where "+queryConditions;

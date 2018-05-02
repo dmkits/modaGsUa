@@ -163,7 +163,7 @@ module.exports= function(app) {
     });
     app.post("/sysadmin/sql_queries/get_result_to_request", function (req, res) {
         var newQuery = req.body.text;
-        database.selectParamsMSSQLQuery(newQuery, req.query,
+        database.selectParamsMSSQLQuery(req.uuid, newQuery, req.query,
         function(err,result){
             var outData = {};
             if (err) {
