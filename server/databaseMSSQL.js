@@ -63,41 +63,40 @@ function getFieldsTypes(recordset){
     }
     return fieldsTypes;
 }
-//selectQuery
-function selectMSSQLQuery(uuid,query, callback) {                                                   log.info("database selectMSSQLQuery query:",query);
+function selectQuery(uuid,query, callback) {                                                   log.info("database selectQuery query:",query);
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     request.query(query,
         function(err, result) {
             if (err) {
-                if(err.name=="ConnectionError")dbConnectError=err.message;                          log.error('database: selectMSSQLQuery error:',err.message, {});
+                if(err.name=="ConnectionError")dbConnectError=err.message;                          log.error('database: selectQuery error:',err.message, {});
                 callback(err);
                 return;
-            }                                                               console.log('selectMSSQLQuery result.recordset=', result.recordset, result.recordset.columns, result.recordset.columns.first, {});
+            }                                                               console.log('selectQuery result.recordset=', result.recordset, result.recordset.columns, result.recordset.columns.first, {});
             callback(null, result.recordset, result.rowsAffected.length, getFieldsTypes(result.recordset));
         });
 }
-module.exports.selectMSSQLQuery=selectMSSQLQuery;
+module.exports.selectQuery=selectQuery;
 /**
  * for MS SQL database query insert/update/delete
  * query= <MS SQL queryStr>
  * callback = function(err, updateCount)
  */
-module.exports.executeMSSQLQuery=function(uuid,query,callback){                                      log.debug("database executeMSSQLQuery:",query);
+module.exports.executeQuery=function(uuid,query,callback){                                      log.debug("database executeQuery:",query);
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     request.query(query,
         function(err,result){
             if(err){
                 if(err.name=="ConnectionError")dbConnectError=err.message;
-                log.error('database: executeMSSQLQuery error:',err.message,{});
+                log.error('database: executeQuery error:',err.message,{});
                 callback(err);
                 return;
             }
             callback(null, result.rowsAffected.length);
         });
 };
-function selectParamsMSSQLQuery(uuid,query, parameters, callback) {                                      log.debug("database selectParamsMSSQLQuery query:",query," parameters:",parameters,{});
+function selectParamsQuery(uuid,query, parameters, callback) {                                      log.debug("database selectParamsQuery query:",query," parameters:",parameters,{});
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     for(var i in parameters){
@@ -105,7 +104,7 @@ function selectParamsMSSQLQuery(uuid,query, parameters, callback) {             
     }
     request.query(query,
         function (err, result) {
-            if (err) {                                                                                 log.error('database: selectParamsMSSQLQuery error:',err.message,{});
+            if (err) {                                                                                 log.error('database: selectParamsQuery error:',err.message,{});
                 if(err.name=="ConnectionError")dbConnectError=err.message;
                 callback(err);
                 return;
@@ -113,14 +112,14 @@ function selectParamsMSSQLQuery(uuid,query, parameters, callback) {             
             callback(null, result.recordset ,result.rowsAffected.length, getFieldsTypes(result.recordset));
         });
 }
-module.exports.selectParamsMSSQLQuery=selectParamsMSSQLQuery;
+module.exports.selectParamsQuery=selectParamsQuery;
 /**
  * for MS SQL database query insert/update/delete
  * query= <MS SQL queryStr>
  * paramsValueObj = {<paramName>:<paramValue>,...}
  * callback = function(err, updateCount)
  */
-module.exports.executeParamsMSSQLQuery= function(uuid, query, parameters, callback) {                 log.debug("database executeMSSQLParamsQuery:",query,parameters);
+module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {                 log.debug("database executeParamsQuery:",query,parameters);
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     for(var i in parameters){
@@ -128,10 +127,10 @@ module.exports.executeParamsMSSQLQuery= function(uuid, query, parameters, callba
     }
     request.query(query,
         function (err, result) {
-            if (err) {                                                                          log.error('database: executeMSSQLParamsQuery error:',err.message,{});//test
+            if (err) {                                                                          log.error('database: executeParamsQuery error:',err.message,{});//test
                 callback(err);
                 return;
-            }                                                                                   log.debug('database: executeMSSQLParamsQuery recordset:',result.recordset,{});//test
+            }                                                                                   log.debug('database: executeParamsQuery recordset:',result.recordset,{});//test
             callback(null, result.rowsAffected.length);
         });
 };

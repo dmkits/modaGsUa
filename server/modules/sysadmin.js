@@ -186,7 +186,7 @@ module.exports.init = function(app){
         res.send(serverConfig);
     });
     app.get("/sysadmin/server/getDBList", function (req, res) {
-        database.selectMSSQLQuery(req.uuid,"select	name "+
+        database.selectQuery(req.uuid,"select	name "+
             "from	sys.databases "+
             "where	name not in ('master','tempdb','model','msdb') "+
             "and is_distributor = 0 "+
@@ -718,7 +718,7 @@ module.exports.init = function(app){
         checkIfChangeLogExists(req.uuid,function(result) {
            // if (result.error && (result.errorCode == "ER_NO_SUCH_TABLE")) {
             if (result.error&&  result.error.indexOf("Invalid object name")>=0) {  log.info("checkIfChangeLogExists  tableData.error:",result.error);
-                database.executeMSSQLQuery(req.uuid,CHANGE_VAL, function (err) {
+                database.executeQuery(req.uuid,CHANGE_VAL, function (err) {
                     if (err) {
                         outData.error = err.message;
                         res.send(outData);
@@ -757,7 +757,7 @@ module.exports.init = function(app){
                     res.send(outData);
                     return;
                 }
-                database.executeMSSQLQuery(req.uuid,CHANGE_VAL, function (err) {
+                database.executeQuery(req.uuid,CHANGE_VAL, function (err) {
                     if (err) {
                         outData.error = err.message;
                         res.send(outData);
@@ -985,7 +985,7 @@ module.exports.init = function(app){
             callback("Data model data cannot be deleted!");
             return;
         }
-        database.executeMSSQLQuery(req.uuid,"DELETE FROM "+tableName,
+        database.executeQuery(req.uuid,"DELETE FROM "+tableName,
             function(err,updateCount){
                 var deletedResult;
                 if(err) deletedResult="Failed delete data! Reason:"+err.message;

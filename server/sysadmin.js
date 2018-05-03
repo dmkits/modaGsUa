@@ -37,7 +37,7 @@ module.exports= function(app) {
         }
         var appConfig=database.getDBConfig();
         if(!appConfig["reports.config"])appConfig["reports.config"]=common.getConfigDirectoryName();
-        //database.selectMSSQLQuery("select	name "+
+        //database.selectQuery("select	name "+
         //"from	sys.databases "+
         //"where	name not in ('master','tempdb','model','msdb') "+
         //"and is_distributor = 0 "+
@@ -52,7 +52,7 @@ module.exports= function(app) {
         res.send(appConfig);
     });
     app.get("/sysadmin/startup_parameters/get_db_list", function (req, res) {
-        database.selectMSSQLQuery("select	name "+
+        database.selectQuery("select	name "+
             "from	sys.databases "+
             "where	name not in ('master','tempdb','model','msdb') "+
             "and is_distributor = 0 "+
@@ -159,7 +159,7 @@ module.exports= function(app) {
     });
     app.post("/sysadmin/sql_queries/get_result_to_request", function (req, res) {
         var newQuery = req.body.text;
-        database.selectParamsMSSQLQuery(req.uuid, newQuery, req.query,
+        database.selectParamsQuery(req.uuid, newQuery, req.query,
         function(err,result){
             var outData = {};
             if (err) {
