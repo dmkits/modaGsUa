@@ -1,5 +1,5 @@
 var server= require("../server"), log= server.log;
-var dateFormat = require('dateformat'), path=require('path');
+var dateFormat = require('dateformat'), path=require('path'), moment=require('moment');
 var util=require("../util");
 
 var dataModelChanges= [], validatedDataModels={};
@@ -139,6 +139,19 @@ module.exports.initValidateDataModels=function(uuid,dataModelsList, errs, result
     validateDataModelCallback(uuid,dataModelsList, 0, errs);
 };
 
+function convertDateTimeValues(recordsetData, fieldsTypes){
+    var columns=fieldsTypes;
+    for(var item in recordsetData){
+        var dataItem=recordsetData[item];
+        var keysArr=Object.keys(dataItem);
+        for(var i in keysArr){
+            var valueName=keysArr[i];
+            if (columns[valueName]=='datetime'){
+                dataItem[valueName]=moment.parseZone(dataItem[valueName]).utc().format("YYYY-MM-DD HH:mm:ss");
+            }
+        }
+    }
+}
 /**
  * params = { source,
  *      fields = [ <fieldName> or <functionFieldName>, ... ],
@@ -269,11 +282,13 @@ function _getSelectItems(params,resultCallback){                    log.debug("_
                 resultCallback(null,recordset);
         });
     else
-        database.selectParamsMSSQLQuery(params.uuid,selectQuery,coditionValues, function(err, recordset, count, fields){
+        database.selectParamsMSSQLQuery(params.uuid,selectQuery,coditionValues, function(err, recordset, count, fieldsMetadata){
             if(err) {                                                                                       log.error("FAILED _getSelectItems selectParamsQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
-            } else
-                resultCallback(null,recordset);
+            } else {
+                convertDateTimeValues(recordset, fieldsMetadata);
+                resultCallback(null, recordset);
+            }
         });
 }
 module.exports.getSelectItems=_getSelectItems;

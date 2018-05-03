@@ -690,12 +690,10 @@ module.exports.init = function(app){
 
     var changeLogTableColumns=[
         {data: "ID", name: "changeID", width: 200, type: "text"},
-        {data: "CHANGE_DATETIME", name: "changeDatetime", width: 120, type: "datetimeAsText"},
-      //  {data: "CHANGE_DATETIME", name: "changeDatetime", width: 120, type: "date", dateFormat:"DD.MM.YYYY", correctFormat:true, align:"center"},
+        {data: "CHANGE_DATETIME", name: "changeDatetime", width: 120, type: "date", dateFormat:"YYYY-MM-DD HH:mm:ss", align:"center"},
         {data: "CHANGE_OBJ", name: "changeObj", width: 200, type: "text"},
         {data: "CHANGE_VAL", name: "changeVal", width: 450, type: "text"},
-        {data: "APPLIED_DATETIME", name: "appliedDatetime", width: 120, type: "date", dateFormat:"DD.MM.YYYY", correctFormat:true, align:"center"}
-        //{data: "APPLIED_DATETIME", name: "appliedDatetime", width: 120, type: "datetimeAsText"}
+        {data: "APPLIED_DATETIME", name: "appliedDatetime", width: 120, type: "date", dateFormat:"YYYY-MM-DD HH:mm:ss", align:"center"}
     ];
     /**
      * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
@@ -786,7 +784,7 @@ module.exports.init = function(app){
     app.get("/sysadmin/database/getChangeLog", function (req, res) {
         changeLog.getDataForTable({uuid:req.uuid,tableColumns:changeLogTableColumns, identifier:changeLogTableColumns[0].data,
             conditions:req.query,
-            order:"CHANGE_DATETIME, CHANGE_OBJ, ID"}, function(result){            console.log('getChangeLog result=', result);
+            order:"CHANGE_DATETIME, CHANGE_OBJ, ID"}, function(result){
             res.send(result);
         });
     });
