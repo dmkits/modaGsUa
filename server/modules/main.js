@@ -55,7 +55,7 @@ module.exports.init= function(app){
         outData.imageSmall=appConfig.imageSmall;
         outData.imageMain=appConfig.imageMain;
 
-        outData.appUserName= (req.mduUser)?req.mduUser:"unknown";
+        //outData.appUserName= (req.mduUser)?req.mduUser:"unknown";
 
         var userRole=req.mduUserRole;
         //outData.menuBar=getUserMenuByUserRole(userRole, appConfig.usersRoleMenu, appConfig.appMenu);
@@ -76,18 +76,13 @@ module.exports.init= function(app){
         outData.dbConnection='Connected';
         res.send(outData);
     });
-    app.post("/", function(req, res){                                                                   log.info("app.post /  req.body=",req.body);
+    app.post("/main/exit", function(req, res){                                                                   log.info("app.post /  req.body=",req.body);
         var outData={};
-        if(req.body["action"] && req.body["action"]=="exit"){
-            var cookiesArr=Object.keys(req.cookies);
-            for(var i in cookiesArr){
-                res.clearCookie(cookiesArr[i]);
-            }
-            outData.actionResult="successfull";
-            res.send(outData);
-            return;
+        var cookiesArr=Object.keys(req.cookies);
+        for(var i in cookiesArr){
+            res.clearCookie(cookiesArr[i]);
         }
-        outData.error="Не удалось завершить сессию.";
+        outData.actionResult="successful";
         res.send(outData);
     });
  };

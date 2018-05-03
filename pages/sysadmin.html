@@ -220,7 +220,7 @@
                 btnLogout.onClick=function(){
                     Request.postJSONData({url:"/" /*"/clean_cookie"*/ ,data:{action:"exit"},consoleLog:true},
                             function(result){
-                                if (result&&result.actionResult=="successfull"){
+                                if (result&&result.actionResult=="successful"){
                                     window.location.replace(window.location.href);
                                     return;
                                 }

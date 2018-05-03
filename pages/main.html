@@ -124,14 +124,23 @@
                     if (actionData.action=="close") {
                         main_MainMenu.destroy();
                         main_ContentContainer.destroy();
-                        document.cookie="mduUser=";
-                        document.cookie="mduPswrd=";
-                        location.reload();
+                     //   location.reload();
                         Request.postJSONData({url:"/main/exit"},
-                                /*posaction*/function(result){
+                                function(result){
                                     var resultContent;
-                                    if (result&&result.actionResult=="successfull") resultContent= "<div>Вы закрыли все окна и вышли из рабочей сессии.</div>";
-                                    else resultContent= "<div>Вы закрыли все окна.</div>";
+                                    if (result&&result.actionResult=="successful"){
+                                            resultContent= "<div>Вы закрыли все окна и вышли из рабочей сессии. <a href='/login'>Войти</a></div>";
+                                        main_MainContainer.addChild(new ContentPane({id:"finish", title:"finish", region:"center",content:resultContent}) );
+                                        return;
+                                    }
+                                    var cookies = document.cookie.split(";");
+                                    for (var i = 0; i < cookies.length; i++) {
+                                        var cookie = cookies[i];
+                                        var eqPos = cookie.indexOf("=");
+                                        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                                        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                                    }
+                                    resultContent= "<div>Вы закрыли все окна.</div>";
                                     main_MainContainer.addChild(new ContentPane({id:"finish", title:"finish", region:"center",content:resultContent}) );
                                 });
                     } else if (actionData.action=="help_about") {
