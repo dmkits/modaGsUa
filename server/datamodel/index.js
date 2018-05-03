@@ -275,14 +275,14 @@ function _getSelectItems(params,resultCallback){                    log.debug("_
     if(hConditionQuery)selectQuery+=" having "+hConditionQuery;
     if (params.order) selectQuery+=" order by "+params.order;
     if (coditionValues.length==0)
-        database.selectMSSQLQuery(params.uuid,selectQuery, function(err, recordset, count, fields){
+        database.selectQuery(params.uuid,selectQuery, function(err, recordset, count, fields){
             if(err) {                                                                                       log.error("FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             } else
                 resultCallback(null,recordset);
         });
     else
-        database.selectParamsMSSQLQuery(params.uuid,selectQuery,coditionValues, function(err, recordset, count, fieldsMetadata){
+        database.selectParamsQuery(params.uuid,selectQuery,coditionValues, function(err, recordset, count, fieldsMetadata){
             if(err) {                                                                                       log.error("FAILED _getSelectItems selectParamsQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             } else {
@@ -854,7 +854,7 @@ function _insDataItem(params, resultCallback) {
         queryInputParams.push(insDataItemValue);
     }
     var insQuery="insert into "+params.tableName+"("+queryFields+") values("+queryFieldsValues+")";
-    database.executeParamsMSSQLQuery(params.uuid,insQuery,queryInputParams,function(err, updateCount){
+    database.executeParamsQuery(params.uuid,insQuery,queryInputParams,function(err, updateCount){
         var insResult={};
         if(err) {
             insResult.error="Failed insert data item! Reason:"+err.message;
@@ -931,7 +931,7 @@ function _updDataItem(params, resultCallback) {
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     updQuery+= " where "+queryConditions;
-    database.executeParamsMSSQLQuery(params.uuid,updQuery,fieldsValues,function(err, updateCount){
+    database.executeParamsQuery(params.uuid,updQuery,fieldsValues,function(err, updateCount){
         var updResult={};
         if(err) {
             updResult.error="Failed update data item! Reason:"+err.message;
@@ -1014,7 +1014,7 @@ function _delDataItem(params, resultCallback) {
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     delQuery+= " where "+queryConditions;
-    database.executeParamsMSSQLQuery(params.uuid,delQuery,fieldsValues,function(err, updateCount){
+    database.executeParamsQuery(params.uuid,delQuery,fieldsValues,function(err, updateCount){
         var delResult={};
         if(err) {
             delResult.error="Failed delete data item! Reason:"+err.message;
