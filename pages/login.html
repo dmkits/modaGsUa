@@ -15,38 +15,41 @@
     require(["request","dijit/ConfirmDialog","dojo/keys", "dojo/domReady!"],
             function (Request, ConfirmDialog,keys) {
                 moment.locale("uk");
-
+                var authDataTable='<table id="auth_admin_dialog_table" width="240px">'+
+                        '<tr>'+
+                        '<td><label for="user_name">Имя:</label></td>'+
+                        '<td><input type="text" name="user_name" id="user_name"></td>'+
+                        '</tr>'+
+                        '<tr>'+
+                        '<td><label for="user_password">Пароль:</label></td>'+
+                        '<td><input type="password" name="user_password" id="user_password"></td>'+
+                        '</tr>'+
+                        '</table>';
                 var loginDialog = new ConfirmDialog({
                     autofocus:false,
                     id: "loginDialog",
-                    content: '<table id="auth_admin_dialog_table">'+
-                    '<tr>'+
-                    '<td><label for="user_name">Имя:</label></td>'+
-                    '<td><input type="text" name="user_name" id="user_name"></td>'+
-                    '</tr>'+
-                    '<tr>'+
-                    '<td><label for="user_password">Пароль:</label></td>'+
-                    '<td><input type="password" name="user_password" id="user_password"></td>'+
-                    '</tr>'+
-                    '</table>',
+                    content:authDataTable,
                     title: "Авторизация"
                 }, "loginDialog");
                 loginDialog.set("buttonOk","Войти");
                 loginDialog.set("buttonCancel","Отмена");
                 loginDialog.startup();
 
-//                loginDialog.onExecute  = function () {
-//                    var user=document.getElementById("user_name").value, pswrd=document.getElementById("user_password").value;
-//                    Request.postJSONData({url:  "/login", data: {user:user, pswrd:pswrd}, consoleLog: true},
-//                            function (result)   {
-//                                if (result && result["result"]=="success") window.location.replace(window.location.href);
-//                            });
-//                };
                 loginDialog.onExecute  = function () {
                     var user=document.getElementById("user_name").value.trim(), pswrd=document.getElementById("user_password").value.trim();
-                    Request.postJSONData({url:  "/login", data: {user:user, pswrd:pswrd}, consoleLog: true},
-                            function (result) {
-                                if(result && !result.error) {
+                    Request.postJSON({url:  "/login", data: {user:user, pswrd:pswrd}, consoleLog: true},
+                            function (sucsess,result) {
+                                if(!sucsess){
+                                    var div= '<div style="color:red; padding:4px; width: 240px;">Не удалось связаться с сервером</div>';
+                                    loginDialog.set("content",div+authDataTable);
+                                    return;
+                                }
+                                if(result && result.error){
+                                    var div= '<div style="color:red; padding:4px; width: 240px;">'+result.error+'</div>';
+                                    loginDialog.set("content",div+authDataTable);
+                                    return;
+                                }
+                                if(result && result.result && result.result== "success") {
                                     if(window.location.href.indexOf("/login")>=0)window.location.replace("/");
                                     else window.location.replace(window.location.href);
                                 }

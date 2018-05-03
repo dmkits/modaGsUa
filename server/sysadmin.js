@@ -29,7 +29,6 @@ module.exports= function(app) {
     app.get("/sysadmin/startup_parameters", function (req, res) {
         res.sendFile(path.join(__dirname, '../pages/sysadmin', 'startup_parameters.html'));
     });
-
     app.get("/sysadmin/startup_parameters/get_app_config", function (req, res) {
         if (app.ConfigurationError) {
             res.send({error:app.ConfigurationError});
