@@ -105,7 +105,7 @@ var appModules=require("./modules");
 var loadInitModulesErrorMsg=null;
 module.exports.getLoadInitModulesError= function(){ return loadInitModulesErrorMsg; };
 
-database.connectToDB(function(err){
+database.setSystemConnection(function(err){
     if(err){
         log.error("FAILED to set system connection! Reason: ",err);
         return;

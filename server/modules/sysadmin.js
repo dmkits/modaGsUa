@@ -133,8 +133,6 @@ module.exports.init = function(app){
         outData.mode= appParams.mode;
         outData.port=appParams.port;
         var serverConfig=getServerConfig();
-        outData.connUserName=req.connUserName ;
-      //  outData.appUserName= (req.mduUser)?req.mduUser:"unknown"; //TODO
         if (!serverConfig||serverConfig.error) {
             outData.error= (serverConfig&&serverConfig.error)?serverConfig.error:"unknown";
             res.send(outData);
@@ -215,26 +213,22 @@ module.exports.init = function(app){
         util.saveConfig(appParams.mode+".cfg", newDBConfig,
             function (err) {
                 var outData = {};
-                if (err){
+                if (err) {
                     outData.error = err;
                     res.send(outData);
+                    return;
                 }
-                database.connectWithPool({
-                        login: newDBConfig.user,
-                        password: newDBConfig.password},
-                    function(err,recordset){
-                        if (err) {
-                            outData.DBConnectError = err;
-                            res.send(outData);
-                            return;
-                        }
-                        appModules.validateModules(req.uuid,function(errs, errMessage){
-                            if(errMessage) outData.dbValidation = errMessage;
-                            res.cookie("uuid", recordset.uuid);
-                            res.send(outData);
-                            //startBackupBySchedule();
-                        });
+                database.setSystemConnection(function (err) {
+                    if (err) {
+                        outData.DBConnectError = err;
+                        res.send(outData);
+                        return;
+                    }
+                    appModules.validateModules(req.uuid, function (errs, errMessage, uuid) {
+                        if (errMessage) outData.dbValidation = errMessage;
+                        res.send(outData);
                     });
+                });
             });
     });
 

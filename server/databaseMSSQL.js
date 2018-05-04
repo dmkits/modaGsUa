@@ -28,7 +28,7 @@ module.exports.getConnData=function(){
 function connectWithPool(userData, callback){
     if (connections && connections[userData.uuid]
         && connections[userData.uuid].connection){
-        callback(null,{uuid:uuid});
+        callback(null,{uuid:userData.uuid});
         return;
     }
     var pool = new mssql.ConnectionPool({
@@ -42,26 +42,28 @@ function connectWithPool(userData, callback){
             callback(err.message);
             return;
         }
-        var uuid=userData.uuid||common.getUIDNumber();
-            dbConnectError=null;
-            connections[uuid]={};
-            connections[uuid].connection=pool;
-            connections[uuid].user=userData.login;
-            callback(null,{uuid:uuid})
+        var uuid=userData.uuid=="systemConnection"?"systemConnection":common.getUIDNumber();
+        dbConnectError=null;
+        connections[uuid]={};
+        connections[uuid].connection=pool;
+        connections[uuid].user=userData.login;
+        callback(null,{uuid:uuid})
     });
 };
 module.exports.connectWithPool=connectWithPool;
-function connectToDB(callback){
+function setSystemConnection(callback){
     var dbConfig=getDBConfig();
-    console.log('connectToDB dbConfig=', dbConfig);
     if(dbConfig){
         var systemConnUser= {
             login: dbConfig.user,
             password: dbConfig.password,
-            //host: dbConfig.host,
-            //database: dbConfig.database,
             uuid: "systemConnection"
         };
+        if(connections["systemConnection"]
+            &&connections["systemConnection"].connection){
+            connections["systemConnection"].connection.close();
+            connections["systemConnection"].connection=null;
+        }
         connectWithPool(systemConnUser,function(err){
             if(err) {
                 dbConnectError = err;
@@ -73,7 +75,7 @@ function connectToDB(callback){
         });
     }
 }
-module.exports.connectToDB=connectToDB;
+module.exports.setSystemConnection=setSystemConnection;
 
 function getFieldsTypes(recordset){
     var columns=recordset.columns;

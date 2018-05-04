@@ -82,7 +82,7 @@
                     var condition;
                     if(params&&params.revalidate) condition={"REVALIDATE":true};
                     Request.getJSONData({url: "/sysadmin/serverState", condition:condition, consoleLog: true},
-                            function (result) {                                                          console.log("sysadmin_MainContainer.updateDBState result=",result);
+                            function (result) {       console.log("sysadmin_MainContainer.updateDBState result=",result);
                                 if(!result){
                                     document.getElementById("sysadmin_connectToDBState").innerHTML =
                                             "<b>DB CONNECTION STATE:<span id='dbConnection_color' style='color:red'>UNKNOWN</span></b>";
@@ -114,25 +114,21 @@
                                     eAppPort.innerHTML=eAppPort.innerHTML+"<b style='color:dimgrey'>"+ result.port+"</b>";
                                 else
                                     eAppPort.innerHTML=eAppPort.innerHTML+"<b style='color:dimgrey'>UNKNOWN</b>";
-                                if(result.connUserName){
-                                    document.getElementById("sysadmin_ConnUserName").innerHTML =
-                                            "<b>USER:<b style='color:dimgrey'>" + result.connUserName + "</b>";
-                                }
                                 if(result.configuration && result.configuration.database){
                                     document.getElementById("sysadmin_dbName").innerHTML =
                                             "<b>DB NAME:<span style='color:dimgrey'>" + result.configuration.database + "</span></b>";
+                                } else {
+                                    document.getElementById("sysadmin_dbName").innerHTML =
+                                            "<b>DB NAME:<span style='color:dimgrey'>UNKNOWN</span></b>";
                                 }
-//                                if (result.configuration) {
-//                                    document.getElementById("sysadmin_dbName").innerHTML =
-//                                            "<b>DB NAME:<span style='color:dimgrey'>" + result.configuration.database + "</span></b>";
-//                                    document.getElementById("sysadmin_ConnUserName").innerHTML =
-//                                            "<b>DB USER:<span style='color:dimgrey'>" + result.configuration.user + "</span></b>"
-//                                } else {
-//                                    document.getElementById("sysadmin_dbName").innerHTML =
-//                                            "<b>DB NAME:<span style='color:dimgrey'>UNKNOWN</span></b>";
-//                                    document.getElementById("sysadmin_ConnUserName").innerHTML =
-//                                            "<b>DB USER:<span style='color:dimgrey'>UNKNOWN</span></b>"
-//                                }
+                                if(result.configuration && result.configuration.user){
+                                    document.getElementById("sysadmin_ConnUserName").innerHTML =
+                                            "<b>USER:<b style='color:dimgrey'>" + result.configuration.user + "</b>";
+                                }else {
+                                    document.getElementById("sysadmin_ConnUserName").innerHTML =
+                                            "<b>DB NAME:<span style='color:dimgrey'>UNKNOWN</span></b>";
+                                }
+
                                 if (result.dbConnection) {
                                     document.getElementById("sysadmin_connectToDBState").innerHTML =
                                             "<b>DB CONNECTION STATE:<span id ='dbConnection_color'>" + result.dbConnection + "</span></b>";
