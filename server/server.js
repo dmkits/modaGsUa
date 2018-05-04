@@ -43,7 +43,6 @@ if (appStartupParams.logToConsole) {
 }                                                                                                   log.info('STARTING at', startDateTime );//test
 module.exports.log=log;                                                                             log.info('Modules path, fs, dateformat, winston, util loaded' );//test
 
-//var database = require('./databaseMSSQL');                                                               log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
 var common=require('./common');
 var tempExcelRepDir=path.join(__dirname, '/../temp/');
 try {
@@ -87,7 +86,7 @@ module.exports.getConfig=function(){ return config; };
 module.exports.getConfigAppMenu=function(){ return (config&&config.appMenu)?config.appMenu:null; };
 module.exports.getConfigModules=function(){ return (config&&config.modules)?config.modules:null; };
 
-server.use(function (req, res, next) {                                                             // log.info("REQUEST CONTROLLER:",req.method,req.url);
+server.use(function (req, res, next) {
     next();
 });
 server.use(cookieParser());
@@ -97,7 +96,6 @@ server.use(bodyParser.text({limit: '5mb'}));
 server.use('/', express.static('public'));
 server.set('view engine','ejs');
 
-//require('./access')(server);
 
 global.appViewsPath= path.join(__dirname,'/../pages/','');
 global.appModulesPath= path.join(__dirname,'/modules/','');
@@ -143,7 +141,7 @@ process.on("uncaughtException", function(err){
     console.log("uncaughtException=",err);
 });
 
-server.get("/login", function (req, res) {                        log.info("app.get /login");
+server.get("/login", function (req, res) {                          log.info("app.get /login");
     res.render(path.join(__dirname, '../pages/login.ejs'), {
         loginMsg: ""
     });
@@ -156,7 +154,6 @@ server.post("/login", function (req, res) {                        log.info("app
     }
     database.connectWithPool({login:userName,password:userPswrd}, function(err,recordset){
         if(err){
-            //server sysAdminLoginDataArr=common.getSysAdminLoginDataArr();
             var rootUser=serverConfig.user;
             var rootPassword=serverConfig.password;
             if(userName==rootUser && userPswrd==rootPassword){
@@ -175,53 +172,7 @@ server.post("/login", function (req, res) {                        log.info("app
                 return;
             }
         }
-        //appModules.validateModules(recordset.uuid,function(errs,errMessage,uuid){
-        //    //if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
-        //    //}
-        //    appModules.init(uuid,server,errs);
-        //    if(Object.keys(errs).length>0&&!errMessage){
-        //        var eCount=0;
-        //        for(var errItem in errs){
-        //            if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
-        //            loadInitModulesErrorMsg+=errs[errItem];
-        //            eCount++;
-        //            if(eCount>3) break;
-        //        }
-        //        res.send({error:loadInitModulesErrorMsg});
-        //        return;
-        //    }
-        //    // server.DBConnectError=null;
-        //
-        //});
         res.cookie("uuid", recordset.uuid);
         res.send({result: "success"});
     });
 });
-server.get("/", function(req, res){                                                                     log.info("app.get /");
-    res.sendFile(path.join(__dirname, '../pages', 'main.html'));
-});
-
-//server.post("/", function(req, res){                                                                   log.info("app.post /  req.body=",req.body);
-//    var outData={};
-//    if(req.body["action"] && req.body["action"]=="exit"){
-//        var cookiesArr=Object.keys(req.cookies);
-//        for(var i in cookiesArr){
-//            res.clearCookie(cookiesArr[i]);
-//        }
-//        outData.actionResult="successfull";
-//        res.send(outData);
-//        return;
-//    }
-//    outData.error="Не удалось завершить сессию.";
-//    res.send(outData);
-//});
-
-//server.listen(appStartupParams.port, function (err) {
-//    if (err) {
-//        log.error(err);
-//        console.log(err);
-//        return;
-//    }
-//    console.log("app runs on port " + appStartupParams.port, new Date().getTime() - startTime);
-//    log.info("app runs on port " + appStartupParams.port);
-//});
