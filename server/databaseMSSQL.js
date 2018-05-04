@@ -16,6 +16,8 @@ module.exports.getDBConnectError= function(){ return dbConnectError; };
  */
 var connections={};
 
+console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DATABASE=');
+
 module.exports.getConnData=function(){
     return connections;
 };
@@ -23,7 +25,7 @@ module.exports.getConnData=function(){
  * @param userData
  * @param callback (err,uuid)
  */
-module.exports.connectWithPool=function(userData, callback){
+function connectWithPool(userData, callback){
     if (connections && connections[userData.uuid]
         && connections[userData.uuid].connection){
         callback(null,{uuid:uuid});
@@ -40,7 +42,7 @@ module.exports.connectWithPool=function(userData, callback){
             callback(err.message);
             return;
         }
-        var uuid=common.getUIDNumber();
+        var uuid=userData.uuid||common.getUIDNumber();
             dbConnectError=null;
             connections[uuid]={};
             connections[uuid].connection=pool;
@@ -48,6 +50,31 @@ module.exports.connectWithPool=function(userData, callback){
             callback(null,{uuid:uuid})
     });
 };
+module.exports.connectWithPool=connectWithPool;
+function connectToDB(callback){
+    var dbConfig=getDBConfig();
+    console.log('connectToDB dbConfig=', dbConfig);
+    if(dbConfig){
+        var systemConnUser= {
+            login: dbConfig.user,
+            password: dbConfig.password,
+            //host: dbConfig.host,
+            //database: dbConfig.database,
+            uuid: "systemConnection"
+        };
+        connectWithPool(systemConnUser,function(err){
+            if(err) {
+                dbConnectError = err;
+                callback(err);
+                return;
+            }
+            dbConnectError = null;
+            callback()
+        });
+    }
+}
+module.exports.connectToDB=connectToDB;
+
 function getFieldsTypes(recordset){
     var columns=recordset.columns;
     var fieldsTypes={};
@@ -134,6 +161,5 @@ module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {
             callback(null, result.rowsAffected.length);
         });
 };
-
 
 

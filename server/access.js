@@ -18,7 +18,7 @@ module.exports= function(app) {
             next();
             return;
         }
-        if (req.cookies.uuid) { console.log('req.cookies.uuid');
+        if (req.cookies.uuid) {                                 console.log('req.cookies.uuid');
             var uuid=req.cookies.uuid;
             var connData=database.getConnData();
             if(connData && connData[uuid] && connData[uuid].connection
@@ -29,7 +29,7 @@ module.exports= function(app) {
                 next();
                 return;
             }
-            if(req.cookies.sysadmin){  console.log('req.cookies.sysadmin');
+            if(req.cookies.sysadmin){                           console.log('req.cookies.sysadmin');
                 var sysAdminUUIDArr = common.getSysAdminConnArr();
                 for (var i in sysAdminUUIDArr) {
                     if (sysAdminUUIDArr[i][req.cookies.uuid]) {
@@ -40,7 +40,7 @@ module.exports= function(app) {
                     }
                 }
             }
-            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {          console.log('reqIsJSON(req.headers) || reqIsAJAX(req.headers)');
                 console.log("(reqIsJSON(req.headers) || reqIsAJAX(req.headers 180");
                 res.send({
                     error: "Failed to get data! Reason:the session has expired!",

@@ -43,7 +43,7 @@ if (appStartupParams.logToConsole) {
 }                                                                                                   log.info('STARTING at', startDateTime );//test
 module.exports.log=log;                                                                             log.info('Modules path, fs, dateformat, winston, util loaded' );//test
 
-var database = require('./databaseMSSQL');                                                               log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
+//var database = require('./databaseMSSQL');                                                               log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
 var common=require('./common');
 var tempExcelRepDir=path.join(__dirname, '/../temp/');
 try {
@@ -70,6 +70,7 @@ function loadServerConfiguration(){
     try {
         serverConfig= util.loadConfig(appStartupParams.mode + '.cfg');
     } catch (e) {
+        log.error("Failed to load configuration! Reason:" + e);
         serverConfig= {"error":"Failed to load configuration! Reason:" + e};
     }
 };
@@ -77,6 +78,8 @@ loadServerConfiguration();                                                      
 module.exports.loadServerConfiguration= loadServerConfiguration;                                    log.info('startup mode:'+appStartupParams.mode,' server configuration:', serverConfig);//test
 module.exports.getServerConfig= function(){ return serverConfig };
 module.exports.setAppConfig= function(newAppConfig){ serverConfig=newAppConfig; };
+
+var database = require('./databaseMSSQL');                                                               log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
 
 var configFileName=serverConfig.configName || 'config.json';
 var config=JSON.parse(util.getJSONWithoutComments(fs.readFileSync('./'+configFileName,'utf-8')));
@@ -94,7 +97,7 @@ server.use(bodyParser.text({limit: '5mb'}));
 server.use('/', express.static('public'));
 server.set('view engine','ejs');
 
-require('./access')(server);
+//require('./access')(server);
 
 global.appViewsPath= path.join(__dirname,'/../pages/','');
 global.appModulesPath= path.join(__dirname,'/modules/','');
@@ -104,30 +107,36 @@ var appModules=require("./modules");
 var loadInitModulesErrorMsg=null;
 module.exports.getLoadInitModulesError= function(){ return loadInitModulesErrorMsg; };
 
+database.connectToDB(function(err){
+    if(err){
+        log.error("FAILED to set system connection! Reason: ",err);
+        return;
+    }
+    appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
+        if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
+        }
+        require('./access')(server);
 
-//appModules.validateModules(function(errs, errMessage){
-//    if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
-//    }
-//
-//    appModules.init(server,errs);
-//    if(errs&&!errMessage){
-//        var eCount=0;
-//        for(var errItem in errs){
-//            if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
-//            loadInitModulesErrorMsg+=errs[errItem];
-//            eCount++;
-//            if(eCount>3) break;
-//        }
-//    }
-//    server.listen(appStartupParams.port, function (err) {
-//        if(err){
-//            console.log("listen port err= ", err);
-//            return;
-//        }
-//        console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-//        log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-//    });                                                                                             log.info("server inited.");
-//});
+        appModules.init(uuid,server,errs);
+        if(errs&&!errMessage){
+            var eCount=0;
+            for(var errItem in errs){
+                if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
+                loadInitModulesErrorMsg+=errs[errItem];
+                eCount++;
+                if(eCount>3) break;
+            }
+        }
+        server.listen(appStartupParams.port, function (err) {
+            if(err){
+                console.log("listen port err= ", err);
+                return;
+            }
+            console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+            log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+        });                                                                                             log.info("server inited.");
+    });
+});
 
 process.on("uncaughtException", function(err){
     log.error(err);
@@ -135,7 +144,6 @@ process.on("uncaughtException", function(err){
 });
 
 server.get("/login", function (req, res) {                        log.info("app.get /login");
-    //res.sendFile(path.join(__dirname, '../pages', 'login.html'));
     res.render(path.join(__dirname, '../pages/login.ejs'), {
         loginMsg: ""
     });
@@ -163,34 +171,36 @@ server.post("/login", function (req, res) {                        log.info("app
                 res.send({result: "success"});
                 return;
             }else{
-                res.send({error:err}); 
+                res.send({error:err});
                 return;
             }
         }
-        appModules.validateModules(recordset.uuid,function(errs,errMessage,uuid){
-            //if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
-            //}
-            appModules.init(uuid,server,errs);
-            if(Object.keys(errs).length>0&&!errMessage){
-                var eCount=0;
-                for(var errItem in errs){
-                    if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
-                    loadInitModulesErrorMsg+=errs[errItem];
-                    eCount++;
-                    if(eCount>3) break;
-                }
-                res.send({error:loadInitModulesErrorMsg});
-                return;
-            }
-            // server.DBConnectError=null;
-            res.cookie("uuid", recordset.uuid);
-            res.send({result: "success"});
-        });
+        //appModules.validateModules(recordset.uuid,function(errs,errMessage,uuid){
+        //    //if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
+        //    //}
+        //    appModules.init(uuid,server,errs);
+        //    if(Object.keys(errs).length>0&&!errMessage){
+        //        var eCount=0;
+        //        for(var errItem in errs){
+        //            if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
+        //            loadInitModulesErrorMsg+=errs[errItem];
+        //            eCount++;
+        //            if(eCount>3) break;
+        //        }
+        //        res.send({error:loadInitModulesErrorMsg});
+        //        return;
+        //    }
+        //    // server.DBConnectError=null;
+        //
+        //});
+        res.cookie("uuid", recordset.uuid);
+        res.send({result: "success"});
     });
 });
-//server.get("/", function(req, res){                                                                     log.info("app.get /");
-//    res.sendFile(path.join(__dirname, '../pages', 'main.html'));
-//});
+server.get("/", function(req, res){                                                                     log.info("app.get /");
+    res.sendFile(path.join(__dirname, '../pages', 'main.html'));
+});
+
 //server.post("/", function(req, res){                                                                   log.info("app.post /  req.body=",req.body);
 //    var outData={};
 //    if(req.body["action"] && req.body["action"]=="exit"){
@@ -206,12 +216,12 @@ server.post("/login", function (req, res) {                        log.info("app
 //    res.send(outData);
 //});
 
-server.listen(appStartupParams.port, function (err) {
-    if (err) {
-        log.error(err);
-        console.log(err);
-        return;
-    }
-    console.log("app runs on port " + appStartupParams.port, new Date().getTime() - startTime);
-    log.info("app runs on port " + appStartupParams.port);
-});
+//server.listen(appStartupParams.port, function (err) {
+//    if (err) {
+//        log.error(err);
+//        console.log(err);
+//        return;
+//    }
+//    console.log("app runs on port " + appStartupParams.port, new Date().getTime() - startTime);
+//    log.info("app runs on port " + appStartupParams.port);
+//});
