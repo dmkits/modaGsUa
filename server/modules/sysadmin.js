@@ -139,13 +139,13 @@ module.exports.init = function(app){
             return;
         }
         outData.configuration= serverConfig;
-        var dbConnectError= database.getDBConnectError();
-        if (dbConnectError) {
-            outData.dbConnection= dbConnectError;
+        var systemConnectionErr= database.getSystemConnection();
+        if (systemConnectionErr) {
+            outData.systemConnectionErr= systemConnectionErr;
             res.send(outData);
             return
         }
-        outData.dbConnection = 'Connected';
+        outData.systemConnectionErr = 'Connected';
         var loadInitModulesError=getLoadInitModulesError();
         if(loadInitModulesError) outData.modulesFailures = loadInitModulesError;
         if (revalidateModules) {
@@ -184,7 +184,7 @@ module.exports.init = function(app){
         res.send(serverConfig);
     });
     app.get("/sysadmin/server/getDBList", function (req, res) {
-        database.selectQuery(req.uuid,"select	name "+
+        database.selectQuery('systemConnection',"select	name "+
             "from	sys.databases "+
             "where	name not in ('master','tempdb','model','msdb') "+
             "and is_distributor = 0 "+
@@ -224,7 +224,7 @@ module.exports.init = function(app){
                         res.send(outData);
                         return;
                     }
-                    appModules.validateModules(req.uuid, function (errs, errMessage, uuid) {
+                    appModules.validateModules("systemConnection", function (errs, errMessage, uuid) {
                         if (errMessage) outData.dbValidation = errMessage;
                         res.send(outData);
                     });

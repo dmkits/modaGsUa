@@ -105,16 +105,15 @@ var appModules=require("./modules");
 var loadInitModulesErrorMsg=null;
 module.exports.getLoadInitModulesError= function(){ return loadInitModulesErrorMsg; };
 
+require('./access')(server);
+
 database.setSystemConnection(function(err){
     if(err){
         log.error("FAILED to set system connection! Reason: ",err);
-        return;
     }
     appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
         if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
         }
-        require('./access')(server);
-
         appModules.init(uuid,server,errs);
         if(errs&&!errMessage){
             var eCount=0;

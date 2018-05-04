@@ -16,7 +16,6 @@ module.exports.getDBConnectError= function(){ return dbConnectError; };
  */
 var connections={};
 
-console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DATABASE=');
 
 module.exports.getConnData=function(){
     return connections;
@@ -51,6 +50,8 @@ function connectWithPool(userData, callback){
     });
 };
 module.exports.connectWithPool=connectWithPool;
+
+var systemConnectionErr=null;
 function setSystemConnection(callback){
     var dbConfig=getDBConfig();
     if(dbConfig){
@@ -66,16 +67,21 @@ function setSystemConnection(callback){
         }
         connectWithPool(systemConnUser,function(err){
             if(err) {
-                dbConnectError = err;
+                systemConnectionErr = err;
                 callback(err);
                 return;
             }
-            dbConnectError = null;
+            systemConnectionErr = null;
             callback()
         });
     }
 }
 module.exports.setSystemConnection=setSystemConnection;
+
+function getSystemConnection(){
+    return systemConnectionErr;
+}
+module.exports.getSystemConnection=getSystemConnection;
 
 function getFieldsTypes(recordset){
     var columns=recordset.columns;
@@ -93,6 +99,10 @@ function getFieldsTypes(recordset){
     return fieldsTypes;
 }
 function selectQuery(uuid,query, callback) {                                                   log.info("database selectQuery query:",query);
+    if(!connections[uuid]){
+        callback( "No connection to database");
+        return;
+    }
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     request.query(query,
@@ -112,6 +122,10 @@ module.exports.selectQuery=selectQuery;
  * callback = function(err, updateCount)
  */
 module.exports.executeQuery=function(uuid,query,callback){                                      log.debug("database executeQuery:",query);
+    if(!connections[uuid]){
+        callback("No connection to database");
+        return;
+    }
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     request.query(query,
@@ -126,6 +140,10 @@ module.exports.executeQuery=function(uuid,query,callback){                      
         });
 };
 function selectParamsQuery(uuid,query, parameters, callback) {                                      log.debug("database selectParamsQuery query:",query," parameters:",parameters,{});
+    if(!connections[uuid]){
+        callback("No connection to database");
+        return;
+    }
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     for(var i in parameters){
@@ -149,6 +167,10 @@ module.exports.selectParamsQuery=selectParamsQuery;
  * callback = function(err, updateCount)
  */
 module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {                 log.debug("database executeParamsQuery:",query,parameters);
+    if(!connections[uuid]){
+        callback("No connection to database");
+        return;
+    }
     var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     for(var i in parameters){

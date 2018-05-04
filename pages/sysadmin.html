@@ -129,11 +129,11 @@
                                             "<b>DB NAME:<span style='color:dimgrey'>UNKNOWN</span></b>";
                                 }
 
-                                if (result.dbConnection) {
+                                if (result.systemConnectionErr) {
                                     document.getElementById("sysadmin_connectToDBState").innerHTML =
-                                            "<b>DB CONNECTION STATE:<span id ='dbConnection_color'>" + result.dbConnection + "</span></b>";
+                                            "<b>DB CONNECTION STATE:<span id ='dbConnection_color'>" + result.systemConnectionErr + "</span></b>";
                                     var dbConnection_color = document.getElementById("dbConnection_color");
-                                    if (result.dbConnection == "Connected") {
+                                    if (result.systemConnectionErr == "Connected") {
                                         dbConnection_color.setAttribute("style", "color:dimgrey");
                                         sysadmin_TopContainer.set("style","height:63px; margin:0; padding:0");
                                     }else {
