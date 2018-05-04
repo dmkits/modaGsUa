@@ -135,7 +135,10 @@ process.on("uncaughtException", function(err){
 });
 
 server.get("/login", function (req, res) {                        log.info("app.get /login");
-    res.sendFile(path.join(__dirname, '../pages', 'login.html'));
+    //res.sendFile(path.join(__dirname, '../pages', 'login.html'));
+    res.render(path.join(__dirname, '../pages/login.ejs'), {
+        loginMsg: ""
+    });
 });
 server.post("/login", function (req, res) {                        log.info("app.post /login",req.body.user, 'userPswrd=',req.body.pswrd);
     var userName=req.body.user, userPswrd=req.body.pswrd;

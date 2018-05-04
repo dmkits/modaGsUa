@@ -40,23 +40,38 @@ module.exports= function(app) {
                     }
                 }
             }
-            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {  console.log("reqIsJSON(req.headers) || reqIsAJAX(req.headers)=");
+            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+                console.log("(reqIsJSON(req.headers) || reqIsAJAX(req.headers 180");
                 res.send({
-                    error: "Failed to connect to database!",
-                    userErrorMsg: "Не удалось подключиться к базе данных."
+                    error: "Failed to get data! Reason:the session has expired!",
+                    userErrorMsg: "Не удалось плучить данные. Время сессии истекло."
                 });
                 return;
             }
-            var img = "imgs/girls_big.jpg";
-            var title = "REPORTS";
-            var icon32x32 = "icons/profits32x32.jpg";
-            res.render(path.join(__dirname, "../pages/dbFailed.ejs"), {
-                title: title,
-                bigImg: img,
-                icon: icon32x32,
-                errorReason: "Не удалось обратиться к базе данных!"
+            res.render(path.join(__dirname, '../pages/login.ejs'), {
+                loginMsg: "<div>Время сессии истекло.<br> Необходима авторизация.</div>"
             });
             return;
+
+            //}
+            //if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {  console.log("reqIsJSON(req.headers) || reqIsAJAX(req.headers)=");
+            //    res.send({
+            //        error: "Failed to connect to database!",
+            //        userErrorMsg: "Не удалось подключиться к базе данных."
+            //    });
+            //    return;
+            //}
+
+            //var img = "imgs/girls_big.jpg";
+            //var title = "REPORTS";
+            //var icon32x32 = "icons/profits32x32.jpg";
+            //res.render(path.join(__dirname, "../pages/dbFailed.ejs"), {
+            //    title: title,
+            //    bigImg: img,
+            //    icon: icon32x32,
+            //    errorReason: "Не удалось обратиться к базе данных!"
+            //});
+            //return;
         }
                 //var sysAdminAccess = false;
                 //var sysAdminLogin = null;
@@ -185,6 +200,8 @@ module.exports= function(app) {
             return;
         }
         console.log("access sendFile");
-        res.sendFile(path.join(__dirname, '../pages', 'login.html'));
+        res.render(path.join(__dirname, '../pages/login.ejs'), {
+            loginMsg: ""
+        });
     });
 };

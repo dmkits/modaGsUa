@@ -12,10 +12,11 @@
 <body id="loginBody" class="claro">
 </body>
 <script type="text/javascript">
-    require(["request","dijit/ConfirmDialog","dojo/keys", "dojo/domReady!"],
+    require(["request","dijit/ConfirmDialog","dojo/keys","dojo/domReady!"],
             function (Request, ConfirmDialog,keys) {
                 moment.locale("uk");
-                var authDataTable='<table id="auth_admin_dialog_table" width="240px">'+
+                var authTableContent='<div id="loginDialogDiv" style="width:250px; padding:4px"><%-loginMsg%></div>' +
+                        '<table id="auth_admin_dialog_table" width="240px">'+
                         '<tr>'+
                         '<td><label for="user_name">Имя:</label></td>'+
                         '<td><input type="text" name="user_name" id="user_name"></td>'+
@@ -28,7 +29,7 @@
                 var loginDialog = new ConfirmDialog({
                     autofocus:false,
                     id: "loginDialog",
-                    content:authDataTable,
+                    content:authTableContent,
                     title: "Авторизация"
                 }, "loginDialog");
                 loginDialog.set("buttonOk","Войти");
@@ -40,13 +41,13 @@
                     Request.postJSON({url:  "/login", data: {user:user, pswrd:pswrd}, consoleLog: true},
                             function (sucsess,result) {
                                 if(!sucsess){
-                                    var div= '<div style="color:red; padding:4px; width: 240px;">Не удалось связаться с сервером</div>';
-                                    loginDialog.set("content",div+authDataTable);
+                                    document.getElementById("loginDialogDiv").innerHTML='<div style="color:red; padding:4px; width: 240px;">Не удалось связаться с сервером</div>';
+                                    loginDialog.reset();
                                     return;
                                 }
                                 if(result && result.error){
-                                    var div= '<div style="color:red; padding:4px; width: 240px;">'+result.error+'</div>';
-                                    loginDialog.set("content",div+authDataTable);
+                                    document.getElementById("loginDialogDiv").innerHTML='<div style="color:red; padding:4px; width: 240px;">'+result.error+'</div>';
+                                    loginDialog.reset();
                                     return;
                                 }
                                 if(result && result.result && result.result== "success") {
