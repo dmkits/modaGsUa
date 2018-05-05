@@ -84,25 +84,46 @@ module.exports= function(app) {
                     res.send(outData);
                       return;
                 }
-                database.connectWithPool({
-                        login: newDBConfigString.user,
-                        password: newDBConfigString.password},
-                    function(err,recordset){
-                        if (err) {
-                           // outData.connUserName = newDBConfigString.user;
-                            req.connUserName=newDBConfigString.user;
-                            outData.DBConnectError = err;
-                            app.DBConnectError=err;
-                            res.send(outData);
-                            return;
+                //database.connectWithPool({
+                //        login: newDBConfigString.user,
+                //        password: newDBConfigString.password},
+                //    function(err,recordset){
+                //        if (err) {
+                //           // outData.connUserName = newDBConfigString.user;
+                //           // req.connUserName=newDBConfigString.user;
+                //            outData.DBConnectError = err;
+                //            app.DBConnectError=err;
+                //            res.send(outData);
+                //            return;
+                //        }
+                //        //outData.connUserName = newDBConfigString.user;
+                //        //req.connUserName=newDBConfigString.user;
+                //        outData.DBConnectError = err;
+                //        app.DBConnectError=null;
+                //        res.cookie("uuid", recordset.uuid);
+                //        res.send(outData);
+                //    });
+
+                database.setSystemConnection(function(err){
+                    if(err){
+                        log.error("FAILED to set system connection! Reason: ",err);
+                    }
+                    appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
+                        if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
                         }
-                      //  outData.connUserName = newDBConfigString.user;
-                        req.connUserName=newDBConfigString.user;
-                        outData.DBConnectError = err;
-                        app.DBConnectError=null;
-                        res.cookie("uuid", recordset.uuid);
-                        res.send(outData);
+                        appModules.init(uuid,server,errs);
+                        if(errs&&!errMessage){
+                            var eCount=0;
+                            for(var errItem in errs){
+                                if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
+                                loadInitModulesErrorMsg+=errs[errItem];
+                                eCount++;
+                                if(eCount>3) break;
+                            }
+                        }
                     });
+                });
+
             });
     });
 

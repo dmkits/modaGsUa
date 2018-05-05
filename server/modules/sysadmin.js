@@ -139,7 +139,7 @@ module.exports.init = function(app){
             return;
         }
         outData.configuration= serverConfig;
-        var systemConnectionErr= database.getSystemConnection();
+        var systemConnectionErr= database.getSystemConnectionErr();
         if (systemConnectionErr) {
             outData.systemConnectionErr= systemConnectionErr;
             res.send(outData);

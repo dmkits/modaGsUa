@@ -24,31 +24,40 @@ module.exports.getConnData=function(){
  * @param userData
  * @param callback (err,uuid)
  */
-function connectWithPool(userData, callback){
+function connectWithPool(userData, callback){                  console.log('connectWithPool userData=', userData);
     if (connections && connections[userData.uuid]
         && connections[userData.uuid].connection){
         callback(null,{uuid:userData.uuid});
         return;
     }
+    var dbConfig=getDBConfig();
     var pool = new mssql.ConnectionPool({
         user: userData.login,
         password: userData.password,
-        server:   getDBConfig().host,
-        database: getDBConfig().database
+        server:   dbConfig.host,
+        database: dbConfig.database
+        //,pool: {
+        //    max: 10,
+        //    min: 0,
+        //    idleTimeoutMillis: 30000
+        //}
     }, function(err){
         if(err){
+            log.info("Failed to create connection for user "+userData.login+" userData.uuid="+userData.uuid+ ". Reason: "+err);
             dbConnectError=err.message;
             callback(err.message);
             return;
         }
-        var uuid=userData.uuid=="systemConnection"?"systemConnection":common.getUIDNumber();
+        var uuid;
+        if(userData.uuid && userData.uuid=="systemConnection") uuid="systemConnection";
+        else uuid=common.getUIDNumber();
         dbConnectError=null;
         connections[uuid]={};
         connections[uuid].connection=pool;
         connections[uuid].user=userData.login;
         callback(null,{uuid:uuid})
     });
-};
+}
 module.exports.connectWithPool=connectWithPool;
 
 var systemConnectionErr=null;
@@ -78,10 +87,10 @@ function setSystemConnection(callback){
 }
 module.exports.setSystemConnection=setSystemConnection;
 
-function getSystemConnection(){
+function getSystemConnectionErr(){
     return systemConnectionErr;
 }
-module.exports.getSystemConnection=getSystemConnection;
+module.exports.getSystemConnectionErr=getSystemConnectionErr;
 
 function getFieldsTypes(recordset){
     var columns=recordset.columns;
