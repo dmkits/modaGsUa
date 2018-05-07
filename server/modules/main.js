@@ -60,7 +60,7 @@ module.exports.init= function(app){
         //outData.menuBar=getUserMenuByUserRole(userRole, appConfig.usersRoleMenu, appConfig.appMenu);
         outData.menuBar=appConfig.appMenu;
 
-        outData.autorun=appConfig.usersRoleAutorun[userRole];
+        //outData.autorun=appConfig.usersRoleAutorun[userRole];
 
         if (!appConfig||appConfig.error) {
             outData.error= "Failed load application configuration!"+(appConfig&&appConfig.error)?" Reason:"+appConfig.error:"";

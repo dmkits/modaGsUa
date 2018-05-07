@@ -665,7 +665,7 @@ module.exports.init = function(app){
     app.get("/sysadmin/database/getCurrentChanges", function (req, res) {
         var outData = { columns:changesTableColumns, identifier:changesTableColumns[0].data, items:[] };
         checkIfChangeLogExists(req.uuid,function(tableData) {
-            if (tableData.error&&  tableData.error.indexOf("Invalid object name")>=0) {  log.info("checkIfChangeLogExists resultCallback tableData.error:",tableData.error);
+            if (tableData.error&&  tableData.error.indexOf("Invalid object name")>=0) {  log.info("668   checkIfChangeLogExists resultCallback tableData.error:",tableData.error,tableData);
                 outData.noTable = true;
                 var arr=dataModel.getModelChanges();
                 var items=util.sortArray(arr);
@@ -678,7 +678,7 @@ module.exports.init = function(app){
                 res.send(outData);
                 return;
             }
-            if (tableData.error) {                                                                          log.error("checkIfChangeLogExists resultCallback tableData.error:",tableData.error);
+            if (tableData.error) {                                                                          log.error("681   checkIfChangeLogExists resultCallback tableData.error:",tableData.error);
                 outData.error = tableData.error;
                 res.send(outData);
                 return;

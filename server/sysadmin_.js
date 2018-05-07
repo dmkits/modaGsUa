@@ -2,6 +2,7 @@ var fs = require('fs'), path=require ('path');
 
 var common=require('./common');
 var database=require('./databaseMSSQL');
+var server=require('./server');
 var logger=require('./server').log;
 
 module.exports= function(app) {
@@ -103,25 +104,12 @@ module.exports= function(app) {
                 //        res.cookie("uuid", recordset.uuid);
                 //        res.send(outData);
                 //    });
-
                 database.setSystemConnection(function(err){
                     if(err){
+
                         log.error("FAILED to set system connection! Reason: ",err);
                     }
-                    appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
-                        if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
-                        }
-                        appModules.init(uuid,server,errs);
-                        if(errs&&!errMessage){
-                            var eCount=0;
-                            for(var errItem in errs){
-                                if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
-                                loadInitModulesErrorMsg+=errs[errItem];
-                                eCount++;
-                                if(eCount>3) break;
-                            }
-                        }
-                    });
+                    server.validateAppModules();
                 });
 
             });

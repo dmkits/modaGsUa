@@ -53,10 +53,11 @@ module.exports= function(app) {
                         }
                         if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
                             log.info("DB connection config was changed or connections were cleared. New authorisation is needed.");
-                            res.send({
-                                error: "DB connection config was changed or connections were cleared. New authorisation is needed.",
-                                userErrorMsg: "Необходимо повторно авторизироваться."
-                            });
+                            //res.send({
+                            //    error: "DB connection config was changed or connections were cleared. New authorisation is needed.",
+                            //    userErrorMsg: "Необходимо повторно авторизироваться."
+                            //});
+                            next();
                             return;
                         }
                         log.info("DB connection config was changed or connections were cleared. New authorisation is needed.");

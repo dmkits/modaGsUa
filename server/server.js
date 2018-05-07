@@ -111,6 +111,42 @@ database.setSystemConnection(function(err){
     if(err){
         log.error("FAILED to set system connection! Reason: ",err);
     }
+    validateAppModules(function(){
+            server.listen(appStartupParams.port, function (err) {
+                if(err){
+                    console.log("listen port err= ", err);
+                    return;
+                }
+                console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+                log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+            });                                                                                             log.info("server inited.");
+        });
+    });
+    //appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
+    //    if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
+    //    }
+    //    appModules.init(uuid,server,errs);
+    //    if(errs&&!errMessage){
+    //        var eCount=0;
+    //        for(var errItem in errs){
+    //            if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
+    //            loadInitModulesErrorMsg+=errs[errItem];
+    //            eCount++;
+    //            if(eCount>3) break;
+    //        }
+    //    }
+    //    server.listen(appStartupParams.port, function (err) {
+    //        if(err){
+    //            console.log("listen port err= ", err);
+    //            return;
+    //        }
+    //        console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+    //        log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+    //    });                                                                                             log.info("server inited.");
+    //});
+
+
+function validateAppModules(callback){
     appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
         if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
         }
@@ -124,21 +160,18 @@ database.setSystemConnection(function(err){
                 if(eCount>3) break;
             }
         }
-        server.listen(appStartupParams.port, function (err) {
-            if(err){
-                console.log("listen port err= ", err);
-                return;
-            }
-            console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-            log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-        });                                                                                             log.info("server inited.");
+        callback();
+        //server.listen(appStartupParams.port, function (err) {
+        //    if(err){
+        //        console.log("listen port err= ", err);
+        //        return;
+        //    }
+        //    console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+        //    log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+        //});                                                                                             log.info("server inited.");
     });
-});
-
-module.exports.validateAppModules=validateAppModules;
-function validateAppModules(callback){
-
 }
+module.exports.validateAppModules=validateAppModules;
 
 process.on("uncaughtException", function(err){
     log.error(err);
