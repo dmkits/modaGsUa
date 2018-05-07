@@ -18,21 +18,19 @@ module.exports= function(app) {
             next();
             return;
         }
-        if (req.cookies.uuid) {                                 console.log('req.cookies.uuid');
+        if (req.cookies.uuid) {                                              console.log('req.cookies.uuid');
             var uuid=req.cookies.uuid;
-            var connData=database.getConnData();                console.log('connData=',connData);
+            var connData=database.getConnData();                             console.log('connData=',connData);
             if(connData && connData[uuid] && connData[uuid].connection
                 && connData[uuid].user) {
-             // req.dbConnection = connData[uuid].connection;
-                database.executeQuery(uuid,"select SUSER_NAME();",function(err, recordset){
+                database.selectQuery(uuid,"select SUSER_NAME() as dbUserName;",function(err, recordset){
                     if(err){
                         log.error('Failed to get current DB user. Reason: '+err);
                         return;
                     }
-                    log.info('Current DB user: '+recordset);
-
+                    log.info('Current DB user: ', recordset[0].username);
                     req.uuid = uuid;
-                    req.connUserName=connData[uuid].user;
+                    req.dbUserName=recordset[0].dbUserName;
                     next();
                 });
                 return;
@@ -41,7 +39,7 @@ module.exports= function(app) {
                 var sysAdminUUIDArr = common.getSysAdminConnArr();  // console.log('sysAdminUUIDArr=',sysAdminUUIDArr);
                 for (var i in sysAdminUUIDArr) {
                     if (sysAdminUUIDArr[i][req.cookies.uuid]) {  console.log('inside if sysAdminUUIDArr');
-                        req.connUserName = sysAdminUUIDArr[i][req.cookies.uuid];
+                    //    req.connUserName = sysAdminUUIDArr[i][req.cookies.uuid];
 
                  //   }
                         //check systemconn

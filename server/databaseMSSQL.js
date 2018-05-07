@@ -10,6 +10,7 @@ function getDBConfig(){
     return { host:serverConfig.host, database:serverConfig.database, user:serverConfig.user, password:serverConfig.password,
         supportBigNumbers:true };
 }
+module.exports.getDBConfig= getDBConfig;
 module.exports.getDBConnectError= function(){ return dbConnectError; };
 /**
  *{uuid:{user:<user>, connection: <connection> }}
@@ -19,6 +20,14 @@ var connections={};
 
 module.exports.getConnData=function(){
     return connections;
+};
+module.exports.cleanConnectionPool=function(){
+  for(var i in connections){
+     if(connections[i]['connection']){
+         connections[i]['connection'].close();
+     }
+  }
+    connections={};
 };
 /**
  * @param userData
@@ -194,5 +203,3 @@ module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {
             callback(null, result.rowsAffected.length);
         });
 };
-
-

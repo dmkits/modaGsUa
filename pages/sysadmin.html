@@ -21,9 +21,10 @@
         <div id="sysadmin_TopStateInfo">
             <!--<div id="sysadmin_app_user" style="display:inline;"></div>-->
             <div id="sysadmin_app_mode" style="display:inline;inline;margin-left:20px;"></div>
+            <div id="sysadmin_ConnUserName" style="display:inline;;margin-left:20px;"></div>
             <div id="sysadmin_app_port" style="display:inline; margin-left:20px;"></div>
             <div id="sysadmin_dbName" style="display:inline;;margin-left:20px;"></div>
-            <div id="sysadmin_ConnUserName" style="display:inline;;margin-left:20px;"></div>
+            <div id="sysadmin_db_sysadmin_name" style="display:inline;;margin-left:20px;"></div>
             <div id="sysadmin_connectToDBState" style="display:inline;margin-left:20px;"></div>
             <div id="sysadmin_modulesFailures" style="display:inline;margin-left:20px;"></div>
             <div id="sysadmin_dbValidateState" style="display:inline;margin-left:20px;"></div>
@@ -90,19 +91,15 @@
                                     return;
                                 }
                                 if(result.error){
-                                    if(error)sysadmin_MainContainer.mainContentData["error"] = error;
+                                    if(error)sysadmin_MainContainer.mainContentData["error"] = result.error;
                                     return;
                                 }
                                 sysadmin_MainContainer.mainContentData = result;
-                               // var eAppUser = document.getElementById("sysadmin_app_user");
                                 var eAppMode = document.getElementById("sysadmin_app_mode");
                                 var eAppPort = document.getElementById("sysadmin_app_port");
-                               // eAppUser.innerHTML = "<b>USER:</b>";
                                 eAppMode.innerHTML = "<b>MODE:</b>";
                                 eAppPort.innerHTML = "<b>PORT:</b>";
                                 if(result.config) setBrending(result.config);
-//                                if (result.appUserName) eAppUser.innerHTML = eAppUser.innerHTML + "<b><span style='color:dimgrey'>" + result.appUserName + "</span></b>";
-//                                else eAppUser.innerHTML = eAppUser.innerHTML + "<b>UNKNOWN!!!</b>";
                                 if (result.mode) {
                                     if (result.mode.toString().toLocaleLowerCase().indexOf("production") < 0)
                                         eAppMode.innerHTML = eAppMode.innerHTML + "<b style='color:red'>" + result.mode + "</b>";
@@ -122,11 +119,18 @@
                                             "<b>DB NAME:<span style='color:dimgrey'>UNKNOWN</span></b>";
                                 }
                                 if(result.configuration && result.configuration.user){
+                                    document.getElementById("sysadmin_db_sysadmin_name").innerHTML =
+                                            "<b>DB SYSADMIN USER:<b style='color:dimgrey'>" + result.configuration.user + "</b>";
+                                }else {
+                                    document.getElementById("sysadmin_db_sysadmin_name").innerHTML =
+                                            "<b>DB CONNECTION USER:<span style='color:dimgrey'>UNKNOWN</span></b>";
+                                }
+                                if(result.dbUserName){
                                     document.getElementById("sysadmin_ConnUserName").innerHTML =
-                                            "<b>USER:<b style='color:dimgrey'>" + result.configuration.user + "</b>";
+                                            "<b>DB CONNECTION USER:<b style='color:dimgrey'>" + result.dbUserName + "</b>";
                                 }else {
                                     document.getElementById("sysadmin_ConnUserName").innerHTML =
-                                            "<b>DB NAME:<span style='color:dimgrey'>UNKNOWN</span></b>";
+                                            "<b>DB CONNECTION USER:<span style='color:dimgrey'>UNKNOWN</span></b>";
                                 }
 
                                 if (result.systemConnectionErr) {

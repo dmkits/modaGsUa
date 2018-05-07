@@ -41,7 +41,7 @@
             <div id="main_TopImg"></div>
             <div id="main_MainMenu"></div>
             <div id="main_TopInfoPane">
-                <div id="main_username" style="display:inline;margin-left:10px;"></div>
+                <div id="main_db_username" style="display:inline;margin-left:10px;"></div>
                 <div id="main_app_mode"  style="display:inline;margin-left:10px;"></div>
             </div>
         </div>
@@ -85,7 +85,7 @@
                                     } else if (!result.mode)
                                         eAppMode.innerHTML =  eAppMode.innerHTML+"<b>UNKNOWN MODE!!!</b>";
 
-                                    if(result.appUserName) document.getElementById("main_username").innerHTML =  "<b>"+result.appUserName+"</b>";
+                                    if(result.dbUserName) document.getElementById("main_db_username").innerHTML =  "<b>"+result.dbUserName+"</b>";
 
                                     if(result.title)document.title=result.title;
 

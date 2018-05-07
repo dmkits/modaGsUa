@@ -12,7 +12,7 @@ var dateFormat = require('dateformat'), cron = require('node-cron'), moment = re
 var dataModel=require('../datamodel');
 var changeLog= require(appDataModelPath+"change_log");
 //var sys_currency= require(appDataModelPath+"sys_currency"),
-//    sys_docstates= require(appDataModelPath+"sys_docstates");
+//sys_docstates= require(appDataModelPath+"sys_docstates");
 
 module.exports.validateModule = function(uuid, errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels(uuid,[changeLog/*, sys_docstates,sys_currency*/], errs,
@@ -155,10 +155,20 @@ module.exports.init = function(app){
             });
             return;
         }
-        outData.config=getConfig();
+        outData.config=getConfig(); //connUserName
+        outData.dbUserName=req.dbUserName;
         var validateError=getValidateError();
         if(validateError) outData.dbValidation=validateError; else outData.dbValidation = "success";
         res.send(outData);
+
+
+        //outData.config=database.selectQuery(req.uuid,'select SUSER_NAME() as dbUserNAme', function(err, recordset){
+        //    if(err)outData.error="Failed to get dbUserNAme.Reason: "+err;
+        //    else outData.dbUserName=recordset[0].dbUserNAme;
+        //    var validateError=getValidateError();
+        //    if(validateError) outData.dbValidation=validateError; else outData.dbValidation = "success";
+        //    res.send(outData);
+        //});
     });
 
     app.get("/sysadmin/serverConfig", function (req, res) {
@@ -209,15 +219,20 @@ module.exports.init = function(app){
 
     app.post("/sysadmin/serverConfig/storeServerConfigAndReconnect", function (req, res) {
         var newDBConfig = req.body;
-        setAppConfig(newDBConfig);
+        var currentDbName=database.getDBConfig().database;
+        var currentDbHost=database.getDBConfig().host;
         util.saveConfig(appParams.mode+".cfg", newDBConfig,
             function (err) {
                 var outData = {};
                 if (err) {
-                    outData.error = err;
+                    outData.error = "Failed to save config. Reason: "+err;
                     res.send(outData);
                     return;
                 }
+                if(!(currentDbName==newDBConfig.database) || !(currentDbHost==newDBConfig.host)){
+                    database.cleanConnectionPool();
+                }
+                setAppConfig(newDBConfig);
                 database.setSystemConnection(function (err) {
                     if (err) {
                         outData.DBConnectError = err;

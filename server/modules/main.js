@@ -54,10 +54,9 @@ module.exports.init= function(app){
         outData.icon32x32=appConfig.icon32x32;
         outData.imageSmall=appConfig.imageSmall;
         outData.imageMain=appConfig.imageMain;
+        outData.dbUserName=(req.dbUserName)?req.dbUserName:"unknown";
 
-        //outData.appUserName= (req.mduUser)?req.mduUser:"unknown";
-
-        var userRole=req.mduUserRole;
+        //var userRole=req.mduUserRole;
         //outData.menuBar=getUserMenuByUserRole(userRole, appConfig.usersRoleMenu, appConfig.appMenu);
         outData.menuBar=appConfig.appMenu;
 
