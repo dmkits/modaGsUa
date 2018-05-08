@@ -3,7 +3,6 @@ var database=require("./databaseMSSQL");
 var common=require("./common");
 var path=require('path');
 var fs=require('fs');
-//var log=require('./log')();
 var log=require("./server").log;
 
 module.exports= function(app) {
@@ -14,13 +13,13 @@ module.exports= function(app) {
         return (headers && headers["content-type"] == "application/x-www-form-urlencoded" && headers["x-requested-with"] == "XMLHttpRequest");
     };
     app.use(function (req, res, next) {                     log.info("ACCESS CONTROLLER  req.path=", req.path, " params:",req.query,{});
-        if (req.originalUrl.indexOf("/login") >= 0) { console.log('if req.originalUrl.indexOf("/login")');
+        if (req.originalUrl.indexOf("/login") >= 0) {
             next();
             return;
         }
-        if (req.cookies.uuid) {                                              console.log('req.cookies.uuid');
+        if (req.cookies.uuid) {
             var uuid=req.cookies.uuid;
-            var connData=database.getConnData();                             console.log('connData=',connData);
+            var connData=database.getConnData();
             if(connData && connData[uuid] && connData[uuid].connection
                 && connData[uuid].user) {
                 database.selectQuery(uuid,"select SUSER_NAME() as dbUserName;",function(err, recordset){
@@ -48,21 +47,21 @@ module.exports= function(app) {
                 });
                 return;
             }
-            if(req.cookies.sysadmin){                                //console.log('req.cookies.sysadmin');
-                var sysAdminUUIDArr = common.getSysAdminConnArr();  // console.log('sysAdminUUIDArr=',sysAdminUUIDArr);
+            if(req.cookies.sysadmin){
+                var sysAdminUUIDArr = common.getSysAdminConnArr();
                 for (var i in sysAdminUUIDArr) {
-                    if (sysAdminUUIDArr[i][req.cookies.uuid]) {  console.log('inside if sysAdminUUIDArr');
+                    if (sysAdminUUIDArr[i][req.cookies.uuid]) {
                         if(database.getSystemConnectionErr()){
-                            if(req.originalUrl.indexOf("/sysadmin") < 0) res.redirect('/sysadmin');    //TODO redirect exit sysadmin error
+                            if(req.originalUrl.indexOf("/sysadmin") < 0) res.redirect('/sysadmin');
                             next();
                             return;
                         }
                         if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
                             log.info("DB connection config was changed or connections were cleared. New authorisation is needed.");
-                            //res.send({
-                            //    error: "DB connection config was changed or connections were cleared. New authorisation is needed.",
-                            //    userErrorMsg: "Необходимо повторно авторизироваться."
-                            //});
+                            res.send({
+                                error: "DB connection config was changed or connections were cleared. New authorisation is needed.",
+                                userErrorMsg: "Необходимо повторно авторизироваться."
+                            });
                             next();
                             return;
                         }
@@ -74,7 +73,7 @@ module.exports= function(app) {
                     }
                 }
             }
-            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {          console.log('reqIsJSON(req.headers) || reqIsAJAX(req.headers)');
+            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
                 res.send({
                     error: "Failed to get data! Reason:the session has expired!",
                     userErrorMsg: "Не удалось плучить данные. Время сессии истекло."
@@ -86,7 +85,7 @@ module.exports= function(app) {
             });
             return;
         }
-        if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {   console.log("(reqIsJSON(req.headers) || reqIsAJAX(req.headers 180");
+        if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
             res.send({
                 error: "Failed to get data! Reason: user is not authorized!",
                 userErrorMsg: "Не удалось плучить данные. Пользователь не авторизирован."

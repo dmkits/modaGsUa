@@ -1,21 +1,8 @@
-//var database= require("./databaseMSSQL");
+
 var path=require('path');
 var fs=require('fs');
 var uid = require('uniqid');
 var BigNumber = require('big-number');
-
-//module.exports.tryLoadConfiguration=function (app){                                         //console.log('tryLoadConfiguration...', new Date().getTime() - startTime);
-//    try {
-//        database.loadConfig();
-//        app.ConfigurationError=null;
-//    } catch (e) {                    console.log('ConfigurationError=', app.ConfigurationError);
-//        app.ConfigurationError= "Failed to load configuration! Reason:"+e;
-//    }
-//};
-//module.exports.getConfigDirectoryName=function (){
-//    var dirName=(database.getDBConfig()["reports.config"])?database.getDBConfig()["reports.config"]:"reportsConfig";
-//    return dirName;
-//};
 
 module.exports.getJSONWithoutComments= function (text){
     var target = "/*";
@@ -30,28 +17,6 @@ module.exports.getJSONWithoutComments= function (text){
     return text;
 };
 
-//module.exports.tryDBConnect=function (app,postaction) {
-//   tryToConnectToDBRecursively(0,app,postaction);
-//};
-//function tryToConnectToDBRecursively(index,app,postaction){
-//    database.setDatabaseConnection(function (err) {
-//        if (err) {
-//            if(index==3) {
-//                app.DBConnectError = "Failed to connect to database! Reason:" + err;
-//            }
-//            else if(index<3){
-//                setTimeout(function () {
-//                    tryToConnectToDBRecursively(index+1,app,postaction)
-//                },10000);
-//                return;
-//            }
-//            if (postaction)postaction(err);
-//            return;
-//        }
-//        app.DBConnectError = null;
-//        if (postaction)postaction(err);
-//    });
-//}
 
 module.exports.getSysAdminConnArr=function (){
     try{
