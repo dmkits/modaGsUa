@@ -9,24 +9,23 @@ module.exports= function(app) {
     app.get("/sysadmin", function(req, res){
         res.sendFile(path.join(__dirname, '../pages', 'sysadmin.html'));
     });
-    app.get("/sysadmin/serverConfig", function(req, res){
-        var outData= {};
-        outData.mode= app.mode;
-        outData.port=app.port;
-        //outData.sysadminName=req.sysadminName;
-        outData.connUserName=req.connUserName ;
-        if (app.ConfigurationError) {
-            outData.error= app.ConfigurationError;
-            res.send(outData);
-            return;
-        }
-        outData.configuration= database.getDBConfig();
-        if (app.DBConnectError)
-            outData.dbConnection= app.DBConnectError;
-        else
-            outData.dbConnection='Connected';
-        res.send(outData);
-    });
+    //app.get("/sysadmin/serverConfig", function(req, res){
+    //    var outData= {};
+    //    outData.mode= app.mode;
+    //    outData.port=app.port;
+    //    outData.connUserName=req.connUserName ;
+    //    if (app.ConfigurationError) {
+    //        outData.error= app.ConfigurationError;
+    //        res.send(outData);
+    //        return;
+    //    }
+    //    outData.configuration= database.getDBConfig();
+    //    if (app.DBConnectError)
+    //        outData.dbConnection= app.DBConnectError;
+    //    else
+    //        outData.dbConnection='Connected';
+    //    res.send(outData);
+    //});
     app.get("/sysadmin/startup_parameters", function (req, res) {
         res.sendFile(path.join(__dirname, '../pages/sysadmin', 'startup_parameters.html'));
     });

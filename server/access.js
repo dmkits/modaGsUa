@@ -28,9 +28,22 @@ module.exports= function(app) {
                         log.error('Failed to get current DB user. Reason: '+err);
                         return;
                     }
-                    log.info('Current DB user: ', recordset[0].username);
+                    log.info('Current DB user: ', recordset[0].dbUserName);
                     req.uuid = uuid;
                     req.dbUserName=recordset[0].dbUserName;
+
+                    if(database.getSystemConnectionErr() && !req.cookies.sysadmin){
+                        var img = "imgs/girls_big.jpg";
+                        var title = "REPORTS";
+                        var icon32x32 = "icons/profits32x32.jpg";
+                        res.render(path.join(__dirname, "../pages/dbFailed.ejs"), {
+                            title: title,
+                            bigImg: img,
+                            icon: icon32x32,
+                            errorReason: "Не удалось обратиться к базе данных!"
+                        });
+                        return;
+                    }
                     next();
                 });
                 return;
@@ -39,14 +52,7 @@ module.exports= function(app) {
                 var sysAdminUUIDArr = common.getSysAdminConnArr();  // console.log('sysAdminUUIDArr=',sysAdminUUIDArr);
                 for (var i in sysAdminUUIDArr) {
                     if (sysAdminUUIDArr[i][req.cookies.uuid]) {  console.log('inside if sysAdminUUIDArr');
-                    //    req.connUserName = sysAdminUUIDArr[i][req.cookies.uuid];
-
-                 //   }
-                        //check systemconn
-                        //create new conn for sysadmin
-                        //else without DB conn
-                        console.log('database.getSystemConnectionErr()=', database.getSystemConnectionErr());
-                        if(database.getSystemConnectionErr()){  console.log('database.getSystemConnectionErr()=');
+                        if(database.getSystemConnectionErr()){
                             if(req.originalUrl.indexOf("/sysadmin") < 0) res.redirect('/sysadmin');    //TODO redirect exit sysadmin error
                             next();
                             return;

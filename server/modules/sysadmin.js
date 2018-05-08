@@ -132,6 +132,7 @@ module.exports.init = function(app){
         var outData= {};
         outData.mode= appParams.mode;
         outData.port=appParams.port;
+        outData.dbUserName=req.dbUserName;
         var serverConfig=getServerConfig();
         if (!serverConfig||serverConfig.error) {
             outData.error= (serverConfig&&serverConfig.error)?serverConfig.error:"unknown";
@@ -155,8 +156,7 @@ module.exports.init = function(app){
             });
             return;
         }
-        outData.config=getConfig(); //connUserName
-        outData.dbUserName=req.dbUserName;
+        outData.config=getConfig();
         var validateError=getValidateError();
         if(validateError) outData.dbValidation=validateError; else outData.dbValidation = "success";
         res.send(outData);
@@ -176,7 +176,7 @@ module.exports.init = function(app){
     });
 
     app.get("/sysadmin/server/getServerConfig", function (req, res) {
-        var serverConfig=getServerConfig();               
+        var serverConfig=getServerConfig();
         if (!serverConfig||serverConfig.error) {
             res.send({error:(serverConfig&&serverConfig.error)?serverConfig.error:"unknown"});
             return;
@@ -236,6 +236,7 @@ module.exports.init = function(app){
                 database.setSystemConnection(function (err) {
                     if (err) {
                         outData.DBConnectError = err;
+                        outData.error="'\n Не удалось подключиться ка базе данных.\n"+err;
                         res.send(outData);
                         return;
                     }

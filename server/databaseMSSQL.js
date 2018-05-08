@@ -116,9 +116,10 @@ function getFieldsTypes(recordset){
     }
     return fieldsTypes;
 }
-function selectQuery(uuid,query, callback) {                                                   log.info("database selectQuery query:",query);
-    if(!connections[uuid]){
-        callback( "No connection to database");
+function selectQuery(uuid,query, callback) {                                                   log.info("database selectQuery uuid,query:",uuid,query);
+    if(!uuid || !connections[uuid]){
+        console.log('selectQuery !uuid=');
+        callback({message:"No user database connection is specified."});
         return;
     }
     var connection=connections[uuid].connection;
@@ -141,7 +142,7 @@ module.exports.selectQuery=selectQuery;
  */
 module.exports.executeQuery=function(uuid,query,callback){                                      log.debug("database executeQuery:",query);
     if(!connections[uuid]){
-        callback("No connection to database");
+        callback({message:"No user database connection is specified."});
         return;
     }
     var connection=connections[uuid].connection;
@@ -159,7 +160,7 @@ module.exports.executeQuery=function(uuid,query,callback){                      
 };
 function selectParamsQuery(uuid,query, parameters, callback) {                                      log.debug("database selectParamsQuery query:",query," parameters:",parameters,{});
     if(!connections[uuid]){
-        callback("No connection to database");
+        callback({message:"No user database connection is specified."});
         return;
     }
     var connection=connections[uuid].connection;
@@ -186,7 +187,7 @@ module.exports.selectParamsQuery=selectParamsQuery;
  */
 module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {                 log.debug("database executeParamsQuery:",query,parameters);
     if(!connections[uuid]){
-        callback("No connection to database");
+        callback({message:"No user database connection is specified."});
         return;
     }
     var connection=connections[uuid].connection;

@@ -192,26 +192,25 @@
                                     if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
                                     return;
                                 }
-                                if (error){
-                                    configState.innerHTML = "<div><b style='color:red'>Failed store configuration! Reason:" + error + "</b></div>";
-                                    if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
-                                    return;
-                                }
-                                configState.innerHTML = "<div><b>Configuration saved.</b></div>";
-//                                if(result.dbListError){
-//                                    document.getElementById("db_list").innerText=result.dbListError;
-//                                } else if(result.dbList){
-//                                    if(result.dbListUser) document.getElementById("server_dblist_user").innerHTML=result.dbListUser;
-//                                    var DBArray=result.dbList, DBstr="";
-//                                    for(var i in DBArray) DBstr=DBstr+DBArray[i].Database+"\n";
-//                                    document.getElementById("db_list").innerText=DBstr;
-//                                }
                                 if (result.DBConnectError)
                                     configState.innerHTML=
                                             configState.innerHTML+ "<br><div><b style='color:red'>Failed connect to database ! Reason:" + result["DBConnectError"] + "</b></div>";
                                 else
                                     configState.innerHTML =
                                             configState.innerHTML+ "<br><div><b>Reconnected to database.</b></div>";
+                                if (error){
+                                    configState.innerHTML = "<div><b style='color:red'>Failed! Reason:" + error + "</b></div>";
+                                    if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
+                                    return;
+                                }
+                                configState.innerHTML = "<div><b>Configuration saved.</b></div>";
+//
+//                                if (result.DBConnectError)
+//                                    configState.innerHTML=
+//                                            configState.innerHTML+ "<br><div><b style='color:red'>Failed connect to database ! Reason:" + result["DBConnectError"] + "</b></div>";
+//                                else
+//                                    configState.innerHTML =
+//                                            configState.innerHTML+ "<br><div><b>Reconnected to database.</b></div>";
                                 if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
                                 getDBList();
                             });
