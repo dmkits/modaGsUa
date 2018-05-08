@@ -1,7 +1,7 @@
 /**
  * Created by dmkits on 30.12.16.
  */
-define(["app", "dijit/ConfirmDialog","dojox/widget/DialogSimple", "dijit/form/Button", "dijit/form/TextBox", "dojo/domReady!"],
+define(["dojo.app/app", "dijit/ConfirmDialog","dojox/widget/DialogSimple", "dijit/form/Button", "dijit/form/TextBox", "dojo/domReady!"],
     function(APP, ConfirmDialog,DialogSimple, Button, TextBox) {
         return {
             /**

@@ -29,9 +29,9 @@
     <!--<link rel="stylesheet" href="/jslib/dijit/themes/tundra/tundra.css" media="screen">-->
     <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:true"></script>
 
-    <link rel="stylesheet" href="/jslib/htable.css" media="screen">
+    <link rel="stylesheet" href="/css/htable.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/css/main.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="/jslib/contentController.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/css/contentController.css" media="screen">
     <script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
     <!--<title>MODA.UA</title>-->
 </head>
@@ -49,10 +49,10 @@
     </div>
 </body>
 <script type="text/javascript">
-    require(["app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane",
+    require(["dojo.app/app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane",
                 "dijit/MenuBar", "dijit/MenuBarItem", "dijit/PopupMenuBarItem", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator",
                 "dijit/form/ToggleButton", "dojox/layout/ContentPane",
-                "dialogs", "request", "dojo/domReady!"],
+                "dojo.app/dialogs", "dojo.app/request", "dojo/domReady!"],
             function (APP, BorderContainer, LayoutContainer, TabContainer, ContentPane,
                       MenuBar, MenuBarItem, PopupMenuBarItem, Menu, MenuItem, MenuSeparator,
                       ToggleButton, XContentPane, dialogs, Request) {                                               console.log("START MAIN PAGE...");//!!!IT'S FOR TESTING!!!

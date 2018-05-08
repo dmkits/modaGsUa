@@ -1,7 +1,7 @@
 /**
  * Created by dmkits on 30.12.16.
  */
-define(["dojo/_base/declare", "dojo/request", "dijit/registry", "dialogs"],
+define(["dojo/_base/declare", "dojo/request", "dijit/registry", "dojo.app/dialogs"],
     function(declare, request, registry, dialogs) {
         return {
             jsonHeader: {"X-Requested-With":"application/json; charset=utf-8",

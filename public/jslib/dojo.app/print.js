@@ -1,7 +1,7 @@
 /**
  * Created by dmkits on 30.12.16.
  */
-define(["dialogs"],
+define(["dojo.app/dialogs"],
     function (dialogs) {
         return {
             /**
