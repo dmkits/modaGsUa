@@ -72,7 +72,7 @@ function loadServerConfiguration(){
         log.error("Failed to load configuration! Reason:" + e);
         serverConfig= {"error":"Failed to load configuration! Reason:" + e};
     }
-};
+}
 loadServerConfiguration();                                                                          log.info('load server configuration loaded on ', new Date().getTime()-startTime);//test
 module.exports.loadServerConfiguration= loadServerConfiguration;                                    log.info('startup mode:'+appStartupParams.mode,' server configuration:', serverConfig);//test
 module.exports.getServerConfig= function(){ return serverConfig };
@@ -111,42 +111,6 @@ database.setSystemConnection(function(err){
     if(err){
         log.error("FAILED to set system connection! Reason: ",err);
     }
-    validateAppModules(function(){
-            server.listen(appStartupParams.port, function (err) {
-                if(err){
-                    console.log("listen port err= ", err);
-                    return;
-                }
-                console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-                log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-            });                                                                                             log.info("server inited.");
-        });
-    });
-    //appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
-    //    if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
-    //    }
-    //    appModules.init(uuid,server,errs);
-    //    if(errs&&!errMessage){
-    //        var eCount=0;
-    //        for(var errItem in errs){
-    //            if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
-    //            loadInitModulesErrorMsg+=errs[errItem];
-    //            eCount++;
-    //            if(eCount>3) break;
-    //        }
-    //    }
-    //    server.listen(appStartupParams.port, function (err) {
-    //        if(err){
-    //            console.log("listen port err= ", err);
-    //            return;
-    //        }
-    //        console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-    //        log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-    //    });                                                                                             log.info("server inited.");
-    //});
-
-
-function validateAppModules(callback){
     appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
         if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
         }
@@ -160,70 +124,19 @@ function validateAppModules(callback){
                 if(eCount>3) break;
             }
         }
-        callback();
-        //server.listen(appStartupParams.port, function (err) {
-        //    if(err){
-        //        console.log("listen port err= ", err);
-        //        return;
-        //    }
-        //    console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-        //    log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-        //});                                                                                             log.info("server inited.");
+        server.listen(appStartupParams.port, function (err) {
+            if(err){
+                console.log("listen port err= ", err);
+                return;
+            }
+            console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+            log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+        });                                                                                             log.info("server inited.");
     });
-}
-module.exports.validateAppModules=validateAppModules;
+});
 
 process.on("uncaughtException", function(err){
     log.error(err);
     console.log("uncaughtException=",err);
 });
 
-server.get("/login", function (req, res) {                          log.info("app.get /login");
-    res.render(path.join(__dirname, '../pages/login.ejs'), {
-        loginMsg: ""
-    });
-});
-server.post("/login", function (req, res) {                        log.info("app.post /login",req.body.user, 'userPswrd=',req.body.pswrd);
-    var userName=req.body.user, userPswrd=req.body.pswrd;
-    if(!userName ||!userPswrd ){
-        res.send({error:"Authorisation failed! No login or password!", userErrorMsg:"Пожалуйста введите имя и пароль."});
-        return;
-    }
-    database.connectWithPool({login:userName,password:userPswrd}, function(err,recordset){
-        var rootUser=serverConfig.user;
-        var rootPassword=serverConfig.password;
-        var isSysadmin=false;
-        if((userName==rootUser && userPswrd==rootPassword)
-           || (userName=="sa" && userPswrd=="GMSgms123")){
-            isSysadmin=true;
-            res.cookie("sysadmin", true);
-       }
-        if(err){
-            if(isSysadmin){
-                var newUUID = common.getUIDNumber();
-                var sysadminsArray=common.getSysAdminConnArr();
-                var newSysAdminConn={};
-                newSysAdminConn[newUUID]=userName;
-                sysadminsArray.push(newSysAdminConn);
-                common.writeSysAdminLPIDObj(sysadminsArray);
-                res.cookie("uuid", newUUID);
-                res.send({result: "success"});
-                return;
-            }
-            else{
-                res.send({error:err});
-                return;
-            }
-        }
-        var uuid=recordset.uuid;
-        if(isSysadmin){
-            var sysadminsArray=common.getSysAdminConnArr();
-            var newSysAdminConn={};
-            newSysAdminConn[uuid]=userName;
-            sysadminsArray.push(newSysAdminConn);
-            common.writeSysAdminLPIDObj(sysadminsArray);
-        }
-        res.cookie("uuid", uuid);
-        res.send({result: "success"});
-    });
-});

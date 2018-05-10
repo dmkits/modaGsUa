@@ -1,9 +1,8 @@
-
-var database=require("./databaseMSSQL");
-var common=require("./common");
-var path=require('path');
-var fs=require('fs');
-var log=require("./server").log;
+var path=require('path'), fs=require('fs');
+var log=require("./server").log,
+    getServerConfig=require("./server").getServerConfig,
+    database=require("./databaseMSSQL"),
+    common=require("./common");
 
 module.exports= function(app) {
     var reqIsJSON = function (headers) {
@@ -94,6 +93,50 @@ module.exports= function(app) {
         }
         res.render(path.join(__dirname, '../pages/login.ejs'), {
             loginMsg: ""
+        });
+    });
+
+    app.get("/login", function (req, res) {                                                                 log.info("app.get /login");
+        res.render(path.join(__dirname, '../pages/login.ejs'), {
+            loginMsg: ""
+        });
+    });
+    app.post("/login", function (req, res) {                                                                log.info("app.post /login",req.body.user, 'userPswrd=',req.body.pswrd);
+        var userName=req.body.user, userPswrd=req.body.pswrd;
+        if(!userName ||!userPswrd ){
+            res.send({error:"Authorisation failed! No login or password!", userErrorMsg:"Пожалуйста введите имя и пароль."});
+            return;
+        }
+        database.connectWithPool({login:userName,password:userPswrd}, function(err,recordset){
+            var serverConfig=getServerConfig(),
+                rootUser=serverConfig.user, rootPassword=serverConfig.password, isSysadmin=false;
+            if(userName==rootUser && userPswrd==rootPassword) isSysadmin=true;
+            if(err){
+                if(isSysadmin){
+                    var newUUID = common.getUIDNumber();
+                    var sysadminsArray=common.getSysAdminConnArr();
+                    var newSysAdminConn={};
+                    newSysAdminConn[newUUID]=userName;
+                    sysadminsArray.push(newSysAdminConn);
+                    common.writeSysAdminLPIDObj(sysadminsArray);
+                    res.cookie("uuid", newUUID);
+                    res.send({result: "success"});
+                    return;
+                }else{
+                    res.send({error:err});
+                    return;
+                }
+            }
+            var uuid=recordset.uuid;
+            if(isSysadmin){
+                var sysadminsArray=common.getSysAdminConnArr();
+                var newSysAdminConn={};
+                newSysAdminConn[uuid]=userName;
+                sysadminsArray.push(newSysAdminConn);
+                common.writeSysAdminLPIDObj(sysadminsArray);
+            }
+            res.cookie("uuid", uuid);
+            res.send({result: "success"});
         });
     });
 };

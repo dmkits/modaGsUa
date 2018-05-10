@@ -3,9 +3,9 @@ var server= require("../server"), log= server.log, appParams= server.getAppStart
 var database= require("../databaseMSSQL");
 
 module.exports.validateModule = function(uuid,errs, nextValidateModuleCallback){
-
     nextValidateModuleCallback();
 };
+
 function getUserMenuByUserRole(userRole, usersRoleMenu, appMenu){
     var userMenu=[];
     if(!userRole) return userMenu;
@@ -40,7 +40,7 @@ function getUserMenuByUserRole(userRole, usersRoleMenu, appMenu){
         }
     }
     return userMenu;
-};
+}
 
 module.exports.modulePageURL = "/";
 module.exports.modulePagePath = "main.html";

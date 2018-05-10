@@ -33,7 +33,7 @@ module.exports.cleanConnectionPool=function(){
  * @param userData
  * @param callback (err,uuid)
  */
-function connectWithPool(userData, callback){                  console.log('connectWithPool userData=', userData);
+function connectWithPool(userData, callback){                                                       //console.log('connectWithPool userData=', userData);
     if (connections && connections[userData.uuid]
         && connections[userData.uuid].connection){
         callback(null,{uuid:userData.uuid});
@@ -116,7 +116,7 @@ function getFieldsTypes(recordset){
     }
     return fieldsTypes;
 }
-function selectQuery(uuid,query, callback) {                                                   log.info("database selectQuery uuid,query:",uuid,query);
+function selectQuery(uuid,query, callback) {                                                            log.info("database selectQuery uuid,query:",uuid,query);
     if(!uuid || !connections[uuid]){
         console.log('selectQuery !uuid=');
         callback({message:"No user database connection is specified."});
@@ -127,10 +127,10 @@ function selectQuery(uuid,query, callback) {                                    
     request.query(query,
         function(err, result) {
             if (err) {
-                if(err.name=="ConnectionError")dbConnectError=err.message;                          log.error('database: selectQuery error:',err.message, {});
+                if(err.name=="ConnectionError")dbConnectError=err.message;                              log.error('database: selectQuery error:',err.message, {});
                 callback(err);
                 return;
-            }                                                               console.log('selectQuery result.recordset=', result.recordset, result.recordset.columns, result.recordset.columns.first, {});
+            }
             callback(null, result.recordset, result.rowsAffected.length, getFieldsTypes(result.recordset));
         });
 }
@@ -140,7 +140,7 @@ module.exports.selectQuery=selectQuery;
  * query= <MS SQL queryStr>
  * callback = function(err, updateCount)
  */
-module.exports.executeQuery=function(uuid,query,callback){                                      log.debug("database executeQuery:",query);
+module.exports.executeQuery=function(uuid,query,callback){                                              log.debug("database executeQuery:",query);
     if(!connections[uuid]){
         callback({message:"No user database connection is specified."});
         return;
@@ -158,7 +158,7 @@ module.exports.executeQuery=function(uuid,query,callback){                      
             callback(null, result.rowsAffected.length);
         });
 };
-function selectParamsQuery(uuid,query, parameters, callback) {                                      log.debug("database selectParamsQuery query:",query," parameters:",parameters,{});
+function selectParamsQuery(uuid,query, parameters, callback) {                                          log.debug("database selectParamsQuery query:",query," parameters:",parameters,{});
     if(!connections[uuid]){
         callback({message:"No user database connection is specified."});
         return;
@@ -185,7 +185,7 @@ module.exports.selectParamsQuery=selectParamsQuery;
  * paramsValueObj = {<paramName>:<paramValue>,...}
  * callback = function(err, updateCount)
  */
-module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {                 log.debug("database executeParamsQuery:",query,parameters);
+module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {                        log.debug("database executeParamsQuery:",query,parameters);
     if(!connections[uuid]){
         callback({message:"No user database connection is specified."});
         return;
@@ -197,10 +197,10 @@ module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {
     }
     request.query(query,
         function (err, result) {
-            if (err) {                                                                          log.error('database: executeParamsQuery error:',err.message,{});//test
+            if (err) {                                                                                  log.error('database: executeParamsQuery error:',err.message,{});//test
                 callback(err);
                 return;
-            }                                                                                   log.debug('database: executeParamsQuery recordset:',result.recordset,{});//test
+            }                                                                                           log.debug('database: executeParamsQuery recordset:',result.recordset,{});//test
             callback(null, result.rowsAffected.length);
         });
 };

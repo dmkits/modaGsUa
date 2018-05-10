@@ -14,7 +14,7 @@ var database= require("../databaseMSSQL");
  * created for data model fields: sourceType, source, fields, idField, fieldsMetadata
  * created data model functions
  */
-function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidateDataModelCallback){              log.info('InitValidateDataModel: dataModel:'+dataModelName+"...");//test
+function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidateDataModelCallback){         log.info('InitValidateDataModel: dataModel:'+dataModelName+"...");//test
     if(!dataModel.changeLog&&!dataModel.modelData){
         errs[dataModelName+"_initError"]="Failed init dataModel:"+dataModelName
             +"! Reason: no model data and no change log!";                                                  log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model data and no change log!");//test
@@ -28,7 +28,7 @@ function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidate
     validatedDataModels[dataModelName]=dataModel;//dataModel.source dataModel.sourceType=="table" //restore DB data from bata1 DB
     if(dataModel.changeLog)
         dataModelChanges= dataModelChanges.concat(dataModel.changeLog);
-    if(dataModel.doValidate){//if data model only inited
+    if(dataModel.doValidate){//if data model already inited and validated
         dataModel.doValidate(errs, nextValidateDataModelCallback);
         return;
     }
@@ -38,7 +38,7 @@ function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidate
             var changeLogItem=dataModel.changeLog[i];
             if(changeLogItem.tableName&&!tableName&&!viewName) tableName=changeLogItem.tableName;
             if(changeLogItem.viewName&&!viewName&&!tableName) viewName=changeLogItem.viewName;
-            if(changeLogItem.id&&!idFieldName) idFieldName=changeLogItem.id;
+            if(changeLogItem.idField&&!idFieldName) idFieldName=changeLogItem.idField;
             if(changeLogItem.fields){
                 for(var fieldIndex in changeLogItem.fields){
                     var fieldName=changeLogItem.fields[fieldIndex];
@@ -64,7 +64,18 @@ function initValidateDataModel(uuid,dataModelName, dataModel, errs, nextValidate
             }
         }
     } else if(dataModel.modelData) {
-        //
+        var modelData=dataModel.modelData;
+        if(modelData.tableName) tableName=modelData.tableName;
+        if(modelData.viewName) viewName=modelData.viewName;
+        if(modelData.idField) idFieldName=modelData.idField;
+        if(modelData.fields)
+            for(var fieldIndex in modelData.fields){
+                var fieldName=modelData.fields[fieldIndex];
+                if(!tableFields[fieldName]){
+                    tableFields[fieldName]=true;
+                    tableFieldsList.push(fieldName);
+                }
+            }
     }
     dataModel.getDataItems= _getDataItems;
     dataModel.getDataItemsForSelect= _getDataItemsForSelect;

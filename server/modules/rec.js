@@ -1,11 +1,11 @@
 var dataModel=require('../datamodel'), dateFormat = require('dateformat');
-var wrh_pinvs= require(appDataModelPath+"wrh_pinvs"), wrh_pinvs_products= require(appDataModelPath+"wrh_pinvs_products");
-var dirUnits= require(appDataModelPath+"dir_units"), dirContractors= require(appDataModelPath+"dir_contractors"),
-    sysCurrency= require(appDataModelPath+"sys_currency"), sysDocStates= require(appDataModelPath+"sys_docstates"),
-    dirProdsCollections= require(appDataModelPath+"dir_products_collections");
+var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
+var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
+    r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
+    r_States= require(appDataModelPath+"r_States");
 
 module.exports.validateModule = function(uuid,errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels(uuid,[wrh_pinvs,wrh_pinvs_products], errs,
+    dataModel.initValidateDataModels(uuid,[t_Rec,t_RecD,r_Ours,r_Stocks,r_Comps,r_Currs,r_States], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -15,7 +15,7 @@ module.exports.validateModule = function(uuid,errs, nextValidateModuleCallback){
 module.exports.modulePageURL = "/wrh/pinvoices";
 module.exports.modulePagePath = "wrh/pinvoices.html";
 module.exports.init = function(app){
-    var wrhPInvsListTableColumns=[
+    var tRecsListTableColumns=[
         {data: "ID", name: "ID", width: 50, type: "text", readOnly:true, visible:false, dataSource:"wrh_pinvs"},
         {data: "NUMBER", name: "Номер", width: 50, type: "text", dataSource:"wrh_pinvs"},
         {data: "DOCDATE", name: "Дата", width: 55, type: "dateAsText", dataSource:"wrh_pinvs"},
@@ -34,27 +34,27 @@ module.exports.init = function(app){
         {data: "RATE", name: "Курс валюты", width: 60, type: "numeric2", visible:false, dataSource:"wrh_pinvs"},
         {data: "BASE_FACTOR", name: "Базов.коэфф.", width: 60, type: "numeric2", visible:false, dataSource:"wrh_pinvs"}
     ];
-    app.get("/wrh/pInvoices/getDataForPInvsListTable", function(req, res){
+    app.get("/wrh/pInvoices/getDataForRecsListTable", function(req, res){
         var conditions={};
-        for(var condItem in req.query) conditions["wrh_pinvs."+condItem]=req.query[condItem];
-        wrh_pinvs.getDataForTable({uuid:req.uuid,tableColumns:wrhPInvsListTableColumns,
-                identifier:wrhPInvsListTableColumns[0].data,
+        for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
+        t_Rec.getDataForTable({uuid:req.uuid,tableColumns:tRecsListTableColumns,
+                identifier:tRecsListTableColumns[0].data,
                 conditions:conditions},
             function(result){
                 res.send(result);
             });
     });
-    app.get("/wrh/pInvoices/getPInvData", function(req, res){
+    app.get("/wrh/pInvoices/getRecData", function(req, res){
         var conditions={};
-        for(var condItem in req.query) conditions["wrh_pinvs."+condItem]=req.query[condItem];
-        wrh_pinvs.getDataItemForTable({uuid:req.uuid,tableColumns:wrhPInvsListTableColumns,
+        for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
+        t_Rec.getDataItemForTable({uuid:req.uuid,tableColumns:tRecsListTableColumns,
                 conditions:conditions},
             function(result){
                 res.send(result);
             });
     });
-    app.get("/wrh/pInvoices/getNewPInvData", function(req, res){
-        wrh_pinvs.getDataItem(req.uuid,{fields:["MAXNUMBER"],fieldsFunctions:{"MAXNUMBER":{function:"maxPlus1", sourceField:"NUMBER"}},
+    app.get("/wrh/pInvoices/getNewRecData", function(req, res){
+        t_Rec.getDataItem(req.uuid,{fields:["MAXNUMBER"],fieldsFunctions:{"MAXNUMBER":{function:"maxPlus1", sourceField:"NUMBER"}},
                 conditions:{"1=1":null}},
             function(result){
                 var newNumber=(result&&result.item)?result.item["MAXNUMBER"]:"", docDate=dateFormat(new Date(),"yyyy-mm-dd");
@@ -89,7 +89,7 @@ module.exports.init = function(app){
                 });
             });
     });
-    app.post("/wrh/pInvoices/storePInvData", function(req, res){
+    app.post("/wrh/pInvoices/storeRecData", function(req, res){
         var storeData=req.body;
         dirUnits.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["UNIT_NAME"]}}, function(result){
             if(!result.item){
@@ -125,15 +125,15 @@ module.exports.init = function(app){
             });
         });
     });
-    app.post("/wrh/pInvoices/deletePInvData", function(req, res){
+    app.post("/wrh/pInvoices/deleteRecData", function(req, res){
         var delData=req.body;
-        wrh_pinvs.delTableDataItem(req.uuid,{idFieldName:"ID", delTableData:delData},
+        t_Rec.delTableDataItem(req.uuid,{idFieldName:"ID", delTableData:delData},
             function(result){
                 res.send(result);
             });
     });
 
-    var wrhPInvProductsTableColumns=[
+    var tRecDTableColumns=[
         {data: "ID", name: "ID", width: 50, type: "text", readOnly:true, visible:false},
         {data: "PINV_ID", name: "PINV_ID", width: 50, type: "text", readOnly:true, visible:false},
         {data: "POSIND", name: "POSIND", width: 45, type: "numeric", visible:false},
@@ -152,21 +152,21 @@ module.exports.init = function(app){
         {data: "BATCH_NUMBER", name: "BATCH_NUMBER", width: 60, type: "numeric", visible:false}
     ];
     app.get("/wrh/pInvoices/getDataForPInvProductsTable", function(req, res){
-        wrh_pinvs_products.getDataForTable({uuid:req.uuid,tableColumns:wrhPInvProductsTableColumns,
-                identifier:wrhPInvProductsTableColumns[0].data,
+        t_RecD.getDataForTable({uuid:req.uuid,tableColumns:tRecDTableColumns,
+                identifier:tRecDTableColumns[0].data,
                 conditions:req.body},
             function(result){
                 res.send(result);
             });
     });
     app.post("/wrh/pInvoices/storePInvProductsTableData", function(req, res){
-        wrh_pinvs_products.storeTableDataItem(req.uuid,{tableColumns:wrhPInvProductsTableColumns, idFieldName:"ID"},
+        t_RecD.storeTableDataItem(req.uuid,{tableColumns:tRecDTableColumns, idFieldName:"ID"},
             function(result){
                 res.send(result);
             });
     });
     app.post("/wrh/pInvoices/deletePInvProductsTableData", function(req, res){
-        wrh_pinvs_products.delTableDataItem(req.uuid,{idFieldName:"ID"},
+        t_RecD.delTableDataItem(req.uuid,{idFieldName:"ID"},
             function(result){
                 res.send(result);
             });

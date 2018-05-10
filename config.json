@@ -3,58 +3,18 @@
   "icon32x32":"/icons/modaua32x32.ico",
   "imageSmall":"/imgs/modaua_small.jpg",
   "imageMain":"/imgs/modaua_big.jpg",
- /* "users":[
-    { "userLogin":"sysAdmin", "pswrd":"sysadmin", "userRole":"sysAdmin" },
-    { "userLogin":"sysAdminDev", "pswrd":"sysadmin", "userRole":"sysAdminDev" },
-    { "userLogin":"user", "pswrd":"user", "userRole":"user" },
-    { "userLogin":"cashier", "pswrd":"cashier", "userRole":"cashier" }
-  ],
-  */
   "modules":[
     "sysadmin",
     "main",
+    "rec"
     /*"print",*/
     /*"mainPage",*/
     /*"system",*/
-    /*"dirPriceLists",
-    "dirUnits",
-    "dirContractors",
-    "dirProducts",*/
-    "wrhPInvoices"
-   /* "wrhInvoices",
-    "wrhRetInvoices",
-    "wrhRetPInvoices"*/
   ],
   "appMenu":[
-    { "menuTitle":"Главная страница", "menuItemName":"menuBarItemMainPage", "pageTitle":"Главная страница", "module":"mainPage", "closable":false},
-    /*{ "menuItemName":"menuBarPopupMenuMain", "menuTitle":"Предприятие",
-      "popupMenu":[
-        { "menuTitle":"Подразделения", "menuItemName":"menuBarDirsItemUnits", "pageTitle":"Подразделения", "module":"dirUnits", "closable":true},
-        { "menuItemName":"separator_dir1"},
-        { "menuTitle":"Контрагенты", "menuItemName":"menuBarDirsItemContractors", "pageTitle":"Контрагенты", "module":"dirContractors", "closable":true},
-        { "menuItemName":"separator_dir2"},
-        { "menuTitle":"Товарные номенклатуры", "menuItemName":"menuBarDirsItemProducts", "pageTitle":"Товарные номенклатуры", "module":"dirProducts", "closable":true}
-      ]},
-    { "menuItemName":"menuBarWrh", "menuTitle":"Склад",
-      "popupMenu":[
-        { "menuItemName":"menuBarWrhPInvoices", "menuTitle":"Приходные накладные", "pageTitle":"Приходные накладные", "module":"wrhPInvoices", "closable":true},
-        { "menuItemName":"menuBarWrhRetPInvoices", "menuTitle":"Накладные возврата поставщику", "pageTitle":"Накладные возврата поставщику", "module":"wrhRetPInvoices", "closable":true},
-        { "menuItemName":"separator_wrh1"},
-        {"menuItemName":"menuBarWrhInvoices", "menuTitle":"Расходные накладные", "pageTitle":"Расходные накладные", "module":"wrhInvoices", "closable":true},
-        {"menuItemName":"menuBarWrhRetInvoices", "menuTitle":"Возвратные накладные", "pageTitle":"Возвратные накладные", "module":"wrhRetInvoices", "closable":true},
-        { "menuItemName":"separator_wrh2"},
-        { "menuItemName":"menuBarWrhProdsBalance", "menuTitle":"Остатки товара", "pageTitle":"Остатки товара", "module":"wrhProdsBalance", "closable":true},
-        { "menuItemName":"menuBarWrhProdsMoves", "menuTitle":"Движение товаров", "pageTitle":"Движение товаров", "module":"wrhProdsMoves", "closable":true}
-      ]},
-    { "menuTitle":"Отчеты кассира", "menuItemName":"menuBarItemSalesCashier", "pageTitle":"Отчеты кассира", "module":"retailCashier", "closable":false},
-    { "menuItemName":"menuBarPopupMenuSales", "menuTitle":"Продажи",
-      "popupMenu":[
-        { "menuTitle":"Отчеты кассира", "menuItemName":"menuBarSalesItemCashier", "pageTitle":"Отчеты кассира", "module":"retailCashier", "closable":true}
-      ]},
-      */
-    { "menuItemName":"menuBarWrhPInvoices", "menuTitle":"Приходные накладные", "pageTitle":"Приходные накладные", "module":"wrhPInvoices", "closable":true},
-    { "menuItemName":"menuBarItemClose", "menuTitle":"Выход", "action":"close"},
-    { "menuItemName":"menuBarItemHelpAbout", "menuTitle":"О программе", "action":"help_about"}
+    { "menuTitle":"Приход товара", "menuItemName":"menuBarItemRec", "pageTitle":"Приход товара", "module":"rec", "closable":false},
+    { "menuTitle":"Выход", "menuItemName":"menuBarItemClose", "action":"close"},
+    { "menuTitle":"О программе", "menuItemName":"menuBarItemHelpAbout", "action":"help_about"}
   ],
   "usersRoleMenu":{
     "user":["menuBarItemMainPage",
