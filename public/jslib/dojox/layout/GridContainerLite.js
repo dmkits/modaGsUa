@@ -1,20 +1,833 @@
-//>>built
-require({cache:{"url:dojox/layout/resources/GridContainer.html":'\x3cdiv id\x3d"${id}" class\x3d"gridContainer" dojoAttachPoint\x3d"containerNode" tabIndex\x3d"0" dojoAttachEvent\x3d"onkeypress:_selectFocus"\x3e\n\t\x3cdiv dojoAttachPoint\x3d"gridContainerDiv"\x3e\n\t\t\x3ctable class\x3d"gridContainerTable" dojoAttachPoint\x3d"gridContainerTable" cellspacing\x3d"0" cellpadding\x3d"0"\x3e\n\t\t\t\x3ctbody\x3e\n\t\t\t\t\x3ctr dojoAttachPoint\x3d"gridNode" \x3e\n\t\t\t\t\t\n\t\t\t\t\x3c/tr\x3e\n\t\t\t\x3c/tbody\x3e\n\t\t\x3c/table\x3e\n\t\x3c/div\x3e\n\x3c/div\x3e'}});
-define("dojox/layout/GridContainerLite","dojo/_base/kernel dojo/text!./resources/GridContainer.html dojo/_base/declare dojo/query dojo/_base/sniff dojo/dom-class dojo/dom-style dojo/dom-geometry dojo/dom-construct dojo/dom-attr dojo/_base/array dojo/_base/lang dojo/_base/event dojo/keys dojo/topic dijit/registry dijit/focus dijit/_base/focus dijit/_WidgetBase dijit/_TemplatedMixin dijit/layout/_LayoutWidget dojo/_base/NodeList dojox/mdnd/AreaManager dojox/mdnd/DropIndicator dojox/mdnd/dropMode/OverDropMode dojox/mdnd/AutoScroll".split(" "),
-function(K,B,C,z,m,D,x,l,y,v,p,u,w,k,A,q,r,E,F,G,H,I,J){var t=C("dojox.layout.GridContainerLite",[H,G],{autoRefresh:!0,templateString:B,dragHandleClass:"dojoxDragHandle",nbZones:1,doLayout:!0,isAutoOrganized:!0,acceptTypes:[],colWidths:"",constructor:function(a,b){this.acceptTypes=(a||{}).acceptTypes||["text"];this._disabled=!0},postCreate:function(){this.inherited(arguments);this._grid=[];this._createCells();this.subscribe("/dojox/mdnd/drop","resizeChildAfterDrop");this.subscribe("/dojox/mdnd/drag/start",
-"resizeChildAfterDragStart");this._dragManager=J.areaManager();this._dragManager.autoRefresh=this.autoRefresh;this._dragManager.dragHandleClass=this.dragHandleClass;this.doLayout?this._border={h:m("ie")?l.getBorderExtents(this.gridContainerTable).h:0,w:6==m("ie")?1:0}:(x.set(this.domNode,"overflowY","hidden"),x.set(this.gridContainerTable,"height","auto"))},startup:function(){this._started||(this.isAutoOrganized?this._organizeChildren():this._organizeChildrenManually(),p.forEach(this.getChildren(),
-function(a){a.startup()}),this._isShown()&&this.enableDnd(),this.inherited(arguments))},resizeChildAfterDrop:function(a,b,c){return this._disabled?!1:q.getEnclosingWidget(b.node)==this?(b=q.byNode(a),b.resize&&u.isFunction(b.resize)&&b.resize(),b.set("column",a.parentNode.cellIndex),this.doLayout&&(a=this._contentBox.h,l.getContentBox(this.gridContainerDiv).h>=a&&x.set(this.gridContainerTable,"height",a-this._border.h+"px")),!0):!1},resizeChildAfterDragStart:function(a,b,c){return this._disabled?
-!1:q.getEnclosingWidget(b.node)==this?(this._draggedNode=a,this.doLayout&&l.setMarginBox(this.gridContainerTable,{h:l.getContentBox(this.gridContainerDiv).h-this._border.h}),!0):!1},getChildren:function(){var a=new I;p.forEach(this._grid,function(b){z("\x3e [widgetId]",b.node).map(q.byNode).forEach(function(b){a.push(b)})});return a},_isShown:function(){if("open"in this)return this.open;var a=this.domNode;return"none"!=a.style.display&&"hidden"!=a.style.visibility&&!D.contains(a,"dijitHidden")},layout:function(){if(this.doLayout){var a=
-this._contentBox;l.setMarginBox(this.gridContainerTable,{h:a.h-this._border.h});l.setContentSize(this.domNode,{w:a.w-this._border.w})}p.forEach(this.getChildren(),function(a){a.resize&&u.isFunction(a.resize)&&a.resize()})},onShow:function(){this._disabled&&this.enableDnd()},onHide:function(){this._disabled||this.disableDnd()},_createCells:function(){0===this.nbZones&&(this.nbZones=1);for(var a=this.acceptTypes.join(","),b=0,c=this._computeColWidth();b<this.nbZones;)this._grid.push({node:y.create("td",
-{"class":"gridContainerZone",accept:a,id:this.id+"_dz"+b,style:{width:c[b]+"%"}},this.gridNode)}),b++},_getZonesAttr:function(){return z(".gridContainerZone",this.containerNode)},enableDnd:function(){var a=this._dragManager;p.forEach(this._grid,function(b){a.registerByNode(b.node)});a._dropMode.updateAreas(a._areaList);this._disabled=!1},disableDnd:function(){var a=this._dragManager;p.forEach(this._grid,function(b){a.unregister(b.node)});a._dropMode.updateAreas(a._areaList);this._disabled=!0},_organizeChildren:function(){for(var a=
-t.superclass.getChildren.call(this),b=this.nbZones,c=Math.floor(a.length/b),d=a.length%b,f=0,h=0;h<b;h++){for(var e=0;e<c;e++)this._insertChild(a[f],h),f++;if(0<d){try{this._insertChild(a[f],h),f++}catch(g){console.error("Unable to insert child in GridContainer",g)}d--}else if(0===c)break}},_organizeChildrenManually:function(){for(var a=t.superclass.getChildren.call(this),b=a.length,c,d=0;d<b;d++){c=a[d];try{this._insertChild(c,c.column-1)}catch(f){console.error("Unable to insert child in GridContainer",
-f)}}},_insertChild:function(a,b,c){var d=this._grid[b].node,f=d.childNodes.length;if("undefined"===typeof c||c>f)c=f;this._disabled?(y.place(a.domNode,d,c),v.set(a.domNode,"tabIndex","0")):a.dragRestriction?(y.place(a.domNode,d,c),v.set(a.domNode,"tabIndex","0")):this._dragManager.addDragItem(d,a.domNode,c,!0);a.set("column",b);return a},removeChild:function(a){this._disabled?this.inherited(arguments):this._dragManager.removeDragItem(a.domNode.parentNode,a.domNode)},addService:function(a,b,c){kernel.deprecated("addService is deprecated.",
-"Please use  instead.","Future");this.addChild(a,b,c)},addChild:function(a,b,c){a.domNode.id=a.id;t.superclass.addChild.call(this,a,0);if(0>b||void 0===b)b=0;0>=c&&(c=0);try{return this._insertChild(a,b,c)}catch(d){console.error("Unable to insert child in GridContainer",d)}return null},_setColWidthsAttr:function(a){this.colWidths=u.isString(a)?a.split(","):u.isArray(a)?a:[a];this._started&&this._updateColumnsWidth()},_updateColumnsWidth:function(a){a=this._grid.length;for(var b=this._computeColWidth(),
-c=0;c<a;c++)this._grid[c].node.style.width=b[c]+"%"},_computeColWidth:function(){var a=this.colWidths||[],b=[],c,d=0,f;for(f=0;f<this.nbZones;f++)b.length<a.length?(d+=1*a[f],b.push(a[f])):(c||(c=(100-d)/(this.nbZones-f),0>c&&(c=100/this.nbZones)),b.push(c),d+=1*c);if(100<d)for(a=100/d,f=0;f<b.length;f++)b[f]*=a;return b},_selectFocus:function(a){if(!this._disabled){var b=a.keyCode,c=null,d=E.getFocus().node,f=this._dragManager,h,e,g;if(d==this.containerNode)switch(d=this.gridNode.childNodes,b){case k.DOWN_ARROW:case k.RIGHT_ARROW:h=
-!1;for(e=0;e<d.length;e++){b=d[e].childNodes;for(g=0;g<b.length;g++)if(c=b[g],null!==c&&"none"!=c.style.display){r.focus(c);w.stop(a);h=!0;break}if(h)break}break;case k.UP_ARROW:case k.LEFT_ARROW:for(d=this.gridNode.childNodes,h=!1,e=d.length-1;0<=e;e--){b=d[e].childNodes;for(g=b.length;0<=g;g--)if(c=b[g],null!==c&&"none"!=c.style.display){r.focus(c);w.stop(a);h=!0;break}if(h)break}}else if(d.parentNode.parentNode==this.gridNode){var n=b==k.UP_ARROW||b==k.LEFT_ARROW?"lastChild":"firstChild";g=b==
-k.UP_ARROW||b==k.LEFT_ARROW?"previousSibling":"nextSibling";switch(b){case k.UP_ARROW:case k.DOWN_ARROW:w.stop(a);h=!1;for(var l=d;!h;){b=l.parentNode.childNodes;for(e=c=0;e<b.length&&!("none"!=b[e].style.display&&c++,1<c);e++);if(1==c)return;c=null===l[g]?l.parentNode[n]:l[g];"none"===c.style.display?l=c:h=!0}if(a.shiftKey){a=d.parentNode;for(e=0;e<this.gridNode.childNodes.length&&a!=this.gridNode.childNodes[e];e++);b=this.gridNode.childNodes[e].childNodes;for(g=0;g<b.length&&c!=b[g];g++);(m("mozilla")||
-m("webkit"))&&e--;c=q.byNode(d);c.dragRestriction?A.publish("/dojox/layout/gridContainer/moveRestriction",this):(f=f.removeDragItem(a,d),this.addChild(c,e,g),v.set(d,"tabIndex","0"),r.focus(d))}else r.focus(c);break;case k.RIGHT_ARROW:case k.LEFT_ARROW:if(w.stop(a),a.shiftKey){a=0;if(null===d.parentNode[g])m("ie")&&b==k.LEFT_ARROW&&(a=this.gridNode.childNodes.length-1);else if(3==d.parentNode[g].nodeType)a=this.gridNode.childNodes.length-2;else{for(e=0;e<this.gridNode.childNodes.length&&d.parentNode[g]!=
-this.gridNode.childNodes[e];e++)a++;(m("mozilla")||m("webkit"))&&a--}c=q.byNode(d);n=d.getAttribute("dndtype");n=null===n?c&&c.dndType?c.dndType.split(/\s*,\s*/):["text"]:n.split(/\s*,\s*/);h=!1;for(e=0;e<this.acceptTypes.length;e++)for(g=0;g<n.length;g++)if(n[g]==this.acceptTypes[e]){h=!0;break}if(h&&!c.dragRestriction){e=d.parentNode;g=0;if(k.LEFT_ARROW==b){b=a;if(m("mozilla")||m("webkit"))b=a+1;g=this.gridNode.childNodes[b].childNodes.length}f=f.removeDragItem(e,d);this.addChild(c,a,g);v.set(f,
-"tabIndex","0");r.focus(f)}else A.publish("/dojox/layout/gridContainer/moveRestriction",this)}else{for(d=d.parentNode;null===c;)if(d=null!==d[g]&&3!==d[g].nodeType?d[g]:"previousSibling"===g?d.parentNode.childNodes[d.parentNode.childNodes.length-1]:d.parentNode.childNodes[m("ie")?0:1],(c=d[n])&&"none"==c.style.display){b=c.parentNode.childNodes;f=null;if("previousSibling"==g)for(e=b.length-1;0<=e;e--){if("none"!=b[e].style.display){f=b[e];break}}else for(e=0;e<b.length;e++)if("none"!=b[e].style.display){f=
-b[e];break}f?c=f:(d=c,d=d.parentNode,c=null)}r.focus(c)}}}}},destroy:function(){var a=this._dragManager;p.forEach(this._grid,function(b){a.unregister(b.node)});this.inherited(arguments)}});t.ChildWidgetProperties={column:"1",dragRestriction:!1};u.extend(F,t.ChildWidgetProperties);return t});
-//# sourceMappingURL=GridContainerLite.js.map
+define([
+	"dojo/_base/kernel",
+	"dojo/text!./resources/GridContainer.html",
+	"dojo/_base/declare", // declare
+	"dojo/query",
+	"dojo/_base/sniff",
+	"dojo/dom-class",
+	"dojo/dom-style",
+	"dojo/dom-geometry",
+	"dojo/dom-construct",
+	"dojo/dom-attr", // domAttr.get
+	"dojo/_base/array",
+	"dojo/_base/lang",
+	"dojo/_base/event",
+	"dojo/keys", // keys
+	"dojo/topic", // topic.publish()
+	"dijit/registry",
+	"dijit/focus",
+	"dijit/_base/focus", // dijit.getFocus()
+	"dijit/_WidgetBase",
+	"dijit/_TemplatedMixin",
+	"dijit/layout/_LayoutWidget",
+	"dojo/_base/NodeList",
+	"dojox/mdnd/AreaManager", "dojox/mdnd/DropIndicator",
+	"dojox/mdnd/dropMode/OverDropMode","dojox/mdnd/AutoScroll"
+],function(dojo, template, declare, query, has, domClass, domStyle, geom, domConstruct, domAttr, array, lang, events, keys, topic, registry, focus, baseFocus, _WidgetBase, _TemplatedMixin, _LayoutWidget, NodeList, AreaManager){
+
+	var gcl = declare(
+		"dojox.layout.GridContainerLite",
+		[_LayoutWidget, _TemplatedMixin],
+	{
+		// summary:
+		//		The GridContainerLite is a container of child elements that are placed in a kind of grid.
+		//
+		// description:
+		//		GridContainerLite displays the child elements by column
+		//		(ie: the children widths are fixed by the column width of the grid but
+		//		the children heights are free).
+		//		Each child is movable by drag and drop inside the GridContainer.
+		//		The position of other children is automatically calculated when a child is moved.
+		//
+		// example:
+		// 	|	<div dojoType="dojox.layout.GridContainerLite" nbZones="3" isAutoOrganized="true">
+		// 	|		<div dojoType="dijit.layout.ContentPane">Content Pane 1 : Drag Me !</div>
+		// 	|		<div dojoType="dijit.layout.ContentPane">Content Pane 2 : Drag Me !</div>
+		// 	|		<div dojoType="dijit.layout.ContentPane">Content Pane 3 : Drag Me !</div>
+		// 	|	</div>
+		//
+		// example:
+		// 	|	dojo.ready(function(){
+		// 	|		var cpane1 = new dijit.layout.ContentPane({
+		//	|			title:"cpane1", content: "Content Pane 1 : Drag Me !"
+		//	|		}),
+		// 	|		cpane2 = new dijit.layout.ContentPane({
+		//	|			title:"cpane2",
+		//	|			content: "Content Pane 2 : Drag Me !"
+		//	|		}),
+		// 	|		cpane3 = new dijit.layout.ContentPane({
+		//	|			title:"cpane3",
+		//	|			content: "Content Pane 3 : Drag Me !"
+		//	|		});
+		// 	|
+		// 	|		var widget = new dojox.layout.GridContainerLite({
+		// 	|			nbZones: 3,
+		// 	|			isAutoOrganized: true
+		// 	|		}, dojo.byId("idNode"));
+		// 	|		widget.addChild(cpane1, 0, 0);
+		// 	|		widget.addChild(cpane2, 1, 0);
+		// 	|		widget.addChild(cpane3, 2, 1);
+		// 	|		widget.startup();
+		// 	|	});
+
+		// autoRefresh: Boolean
+		//		Enable the refresh of registered areas on drag start.
+		autoRefresh: true,
+
+
+		// templateString: String
+		//		template of gridContainer.
+		templateString: template,
+
+		// dragHandleClass: Array
+		//		CSS class enabling a drag handle on a child.
+		dragHandleClass: "dojoxDragHandle",
+
+		// nbZones: Integer
+		//		The number of dropped zones, by default 1.
+		nbZones: 1,
+
+		// doLayout: Boolean
+		//		If true, change the size of my currently displayed child to match my size.
+		doLayout: true,
+
+		// isAutoOrganized: Boolean
+		//		If true, widgets are organized automatically,
+		//		else the attribute colum of child will define the right column.
+		isAutoOrganized: true,
+
+		// acceptTypes: Array
+		//		The GridContainer will only accept the children that fit to the types.
+		acceptTypes: [],
+
+		// colWidths: String
+		//		A comma separated list of column widths. If the column widths do not add up
+		//		to 100, the remaining columns split the rest of the width evenly
+		//		between them.
+		colWidths: "",
+
+		constructor: function(/*Object*/props, /*DOMNode*/node){
+			this.acceptTypes = (props || {}).acceptTypes || ["text"];
+			this._disabled = true;
+		},
+
+		postCreate: function(){
+			//console.log("dojox.layout.GridContainerLite ::: postCreate");
+			this.inherited(arguments);
+			this._grid = [];
+
+			this._createCells();
+
+			// need to resize dragged child when it's dropped.
+			this.subscribe("/dojox/mdnd/drop", "resizeChildAfterDrop");
+			this.subscribe("/dojox/mdnd/drag/start", "resizeChildAfterDragStart");
+
+			this._dragManager = AreaManager.areaManager();
+			// console.info("autorefresh ::: ", this.autoRefresh);
+			this._dragManager.autoRefresh = this.autoRefresh;
+
+			//	Add specific dragHandleClass to the manager.
+			this._dragManager.dragHandleClass = this.dragHandleClass;
+
+			if(this.doLayout){
+				this._border = {
+					h: has("ie") ? geom.getBorderExtents(this.gridContainerTable).h : 0,
+					w: (has("ie") == 6) ? 1 : 0
+				};
+			}else{
+				domStyle.set(this.domNode, "overflowY", "hidden");
+				domStyle.set(this.gridContainerTable, "height", "auto");
+			}
+		},
+
+		startup: function(){
+			//console.log("dojox.layout.GridContainerLite ::: startup");
+			if(this._started){ return; }
+
+			if(this.isAutoOrganized){
+				this._organizeChildren();
+			}
+			else{
+				this._organizeChildrenManually();
+			}
+
+			// Need to call getChildren because getChildren return null
+			// The children are not direct children because of _organizeChildren method
+			array.forEach(this.getChildren(), function(child){
+			  child.startup();
+			});
+
+			// Need to enable the Drag And Drop only if the GridContainer is visible.
+			if(this._isShown()){
+				this.enableDnd();
+			}
+			this.inherited(arguments);
+		},
+
+		resizeChildAfterDrop: function(/*Node*/node, /*Object*/targetArea, /*Integer*/indexChild){
+			// summary:
+			//		Resize the GridContainerLite inner table and the dropped widget.
+			// description:
+			//		These components are resized only if the targetArea.node is a
+			//		child of this instance of gridContainerLite.
+			//		To be resized, the dropped node must have also a method resize.
+			// node:
+			//		domNode of dropped widget.
+			// targetArea:
+			//		AreaManager Object containing information of targetArea
+			// indexChild:
+			//		Index where the dropped widget has been placed
+			// returns:
+			//		True if resized.
+
+			//console.log("dojox.layout.GridContainerLite ::: resizeChildAfterDrop");
+			if(this._disabled){
+				return false;
+			}
+			if(registry.getEnclosingWidget(targetArea.node) == this){
+				var widget = registry.byNode(node);
+				if(widget.resize && lang.isFunction(widget.resize)){
+					widget.resize();
+				}
+
+				// Update the column of the widget
+				widget.set("column", node.parentNode.cellIndex);
+
+				if(this.doLayout){
+					var domNodeHeight = this._contentBox.h,
+						divHeight = geom.getContentBox(this.gridContainerDiv).h;
+					if(divHeight >= domNodeHeight){
+						domStyle.set(this.gridContainerTable, "height",
+								(domNodeHeight - this._border.h) + "px");
+					}
+				}
+				return true;
+			}
+			return false;
+		},
+
+		resizeChildAfterDragStart: function(/*Node*/node, /*Object*/sourceArea, /*Integer*/indexChild){
+			// summary:
+			//		Resize the GridContainerLite inner table only if the drag source
+			//		is a child of this gridContainer.
+			// node:
+			//		domNode of dragged widget.
+			// sourceArea:
+			//		AreaManager Object containing information of sourceArea
+			// indexChild:
+			//		Index where the dragged widget has been placed
+
+			//console.log("dojox.layout.GridContainerLite ::: resizeChildAfterDragStart");
+			if(this._disabled){
+				return false;
+			}
+			if(registry.getEnclosingWidget(sourceArea.node) == this){
+				this._draggedNode = node;
+				if(this.doLayout){
+					geom.setMarginBox(this.gridContainerTable, {
+						h: geom.getContentBox(this.gridContainerDiv).h - this._border.h
+					});
+				}
+				return true;
+			}
+			return false;
+		},
+
+		getChildren: function(){
+			// summary:
+			//		A specific method which returns children after they were placed in zones.
+			// returns:
+			//		A NodeList containing all children (widgets).
+			// tags:
+			//		protected
+
+			var children = new NodeList();
+			array.forEach(this._grid, function(dropZone){
+				query("> [widgetId]", dropZone.node).map(registry.byNode).forEach(function(item){
+				  children.push(item);
+				});
+			});
+			return children;	// Array
+		},
+
+		_isShown: function(){
+			// summary:
+			//		Check if the domNode is visible or not.
+			// returns:
+			//		true if the content is currently shown
+			// tags:
+			//		protected
+
+			//console.log("dojox.layout.GridContainerLite ::: _isShown");
+			if("open" in this){		// for TitlePane, etc.
+				return this.open;		// Boolean
+			}
+			else{
+				var node = this.domNode;
+				return (node.style.display != 'none') && (node.style.visibility != 'hidden') && !domClass.contains(node, "dijitHidden"); // Boolean
+			}
+		},
+
+		layout: function(){
+			// summary:
+			//		Resize of each child
+
+			//console.log("dojox.layout.GridContainerLite ::: layout");
+			if(this.doLayout){
+				var contentBox = this._contentBox;
+				geom.setMarginBox(this.gridContainerTable, {
+					h: contentBox.h - this._border.h
+				});
+				geom.setContentSize(this.domNode, {
+					w: contentBox.w - this._border.w
+				});
+			}
+			array.forEach(this.getChildren(), function(widget){
+				if(widget.resize && lang.isFunction(widget.resize)){
+					widget.resize();
+				}
+			});
+		},
+
+		onShow: function(){
+			// summary:
+			//		Enabled the Drag And Drop if it's necessary.
+
+			//console.log("dojox.layout.GridContainerLite ::: onShow");
+			if(this._disabled){
+				this.enableDnd();
+			}
+		},
+
+		onHide: function(){
+			// summary:
+			//		Disabled the Drag And Drop if it's necessary.
+
+			//console.log("dojox.layout.GridContainerLite ::: onHide");
+			if(!this._disabled){
+				this.disableDnd();
+			}
+		},
+
+		_createCells: function(){
+			// summary:
+			//		Create the columns of the GridContainer.
+			// tags:
+			//		protected
+
+			//console.log("dojox.layout.GridContainerLite ::: _createCells");
+			if(this.nbZones === 0){ this.nbZones = 1; }
+			var accept = this.acceptTypes.join(","),
+				i = 0;
+
+			var widths = this._computeColWidth();
+
+			while(i < this.nbZones){
+				// Add the parameter accept in each zone used by AreaManager
+				// (see method dojox.mdnd.AreaManager:registerByNode)
+				this._grid.push({
+					node: domConstruct.create("td", {
+						'class': "gridContainerZone",
+						accept: accept,
+						id: this.id + "_dz" + i,
+						style: {
+							'width': widths[i] + "%"
+						}
+					}, this.gridNode)
+				});
+				i++;
+			}
+		},
+
+		_getZonesAttr: function(){
+			// summary:
+			//		return array of zone (domNode)
+			return query(".gridContainerZone",  this.containerNode);
+		},
+
+		enableDnd: function(){
+			// summary:
+			//		Enable the Drag And Drop for children of GridContainer.
+
+			//console.log("dojox.layout.GridContainerLite ::: enableDnd");
+			var m = this._dragManager;
+			array.forEach(this._grid, function(dropZone){
+				m.registerByNode(dropZone.node);
+			});
+			m._dropMode.updateAreas(m._areaList);
+			this._disabled = false;
+		},
+
+		disableDnd: function(){
+			// summary:
+			//		Disable the Drag And Drop for children of GridContainer.
+
+			//console.log("dojox.layout.GridContainerLite ::: disableDnd");
+			var m = this._dragManager;
+			array.forEach(this._grid, function(dropZone){
+				m.unregister(dropZone.node);
+			});
+			m._dropMode.updateAreas(m._areaList);
+			this._disabled = true;
+		},
+
+		_organizeChildren: function(){
+			// summary:
+			//		List all zones and insert child into columns.
+
+			//console.log("dojox.layout.GridContainerLite ::: _organizeChildren");
+			var children = gcl.superclass.getChildren.call(this);
+			var numZones = this.nbZones,
+				numPerZone = Math.floor(children.length / numZones),
+				mod = children.length % numZones,
+				i = 0;
+	//		console.log('numPerZone', numPerZone, ':: mod', mod);
+			for(var z = 0; z < numZones; z++){
+				for(var r = 0; r < numPerZone; r++){
+					this._insertChild(children[i], z);
+					i++;
+				}
+				if(mod > 0){
+					try{
+						this._insertChild(children[i], z);
+						i++;
+					}
+					catch(e){
+						console.error("Unable to insert child in GridContainer", e);
+					}
+					mod--;
+				}
+				else if(numPerZone === 0){
+					break;	// Optimization
+				}
+			}
+		},
+
+		_organizeChildrenManually: function (){
+			// summary:
+			//		Organize children by column property of widget.
+
+			//console.log("dojox.layout.GridContainerLite ::: _organizeChildrenManually");
+			var children = gcl.superclass.getChildren.call(this),
+				length = children.length,
+				child;
+			for(var i = 0; i < length; i++){
+				child = children[i];
+				try{
+					this._insertChild(child, child.column - 1);
+				}
+				catch(e){
+					console.error("Unable to insert child in GridContainer", e);
+				}
+			}
+		},
+
+		_insertChild: function(/*Widget*/child, /*Integer*/column, /*Integer?*/p){
+			// summary:
+			//		Insert a child in a specific column of the GridContainer widget.
+			// column:
+			//		Column number
+			// p:
+			//		Place in the zone (0 - first)
+			// returns:
+			//		The widget inserted
+
+			//console.log("dojox.layout.GridContainerLite ::: _insertChild", child, column, p);
+			var zone = this._grid[column].node,
+				length = zone.childNodes.length;
+			if(typeof p === "undefined" || p > length){
+				p = length;
+			}
+			if(this._disabled){
+				domConstruct.place(child.domNode, zone, p);
+				domAttr.set(child.domNode, "tabIndex", "0");
+			}
+			else{
+				if(!child.dragRestriction){
+					this._dragManager.addDragItem(zone, child.domNode, p, true);
+				}
+				else{
+					domConstruct.place(child.domNode, zone, p);
+					domAttr.set(child.domNode, "tabIndex", "0");
+				}
+			}
+			child.set("column", column);
+			return child; // Widget
+		},
+
+		removeChild: function(/*Widget*/ widget){
+			//console.log("dojox.layout.GridContainerLite ::: removeChild");
+			if(this._disabled){
+				this.inherited(arguments);
+			}
+			else{
+				this._dragManager.removeDragItem(widget.domNode.parentNode, widget.domNode);
+			}
+		},
+
+		addService: function(/*Object*/child, /*Integer?*/column, /*Integer?*/p){
+			//console.log("dojox.layout.GridContainerLite ::: addService");
+			kernel.deprecated("addService is deprecated.", "Please use  instead.", "Future");
+			this.addChild(child, column, p);
+		},
+
+		addChild: function(/*Object*/child, /*Integer?*/column, /*Integer?*/p){
+			// summary:
+			//		Add a child in a specific column of the GridContainer widget.
+			// child:
+			//		widget to insert
+			// column:
+			//		column number
+			// p:
+			//		place in the zone (first = 0)
+			// returns:
+			//		The widget inserted
+
+			//console.log("dojox.layout.GridContainerLite ::: addChild");
+			child.domNode.id = child.id;
+			gcl.superclass.addChild.call(this, child, 0);
+			if(column < 0 || column === undefined){ column = 0; }
+			if(p <= 0){ p = 0; }
+			try{
+				return this._insertChild(child, column, p);
+			}
+			catch(e){
+				console.error("Unable to insert child in GridContainer", e);
+			}
+			return null; 	// Widget
+		},
+
+		_setColWidthsAttr: function(value){
+			this.colWidths = lang.isString(value) ? value.split(",") : (lang.isArray(value) ? value : [value]);
+
+			if(this._started){
+				this._updateColumnsWidth();
+			}
+		},
+
+		_updateColumnsWidth: function(/*Object*/ manager){
+			// summary:
+			//		Update the columns width.
+			// manager:
+			//		dojox.mdnd.AreaManager singleton
+			// tags:
+			//		private
+
+			//console.log("dojox.layout.GridContainer ::: _updateColumnsWidth");
+			var length = this._grid.length;
+
+			var widths = this._computeColWidth();
+
+			// Set the widths of each node
+			for (var i = 0; i < length; i++){
+				this._grid[i].node.style.width = widths[i] + "%";
+			}
+		},
+
+		_computeColWidth: function(){
+			var origWidths = this.colWidths || [];
+			var widths = [];
+			var colWidth;
+			var widthSum = 0;
+			var i;
+
+			// Calculate the widths of each column.
+			for(i = 0; i < this.nbZones; i++){
+				if(widths.length < origWidths.length){
+					widthSum += origWidths[i] * 1;
+					widths.push(origWidths[i]);
+				}else{
+					if(!colWidth){
+						colWidth = (100 - widthSum)/(this.nbZones - i);
+
+						// If the numbers don't work out, make the remaining columns
+						// an even width and let the code below average
+						// out the differences.
+						if(colWidth < 0){
+							colWidth = 100 / this.nbZones;
+						}
+					}
+					widths.push(colWidth);
+					widthSum += colWidth * 1;
+				}
+			}
+
+			// If the numbers are wrong, divide them all so they add up to 100
+			if(widthSum > 100){
+				var divisor = 100 / widthSum;
+				for(i = 0; i < widths.length; i++){
+					widths[i] *= divisor;
+				}
+			}
+			return widths;
+		},
+
+		_selectFocus: function(/*Event*/event){
+			// summary:
+			//		Enable keyboard accessibility into the GridContainer.
+			// description:
+			//		Possibility to move focus into the GridContainer (TAB, LEFT ARROW, RIGHT ARROW, UP ARROW, DOWN ARROW).
+			//		Possibility to move GridContainer's children (Drag and Drop) with keyboard. (SHIFT +  ARROW).
+			//		If the type of widget is not draggable, a popup is displayed.
+
+			//console.log("dojox.layout.GridContainerLite ::: _selectFocus");
+			if(this._disabled){ return; }
+			var key = event.keyCode,
+				k = keys,
+				zone = null,
+				cFocus = baseFocus.getFocus(),
+				focusNode = cFocus.node,
+				m = this._dragManager,
+				found,
+				i,
+				j,
+				r,
+				children,
+				area,
+				widget;
+			if(focusNode == this.containerNode){
+				area = this.gridNode.childNodes;
+				switch(key){
+					case k.DOWN_ARROW:
+					case k.RIGHT_ARROW:
+						found = false;
+						for(i = 0; i < area.length; i++){
+							children = area[i].childNodes;
+							for(j = 0; j < children.length; j++){
+								zone = children[j];
+								if(zone !== null && zone.style.display != "none"){
+									focus.focus(zone);
+									events.stop(event);
+									found = true;
+									break;
+								}
+							}
+							if(found){ break };
+						}
+						break;
+					case k.UP_ARROW:
+					case k.LEFT_ARROW:
+						area = this.gridNode.childNodes;
+						found = false;
+						for(i = area.length-1; i >= 0 ; i--){
+							children = area[i].childNodes;
+							for(j = children.length; j >= 0; j--){
+								zone = children[j];
+								if(zone !== null && zone.style.display != "none"){
+									focus.focus(zone);
+									events.stop(event);
+									found = true;
+									break;
+								}
+							}
+							if(found){ break };
+						}
+					break;
+				}
+			}else{
+				if(focusNode.parentNode.parentNode == this.gridNode){
+					var child = (key == k.UP_ARROW || key == k.LEFT_ARROW) ? "lastChild" : "firstChild";
+					var pos = (key == k.UP_ARROW || key == k.LEFT_ARROW) ? "previousSibling" : "nextSibling";
+					switch(key){
+						case k.UP_ARROW:
+						case k.DOWN_ARROW:
+							events.stop(event);
+							found = false;
+							var focusTemp = focusNode;
+							while(!found){
+								children = focusTemp.parentNode.childNodes;
+								var num = 0;
+								for(i = 0; i < children.length; i++){
+									if(children[i].style.display != "none"){ num++; }
+									if(num > 1){ break; }
+								}
+								if(num == 1){ return; }
+								if(focusTemp[pos] === null){
+									zone = focusTemp.parentNode[child];
+								}
+								else{
+									zone = focusTemp[pos];
+								}
+								if(zone.style.display === "none"){
+									focusTemp = zone;
+								}
+								else{
+									found = true;
+								}
+							}
+							if(event.shiftKey){
+								var parent = focusNode.parentNode;
+								for(i = 0; i < this.gridNode.childNodes.length; i++){
+									if(parent == this.gridNode.childNodes[i]){
+										break;
+									}
+								}
+								children = this.gridNode.childNodes[i].childNodes;
+								for(j = 0; j < children.length; j++){
+									if(zone == children[j]){
+										break;
+									}
+								}
+								if(has("mozilla") || has("webkit")){ i--; }
+
+								widget = registry.byNode(focusNode);
+								if(!widget.dragRestriction){
+									r = m.removeDragItem(parent, focusNode);
+									this.addChild(widget, i, j);
+									domAttr.set(focusNode, "tabIndex", "0");
+									focus.focus(focusNode);
+								}
+								else{
+									topic.publish("/dojox/layout/gridContainer/moveRestriction", this);
+								}
+							}
+							else{
+								focus.focus(zone);
+							}
+						break;
+						case k.RIGHT_ARROW:
+						case k.LEFT_ARROW:
+							events.stop(event);
+							if(event.shiftKey){
+								var z = 0;
+								if(focusNode.parentNode[pos] === null){
+									if(has("ie") && key == k.LEFT_ARROW){
+										z = this.gridNode.childNodes.length-1;
+									}
+								}
+								else if(focusNode.parentNode[pos].nodeType == 3){
+									z = this.gridNode.childNodes.length - 2;
+								}
+								else{
+									for(i = 0; i < this.gridNode.childNodes.length; i++){
+										if(focusNode.parentNode[pos] == this.gridNode.childNodes[i]){
+											break;
+										}
+										z++;
+									}
+									if(has("mozilla") || has("webkit")){ z--; }
+								}
+								widget = registry.byNode(focusNode);
+								var _dndType = focusNode.getAttribute("dndtype");
+								if(_dndType === null){
+									//check if it's a dijit object
+									if(widget && widget.dndType){
+										_dndType = widget.dndType.split(/\s*,\s*/);
+									}
+									else{
+										_dndType = ["text"];
+									}
+								}
+								else{
+									_dndType = _dndType.split(/\s*,\s*/);
+								}
+								var accept = false;
+								for(i = 0; i < this.acceptTypes.length; i++){
+									for(j = 0; j < _dndType.length; j++){
+										if(_dndType[j] == this.acceptTypes[i]){
+											accept = true;
+											break;
+										}
+									}
+								}
+								if(accept && !widget.dragRestriction){
+									var parentSource = focusNode.parentNode,
+										place = 0;
+									if(k.LEFT_ARROW == key){
+										var t = z;
+										if(has("mozilla") || has("webkit")){ t = z + 1; }
+										place = this.gridNode.childNodes[t].childNodes.length;
+									}
+									// delete of manager :
+									r = m.removeDragItem(parentSource, focusNode);
+									this.addChild(widget, z, place);
+									domAttr.set(r, "tabIndex", "0");
+									focus.focus(r);
+								}
+								else{
+									topic.publish("/dojox/layout/gridContainer/moveRestriction", this);
+								}
+							}
+							else{
+								var node = focusNode.parentNode;
+								while(zone === null){
+									if(node[pos] !== null && node[pos].nodeType !== 3){
+										node = node[pos];
+									}
+									else{
+										if(pos === "previousSibling"){
+											node = node.parentNode.childNodes[node.parentNode.childNodes.length-1];
+										}
+										else{
+											node = node.parentNode.childNodes[has("ie") ? 0 : 1];
+										}
+									}
+									zone = node[child];
+									if(zone && zone.style.display == "none"){
+										// check that all elements are not hidden
+										children = zone.parentNode.childNodes;
+										var childToSelect = null;
+										if(pos == "previousSibling"){
+											for(i = children.length-1; i >= 0; i--){
+												if(children[i].style.display != "none"){
+													childToSelect = children[i];
+													break;
+												}
+											}
+										}
+										else{
+											for(i = 0; i < children.length; i++){
+												if(children[i].style.display != "none"){
+													childToSelect = children[i];
+													break;
+												}
+											}
+										}
+										if(!childToSelect){
+											focusNode = zone;
+											node = focusNode.parentNode;
+											zone = null;
+										}
+										else{
+											zone = childToSelect;
+										}
+									}
+								}
+								focus.focus(zone);
+							}
+						break;
+					}
+				}
+			}
+		},
+
+		destroy: function(){
+			//console.log("dojox.layout.GridContainerLite ::: destroy");
+			var m = this._dragManager;
+			array.forEach(this._grid, function(dropZone){
+				m.unregister(dropZone.node);
+			});
+			this.inherited(arguments);
+		}
+	});
+
+	gcl.ChildWidgetProperties = {
+		// summary:
+		//		Properties set on children of a GridContainerLite
+
+		// column: String
+		//		Column of the grid to place the widget.
+		//		Defined only if dojo.require("dojox.layout.GridContainerLite") is done.
+		column: "1",
+
+		// dragRestriction: Boolean
+		//		If true, the widget can not be draggable.
+		//		Defined only if dojo.require("dojox.layout.GridContainerLite") is done.
+		dragRestriction: false
+	};
+
+	// Add to widget base for benefit of parser.   Remove for 2.0.   Also, hide from doc viewer.
+	lang.extend(_WidgetBase, /*===== {} || =====*/ gcl.ChildWidgetProperties);
+
+	return gcl;
+});

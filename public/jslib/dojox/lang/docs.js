@@ -1,7 +1,213 @@
-//>>built
-define("dojox/lang/docs",["dojo","dijit","dojox"],function(f,z,t){f.provide("dojox.lang.docs");(function(){function y(d){}var g={},m=[],n=t.lang.docs._loadedDocs={},h=function(d,a){g[a]=d},r=function(d){var a=d.type||"",c,e=!1,b=!1,l,a=a.replace(/\?/,function(){e=!0;return""}),a=a.replace(/\[\]/,function(){b=!0;return""});a.match(/HTML/)?a="string":"String"==a||"Number"==a||"Boolean"==a||"Object"==a||"Array"==a||"Integer"==a||"Function"==a?a=a.toLowerCase():"bool"==a?a="boolean":a?(c=f.getObject(a)||
-{},l=!0):c={};c=c||{type:a};b&&(c={items:c,type:"array"},l=!1);l||(e&&(c.optional=!0),/const/.test(d.tags)&&(c.readonly=!0));return c},u=function(d,a){var c=n[a];if(c){d.description=c.description;d.properties={};d.methods={};if(c.properties)for(var e=c.properties,b=0,l=e.length;b<l;b++)"prototype"==e[b].scope&&((d.properties[e[b].name]=r(e[b])).description=e[b].summary);if(c.methods)for(e=c.methods,b=0,l=e.length;b<l;b++)if((a=e[b].name)&&"prototype"==e[b].scope){var q=d.methods[a]={};q.description=
-e[b].summary;var k=e[b].parameters;if(k){q.parameters=[];for(var g=0,m=k.length;g<m;g++){var h=k[g],p=q.parameters[g]=r(h);p.name=h.name;p.optional="optional"==h.usage}}(k=e[b]["return-types"])&&k[0]&&(k=r(k[0]),k.type&&(q.returns=k))}(c=c.superclass)&&(d["extends"]=f.getObject(c))}},p=function(d){m.push(d)},v=f.declare;f.declare=function(d){var a=v.apply(this,arguments);h(a,d);return a};f.mixin(f.declare,v);var w,x=f.require;f.require=function(d){p(d);return x.apply(this,arguments)};t.lang.docs.init=
-function(d){function a(){f.require=x;m=null;try{f.xhrGet({sync:!d,url:f.baseUrl+"../util/docscripts/api.json",handleAs:"text"}).addCallbacks(function(a){n=(new Function("return "+a))();a=null;h=u;for(var b in g)h(g[b],b);g=null},y)}catch(b){}}if(w)return null;w=!0;var c=function(a,c){return f.xhrGet({sync:c||!d,url:f.baseUrl+"../util/docscripts/api/"+a+".json",handleAs:"text"}).addCallback(function(a){a=(new Function("return "+a))();for(var b in a)n[b]||(n[b]=a[b])})};try{var e=m.shift();c(e,!0).addCallbacks(function(){p=
-function(a){if(!n[a])try{c(a)}catch(l){n[a]={}}};f.forEach(m,function(a){p(a)});m=null;h=u;for(i in g)h(g[i],i);g=null},a)}catch(b){a()}return null}})()});
-//# sourceMappingURL=docs.js.map
+dojo.provide("dojox.lang.docs");
+
+// Extracts information from the API docs to apply a schema representation to dojo classes.
+// This can be utilized for runtime metadata retrieval and type checking
+(function(){
+	function error(error){
+		console.log("Warning, the API docs must be available at ../util/docscripts/api.json "+
+		"or ../util/docscripts/api/*.json "+
+		"in order for dojox.lang.docs to supply schema information, but it could not be loaded: " + error);
+	}
+
+	var declaredClasses = {};
+	var requiredModules = [];
+	var _docs = dojox.lang.docs._loadedDocs = {};
+
+	var schemifyClass = function(clazz, name){
+		// initial implementation records classes until they are ready
+		declaredClasses[name] = clazz;
+	};
+	var getType = function(typeDef){
+		var type = typeDef.type || '';
+		var typeObj, optional = false, array = false, dontModify;
+		type = type.replace(/\?/, function(){
+			optional = true;
+			return '';
+		});
+		type = type.replace(/\[\]/, function(){
+			array = true;
+			return '';
+		});
+		if(type.match(/HTML/)){
+			// HTML String and other "types" of strings are really just strings
+			type = "string";
+		}else if(type == 'String' || type == 'Number' ||
+				type == 'Boolean' || type == 'Object' ||
+				type == 'Array' || type == 'Integer' || type == "Function"){
+			type = type.toLowerCase();
+		}else if(type == "bool"){
+			type = "boolean";
+		}else if(type){
+			typeObj = dojo.getObject(type) || {};
+			dontModify = true;
+		}else{
+			typeObj = {};
+		}
+		typeObj = typeObj || {type:type};
+		if(array){
+			typeObj = {items:typeObj, type:"array"};
+			dontModify = false;
+		}
+		if(!dontModify){
+			if(optional){
+				typeObj.optional = true;
+			}
+			if(/const/.test(typeDef.tags)){
+				typeObj.readonly = true;
+			}
+		}
+		return typeObj;
+	};
+	var actualSchemifyClass = function(clazz, name){
+		var docForClass = _docs[name];
+		if(docForClass){
+			clazz.description = docForClass.description;
+			clazz.properties = {};
+			clazz.methods = {};
+
+			if(docForClass.properties){
+				var props = docForClass.properties;
+				for(var i=0, l=props.length; i<l; i++){
+					if(props[i].scope == "prototype"){
+						var propDef = clazz.properties[props[i].name] = getType(props[i]);
+						propDef.description = props[i].summary;
+					}
+				}
+			}
+
+			// translate the methods to JSON Schema
+			if(docForClass.methods){
+				var methods = docForClass.methods;
+				for(i=0, l=methods.length; i<l; i++){
+					name = methods[i].name;
+					if(name && methods[i].scope == "prototype"){
+						var methodDef = clazz.methods[name] = {};
+						methodDef.description = methods[i].summary;
+						var parameters = methods[i].parameters;
+						if(parameters){
+							methodDef.parameters = [];
+							for(var j=0, k=parameters.length; j<k; j++){
+								var param = parameters[j];
+								var paramDef = methodDef.parameters[j] = getType(param);
+								paramDef.name = param.name;
+								paramDef.optional = "optional" == param.usage;
+							}
+						}
+						var ret = methods[i]['return-types'];
+						if(ret && ret[0]){
+							var returns = getType(ret[0]);
+							if(returns.type){
+								methodDef.returns = returns;
+							}
+						}
+					}
+				}
+			}
+
+			var superclass = docForClass.superclass;
+			if(superclass){
+				clazz["extends"] = dojo.getObject(superclass);
+			}
+		}
+	};
+	var requireDocs = function(moduleName){
+		requiredModules.push(moduleName);
+	};
+
+	// hook into all declared classes
+	var defaultDeclare = dojo.declare;
+	dojo.declare = function(name){
+		var clazz = defaultDeclare.apply(this, arguments);
+		schemifyClass(clazz, name);
+		return clazz;
+	};
+	dojo.mixin(dojo.declare, defaultDeclare);
+	var initialized;
+
+	// hook into dojo.require
+	var defaultRequire = dojo.require;
+	dojo.require = function(moduleName){
+		requireDocs(moduleName);
+		var module = defaultRequire.apply(this, arguments);
+		return module;
+	};
+
+	dojox.lang.docs.init = function(/*Boolean*/async){
+		// summary:
+		//		Loads the documentation and applies it to the previously defined classes
+		//		and any future defined classes
+		// async:
+		//		 If true, the documentation will be loaded asynchronously
+		function loadFullDocs(){
+			dojo.require = defaultRequire;
+			requiredModules = null;
+			try{
+				dojo.xhrGet({
+					sync:!async,
+					url: dojo.baseUrl + '../util/docscripts/api.json',
+					handleAs: 'text'
+				}).addCallbacks(function(obj){
+					_docs = (new Function("return " + obj))();
+					obj = null;
+					schemifyClass = actualSchemifyClass;
+
+					for(var i in declaredClasses){
+						schemifyClass(declaredClasses[i], i);
+					}
+					declaredClasses = null;
+				}, error);
+			}catch(e){
+				error(e);
+			}
+		}
+		
+		if(initialized){
+			return null;
+		}
+		initialized = true;
+
+		var getSplitDocs = function(moduleName, sync){
+			return dojo.xhrGet({
+				sync: sync||!async,
+				url: dojo.baseUrl + '../util/docscripts/api/' + moduleName + '.json',
+				handleAs: 'text'
+			}).addCallback(function(obj){
+				obj = (new Function("return " + obj))();
+				for(var clazz in obj){
+					if(!_docs[clazz]){
+						_docs[clazz] = obj[clazz];
+					}
+				}
+			});
+		};
+		try{
+			var firstMod = requiredModules.shift();
+			getSplitDocs(firstMod, true).addCallbacks(function(){
+				requireDocs = function(moduleName){
+					if(!_docs[moduleName]){
+						try{
+							getSplitDocs(moduleName);
+						}catch(e){
+							_docs[moduleName] = {};
+						}
+					}
+				};
+				//console.log(requiredModules);
+				dojo.forEach(requiredModules, function(mod){
+					requireDocs(mod);
+				});
+				requiredModules = null;
+
+				schemifyClass = actualSchemifyClass;
+
+				for(i in declaredClasses){
+					schemifyClass(declaredClasses[i], i);
+				}
+				declaredClasses = null;
+			},loadFullDocs);
+		}catch(e){
+			loadFullDocs();
+		}
+		return null;
+	}
+})();

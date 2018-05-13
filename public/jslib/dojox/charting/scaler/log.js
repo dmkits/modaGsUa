@@ -1,7 +1,151 @@
-//>>built
-define("dojox/charting/scaler/log",["dojo/_base/declare","dojo/_base/lang","dojo/_base/array","./linear","./common"],function(u,h,p,k,r){function q(a,c){var f=0;if(.6>a){var b=a.toString().match(/\.(\d+)/);b&&b[1]&&(f=-b[1].length)}return t(a,f,c)}var l={},t=r.getNumericLabel;return h.mixin(l,k,{base:10,setBase:function(a){this.base=Math.round(a||10)},buildScaler:function(a,c,f,b){var g=Math.log(this.base),e,d;"min"in b&&(a=b.min);"max"in b&&(c=b.max);a=Math.log(a)/g;c=Math.log(c)/g;var h=Math.floor(a),
-m=Math.ceil(c);a=h<a?h:a-1;c=c<m?m:c+1;b.includeZero&&(0<a&&(a=0),0>c&&(c=0),0<e&&(e=0),0<d&&(d=0));e={min:a,max:c,fixUpper:b.fixUpper,fixLower:b.fixLower,natural:b.natural,minorTicks:!1,minorLabels:!1,majorTickStep:1};"from"in b&&(e.from=Math.log(b.from)/g);"to"in b&&(e.to=Math.log(b.to)/g);a=k.buildScaler.call(k,a,c,f,e);a.scaler=l;a.bounds.lower=Math.exp(a.bounds.lower*g);a.bounds.upper=Math.exp(a.bounds.upper*g);a.bounds.from=Math.exp(a.bounds.from*g);a.bounds.to=Math.exp(a.bounds.to*g);return a},
-buildTicks:function(a,c){var f=this.base,b=Math.log(this.base),g=h.mixin({},a.bounds);a.bounds.lower=Math.log(a.bounds.lower)/b;a.bounds.upper=Math.log(a.bounds.upper)/b;a.bounds.from=Math.log(a.bounds.from)/b;a.bounds.to=Math.log(a.bounds.to)/b;var e=h.mixin({},c);e.minorTicks=e.minorLabels=!1;e.majorTickStep=1;var d=k.buildTicks.call(k,a,e);h.mixin(a.bounds,g);if(!d)return d;p.forEach(d.major,function(a){a.value=Math.exp(a.value*b);1<=a.value&&(a.value=Math.round(a.value));10===f&&(a.value=+a.value.toPrecision(1));
-c.minorLabels&&(a.label=q(a.value,c))});d.minor=[];if(c.minorTicks&&10===this.base){var l=a.bounds.from,m=a.bounds.to,n=function(a){l<=a&&a<=m&&(c.minorLabels?d.minor.push({value:a,label:q(a,c)}):d.minor.push({value:a}))};d.major.length&&(n(+(d.major[0].value/5).toPrecision(1)),n(+(d.major[0].value/2).toPrecision(1)));p.forEach(d.major,function(a,b){n(+(2*a.value).toPrecision(1));n(+(5*a.value).toPrecision(1))})}d.micro=[];return d},getTransformerFromModel:function(a){var c=Math.log(this.base),f=
-Math.log(a.bounds.from)/c,b=a.bounds.scale;return function(a){return(Math.log(a)/c-f)*b}},getTransformerFromPlot:function(a){var c=this.base,f=a.bounds.from,b=a.bounds.scale;return function(a){return Math.pow(c,a/b)*f}}})});
-//# sourceMappingURL=log.js.map
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "./linear", "./common"],
+    function(declare, lang, arr, linear, common){
+        var log = {}, getLabel = common.getNumericLabel;
+
+        function makeLabel(value, kwArgs){
+            var precision = 0;
+            if(value < 0.6){  // covers 1/2, 1/3, 1/4, and so on
+                var m = value.toString().match(/\.(\d+)/);
+                if(m && m[1]){
+                    precision = -m[1].length;
+                }
+            }
+            return getLabel(value, precision, kwArgs);
+        }
+
+        return lang.mixin(log, linear, {
+            base: 10,
+
+            setBase: function (/*Number*/ base) {
+                this.base = Math.round(base || 10);
+            },
+
+            buildScaler: function(/*Number*/ min, /*Number*/ max, /*Number*/ span, /*Object*/ kwArgs){
+                var logBase = Math.log(this.base), from, to;
+                // update bounds
+                if("min" in kwArgs){ min = kwArgs.min; }
+                if("max" in kwArgs){ max = kwArgs.max; }
+                // transform bounds
+                min = Math.log(min) / logBase;
+                max = Math.log(max) / logBase;
+                var fMin = Math.floor(min), cMax = Math.ceil(max);
+                min = fMin < min ? fMin : min - 1;
+                max = max < cMax ? cMax : max + 1;
+
+                // continue normal processing
+                if(kwArgs.includeZero){
+                    if(min  > 0){ min  = 0; }
+                    if(max  < 0){ max  = 0; }
+                    if(from > 0){ from = 0; }
+                    if(to   > 0){ to   = 0; }
+                }
+
+                var linArgs = {
+                    min: min,
+                    max: max,
+                    fixUpper: kwArgs.fixUpper,
+                    fixLower: kwArgs.fixLower,
+                    natural:  kwArgs.natural,
+                    minorTicks:    false,
+                    minorLabels:   false,
+                    majorTickStep: 1
+                };
+
+                // Process from/to
+                if("from" in kwArgs){
+                    linArgs.from  = Math.log(kwArgs.from) / logBase;
+                }
+                if("to" in kwArgs){
+                    linArgs.to = Math.log(kwArgs.to) / logBase;
+                }
+
+                var result = linear.buildScaler.call(linear, min, max, span, linArgs);
+                // transform scaler back
+                result.scaler = log;
+                result.bounds.lower = Math.exp(result.bounds.lower * logBase);
+                result.bounds.upper = Math.exp(result.bounds.upper * logBase);
+                result.bounds.from  = Math.exp(result.bounds.from  * logBase);
+                result.bounds.to    = Math.exp(result.bounds.to    * logBase);
+                return result;
+            },
+            buildTicks: function(scaler, kwArgs){
+                var base = this.base, logBase = Math.log(this.base);
+
+                // transform scaler to log
+                var oldBounds = lang.mixin({}, scaler.bounds);
+                scaler.bounds.lower = Math.log(scaler.bounds.lower) / logBase;
+                scaler.bounds.upper = Math.log(scaler.bounds.upper) / logBase;
+                scaler.bounds.from  = Math.log(scaler.bounds.from)  / logBase;
+                scaler.bounds.to    = Math.log(scaler.bounds.to)    / logBase;
+
+                var newKwArgs = lang.mixin({}, kwArgs);
+                newKwArgs.minorTicks = newKwArgs.minorLabels = false;
+                newKwArgs.majorTickStep = 1;
+
+                var result = linear.buildTicks.call(linear, scaler, newKwArgs);
+
+                // revert scaler back
+                lang.mixin(scaler.bounds, oldBounds);
+
+                if(!result){
+                    return result;
+                }
+
+                // transform ticks back
+                function transformTick(tick){
+                    tick.value = Math.exp(tick.value * logBase);
+                    if(tick.value >= 1){
+                        tick.value = Math.round(tick.value);
+                    }
+                    if(base === 10){
+                        tick.value = +tick.value.toPrecision(1);
+                    }
+                    if(kwArgs.minorLabels){
+                        tick.label = makeLabel(tick.value, kwArgs);
+                    }
+                }
+
+                arr.forEach(result.major, transformTick);
+
+                result.minor = [];
+                if(kwArgs.minorTicks && this.base === 10){
+                    var from = scaler.bounds.from, to = scaler.bounds.to,
+                        push = function(value){
+                            if(from <= value && value <= to){
+                                if(kwArgs.minorLabels){
+                                    result.minor.push({value: value,
+                                        label: makeLabel(value, kwArgs)});
+                                }else{
+                                    result.minor.push({value: value});
+                                }
+                            }
+                        };
+                    if(result.major.length){
+                        push(+(result.major[0].value / 5).toPrecision(1));
+                        push(+(result.major[0].value / 2).toPrecision(1));
+                    }
+                    arr.forEach(result.major, function(tick, i){
+                        push(+(tick.value * 2).toPrecision(1));
+                        push(+(tick.value * 5).toPrecision(1));
+                    });
+                }
+
+                result.micro = [];
+
+                return result;
+            },
+            getTransformerFromModel: function(/*Object*/ scaler){
+                var logBase = Math.log(this.base),
+                    offset = Math.log(scaler.bounds.from) / logBase,
+                    scale = scaler.bounds.scale;
+                return function(x){ return (Math.log(x) / logBase - offset) * scale; };	// Function
+            },
+            getTransformerFromPlot: function(/*Object*/ scaler){
+                var base = this.base,
+                    offset = scaler.bounds.from,
+                    scale = scaler.bounds.scale;
+                return function(x){ return Math.pow(base, (x/scale))*offset; };	// Function
+            }
+        });
+    }
+);

@@ -1,5 +1,101 @@
-//>>built
-define("dojox/encoding/digests/_base",["dojo/_base/lang"],function(e){e=e.getObject("dojox.encoding.digests",!0);e.outputTypes={Base64:0,Hex:1,String:2,Raw:3};e.addWords=function(c,d){var a=(c&65535)+(d&65535);return(c>>16)+(d>>16)+(a>>16)<<16|a&65535};e.stringToWord=function(c){for(var d=[],a=0,b=8*c.length;a<b;a+=8)d[a>>5]|=(c.charCodeAt(a/8)&255)<<a%32;return d};e.wordToString=function(c){for(var d=[],a=0,b=32*c.length;a<b;a+=8)d.push(String.fromCharCode(c[a>>5]>>>a%32&255));return d.join("")};
-e.wordToHex=function(c){for(var d=[],a=0,b=4*c.length;a<b;a++)d.push("0123456789abcdef".charAt(c[a>>2]>>a%4*8+4&15)+"0123456789abcdef".charAt(c[a>>2]>>a%4*8&15));return d.join("")};e.wordToBase64=function(c){for(var d=[],a=0,b=4*c.length;a<b;a+=3)for(var e=(c[a>>2]>>a%4*8&255)<<16|(c[a+1>>2]>>(a+1)%4*8&255)<<8|c[a+2>>2]>>(a+2)%4*8&255,f=0;4>f;f++)8*a+6*f>32*c.length?d.push("\x3d"):d.push("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(e>>6*(3-f)&63));return d.join("")};e.stringToUtf8=
-function(c){for(var d="",a=-1,b,e;++a<c.length;)b=c.charCodeAt(a),e=a+1<c.length?c.charCodeAt(a+1):0,55296<=b&&56319>=b&&56320<=e&&57343>=e&&(b=65536+((b&1023)<<10)+(e&1023),a++),127>=b?d+=String.fromCharCode(b):2047>=b?d+=String.fromCharCode(192|b>>>6&31,128|b&63):65535>=b?d+=String.fromCharCode(224|b>>>12&15,128|b>>>6&63,128|b&63):2097151>=b&&(d+=String.fromCharCode(240|b>>>18&7,128|b>>>12&63,128|b>>>6&63,128|b&63));return d};return e});
-//# sourceMappingURL=_base.js.map
+define(["dojo/_base/lang"], function(lang){
+	//	These functions are 32-bit word-based.  See _sha-64 for 64-bit word ops.
+	var base = lang.getObject("dojox.encoding.digests", true);
+
+	base.outputTypes={
+		// summary:
+		//		Enumeration for input and output encodings.
+		Base64:0, Hex:1, String:2, Raw:3
+	};
+
+	//	word-based addition
+	base.addWords=function(/* word */a, /* word */b){
+		// summary:
+		//		add a pair of words together with rollover
+		var l=(a&0xFFFF)+(b&0xFFFF);
+		var m=(a>>16)+(b>>16)+(l>>16);
+		return (m<<16)|(l&0xFFFF);	//	word
+	};
+
+	//	word-based conversion method, for efficiency sake;
+	//	most digests operate on words, and this should be faster
+	//	than the encoding version (which works on bytes).
+	var chrsz=8;	//	16 for Unicode
+	var mask=(1<<chrsz)-1;
+
+	base.stringToWord=function(/* string */s){
+		// summary:
+		//		convert a string to a word array
+		var wa=[];
+		for(var i=0, l=s.length*chrsz; i<l; i+=chrsz){
+			wa[i>>5]|=(s.charCodeAt(i/chrsz)&mask)<<(i%32);
+		}
+		return wa;	//	word[]
+	};
+
+	base.wordToString=function(/* word[] */wa){
+		// summary:
+		//		convert an array of words to a string
+		var s=[];
+		for(var i=0, l=wa.length*32; i<l; i+=chrsz){
+			s.push(String.fromCharCode((wa[i>>5]>>>(i%32))&mask));
+		}
+		return s.join("");	//	string
+	};
+
+	base.wordToHex=function(/* word[] */wa){
+		// summary:
+		//		convert an array of words to a hex tab
+		var h="0123456789abcdef", s=[];
+		for(var i=0, l=wa.length*4; i<l; i++){
+			s.push(h.charAt((wa[i>>2]>>((i%4)*8+4))&0xF)+h.charAt((wa[i>>2]>>((i%4)*8))&0xF));
+		}
+		return s.join("");	//	string
+	};
+
+	base.wordToBase64=function(/* word[] */wa){
+		// summary:
+		//		convert an array of words to base64 encoding, should be more efficient
+		//		than using dojox.encoding.base64
+		var p="=", tab="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", s=[];
+		for(var i=0, l=wa.length*4; i<l; i+=3){
+			var t=(((wa[i>>2]>>8*(i%4))&0xFF)<<16)|(((wa[i+1>>2]>>8*((i+1)%4))&0xFF)<<8)|((wa[i+2>>2]>>8*((i+2)%4))&0xFF);
+			for(var j=0; j<4; j++){
+				if(i*8+j*6>wa.length*32){
+					s.push(p);
+				} else {
+					s.push(tab.charAt((t>>6*(3-j))&0x3F));
+				}
+			}
+		}
+		return s.join("");	//	string
+	};
+
+	//	convert to UTF-8
+	base.stringToUtf8 = function(input){
+		var output = "";
+		var i = -1;
+		var x, y;
+
+		while(++i < input.length){
+			x = input.charCodeAt(i);
+			y = i + 1 < input.length ? input.charCodeAt(i + 1) : 0;
+			if(0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF){
+				x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
+				i++;
+			}
+
+			if(x <= 0x7F)
+				output += String.fromCharCode(x);
+			else if(x <= 0x7FF)
+				output += String.fromCharCode(0xC0 | ((x >>> 6) & 0x1F), 0x80 | (x & 0x3F));
+			else if(x <= 0xFFFF)
+				output += String.fromCharCode(0xE0 | ((x >>> 12) & 0x0F), 0x80 | ((x >>> 6) & 0x3F), 0x80 | (x & 0x3F));
+			else if(x <= 0x1FFFFF)
+				output += String.fromCharCode(0xF0 | ((x >>> 18) & 0x07), 0x80 | ((x >>> 12) & 0x3F), 0x80 | ((x >>> 6) & 0x3F), 0x80 | (x & 0x3F));
+		}
+		return output;
+	};
+
+	return base;
+});

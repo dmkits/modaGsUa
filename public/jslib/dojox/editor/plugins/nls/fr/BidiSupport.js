@@ -1,3 +1,7 @@
-//>>built
-define("dojox/editor/plugins/nls/fr/BidiSupport",{ltr:"Direction du texte : de gauche \u00e0 droite",rtl:"Direction du texte : de droite \u00e0 gauche"});
-//# sourceMappingURL=BidiSupport.js.map
+define({      
+//begin v1.x content
+	"ltr": "Direction du texte : de gauche à droite",
+	"rtl": "Direction du texte : de droite à gauche"
+//end v1.x content
+});
+

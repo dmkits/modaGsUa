@@ -1,3 +1,7 @@
-//>>built
-define("dojox/editor/plugins/nls/eu/TextColor",{setButtonText:"Ezarri",cancelButtonText:"Utzi"});
-//# sourceMappingURL=TextColor.js.map
+define({      
+//begin v1.x content
+	"setButtonText": "Ezarri",
+	"cancelButtonText": "Utzi"
+//end v1.x content
+});
+

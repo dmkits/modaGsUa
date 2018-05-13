@@ -1,3 +1,25 @@
-//>>built
-define("dojox/editor/plugins/nls/bs/Smiley",{smiley:"Umetni emotikon",emoticonSmile:"smije\u0161ak",emoticonLaughing:"nasmijan",emoticonWink:"namigivanje",emoticonGrin:"cerenje",emoticonCool:"hladan",emoticonAngry:"ljut",emoticonHalf:"napola",emoticonEyebrow:"obrva",emoticonFrown:"namrgo\u0111en",emoticonShy:"stidan",emoticonGoofy:"budalast",emoticonOops:"ups",emoticonTongue:"jezik",emoticonIdea:"ideja",emoticonYes:"da",emoticonNo:"ne",emoticonAngel:"an\u0111eo",emoticonCrying:"plakanje",emoticonHappy:"sretan"});
-//# sourceMappingURL=Smiley.js.map
+define({      
+//begin v1.x content
+	smiley: "Umetni emotikon",
+	emoticonSmile: "smiješak",
+	emoticonLaughing: "nasmijan",
+	emoticonWink: "namigivanje",
+	emoticonGrin: "cerenje",
+	emoticonCool: "hladan",
+	emoticonAngry: "ljut",
+	emoticonHalf: "napola",
+	emoticonEyebrow: "obrva",
+	emoticonFrown: "namrgođen",
+	emoticonShy: "stidan",
+	emoticonGoofy: "budalast",
+	emoticonOops: "ups",
+	emoticonTongue: "jezik",
+	emoticonIdea: "ideja",
+	emoticonYes: "da",
+	emoticonNo: "ne",
+	emoticonAngel: "anđeo",
+	emoticonCrying: "plakanje",
+	emoticonHappy: "sretan"
+//end v1.x content
+});
+

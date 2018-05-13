@@ -1,6 +1,199 @@
-//>>built
-define("dojox/lang/async",["dojo","dijit","dojox"],function(m,w,q){m.provide("dojox.lang.async");(function(){var e=m.Deferred,f=m.forEach,p=m.some,l=q.lang.async,r=Array.prototype.slice,n=Object.prototype.toString;l.seq=function(a){var c="[object Array]"==n.call(a)?a:arguments;return function(a){var b=new e;f(c,function(a){b.addCallback(a)});b.callback(a);return b}};l.par=function(a){var c="[object Array]"==n.call(a)?a:arguments;return function(a){var b=Array(c.length),k=function(){f(b,function(a){a instanceof
-e&&0>a.fired&&a.cancel()})},d=new e(k),g=c.length;f(c,function(t,g){var d;try{d=t(a)}catch(v){d=v}b[g]=d});p(b,function(a){return a instanceof Error?(k(),d.errback(a),!0):!1})||f(b,function(a,c){a instanceof e?a.addCallbacks(function(a){b[c]=a;--g||d.callback(b)},function(a){k();d.errback(a)}):--g});g||d.callback(b);return d}};l.any=function(a){var c="[object Array]"==n.call(a)?a:arguments;return function(h){var b=Array(c.length),k=!0;cancel=function(a){f(b,function(b,d){d!=a&&b instanceof e&&0>b.fired&&
-b.cancel()})};a=new e(cancel);f(c,function(a,c){var d;try{d=a(h)}catch(u){d=u}b[c]=d});p(b,function(b,c){return b instanceof e?!1:(cancel(c),a.callback(b),!0)})||f(b,function(b,c){b.addBoth(function(b){k&&(k=!1,cancel(c),a.callback(b))})});return a}};l.select=function(a,c){var h="[object Array]"==n.call(c)?c:r.call(arguments,1);return function(b){return(new e).addCallback(a).addCallback(function(a){return"number"==typeof a&&0<=a&&a<h.length?h[a](b):Error("async.select: out of range")}).callback(b)}};
-l.ifThen=function(a,c,h){return function(b){return(new e).addCallback(a).addCallback(function(a){return(a?c:h)(b)}).callback(b)}};l.loop=function(a,c){return function(h){function b(a){f.errback(a)}function k(a){a?g.addCallback(c).addCallback(d):f.callback(a);return a}function d(c){g=(new e).addCallback(a).addCallback(k).addErrback(b);g.callback(c)}var g,f=new e(function(){g.cancel()});d(h);return f}}})()});
-//# sourceMappingURL=async.js.map
+dojo.provide("dojox.lang.async");
+
+(function(){
+	var d = dojo, Deferred = d.Deferred, each = d.forEach, some = d.some,
+		async = dojox.lang.async, aps = Array.prototype.slice,
+		opts = Object.prototype.toString;
+
+	async.seq = function(x){
+		// summary:
+		//		Executes functions sequentially. Waits if any of them returns Deferred.
+		var fs = opts.call(x) == "[object Array]" ? x : arguments;
+		return function(init){
+			var x = new Deferred();
+			each(fs, function(f){ x.addCallback(f); });
+			x.callback(init);
+			return x;
+		};
+	};
+
+	async.par = function(x){
+		// summary:
+		//		Executes functions in parallel. Waits for all of them to finish.
+		var fs = opts.call(x) == "[object Array]" ? x : arguments;
+		return function(init){
+			var results = new Array(fs.length),
+				cancel = function(){
+					each(results, function(v){
+						if(v instanceof Deferred && v.fired < 0){
+							v.cancel();
+						}
+					});
+				},
+				x = new Deferred(cancel),
+				ready = fs.length;
+			each(fs, function(f, i){
+				var x;
+				try {
+					x = f(init);
+				}catch(e){
+					x = e;
+				}
+				results[i] = x;
+			});
+			var failed = some(results, function(v){
+				if(v instanceof Error){
+					cancel();
+					x.errback(v);
+					return true;
+				}
+				return false;
+			});
+			if(!failed){
+				each(results, function(v, i){
+					if(v instanceof Deferred){
+						v.addCallbacks(
+							function(v){
+								results[i] = v;
+								if(!--ready){
+									x.callback(results);
+								}
+							},
+							function(v){
+								cancel();
+								x.errback(v);
+							}
+						);
+					}else{
+						--ready;
+					}
+				});
+			}
+			if(!ready){
+				x.callback(results);
+			}
+			return x;
+		};
+	};
+
+	async.any = function(x){
+		// summary:
+		//		Executes functions in parallel. As soon as one of them finishes
+		//		cancels the rest.
+		var fs = opts.call(x) == "[object Array]" ? x : arguments;
+		return function(init){
+			var results = new Array(fs.length), noResult = true;
+				cancel = function(index){
+					each(results, function(v, i){
+						if(i != index && v instanceof Deferred && v.fired < 0){
+							v.cancel();
+						}
+					});
+				},
+				x = new Deferred(cancel);
+			each(fs, function(f, i){
+				var x;
+				try {
+					x = f(init);
+				}catch(e){
+					x = e;
+				}
+				results[i] = x;
+			});
+			var done = some(results, function(v, i){
+				if(!(v instanceof Deferred)){
+					cancel(i);
+					x.callback(v);
+					return true;
+				}
+				return false;
+			});
+			if(!done){
+				each(results, function(v, i){
+					v.addBoth(
+						function(v){
+							if(noResult){
+								noResult = false;
+								cancel(i);
+								x.callback(v);
+							}
+						}
+					);
+				});
+			}
+			return x;
+		};
+	};
+
+	async.select = function(cond, x){
+		// summary:
+		//		Executes a condition, waits for it if necessary, and executes
+		//		Nth function from list.
+		var fs = opts.call(x) == "[object Array]" ? x : aps.call(arguments, 1);
+		return function(init){
+			return new Deferred().addCallback(cond).addCallback(function(v){
+				if(typeof v == "number" && v >= 0 && v < fs.length){
+					return fs[v](init);
+				}else{
+					return new Error("async.select: out of range");
+				}
+			}).callback(init);
+		};
+	};
+
+	async.ifThen = function(cond, ifTrue, ifFalse){
+		// summary:
+		//		Executes a condition, waits for it if necessary, and executes
+		//		one of two functions.
+		return function(init){
+			return new Deferred().addCallback(cond).addCallback(function(v){
+				return (v ? ifTrue : ifFalse)(init);
+			}).callback(init);
+		};
+	};
+
+	async.loop = function(cond, body){
+		// summary:
+		//		Executes a condition, waits for it if necessary, and executes
+		//		the body, if truthy value was returned.
+		//		Then it repeats the cycle until the condition function returns
+		//		a falsy value.
+		return function(init){
+			var x, y = new Deferred(function(){ x.cancel(); });
+			function ifErr(v){ y.errback(v); }
+			function loop(v){
+				if(v){
+					x.addCallback(body).addCallback(setUp);
+				}else{
+					y.callback(v);
+				}
+				return v;
+			}
+			function setUp(init){
+				x = new Deferred().
+					addCallback(cond).
+					addCallback(loop).
+					addErrback(ifErr);
+				x.callback(init);
+			}
+			setUp(init);
+			return y;
+		};
+	};
+})();
+
+/*
+Design decisions:
+
+seq() - behaves like the normal Deferred callback chain.
+
+par() - if error, all pending Deferreds are cancelled and the error is signaled,
+otherwise return an array of all results.
+
+any() - just like par() but only one result is returned.
+
+select() - any error is returned, otherwise the selected result is returned.
+
+loop() - any error is returned, otherwise the last result is returned.
+
+*/

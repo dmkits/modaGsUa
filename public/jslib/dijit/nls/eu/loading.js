@@ -1,3 +1,7 @@
-//>>built
-define("dijit/nls/eu/loading",{loadingState:"Kargatzen...",errorState:"Barkatu, errorea gertatu da"});
-//# sourceMappingURL=loading.js.map
+define({      
+//begin v1.x content
+	loadingState: "Kargatzen...",
+	errorState: "Barkatu, errorea gertatu da"
+//end v1.x content
+});
+

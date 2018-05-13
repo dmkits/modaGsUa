@@ -1,6 +1,112 @@
-//>>built
-define("dojox/layout/Dock","dojo/_base/lang dojo/_base/window dojo/_base/declare dojo/_base/fx dojo/on dojo/_base/array dojo/_base/sniff dojo/window dojo/dom dojo/dom-class dojo/dom-geometry dojo/dom-construct dijit/_TemplatedMixin dijit/_WidgetBase".split(" "),function(b,d,e,p,c,q,h,k,r,t,u,l,f,g){d=e("dojox.layout.Dock",[g,f],{templateString:'\x3cdiv class\x3d"dojoxDock"\x3e\x3cul data-dojo-attach-point\x3d"containerNode" class\x3d"dojoxDockList"\x3e\x3c/ul\x3e\x3c/div\x3e',_docked:[],_inPositioning:!1,
-autoPosition:!1,addNode:function(a){var m=l.create("li",null,this.containerNode);a=new n({title:a.title,paneRef:a},m);a.startup();return a},startup:function(){if("dojoxGlobalFloatingDock"==this.id||this.isFixedDock)this.own(c(window,"resize",b.hitch(this,"_positionDock")),c(window,"scroll",b.hitch(this,"_positionDock"))),h("ie")&&this.own(c(this.domNode,"resize",b.hitch(this,"_positionDock")));this._positionDock(null);this.inherited(arguments)},_positionDock:function(a){this._inPositioning||"south"==
-this.autoPosition&&this.defer(function(){this._inPositiononing=!0;var a=k.getBox(),b=this.domNode.style;b.left=a.l+"px";b.width=a.w-2+"px";b.top=a.h+a.t-this.domNode.offsetHeight+"px";this._inPositioning=!1},125)}});var n=e("dojox.layout._DockNode",[g,f],{title:"",paneRef:null,templateString:'\x3cli data-dojo-attach-event\x3d"onclick: restore" class\x3d"dojoxDockNode"\x3e\x3cspan data-dojo-attach-point\x3d"restoreNode" class\x3d"dojoxDockRestoreButton" data-dojo-attach-event\x3d"onclick: restore"\x3e\x3c/span\x3e\x3cspan class\x3d"dojoxDockTitleNode" data-dojo-attach-point\x3d"titleNode"\x3e${title}\x3c/span\x3e\x3c/li\x3e',
-restore:function(){this.paneRef.show();this.paneRef.bringToTop();this.destroy()}});return d});
-//# sourceMappingURL=Dock.js.map
+define([
+	"dojo/_base/lang", "dojo/_base/window", "dojo/_base/declare",
+	"dojo/_base/fx", "dojo/on", "dojo/_base/array", "dojo/_base/sniff",
+	"dojo/window", "dojo/dom", "dojo/dom-class", "dojo/dom-geometry", "dojo/dom-construct",
+	"dijit/_TemplatedMixin", "dijit/_WidgetBase"
+], function(
+	lang, winUtil, declare, fx, on, arrayUtil, 
+	has, windowLib, dom, domClass, domGeom, domConstruct, _TemplatedMixin, _WidgetBase
+){
+
+//TODO: don't want to rely on kernel just to make something as experimental	
+//kernel.experimental("dojox.layout.Dock");
+
+var Dock = declare("dojox.layout.Dock",[_WidgetBase, _TemplatedMixin],{
+	// summary:
+	//		A widget that attaches to a node and keeps track of incoming / outgoing FloatingPanes
+	//		and handles layout
+
+	templateString: '<div class="dojoxDock"><ul data-dojo-attach-point="containerNode" class="dojoxDockList"></ul></div>',
+
+	// _docked: [private] Array
+	//		array of panes currently in our dock
+	_docked: [],
+	
+	_inPositioning: false,
+	
+	autoPosition: false,
+	
+	addNode: function(refNode){
+		// summary:
+		//		Insert a dockNode reference into the dock
+		
+		var div = domConstruct.create('li', null, this.containerNode),
+			node = new DockNode({
+				title: refNode.title,
+				paneRef: refNode
+			}, div)
+		;
+		node.startup();
+		return node;
+	},
+
+	startup: function(){
+				
+		if (this.id == "dojoxGlobalFloatingDock" || this.isFixedDock) {
+			// attach window.onScroll, and a position like in presentation/dialog
+			this.own(
+				on(window, "resize", lang.hitch(this, "_positionDock")),
+				on(window, "scroll", lang.hitch(this, "_positionDock"))
+			);
+			if(has("ie")){ // TODO: All versions of IE, or pre-IE9, or some feature to test?
+				this.own(
+					on(this.domNode, "resize", lang.hitch(this, "_positionDock"))
+				);
+			}
+		}
+		this._positionDock(null);
+		this.inherited(arguments);
+
+	},
+	
+	_positionDock: function(/* Event? */e){
+		if(!this._inPositioning){
+			if(this.autoPosition == "south"){
+				// Give some time for scrollbars to appear/disappear
+				this.defer(function() {
+					this._inPositiononing = true;
+					var viewport = windowLib.getBox();
+					var s = this.domNode.style;
+					s.left = viewport.l + "px";
+					s.width = (viewport.w-2) + "px";
+					s.top = (viewport.h + viewport.t) - this.domNode.offsetHeight + "px";
+					this._inPositioning = false;
+				}, 125);
+			}
+		}
+	}
+
+
+});
+
+var DockNode = declare("dojox.layout._DockNode",[_WidgetBase, _TemplatedMixin],{
+	// summary:
+	//		dojox.layout._DockNode is a private widget used to keep track of
+	//		which pane is docked.
+
+	// title: String
+	//		Shown in dock icon. should read parent iconSrc?
+	title: "",
+
+	// paneRef: Widget
+	//		reference to the FloatingPane we reprasent in any given dock
+	paneRef: null,
+
+	templateString:
+		'<li data-dojo-attach-event="onclick: restore" class="dojoxDockNode">'+
+			'<span data-dojo-attach-point="restoreNode" class="dojoxDockRestoreButton" data-dojo-attach-event="onclick: restore"></span>'+
+			'<span class="dojoxDockTitleNode" data-dojo-attach-point="titleNode">${title}</span>'+
+		'</li>',
+
+	restore: function(){
+		// summary:
+		//		remove this dock item from parent dock, and call show() on reffed floatingpane
+		this.paneRef.show();
+		this.paneRef.bringToTop();
+		this.destroy();
+	}
+});
+
+return Dock;
+});
+

@@ -1,3 +1,8 @@
-//>>built
-define("dojox/widget/nls/sr/Wizard",{next:"Slede\u0107e",previous:"Prethodno",done:"Gotovo"});
-//# sourceMappingURL=Wizard.js.map
+define({      
+//begin v1.x content
+next: "Sledeće",
+previous: "Prethodno",
+done: "Gotovo"
+//end v1.x content
+});
+

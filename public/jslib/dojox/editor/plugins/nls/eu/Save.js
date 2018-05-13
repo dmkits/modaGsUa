@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/eu/Save",{save:"Gorde"});
-//# sourceMappingURL=Save.js.map
+define({      
+//begin v1.x content
+	"save": "Gorde"
+//end v1.x content
+});
+

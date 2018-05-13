@@ -1,7 +1,236 @@
-//>>built
-define("dojox/charting/plot2d/commonStacked",["dojo/_base/lang","dojox/lang/functional","./common"],function(m,p,q){var n=m.getObject("dojox.charting.plot2d.commonStacked",!0);return m.mixin(n,{collectStats:function(l,k){for(var f=m.delegate(q.defaultStats),g=0;g<l.length;++g)for(var e=l[g],c=0;c<e.data.length;c++){var a,b;null!==e.data[c]&&("number"!=typeof e.data[c]&&e.data[c].hasOwnProperty("x")?(a=e.data[c].x,null!==a&&(b=n.getValue(l,g,a,k)[0],b=null!=b&&b.y?b.y:null)):(b=n.getIndexValue(l,g,
-c,k)[0],a=c+1),f.hmin=Math.min(f.hmin,a),f.hmax=Math.max(f.hmax,a),f.vmin=Math.min(f.vmin,b),f.vmax=Math.max(f.vmax,b))}return f},rearrangeValues:function(l,k,f){var g=p.filter(l,"x"),e=g.length;if(!e)return l;for(var c={},a=0;a<e;++a){for(var b=g[a],d=b.min,h=b.max;d<h;++d)b[d]=(b[d]||0)+(c[d]||0);c=b}for(a=0;a<e;++a)for(b=g[a],d=b.min,h=b.max;d<h;++d)b[d]=this.isNullValue(b[d])?0:k(b[d])-f;if(this.opt.minWidth){k=this.opt.minWidth;for(a=e-1;a;--a)for(b=g[a],c=g[a-1],d=b.min,h=b.max;d<h;++d)b[d]-=
-c[d];c=b.max;for(d=b.min;d<c;++d){for(a=f=b=0;a<e;++a)h=g[a][d],0<h&&(b+=h,++f);if(b<=f*k)for(a=0;a<e;++a)h=g[a][d],0<h&&(g[a][d]=k);else{for(a=f=0;a<e;++a)b=g[a],h=b[d],0<h&&(h<k?(f+=k-h,b[d]=k):0<f&&(h=b[d]-k,h>=f?(b[d]-=f,f=0):0<h&&(b[d]=k,f-=h)));if(0<f)for(a=e-1;0<=a;--a)if(b=g[a],h=b[d],0<h)if(h=b[d]-k,h>=f){b[d]-=f;break}else 0<h&&(b[d]=k,f-=h)}}for(a=1;a<e;++a)for(b=g[a],c=g[a-1],d=b.min,h=b.max;d<h;++d)b[d]+=c[d]}return l},getIndexValue:function(l,k,f,g){var e=0,c,a;for(a=0;a<=k;++a)c=l[a].data[f],
-g(c)||(isNaN(c)&&(c=c.y||0),e+=c);return e},getValue:function(l,k,f,g){var e=null,c,a;for(c=0;c<=k;++c)for(a=0;a<l[c].data.length;a++)if(v=l[c].data[a],!g(v))if(v.x==f){e||(e={x:f});null!=v.y&&(null==e.y&&(e.y=0),e.y+=v.y);break}else if(v.x>f)break;return e},getIndexValue:function(l,k,f,g){var e=0,c,a,b;for(a=0;a<=k;++a)l[a].hidden||(b=e,c=l[a].data[f],g(c)||(isNaN(c)&&(c=c.y||0),e+=c));return[e,b]},getValue:function(l,k,f,g){var e=null,c,a,b,d;for(c=0;c<=k;++c)if(!l[c].hidden)for(a=0;a<l[c].data.length;a++)if(d=
-e,b=l[c].data[a],!g(b))if(b.x==f){e||(e={x:f});null!=b.y&&(null==e.y&&(e.y=0),e.y+=b.y);break}else if(b.x>f)break;return[e,d]}})});
-//# sourceMappingURL=commonStacked.js.map
+define([
+	"dojo/_base/lang",
+	"dojox/lang/functional",
+	"./common"
+], function(lang, df, common){
+	
+	var commonStacked = lang.getObject("dojox.charting.plot2d.commonStacked", true);
+	return lang.mixin(commonStacked, {
+		collectStats: function(series, isNullValue){
+			var stats = lang.delegate(common.defaultStats);
+			for(var i = 0; i < series.length; ++i){
+				var run = series[i];
+				for(var j = 0; j < run.data.length; j++){
+					var x, y;
+					if(run.data[j] !== null){
+						if(typeof run.data[j] == "number" || !run.data[j].hasOwnProperty("x")){
+							y = commonStacked.getIndexValue(series, i, j, isNullValue)[0];
+							x = j+1;
+						}else{
+							x = run.data[j].x;
+							if(x !== null){
+								y = commonStacked.getValue(series, i, x, isNullValue)[0];
+								y = y != null && y.y ? y.y:null; 
+							}
+						}
+						stats.hmin = Math.min(stats.hmin, x);
+						stats.hmax = Math.max(stats.hmax, x);
+						stats.vmin = Math.min(stats.vmin, y);
+						stats.vmax = Math.max(stats.vmax, y);
+					}
+				}
+			}
+			return stats;
+		},
+		
+		rearrangeValues: function(values, transform, baseline){
+			// collect references to non-empty sets
+			var sets = df.filter(values, "x"), n = sets.length;
+			if(!n){
+				// nothing to do at all
+				return values;
+			}
+
+			// stack values
+			var previousSet = {};
+			for(var i = 0; i < n; ++i){
+				var extractedSet = sets[i];
+				for(var j = extractedSet.min, k = extractedSet.max; j < k; ++j){
+					extractedSet[j] = (extractedSet[j] || 0) + (previousSet[j] || 0);
+				}
+				previousSet = extractedSet;
+			}
+
+			// transform to pixels
+			for(i = 0; i < n; ++i){
+				extractedSet = sets[i];
+				for(j = extractedSet.min, k = extractedSet.max; j < k; ++j){
+					extractedSet[j] = this.isNullValue(extractedSet[j]) ? 0 :
+						transform(extractedSet[j]) - baseline;
+				}
+			}
+
+			// correct the minimal width
+			if(this.opt.minWidth){
+				var minWidth = this.opt.minWidth;
+
+				// unstack
+				for(i = n - 1; i; --i){
+					extractedSet = sets[i];
+					previousSet  = sets[i - 1];
+					for(j = extractedSet.min, k = extractedSet.max; j < k; ++j){
+						extractedSet[j] = extractedSet[j] - previousSet[j];
+					}
+				}
+
+				// now let's go over all values and correct them, if needed
+				var min = extractedSet.min, max = extractedSet.max;
+				for(var j = min; j < max; ++j){
+
+					// find a total length of stack
+					var sum = 0, counter = 0;
+					for(i = 0; i < n; ++i){
+						var value = sets[i][j];
+						if(value > 0){
+							sum += value;
+							++counter;
+						}
+					}
+					if(sum <= counter * minWidth){
+						// the corner case: all values are very small
+						for(i = 0; i < n; ++i){
+							value = sets[i][j];
+							if(value > 0){
+								sets[i][j] = minWidth;
+							}
+						}
+						continue;	// next stack
+					}
+
+					// distributing overflow up
+					var overflow = 0;
+					for(i = 0; i < n; ++i){
+						extractedSet = sets[i];
+						value = extractedSet[j];
+						if(value > 0){
+							if(value < minWidth){
+								overflow += minWidth - value;
+								extractedSet[j] = minWidth;
+							}else if(overflow > 0){
+								// calculate available space
+								var available = extractedSet[j] - minWidth;
+								if(available >= overflow){
+									extractedSet[j] -= overflow;
+									overflow = 0;
+								}else if(available > 0){
+									extractedSet[j] = minWidth;
+									overflow -= available;
+								}
+							}
+						}
+					}
+
+					// distributing overflow down, if any
+					if(overflow > 0){
+						for(i = n - 1; i >= 0; --i){
+							extractedSet = sets[i];
+							value = extractedSet[j];
+							if(value > 0){
+								// calculate available space
+								available = extractedSet[j] - minWidth;
+								if(available >= overflow){
+									extractedSet[j] -= overflow;
+									break;
+								}else if(available > 0){
+									extractedSet[j] = minWidth;
+									overflow -= available;
+								}
+							}
+						}
+					}
+				}
+
+				// stack
+				for(i = 1; i < n; ++i){
+					extractedSet = sets[i];
+					previousSet  = sets[i - 1];
+					for(j = extractedSet.min, k = extractedSet.max; j < k; ++j){
+						extractedSet[j] = extractedSet[j] + previousSet[j];
+					}
+				}
+			}
+
+			return values;
+		},
+
+		getIndexValue: function(series, i, index, isNullValue){
+			var value = 0, v, j;
+			for(j = 0; j <= i; ++j){
+				v = series[j].data[index];
+				if(!isNullValue(v)){
+					if(isNaN(v)){ v = v.y || 0; }
+					value += v;
+				}
+			}
+			return value;
+		},
+
+		getValue: function(series, i, x, isNullValue){
+			var value = null, j, z;
+			for(j = 0; j <= i; ++j){
+				for(z = 0; z < series[j].data.length; z++){
+					v = series[j].data[z];
+					if(!isNullValue(v)){
+						if(v.x == x){
+							if(!value){
+								value = {x: x};
+							}
+							if(v.y != null){
+								if(value.y == null){
+									value.y = 0;
+								}
+								value.y += v.y;
+							}
+							break;
+						}else if(v.x > x){break;}
+					}
+				}
+			}
+			return value;
+		},
+		
+		getIndexValue: function(series, i, index, isNullValue){
+			var value = 0, v, j, pvalue;
+			for(j = 0; j <= i; ++j){
+				if(series[j].hidden){
+					continue;
+				}
+				pvalue = value;
+				v = series[j].data[index];
+				if(!isNullValue(v)){
+					if(isNaN(v)){ v = v.y || 0; }
+					value += v;
+				}
+			}
+			return [value , pvalue];
+		},
+		
+		getValue: function(series, i, x, isNullValue){
+			var value = null, j, z, v, pvalue;
+			for(j = 0; j <= i; ++j){
+				if(series[j].hidden){
+					continue;
+				}
+				for(z = 0; z < series[j].data.length; z++){
+					pvalue = value;
+					v = series[j].data[z];
+					if(!isNullValue(v)){
+						if(v.x == x){
+							if(!value){
+								value = {x: x};
+							}
+							if(v.y != null){
+								if(value.y == null){
+									value.y = 0;
+								}
+								value.y += v.y;
+							}
+							break;
+						}else if(v.x > x){break;}
+					}
+				}
+			}
+			return [value, pvalue];
+		}
+	});
+});

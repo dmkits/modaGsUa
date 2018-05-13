@@ -1,77 +1,2287 @@
-//>>built
-define("dojox/editor/plugins/BidiSupport","dojo/_base/declare dojo/_base/array dojo/aspect dojo/_base/lang dojo/dom-attr dojo/dom-class dojo/dom-construct dojo/i18n dojo/NodeList-dom dojo/NodeList-traverse dojo/dom-style dojo/sniff dojo/query dijit dojox dijit/_editor/_Plugin dijit/_editor/range dijit/_editor/plugins/EnterKeyHandling dijit/_editor/plugins/FontChoice ./NormalizeIndentOutdent dijit/form/ToggleButton dojo/i18n!./nls/BidiSupport".split(" "),function(A,q,w,p,l,B,n,C,G,H,g,m,r,I,J,x,u,
-y,D,E,F){var z=A("dojox.editor.plugins.BidiSupport",x,{useDefaultCommand:!1,buttonClass:null,iconClassPrefix:"dijitAdditionalEditorIcon",command:"bidiSupport",blockMode:"DIV",shortcutonly:!1,bogusHtmlContent:"\x26nbsp;",buttonLtr:null,buttonRtl:null,_indentBy:40,_lineTextArray:"DIV P LI H1 H2 H3 H4 H5 H6 ADDRESS PRE DT DE TD".split(" "),_lineStyledTextArray:"H1 H2 H3 H4 H5 H6 ADDRESS PRE P".split(" "),_tableContainers:["TABLE","THEAD","TBODY","TR"],_blockContainers:["TABLE","OL","UL","BLOCKQUOTE"],
-_initButton:function(){this.shortcutonly||(this.buttonLtr||(this.buttonLtr=this._createButton("ltr")),this.buttonRtl||(this.buttonRtl=this._createButton("rtl")))},_createButton:function(a){return F(p.mixin({label:C.getLocalization("dojox.editor.plugins","BidiSupport")[a],dir:this.editor.dir,lang:this.editor.lang,showLabel:!1,iconClass:this.iconClassPrefix+" "+this.iconClassPrefix+("ltr"==a?"ParaLeftToRight":"ParaRightToLeft"),onClick:p.hitch(this,"_changeState",[a])},this.params||{}))},setToolbar:function(a){this.shortcutonly||
-(this.editor.isLeftToRight()?(a.addChild(this.buttonLtr),a.addChild(this.buttonRtl)):(a.addChild(this.buttonRtl),a.addChild(this.buttonLtr)))},updateState:function(){if(this.editor&&this.editor.isLoaded&&!this.shortcutonly&&(this.buttonLtr.set("disabled",!!this.disabled),this.buttonRtl.set("disabled",!!this.disabled),!this.disabled)){var a=u.getSelection(this.editor.window);if(a&&0!=a.rangeCount){var b=a.getRangeAt(0);if(b.startContainer!==this.editor.editNode||b.startContainer.hasChildNodes()){a=
-b.startContainer;b=b.startOffset;if(this._isBlockElement(a))for(;a.hasChildNodes();)b==a.childNodes.length&&b--,a=a.childNodes[b],b=0;a=this._getBlockAncestor(a)}else a=b.startContainer;a=g.get(a,"direction");this.buttonLtr.set("checked","ltr"==a);this.buttonRtl.set("checked","rtl"==a)}}},setEditor:function(a){this.editor=a;"P"!=this.blockMode&&"DIV"!=this.blockMode&&(this.blockMode="DIV");this._initButton();this.editor.contentPreFilters.push(this._preFilterNewLines);a=p.hitch(this,function(b){if(this.disabled||
-!b.hasChildNodes())return b;this._changeStateOfBlocks(this.editor.editNode,this.editor.editNode,this.editor.editNode,"explicitdir",null);return this.editor.editNode});this.editor.contentDomPostFilters.push(a);this.editor._justifyleftImpl=p.hitch(this,function(){this._changeState("left");return!0});this.editor._justifyrightImpl=p.hitch(this,function(){this._changeState("right");return!0});this.editor._justifycenterImpl=p.hitch(this,function(){this._changeState("center");return!0});this.editor._insertorderedlistImpl=
-p.hitch(this,"_insertLists","insertorderedlist");this.editor._insertunorderedlistImpl=p.hitch(this,"_insertLists","insertunorderedlist");this.editor._indentImpl=p.hitch(this,"_indentAndOutdent","indent");this.editor._outdentImpl=p.hitch(this,"_indentAndOutdent","outdent");this.editor._formatblockImpl=p.hitch(this,"_formatBlocks");this.editor.onLoadDeferred.addCallback(p.hitch(this,function(){var b=this.editor._plugins,c,a,e=b.length;c=p.hitch(this,"_changeState","mirror");a=p.hitch(this,"_changeState",
-"ltr");var d=p.hitch(this,"_changeState","rtl");this.editor.addKeyHandler("9",1,0,c);this.editor.addKeyHandler("8",1,0,a);this.editor.addKeyHandler("0",1,0,d);for(c=0;c<b.length;c++)if(a=b[c])a.constructor===y?(a.destroy(),a=null,e=c):a.constructor===E?(this.editor._normalizeIndentOutdent=!0,this.editor._indentImpl=p.hitch(this,"_indentAndOutdent","indent"),this.editor._outdentImpl=p.hitch(this,"_indentAndOutdent","outdent")):a.constructor===D&&"formatBlock"===a.command&&this.own(w.before(a.button,
-"_execCommand",p.hitch(this,"_handleNoFormat")));this.editor.addPlugin({ctor:y,blockNodeForEnter:this.blockMode,blockNodes:/^(?:P|H1|H2|H3|H4|H5|H6|LI|DIV)$/},e);a=this.editor._plugins[e];this.own(w.after(a,"handleEnterKey",p.hitch(this,"_checkNewLine"),!0))}));this.own(w.after(this.editor,"onNormalizedDisplayChanged",p.hitch(this,"updateState"),!0))},_checkNewLine:function(){var a=u.getSelection(this.editor.window).getRangeAt(0),a=u.getBlockAncestor(a.startContainer,null,this.editor.editNode).blockNode;
-a.innerHTML===this.bogusHtmlContent&&a.previousSibling?a.style.cssText=a.previousSibling.style.cssText:a.innerHTML!==this.bogusHtmlContent&&a.previousSibling&&a.previousSibling.innerHTML===this.bogusHtmlContent&&(a.previousSibling.style.cssText=a.style.cssText)},_handleNoFormat:function(a,b,c){return"noFormat"===c?[a,b,"DIV"]:arguments},_execNativeCmd:function(a,b,c){if(this._isSimpleInfo(c))return a=this.editor.document.execCommand(a,!1,b),m("webkit")&&r("table",this.editor.editNode).prev().forEach(function(b,
-c,a){this._hasTag(b,"BR")&&b.parentNode.removeChild(b)},this),a;var h=u.getSelection(this.editor.window);if(!h||0==h.rangeCount)return!1;for(var e=h.getRangeAt(0),d=e.cloneRange(),k=e.startContainer,f=e.startOffset,g=e.endContainer,e=e.endOffset,l=0;l<c.groups.length;l++){var n=c.groups[l],p=n[n.length-1].childNodes.length;d.setStart(n[0],0);d.setEnd(n[n.length-1],p);h.removeAllRanges();h.addRange(d);p=this.editor.selection.getParentOfType(n[0],["TABLE"]);n=this.editor.document.execCommand(a,!1,b);
-m("webkit")&&(p&&this._hasTag(p.previousSibling,"BR")&&p.parentNode.removeChild(p.previousSibling),this.editor.focus(),h=u.getSelection(this.editor.window),p=h.getRangeAt(0),0==l?(k=p.endContainer,f=p.endOffset):l==c.groups.length-1&&(g=p.endContainer,e=p.endOffset));if(!n)break;m("webkit")&&this._changeState(a)}h.removeAllRanges();try{d.setStart(k,f),d.setEnd(g,e),h.addRange(d)}catch(K){}return!0},_insertLists:function(a){var b=this._changeState("preparelists",a);if(!this._execNativeCmd(a,null,b))return!1;
-m("webkit")&&!this._isSimpleInfo(b)||this._changeState(a);this._cleanLists();this._mergeLists();return!0},_indentAndOutdent:function(a){if(this.editor._normalizeIndentOutdent)return this._changeState("normalize"+a),!0;var b=this._changeState("prepare"+a);if(m("mozilla")){var c;try{c=this.editor.document.queryCommandValue("styleWithCSS")}catch(h){c=!1}this.editor.document.execCommand("styleWithCSS",!1,!0)}b=this._execNativeCmd(a,null,b);m("mozilla")&&this.editor.document.execCommand("styleWithCSS",
-!1,c);if(!b)return!1;this._changeState(a);this._mergeLists();return!0},_formatBlocks:function(a){var b;if(m("mozilla")||m("webkit"))b=this._changeState("prepareformat",a);m("ie")&&a&&"\x3c"!=a.charAt(0)&&(a="\x3c"+a+"\x3e");if(!this._execNativeCmd("formatblock",a,b))return!1;m("webkit")&&!this._isSimpleInfo(b)||this._changeState("formatblock",a);this._mergeLists();return!0},_changeState:function(a,b){if(this.editor.window){this.editor.focus();var c=u.getSelection(this.editor.window);if(c&&0!=c.rangeCount){var h=
-c.getRangeAt(0),e=h.cloneRange(),d,k,f;d=h.startContainer;c=h.startOffset;k=h.endContainer;f=h.endOffset;h=d===k&&c==f;if(this._isBlockElement(d)||this._hasTagFrom(d,this._tableContainers))for(;d.hasChildNodes();)c==d.childNodes.length&&c--,d=d.childNodes[c],c=0;e.setStart(d,c);d=this._getClosestBlock(d,"start",e);(c=u.getBlockAncestor(d,/li/i,this.editor.editNode).blockNode)&&c!==d&&(d=c);k=e.endContainer;f=e.endOffset;if(this._isBlockElement(k)||this._hasTagFrom(k,this._tableContainers))for(;k.hasChildNodes();)f==
-k.childNodes.length&&f--,k=k.childNodes[f],f=k.hasChildNodes()?k.childNodes.length:3==k.nodeType&&k.nodeValue?k.nodeValue.length:0;e.setEnd(k,f);k=this._getClosestBlock(k,"end",e);(c=u.getBlockAncestor(k,/li/i,this.editor.editNode).blockNode)&&c!==k&&(k=c);c=u.getSelection(this.editor.window,!0);c.removeAllRanges();c.addRange(e);c=u.getCommonAncestor(d,k);d=this._changeStateOfBlocks(d,k,c,a,b,e);h&&(k=e.startContainer,f=e.startOffset,e.setEnd(k,f),c=u.getSelection(this.editor.window,!0),c.removeAllRanges(),
-c.addRange(e));return d}}},_isBlockElement:function(a){if(!a||1!=a.nodeType)return!1;a=g.get(a,"display");return"block"==a||"list-item"==a||"table-cell"==a},_isInlineOrTextElement:function(a){return!this._isBlockElement(a)&&(1==a.nodeType||3==a.nodeType||8==a.nodeType)},_isElement:function(a){return a&&(1==a.nodeType||3==a.nodeType)},_isBlockWithText:function(a){return a!==this.editor.editNode&&this._hasTagFrom(a,this._lineTextArray)},_getBlockAncestor:function(a){for(;a.parentNode&&!this._isBlockElement(a);)a=
-a.parentNode;return a},_getClosestBlock:function(a,b,c){if(this._isBlockElement(a))return a;var h=a.parentNode,e,d,k=!1;for(removeOffset=!1;;){for(var f=a,k=!1;this._isInlineOrTextElement(f)&&(e=f,d||(d=f)),f=f.previousSibling,f;)if(this._isBlockElement(f)||this._hasTagFrom(f,this._blockContainers)||this._hasTag(f,"BR")){k=!0;break}else if(3==f.nodeType&&3==f.nextSibling.nodeType&&(f.nextSibling.nodeValue=f.nodeValue+f.nextSibling.nodeValue,"start"==b&&f===c.startContainer?c.setStart(f.nextSibling,
-0):"end"!=b||f!==c.endContainer&&f.nextSibling!==c.endContainer||c.setEnd(f.nextSibling,f.nextSibling.nodeValue.length),f=f.nextSibling,f.parentNode.removeChild(f.previousSibling),!f.previousSibling))break;for(f=a;this._isInlineOrTextElement(f)&&(e||(e=f),d=f),f=f.nextSibling,f;)if(this._isBlockElement(f)||this._hasTagFrom(f,this._blockContainers)){k=!0;break}else if(this._hasTag(f,"BR")&&f.nextSibling&&!this._isBlockElement(f.nextSibling)&&!this._hasTagFrom(f.nextSibling,this._blockContainers)){d=
-f;k=!0;break}else if(3==f.nodeType&&3==f.previousSibling.nodeType&&(f.previousSibling.nodeValue+=f.nodeValue,"start"==b&&f===c.startContainer?c.setStart(f.previousSibling,0):"end"!=b||f!==c.endContainer&&f.previousSibling!==c.endContainer||c.setEnd(f.previousSibling,f.previousSibling.nodeValue.length),f=f.previousSibling,f.parentNode.removeChild(f.nextSibling),!f.nextSibling))break;if(k||this._isBlockElement(h)&&!this._isBlockWithText(h)&&e){a=c?c.startOffset:0;var k=c?c.endOffset:0,f=c?c.startContainer:
-null,g=c?c.endContainer:null,h=this._repackInlineElements(e,d,h);b=h["start"==b?0:h.length-1];c&&b&&e===f&&this._hasTag(e,"BR")&&(f=b,a=0,d===e&&(g=f,k=0));c&&(c.setStart(f,a),c.setEnd(g,k));return b}if(this._isBlockElement(h))return h;a=h;removeOffset=!0;h=h.parentNode;e=d=null}},_changeStateOfBlocks:function(a,b,c,h,e,d){var k=[];if(a===this.editor.editNode){if(!a.hasChildNodes())return;this._isInlineOrTextElement(a.firstChild)&&this._rebuildBlock(a);a=this._getClosestBlock(a.firstChild,"start",
-null)}if(b===this.editor.editNode){if(!b.hasChildNodes())return;this._isInlineOrTextElement(b.lastChild)&&this._rebuildBlock(b);b=this._getClosestBlock(b.lastChild,"end",null)}var f=d?d.startOffset:0,g=d?d.endOffset:0,m=d?d.startContainer:null,l=d?d.endContainer:null;a=this._collectNodes(a,b,c,d,k,m,f,l,g,h);k={nodes:k,groups:a.groups,cells:a.cells};h=h.toString();switch(h){case "mirror":case "ltr":case "rtl":case "left":case "right":case "center":case "explicitdir":this._execDirAndAlignment(k,h,
-e);break;case "preparelists":this._prepareLists(k,e);break;case "insertorderedlist":case "insertunorderedlist":this._execInsertLists(k);break;case "prepareoutdent":this._prepareOutdent(k);break;case "prepareindent":this._prepareIndent(k);break;case "indent":this._execIndent(k);break;case "outdent":this._execOutdent(k);break;case "normalizeindent":this._execNormalizedIndent(k);break;case "normalizeoutdent":this._execNormalizedOutdent(k);break;case "prepareformat":this._prepareFormat(k,e);break;case "formatblock":this._execFormatBlocks(k,
-e);break;default:console.error("Command "+h+" isn't handled")}d&&(d.setStart(m,f),d.setEnd(l,g),sel=u.getSelection(this.editor.window,!0),sel.removeAllRanges(),sel.addRange(d),this.editor.onDisplayChanged());return k},_collectNodes:function(a,b,c,h,e,d,k,f,g,l){h=a.parentNode;f=[];var n,t=[],v=[],r=[],q=this.editor.editNode;d=p.hitch(this,function(b){e.push(b);var c=this.editor.selection.getParentOfType(b,["TD"]);if(q!==c||m("webkit")&&("prepareformat"===l||"preparelists"===l))v.length&&t.push(v),
-v=[],q!=c&&(q=c)&&r.push(q);v.push(b)});for(this._rebuildBlock(h);;){if(this._hasTagFrom(a,this._tableContainers)){if(a.firstChild){h=a;a=a.firstChild;continue}}else if(this._isBlockElement(a)){if((k=u.getBlockAncestor(a,/li/i,this.editor.editNode).blockNode)&&k!==a){a=k;h=a.parentNode;continue}if(!this._hasTag(a,"LI")&&a.firstChild&&(this._rebuildBlock(a),this._isBlockElement(a.firstChild)||this._hasTagFrom(a.firstChild,this._tableContainers))){h=a;a=a.firstChild;continue}this._hasTagFrom(a,this._lineTextArray)&&
-d(a)}else if(this._isInlineOrTextElement(a)&&!this._hasTagFrom(a.parentNode,this._tableContainers)){for(f=a;a;){k=a.nextSibling;if(this._isInlineOrTextElement(a)){if(n=a,this._hasTag(a,"BR")&&(!this._isBlockElement(h)||a!==h.lastChild)){f=this._repackInlineElements(f,n,h);a=f[f.length-1];for(g=0;g<f.length;g++)d(f[g]);f=n=null;k&&this._isInlineOrTextElement(k)&&(f=k)}}else if(this._isBlockElement(a))break;a=k}if(!f)continue;f=this._repackInlineElements(f,n,h);a=f[f.length-1];for(g=0;g<f.length;g++)d(f[g])}if(a===
-b)break;if(a.nextSibling)a=a.nextSibling;else if(h!==c){for(;!h.nextSibling&&(a=h,h=a.parentNode,h!==c););if(h!==c&&h.nextSibling)a=h.nextSibling,h=h.parentNode;else break}else break}v.length&&(m("webkit")||q?t.push(v):t.unshift(v));return{groups:t,cells:r}},_execDirAndAlignment:function(a,b,c){switch(b){case "mirror":case "ltr":case "rtl":q.forEach(a.nodes,function(c){var a=g.getComputedStyle(c),h=a.direction,k="mirror"!=b?b:"ltr"==h?"rtl":"ltr",f=a.textAlign,n=isNaN(parseInt(a.marginLeft))?0:parseInt(a.marginLeft),
-a=isNaN(parseInt(a.marginRight))?0:parseInt(a.marginRight);l.remove(c,"dir");l.remove(c,"align");g.set(c,{direction:k,textAlign:""});if(!this._hasTag(c,"CENTER"))if(0<=f.indexOf("center")&&g.set(c,"textAlign","center"),this._hasTag(c,"LI")){this._refineLIMargins(c);var n="rtl"===h?a:n,a=0,p=c.parentNode;if(h!=g.get(p,"direction")){for(;p!==this.editor.editNode;)this._hasTagFrom(p,["OL","UL"])&&a++,p=p.parentNode;n-=this._getMargins(a)}h="rtl"==k?"marginRight":"marginLeft";a=g.get(c,h);a=isNaN(a)?
-0:parseInt(a);g.set(c,h,""+(a+n)+"px");m("webkit")?0>f.indexOf("center")&&g.set(c,"textAlign","rtl"==k?"right":"left"):c.firstChild&&c.firstChild.tagName&&this._hasTagFrom(c.firstChild,this._lineStyledTextArray)&&(a=g.getComputedStyle(c),f=this._refineAlignment(a.direction,a.textAlign),m("mozilla")?g.set(c.firstChild,{textAlign:f}):g.set(c.firstChild,{direction:k,textAlign:f}))}else"rtl"==k&&0!=n?g.set(c,{marginLeft:"",marginRight:""+n+"px"}):"ltr"==k&&0!=a&&g.set(c,{marginRight:"",marginLeft:""+
-a+"px"})},this);r("table",this.editor.editNode).forEach(function(c,e,d){e=b;"mirror"===b&&(e="ltr"===g.get(c,"direction")?"rtl":"ltr");d=r("td",c);for(var h=!1,f=!1,l=0;l<a.cells.length;l++)if(!h&&d[0]===a.cells[l])h=!0;else if(d[d.length-1]===a.cells[l]){f=!0;break}if(h&&f)for(g.set(c,"direction",e),l=0;l<d.length;l++)g.set(d[l],"direction",e)},this);break;case "left":case "right":case "center":q.forEach(a.nodes,function(c){if(!this._hasTag(c,"CENTER")&&(l.remove(c,"align"),g.set(c,"textAlign",b),
-this._hasTag(c,"LI")&&c.firstChild&&c.firstChild.tagName&&this._hasTagFrom(c.firstChild,this._lineStyledTextArray))){var a=g.getComputedStyle(c),a=this._refineAlignment(a.direction,a.textAlign);g.set(c.firstChild,"textAlign",a)}},this);break;case "explicitdir":q.forEach(a.nodes,function(b){var c=g.getComputedStyle(b).direction;l.remove(b,"dir");g.set(b,{direction:c})},this)}},_prepareLists:function(a,b){q.forEach(a.nodes,function(c,a,e){if(m("mozilla")||m("webkit")){m("mozilla")&&(a=this._getParentFrom(c,
-["TD"]))&&0==r("div[tempRole]",a).length&&n.create("div",{innerHTML:"\x3cspan tempRole\x3d'true'\x3e"+this.bogusHtmlContent+"\x3c/span",tempRole:"true"},a);a=this._tag(c);var h;if(m("webkit")&&this._hasTagFrom(c,this._lineStyledTextArray)||this._hasTag(c,"LI")&&this._hasStyledTextLineTag(c.firstChild)){h=this._hasTag(c,"LI")?this._tag(c.firstChild):a;if(this._hasTag(c,"LI")){for(;c.firstChild.lastChild;)n.place(c.firstChild.lastChild,c.firstChild,"after");c.removeChild(c.firstChild)}h=n.create("span",
-{innerHTML:this.bogusHtmlContent,bogusFormat:h},c,"first")}if(m("webkit")||"DIV"==a||"P"==a||"LI"==a)if(m("webkit")&&this._isListTypeChanged(c,b)&&c===c.parentNode.lastChild&&n.create("li",{tempRole:"true"},c,"after"),!("LI"==a&&c.firstChild&&c.firstChild.tagName&&this._hasTagFrom(c.firstChild,this._lineStyledTextArray))){var k=g.getComputedStyle(c);e=k.direction;var k=k.textAlign,k=this._refineAlignment(e,k),f=this._getLIIndent(c),f=0==f?"":""+f+"px";m("webkit")&&"LI"==a&&g.set(c,"textAlign","");
-c=h?c.firstChild:n.create("span",{innerHTML:this.bogusHtmlContent},c,"first");l.set(c,"bogusDir",e);""!=k&&l.set(c,"bogusAlign",k);f&&l.set(c,"bogusMargin",f)}}else if(m("ie")&&this._hasTag(c,"LI")&&(g.getComputedStyle(c),g.set(c,"marginRight",""),g.set(c,"marginLeft",""),1==this._getLILevel(c)&&!this._isListTypeChanged(c,cmd)&&(c.firstChild&&this._hasTagFrom(c.firstChild,["P","PRE"])&&n.create("span",{bogusIEFormat:this._tag(c.firstChild)},c.firstChild,"first"),this._hasTag(c.firstChild,"PRE")))){for(h=
-n.create("p",null,c.firstChild,"after");c.firstChild.firstChild;)n.place(c.firstChild.firstChild,h,"last");h.style.cssText=c.style.cssText;c.removeChild(c.firstChild)}},this);m("webkit")&&r("table",this.editor.editNode).forEach(function(b,a,e){(a=b.nextSibling)&&this._hasTagFrom(a,["UL","OL"])&&n.create("UL",{tempRole:"true"},b,"after")},this)},_execInsertLists:function(a){q.forEach(a.nodes,function(b,c){if(this._hasTag(b,"LI")){if(b.firstChild&&b.firstChild.tagName&&this._hasTagFrom(b.firstChild,
-this._lineStyledTextArray)){var a=g.getComputedStyle(b.firstChild),e=this._refineAlignment(a.direction,a.textAlign);g.set(b,{direction:a.direction,textAlign:e});var d=this._getIntStyleValue(b,"marginLeft")+this._getIntStyleValue(b.firstChild,"marginLeft"),k=this._getIntStyleValue(b,"marginRight")+this._getIntStyleValue(b.firstChild,"marginRight");g.set(b,{marginLeft:d?""+d+"px":"",marginRight:k?""+k+"px":""});g.set(b.firstChild,{direction:"",textAlign:""});m("mozilla")||g.set(b.firstChild,{marginLeft:"",
-marginRight:""})}for(;1<b.childNodes.length&&3==b.lastChild.nodeType&&b.lastChild.previousSibling&&3==b.lastChild.previousSibling.nodeType&&""==p.trim(b.lastChild.nodeValue);)b.removeChild(b.lastChild);if(m("safari")&&this._hasTag(b.firstChild,"SPAN")&&B.contains(b.firstChild,"Apple-style-span")&&(d=b.firstChild,this._hasTag(d.firstChild,"SPAN")&&l.has(d.firstChild,"bogusFormat"))){for(;d.lastChild;)n.place(d.lastChild,d,"after");b.removeChild(d)}}else if(this._hasTag(b,"DIV")&&0==b.childNodes.length){b.parentNode.removeChild(b);
-return}if(m("ie")){if(this._hasTag(b,"P")&&"DIV"==this.blockMode.toUpperCase()){if(this._hasTag(b.firstChild,"SPAN")&&l.has(b.firstChild,"bogusIEFormat")){"PRE"===l.get(b.firstChild,"bogusIEFormat").toUpperCase()?(d=n.create("pre",{innerHTML:b.innerHTML},b,"before"),d.style.cssText=b.style.cssText,d.removeChild(d.firstChild),b.parentNode.removeChild(b)):b.removeChild(b.firstChild);return}d=n.create("div");d.style.cssText=b.style.cssText;for(b.parentNode.insertBefore(d,b);b.firstChild;)d.appendChild(b.firstChild);
-b.parentNode.removeChild(b)}if(!this._hasTag(b,"LI"))return;this._refineLIMargins(b);d=b.firstChild;if(!this._hasTag(d,"DIV")||d!==b.lastChild)return;var a=g.getComputedStyle(d),f=a.direction,e=a.textAlign;g.getComputedStyle(b);g.set(b,"direction",f);e=this._refineAlignment(f,e);for(g.set(b,"textAlign",e);d.firstChild;)b.insertBefore(d.firstChild,d);b.removeChild(d)}else if(!this._hasTag(b.firstChild,"SPAN")){this._hasTag(b,"LI")&&(this._refineLIMargins(b),m("mozilla")&&this._hasStyledTextLineTag(b.firstChild)&&
-this._recountLIMargins(b));return}var t=!1,v=d=!1,k=0;l.has(b.firstChild,"bogusDir")&&(t=!0,f=l.get(b.firstChild,"bogusDir"),g.set(b,"direction",f));if(l.has(b.firstChild,"bogusAlign")&&(v=t=!0,e=l.get(b.firstChild,"bogusAlign"),g.set(b,"textAlign",e),a=b.firstChild.nextSibling,this._hasTag(a,"SPAN")&&g.get(a,"textAlign")===e&&(g.set(a,"textAlign",""),""==a.style.cssText))){for(;a.lastChild;)n.place(a.lastChild,a,"after");b.removeChild(a)}l.has(b.firstChild,"bogusMargin")&&(d=t=!0,k=parseInt(l.get(b.firstChild,
-"bogusMargin")),this._hasTag(b,"LI")||(a="rtl"===g.get(b,"direction")?"marginRight":"marginLeft",e=this._getIntStyleValue(b,a)+k,g.set(b,a,0==e?"":""+e+"px")));if(l.has(b.firstChild,"bogusFormat")){t=!1;l.remove(b.firstChild,"bogusDir");if(b.firstChild.nextSibling&&this._hasTag(b.firstChild.nextSibling,"SPAN")){for(var e=b.firstChild.style.cssText.trim().split(";"),f=b.firstChild.nextSibling.style.cssText.trim().split(";"),q=0;q<e.length;q++)if(e[q])for(a=0;a<f.length;a++)if(e[q].trim()==f[a].trim()){a=
-e[q].trim().split(":")[0];g.set(b.firstChild.nextSibling,a,"");break}if(""===b.firstChild.nextSibling.style.cssText){for(;b.firstChild.nextSibling.firstChild;)n.place(b.firstChild.nextSibling.firstChild,b.firstChild.nextSibling,"after");b.removeChild(b.firstChild.nextSibling)}}a=l.get(b.firstChild,"bogusFormat");for(e=n.create(a,null,b.firstChild,"after");e.nextSibling;)n.place(e.nextSibling,e,"last");b.removeChild(b.firstChild);m("webkit")&&this._hasTag(b,"LI")&&(f=b.parentNode.parentNode,this._hasTag(f,
-a)&&l.set(f,"tempRole","true"));1!=b.childNodes.length||this._hasTag(b,"TD")||(m("mozilla")||this._hasTag(b,"LI")?this._hasTag(b,"LI")||(e.style.cssText=b.style.cssText,n.place(e,b,"after"),l.set(b,"tempRole","true")):(e.style.cssText=b.style.cssText,l.set(b,"tempRole","true")))}t&&b.removeChild(b.firstChild);this._hasTag(b,"LI")&&(m("webkit")&&!v&&"center"!=g.get(b,"textAlign")&&g.set(b,"textAlign","rtl"==g.get(b,"direction")?"right":"left"),m("safari")&&this._hasTag(b,"DIV")&&(b.innerHTML=b.nextSibling.innerHTML,
-b.parentNode.removeChild(b.nextSibling)),t=b.parentNode.parentNode,t!==this.editor.editNode&&this._hasTag(t,"DIV")&&1==t.childNodes.length&&(t.parentNode.insertBefore(b.parentNode,t),t.parentNode.removeChild(t)),this._refineLIMargins(b),d&&this._recountLIMargins(b,k))},this);m("mozilla")?r("*[tempRole]",this.editor.editNode).forEach(function(b,a,h){if(this._hasTag(b,"SPAN")){if(l.get(b.parentNode,"tempRole"))return;if(this._hasTag(b.parentNode,"LI")){b.parentNode.parentNode.removeChild(b.parentNode);
-return}}b.parentNode.removeChild(b)},this):m("webkit")&&r("*[tempRole]",this.editor.editNode).forEach(function(b,a,h){if(!this._hasTag(b,"LI")&&!this._hasTag(b,"UL")){for(;b.lastChild;)n.place(b.lastChild,b,"after");b.parentNode.removeChild(b)}},this)},_execNormalizedIndent:function(a){q.forEach(a.nodes,function(b){var a="rtl"===g.get(b,"direction")?"marginRight":"marginLeft",h=g.get(b,a),h=isNaN(h)?0:parseInt(h);g.set(b,a,""+(h+this._indentBy)+"px")},this)},_execNormalizedOutdent:function(a){q.forEach(a.nodes,
-function(b){var a="rtl"===g.get(b,"direction")?"marginRight":"marginLeft",h=g.get(b,a),h=isNaN(h)?0:parseInt(h),e=0;if("LI"===b.tagName.toUpperCase()){var d=0,k=b.parentNode;if(g.get(b,"direction")!=g.get(k,"direction")){for(;k!==this.editor.editNode;)this._hasTagFrom(k,["OL","UL"])&&d++,k=k.parentNode;e=this._getMargins(d)}}h>=this._indentBy+e&&g.set(b,a,h==this._indentBy?"":""+(h-this._indentBy)+"px")},this)},_prepareIndent:function(a){q.forEach(a.nodes,function(b){if(m("mozilla")){var a=this._getParentFrom(b,
-["TD"]);a&&0==r("div[tempRole]",a).length&&n.create("div",{innerHTML:this.bogusHtmlContent,tempRole:"true"},a);this._hasTag(b,"LI")&&(a=this._getLIIndent(b),l.set(b,"tempIndent",a))}if(m("webkit")&&this._hasTag(b,"LI")&&this._hasStyledTextLineTag(b.firstChild)){for(a=this._tag(b.firstChild);b.firstChild.lastChild;)n.place(b.firstChild.lastChild,b.firstChild,"after");b.removeChild(b.firstChild);n.create("span",{innerHTML:this.bogusHtmlContent,bogusFormat:a},b,"first")}},this)},_prepareOutdent:function(a){q.forEach(a.nodes,
-function(b){if(m("mozilla")||m("webkit")){if(m("mozilla")){var a=this._getParentFrom(b,["TD"]);a&&0==r("div[tempRole]",a).length&&n.create("div",{innerHTML:this.bogusHtmlContent,tempRole:"true"},a)}a=this._tag(b);if(m("mozilla")&&"LI"!==a)return;var h=null;if(m("webkit")&&this._hasTag(b,"LI")&&this._hasStyledTextLineTag(b.firstChild)){for(var a=this._tag(b.firstChild),e=b.firstChild;e.lastChild;)n.place(e.lastChild,e,"after");b.removeChild(b.firstChild);h=n.create("span",{innerHTML:this.bogusHtmlContent,
-bogusFormat:a},b,"first")}if(b.firstChild&&b.firstChild.tagName&&this._hasTagFrom(b.firstChild,this._lineStyledTextArray)){m("mozilla")&&(b.firstChild.style.cssText=b.style.cssText,a="rtl"===g.get(b,"direction")?"marginRight":"marginLeft",e=this._getLIIndent(b),0<e&&g.set(b.firstChild,a,""+e+"px"));return}var d=g.getComputedStyle(b),e=d.direction,d=d.textAlign,d=this._refineAlignment(e,d);m("webkit")&&"LI"==a&&g.set(b,"textAlign","");a=h?b.firstChild:n.create("span",{innerHTML:this.bogusHtmlContent},
-b,"first");l.set(a,"bogusDir",e);""!=d&&l.set(a,"bogusAlign",d);m("mozilla")&&(e=this._getLIIndent(b),l.set(a,"bogusIndent",e))}if(m("ie")&&"LI"==b.tagName.toUpperCase()&&(g.set(b,"marginLeft",""),g.set(b,"marginRight",""),1==this._getLILevel(b)&&(b.firstChild&&this._hasTagFrom(b.firstChild,["P","PRE"])&&n.create("span",{bogusIEFormat:this._tag(b.firstChild)},b.firstChild,"first"),this._hasTag(b.firstChild,"PRE")))){for(a=n.create("p",null,b.firstChild,"after");b.firstChild.firstChild;)n.place(b.firstChild.firstChild,
-a,"last");a.style.cssText=b.style.cssText;b.removeChild(b.firstChild)}},this)},_execIndent:function(a){q.forEach(a.nodes,function(b){m("mozilla")||g.set(b,"margin","");if(this._hasTag(b,"LI")){var a=0;m("mozilla")&&l.has(b,"tempIndent")&&(a=parseInt(l.get(b,"tempIndent")),l.remove(b,"tempIndent"));this._refineLIMargins(b);m("mozilla")&&this._recountLIMargins(b,a)}if(l.has(b.firstChild,"bogusFormat")){a=l.get(b.firstChild,"bogusFormat");for(a=n.create(a,null,b.firstChild,"after");a.nextSibling;)n.place(a.nextSibling,
-a,"last");b.removeChild(b.firstChild)}if(m("ie")||m("webkit"))for(b=b.parentNode;b!==this.editor.editNode;){b=u.getBlockAncestor(b,/blockquote/i,this.editor.editNode).blockNode;if(!b)break;l.has(b,"dir")&&l.remove(b,"dir");g.set(b,"marginLeft","");g.set(b,"marginRight","");g.set(b,"margin","");b=b.parentNode}},this);m("mozilla")&&(r("div[tempRole]",this.editor.editNode).forEach(function(a,c,h){a.parentNode.removeChild(a)}),r("ul,ol",this.editor.editNode).forEach(function(a,c,h){g.set(a,"marginLeft",
-"");g.set(a,"marginRight","")}))},_execOutdent:function(a){q.forEach(a.nodes,function(a){if(m("mozilla")||m("webkit")){if(!this._hasTag(a.firstChild,"SPAN")){this._hasTag(a,"LI")&&(this._refineLIMargins(a),m("mozilla")&&this._hasStyledTextLineTag(a.firstChild)&&(this._recountLIMargins(a),a.firstChild.style.cssText=""));return}var b=!1,h=!1,e=0;if(l.has(a.firstChild,"bogusDir")){var b=!0,d=l.get(a.firstChild,"bogusDir");g.set(a,"direction",d)}l.has(a.firstChild,"bogusAlign")&&(b=!0,d=l.get(a.firstChild,
-"bogusAlign"),g.set(a,"textAlign",d));if(l.has(a.firstChild,"bogusIndent")&&(b=!0,e=parseInt(l.get(a.firstChild,"bogusIndent")),!this._hasTag(a,"LI"))){var d="rtl"===g.get(a,"direction")?"marginRight":"marginLeft",k=""+(this._getIntStyleValue(a,d)+e)+"px";g.set(a,d,k)}if(l.has(a.firstChild,"bogusFormat")){b=!0;d=l.get(a.firstChild,"bogusFormat");for(d=n.create(d,null,a.firstChild,"after");d.nextSibling;)n.place(d.nextSibling,d,"last");this._hasTag(a,"LI")||(d.style.cssText=a.style.cssText,h=!0)}if(b&&
-(a.removeChild(a.firstChild),h)){for(;a.lastChild;)n.place(a.lastChild,a,"after");l.set(a,"tempRole","true")}m("webkit")&&this._hasTag(a,"LI")&&"center"!=g.get(a,"textAlign")&&g.set(a,"textAlign","rtl"==g.get(a,"direction")?"right":"left");m("mozilla")&&this._hasTag(a,"LI")&&(b=a.parentNode.parentNode,b!==this.editor.editNode&&this._hasTag(b,"DIV")&&1==b.childNodes.length&&(b.parentNode.insertBefore(a.parentNode,b),b.parentNode.removeChild(b)))}if(m("ie")&&this._hasTag(a,"P")&&"DIV"==this.blockMode.toUpperCase()){if(this._hasTag(a.firstChild,
-"SPAN")&&l.has(a.firstChild,"bogusIEFormat")){"PRE"===l.get(a.firstChild,"bogusIEFormat").toUpperCase()?(e=n.create("pre",{innerHTML:a.innerHTML},a,"before"),e.style.cssText=a.style.cssText,e.removeChild(e.firstChild),a.parentNode.removeChild(a)):a.removeChild(a.firstChild);return}b=n.create("div");b.style.cssText=a.style.cssText;for(a.parentNode.insertBefore(b,a);a.firstChild;)b.appendChild(a.firstChild);a.parentNode.removeChild(a)}this._hasTag(a,"LI")&&(this._refineLIMargins(a),m("mozilla")&&this._recountLIMargins(a,
-e))},this);(m("mozilla")||m("webkit"))&&r("div[tempRole]",this.editor.editNode).forEach(function(a,c,h){a.parentNode.removeChild(a)})},_prepareFormat:function(a,b){q.forEach(a.nodes,function(a){if(m("mozilla")&&this._hasTag(a,"LI")){if(a.firstChild&&!this._isBlockElement(a.firstChild)){var c=a.ownerDocument.createElement(b),e=a.firstChild;for(a.insertBefore(c,a.firstChild);e;)c.appendChild(e),e=e.nextSibling}c=this._getLIIndent(a);l.set(a,"tempIndent",c)}if(m("webkit")){var d;if(this._hasTag(a,"LI")){if(this._hasStyledTextLineTag(a.firstChild)){for(;a.firstChild.lastChild;)n.place(a.firstChild.lastChild,
-a.firstChild,"after");a.removeChild(a.firstChild)}d=n.create("span",{innerHTML:this.bogusHtmlContent,bogusFormat:b},a,"first")}e=g.getComputedStyle(a);c=e.direction;e=e.textAlign;e=this._refineAlignment(c,e);a=d?a.firstChild:n.create("span",{innerHTML:this.bogusHtmlContent},a,"first");l.set(a,"bogusDir",c);""!=e&&l.set(a,"bogusAlign",e)}},this)},_execFormatBlocks:function(a,b){q.forEach(a.nodes,function(a){if(this._hasTagFrom(a,this._lineTextArray)){if(this._hasTag(a.parentNode,"DIV")&&a.parentNode!==
-this.editor.editNode)for(;a.parentNode.lastChild&&(3==a.parentNode.lastChild.nodeType&&""==p.trim(a.parentNode.lastChild.nodeValue)||this._hasTag(a.parentNode.lastChild,"BR"));)a.parentNode.removeChild(a.parentNode.lastChild);if(this._hasTag(a.parentNode,"DIV")&&a.parentNode!==this.editor.editNode&&1==a.parentNode.childNodes.length){var c=a.parentNode,e=g.getComputedStyle(c),d=this._refineAlignment(e.direction,e.textAlign);g.set(a,{direction:e.direction,textAlign:d});d="rtl"===e.direction?"marginRight":
-"marginLeft";e=parseInt(g.get(c,d));0==e||isNan(e)||g.set(a,d,e);c.parentNode.insertBefore(a,c);c.parentNode.removeChild(c)}}if(this._hasTag(a,"LI")){c=0;l.has(a,"tempIndent")&&(c=parseInt(l.get(a,"tempIndent")),l.remove(a,"tempIndent"));this._refineLIMargins(a);for(c&&this._recountLIMargins(a,c);1<a.childNodes.length&&3==a.lastChild.nodeType&&""==p.trim(a.lastChild.nodeValue);)a.removeChild(a.lastChild);if(this._hasTagFrom(a.firstChild,this._lineStyledTextArray))e=g.getComputedStyle(a),d=this._refineAlignment(e.direction,
-e.textAlign),m("mozilla")||m("ie")&&this._hasTag(a,"LI")||g.set(a.firstChild,{direction:e.direction,textAlign:d});else if(this._hasTag(a.firstChild,"DIV")){for(c=a.firstChild;c.firstChild;)a.insertBefore(c.firstChild,c);a.removeChild(c)}if(m("ie")&&!this._hasTag(a.firstChild,"P")&&"\x3cp\x3e"===b){c=n.create("p");for(d=this._hasTagFrom(c.nextSibling,this._lineStyledTextArray)?c.nextSibling:a;d.firstChild;)n.place(d.firstChild,c,"last");n.place(c,a,"first");d!==a&&a.removeChild(d)}}if(m("webkit")){if(this._hasTag(a,
-"DIV")){if(l.has(a,"tempRole"))return;if(this._hasTag(a.previousSibling,"LI")){for(;a.firstChild;)n.place(a.firstChild,a.previousSibling,"last");l.set(a,"tempRole",!0);a=a.previousSibling}}c=!1;l.has(a.firstChild,"bogusDir")&&(c=!0,d=l.get(a.firstChild,"bogusDir"),g.set(a,"direction",d));l.has(a.firstChild,"bogusAlign")&&(c=!0,d=l.get(a.firstChild,"bogusAlign"),g.set(a,"textAlign",d));if(l.has(a.firstChild,"bogusFormat")){var c=!0,k=l.get(a.firstChild,"bogusFormat");if("DIV"!==k.toUpperCase())for(d=
-n.create(k,null,a.firstChild,"after");d.nextSibling;)n.place(d.nextSibling,d,"last");else d=a;if(m("safari")&&this._hasTag(a.nextSibling,"DIV")){for(;a.nextSibling.firstChild;)n.place(a.nextSibling.firstChild,d,"last");l.set(a.nextSibling,"tempRole","true")}}c&&a.removeChild(a.firstChild);k&&this._hasTag(a,"LI")&&(a=a.parentNode.parentNode,this._hasTag(a,k)&&l.set(a,"tempRole","true"))}},this);m("webkit")&&r("*[tempRole]",this.editor.editNode).forEach(function(a,b,e){for(;a.lastChild;)n.place(a.lastChild,
-a,"after");a.parentNode.removeChild(a)},this)},_rebuildBlock:function(a){for(var b=a.firstChild,c,g,e=!1;b;){if(this._isInlineOrTextElement(b)&&!this._hasTagFrom(b,this._tableContainers))e=!this._hasTagFrom(a,this._lineTextArray),c||(c=b),g=b;else if(this._isBlockElement(b)||this._hasTagFrom(b,this._tableContainers))c&&(this._repackInlineElements(c,g,a),c=null),e=!0;b=b.nextSibling}e&&c&&this._repackInlineElements(c,g,a)},_repackInlineElements:function(a,b,c){var h=[],e=c.ownerDocument.createElement(this.blockMode),
-d,k=a.previousSibling&&1==a.previousSibling.nodeType?a.previousSibling.style.cssText:c.style.cssText,f=c===this.editor.editNode;h.push(e);a=c.replaceChild(e,a);n.place(a,e,"after");for(f?g.set(e,"direction",g.get(this.editor.editNode,"direction")):e.style.cssText=k;a;){var l=a.nextSibling;this._isInlineOrTextElement(a)&&(this._hasTag(a,"BR")&&a!==b&&(d=c.ownerDocument.createElement(this.blockMode),h.push(d),a=c.replaceChild(d,a),n.place(a,d,"after"),f?g.set(d,"direction",g.get(this.editor.editNode,
-"direction")):d.style.cssText=k),!this._hasTag(a,"BR")&&8!=a.nodeType||e.hasChildNodes()||(e.innerHTML=this.bogusHtmlContent),this._hasTag(a,"BR")&&m("ie")?a.parentNode.removeChild(a):8!=a.nodeType?e.appendChild(a):a.parentNode.removeChild(a),3==a.nodeType&&a.previousSibling&&3==a.previousSibling.nodeType&&(a.previousSibling.nodeValue+=a.nodeValue,a.parentNode.removeChild(a)),d&&(e=d,d=null));if(a===b)break;a=l}return h},_preFilterNewLines:function(a){a=a.split(/(<\/?pre.*>)/i);for(var b=!1,c=0;c<
-a.length;c++)0>a[c].search(/<\/?pre/i)&&!b?a[c]=a[c].replace(/\n/g,"").replace(/\t+/g,"\u00a0").replace(/^\s+/,"\u00a0").replace(/\xA0\xA0+$/,""):0<=a[c].search(/<\/?pre/i)&&(b=!b);return a.join("")},_refineAlignment:function(a,b){return b=0<=b.indexOf("left")&&"rtl"==a?"left":0<=b.indexOf("right")&&"ltr"==a?"right":0<=b.indexOf("center")?"center":""},_refineLIMargins:function(a){var b=g.get(a,"direction"),c=g.get(a.parentNode,"direction"),h=0,e=a.parentNode;for(m("webkit")&&(c=g.get(this.editor.editNode,
-"direction"));e!==this.editor.editNode;)this._hasTagFrom(e,["OL","UL"])&&h++,e=e.parentNode;g.set(a,"marginRight","");g.set(a,"marginLeft","");e="rtl"==b?"marginRight":"marginLeft";h=this._getMargins(h);b!=c&&g.set(a,e,""+h+"px")},_getMargins:function(a){if(0==a)return 0;var b=35;m("mozilla")?b=45:m("ie")&&(b=25);return b+40*(a-1)},_recountLIMargins:function(a,b){var c=g.get(a,"direction"),h=g.get(a.parentNode,"direction"),e="rtl"==c?"marginRight":"marginLeft",d=g.get(a,e),k=(isNaN(parseInt(d))?0:
-parseInt(d))+(b?b:0);a.firstChild&&1==a.firstChild.nodeType&&(d=g.get(a.firstChild,e),k+=isNaN(parseInt(d))?0:parseInt(d),g.set(a.firstChild,{marginLeft:"",marginRight:""}));c!=h&&(k-=this._getMargins(this._getLILevel(a)));if(d=this._getListMargins(a))for(var f=0;f<d/40;f++){var l=n.create(this._tag(a.parentNode),null,a,"before");n.place(a,l,"last")}c!=h&&(k+=this._getMargins(this._getLILevel(a)));k&&g.set(a,e,""+k+"px")},_getLILevel:function(a){a=a.parentNode;for(var b=0;this._hasTagFrom(a,["UL",
-"OL"]);)b++,a=a.parentNode;return b},_getLIIndent:function(a){var b=a.parentNode,c=g.get(a,"direction"),h=g.get(b,"direction"),b=this._getIntStyleValue(a,"rtl"===c?"marginRight":"marginLeft");a=c===h?0:this._getMargins(this._getLILevel(a));return b-a},_getListMargins:function(a){a=a.parentNode;for(var b,c=0;this._hasTagFrom(a,["UL","OL"]);)b="rtl"==g.get(a,"direction")?"marginRight":"marginLeft",b=g.get(a,b),c+=isNaN(parseInt(b))?0:parseInt(b),a=a.parentNode;return c},_tag:function(a){return a&&a.tagName&&
-a.tagName.toUpperCase()},_hasTag:function(a,b){return a&&b&&a.tagName&&a.tagName.toUpperCase()===b.toUpperCase()},_hasStyledTextLineTag:function(a){return this._hasTagFrom(a,this._lineStyledTextArray)},_hasTagFrom:function(a,b){return a&&b&&a.tagName&&0<=q.indexOf(b,a.tagName.toUpperCase())},_getParentFrom:function(a,b){if(!a||!b||!b.length)return null;for(var c=a;c!==this.editor.editNode;){if(this._hasTagFrom(c,b))return c;c=c.parentNode}return null},_isSimpleInfo:function(a){return!a||2>a.groups.length},
-_isListTypeChanged:function(a,b){if(!this._hasTag(a,"LI"))return!1;var c=a.parentNode;return this._hasTag(c,"UL")&&"insertorderedlist"===b||this._hasTag(c,"OL")&&"insertunorderedlist"===b},_getIntStyleValue:function(a,b){var c=parseInt(g.get(a,b));return isNaN(c)?0:c},_mergeLists:function(){var a=u.getSelection(this.editor.window),b=a&&0<a.rangeCount;if(b)var c=a.getRangeAt(0).cloneRange(),g=c.startContainer,e=c.startOffset,d=c.endContainer,k=c.endOffset;var f=!1;r("ul,ol",this.editor.editNode).forEach(function(a,
-b,c){if(l.has(a,"tempRole"))a.parentNode.removeChild(a);else for(b=a.nextSibling;this._hasTag(b,this._tag(a));){for(;b.firstChild;)n.place(b.firstChild,a,"last"),f=!0;l.set(b,"tempRole","true");b=b.nextSibling}},this);if(b&&f){a.removeAllRanges();try{c.setStart(g,e),c.setEnd(d,k),a.addRange(c)}catch(t){}}},_cleanLists:function(){m("webkit")&&(r("table",this.editor.editNode).forEach(function(a,b,c){a=a.nextSibling;this._hasTag(a,"UL")&&"true"===l.get(a,"tempRole")&&a.parentNode.removeChild(a)},this),
-r("li[tempRole]",this.editor.editNode).forEach(function(a,b,c){1==a.parentNode.childNodes.length?a.parentNode.parentNode.removeChild(a.parentNode):a.parentNode.removeChild(a)}));var a=u.getSelection(this.editor.window),b=a&&0<a.rangeCount;if(b)var c=a.getRangeAt(0).cloneRange(),g=c.startContainer,e=c.startOffset,d=c.endContainer,k=c.endOffset;var f=!1;r("span[bogusDir]",this.editor.editNode).forEach(function(a,b,c){c=b=a.firstChild;if(1==b.nodeType)for(;b;)c=b.nextSibling,n.place(b,a,"after"),f=!0,
-b=c;a.parentNode.removeChild(a)},this);if(b&&f){a.removeAllRanges();try{c.setStart(g,e),c.setEnd(d,k),a.addRange(c)}catch(t){}}}});x.registry.bidiSupport=x.registry.bidisupport=function(a){return new z({})};return z});
-//# sourceMappingURL=BidiSupport.js.map
+define([
+	"dojo/_base/declare",
+	"dojo/_base/array",
+	"dojo/aspect",
+	"dojo/_base/lang",
+	"dojo/dom-attr",
+	"dojo/dom-class",
+	"dojo/dom-construct",
+	"dojo/i18n",
+	"dojo/NodeList-dom",
+	"dojo/NodeList-traverse",
+	"dojo/dom-style",
+	"dojo/sniff",
+	"dojo/query",
+	"dijit",
+	"dojox",
+	"dijit/_editor/_Plugin",
+	"dijit/_editor/range",
+	"dijit/_editor/plugins/EnterKeyHandling",
+	"dijit/_editor/plugins/FontChoice",
+	"./NormalizeIndentOutdent",
+	"dijit/form/ToggleButton",
+	"dojo/i18n!./nls/BidiSupport"
+], function(declare,array,aspect,lang,domAttr,domClass,domConstruct,i18n,listDom,listTraverse,domStyle,has,query,dijit,dojox,_Plugin,rangeapi,EnterKeyHandling,FontChoice,NormIndentOutdent,ToggleButton){
+
+	// module:
+	//		rtebidi/BidiSupport
+	
+	var BidiSupport = declare("dojox.editor.plugins.BidiSupport", _Plugin, {
+		// summary:
+		//		This plugin provides some advanced BiDi support for 
+		//		rich text editing widget. It adds several bidi-specific commands,
+		//		which are not released in native RTE's ('set text direction to left-to-right', 
+		//		'set text direction to right-to-left', 'change text direction to opposite') 
+		//		and overrides some existing native commands.
+		
+		// Override _Plugin.useDefaultCommand.
+		useDefaultCommand: false,
+		
+		// Override _Plugin.buttonClass. Plugin uses two buttons, defined below.
+		buttonClass: null,
+
+		// iconClassPrefix: [const] String
+		//		The CSS class name for the button node icon.
+		iconClassPrefix: "dijitAdditionalEditorIcon",
+
+		command: "bidiSupport",
+
+		// blockMode: [const] String
+		//		This property decides the behavior of Enter key, actually released by EnterKeyHandling 
+		//		plugin. Possible values are 'P' and 'DIV'. Used when EnterKeyHandling isn't included 
+		//		into the list of the base plugins, loaded with the current Editor, as well as in case,  
+		//		if blockNodeForEnter property of EnterKeyHandling plugin isn't set to 'P' or 'DIV'.
+		//		The default value is "DIV".
+		blockMode: "DIV",
+
+		// shortcutonly: [const] Boolean
+		//		If this property is set to 'false', plugin handles all text direction commands
+		//		and its behavior is controlled both by buttons and by shortcut (Ctrl+Shift+X). 
+		//		In opposite case only command 'change text direction to opposite', controlled by shortcut, 
+		//		is supported, and buttons don't appear in the toolbar.
+		//		Defaults to false.
+		shortcutonly: false,
+
+		// bogusHtmlContent: [private] String
+		//		HTML to stick into a new empty block	
+		bogusHtmlContent: '&nbsp;',
+
+		// buttonLtr: [private] dijit/form/ToggleButton
+		//		Used to set direction of the selected text to left-to-right.
+		buttonLtr: null,
+		
+		// buttonRtl: [private] dijit/form/ToggleButton
+		//		Used to set direction of the selected text to right-to-left.
+		buttonRtl: null,
+
+		_indentBy: 40,
+		_lineTextArray: ["DIV","P","LI","H1","H2","H3","H4","H5","H6","ADDRESS","PRE","DT","DE","TD"],
+		_lineStyledTextArray: ["H1","H2","H3","H4","H5","H6","ADDRESS","PRE","P"],
+		_tableContainers: ["TABLE","THEAD","TBODY","TR"],
+		_blockContainers: ["TABLE","OL","UL","BLOCKQUOTE"],
+		
+		_initButton: function(){
+			// summary:
+			//		Override _Plugin._initButton(). Creates two buttons, used for
+			//		setting text direction to left-to-right and right-to-left.
+			if(this.shortcutonly){
+				return;
+			}
+			if(!this.buttonLtr){
+				this.buttonLtr = this._createButton("ltr");
+			}
+			if(!this.buttonRtl){		
+				this.buttonRtl = this._createButton("rtl");
+			}
+		},
+
+		_createButton: function(direction){
+			// summary:
+			//		Initialize specific button. 
+			return ToggleButton(lang.mixin({
+				label: i18n.getLocalization("dojox.editor.plugins", "BidiSupport")[direction],
+				dir: this.editor.dir,
+				lang: this.editor.lang,
+				showLabel: false,
+				iconClass: this.iconClassPrefix+" "+this.iconClassPrefix + (direction == "ltr"? "ParaLeftToRight" : "ParaRightToLeft"),
+				onClick: lang.hitch(this, "_changeState", [direction])
+			}, this.params || {}));			
+		},
+
+		setToolbar: function(/*dijit.Toolbar*/ toolbar){
+			// summary:
+			//		Override _Plugin.setToolbar(). Adds buttons so, that 'ltr' button 
+			//		will appear from the left of 'rtl' button regardless of the editor's 
+			//		orientation.
+			if(this.shortcutonly){
+				return;
+			}
+			if(this.editor.isLeftToRight()){
+				toolbar.addChild(this.buttonLtr);
+				toolbar.addChild(this.buttonRtl);
+			}else{
+				toolbar.addChild(this.buttonRtl);
+				toolbar.addChild(this.buttonLtr);			
+			}
+		},
+
+		updateState: function(){
+			// summary:
+			//		Override _Plugin.updateState(). Determines direction of the text in the 
+			//		start point of the current selection. Changes state of the buttons
+			//		correspondingly.
+			if(!this.editor || !this.editor.isLoaded || this.shortcutonly){
+				return;
+			}
+			this.buttonLtr.set("disabled", !!this.disabled);
+			this.buttonRtl.set("disabled", !!this.disabled);
+			if(this.disabled){
+				return;
+			}
+			var sel = rangeapi.getSelection(this.editor.window);
+			if(!sel || sel.rangeCount == 0){
+				return;
+			}	
+			var range = sel.getRangeAt(0), node;
+			if(range.startContainer === this.editor.editNode && !range.startContainer.hasChildNodes()){
+				node = range.startContainer;
+			}else{
+				var startNode = range.startContainer,
+					startOffset = range.startOffset;
+				if(this._isBlockElement(startNode)){
+					while(startNode.hasChildNodes()){
+						if(startOffset == startNode.childNodes.length){
+							startOffset--;
+						}
+						startNode = startNode.childNodes[startOffset];
+						startOffset = 0;
+					}
+				}
+				node = this._getBlockAncestor(startNode);
+			}
+			var cDir = domStyle.get(node,"direction");
+			this.buttonLtr.set("checked", "ltr" == cDir);
+			this.buttonRtl.set("checked", "rtl" == cDir);
+		},
+		
+		setEditor: function(/*dijit.Editor*/ editor){
+			// summary:
+			//		Override _Plugin.setEditor().
+			// description:
+			//		Sets editor's flag 'advancedBidi' to true, which may be used by other plugins 
+			//		as a switch to bidi-specific behaviour. Adds bidi-specific filters, including 
+			//		postDom filter, which provides explicit direction settings for the blocks 
+			//		of the text, direction of which isn't defined. Overrides some native commands,
+			//		which should be changed or expanded in accordance with bidi-specific needs.
+			//		Loads EnterKeyHandling plugin, if it was not loaded, and changes its 
+			//		blockNodeForEnter property, if it is needed. Defines shortcut, which will cause
+			//		execution of 'change text direction to opposite' ('mirror') command.
+			this.editor = editor;
+			if(this.blockMode != "P" && this.blockMode != "DIV"){
+				this.blockMode = "DIV";
+			}
+			this._initButton();
+			var isLtr = this.editor.dir == "ltr";
+			// FF: RTL-oriented DIV's, containing new lines and/or tabs,  can't be converted to lists (exception in native execCommand)
+			// Delete new lines and tabs from everywhere excluding contents of PRE elements.
+			this.editor.contentPreFilters.push(this._preFilterNewLines);
+			// Explicit direction setting
+			var postDomFilterSetDirExplicitly = lang.hitch(this, function(node){			
+				if(this.disabled || !node.hasChildNodes()){
+					return node;
+				}
+				this._changeStateOfBlocks(this.editor.editNode, this.editor.editNode, this.editor.editNode, "explicitdir", null);
+				return this.editor.editNode;
+			});
+			this.editor.contentDomPostFilters.push(postDomFilterSetDirExplicitly);
+			// FF: Native change alignment command for more then one DIV doesn't change actually alignment, but damages 
+			// markup so, that selected DIV's are converted into sequence of text elements, separated by <br>'s.
+			// Override native command
+			this.editor._justifyleftImpl = lang.hitch(this, function(){
+				this._changeState("left");
+				return true;
+			});
+			this.editor._justifyrightImpl = lang.hitch(this, function(){
+				this._changeState("right");
+				return true;
+			});
+			this.editor._justifycenterImpl = lang.hitch(this, function(){
+				this._changeState("center");
+				return true;
+			});
+			// FF:	When blocks are converted into list items, their attributes are lost.
+			// IE:	1)Instead of converting regular block into list item, IE includes block into the newly created item,
+			//		so attributes and styles don't appear in the item.
+			//		2)IE always converts list item into <P>.
+			// Expand native command		
+			this.editor._insertorderedlistImpl = lang.hitch(this, "_insertLists", "insertorderedlist"); 
+			this.editor._insertunorderedlistImpl = lang.hitch(this, "_insertLists", "insertunorderedlist");
+
+			// IE:	Direction of newly created blockquotes is set explicitly,
+			//		which creates problems for further editing of the text.
+			//	Expand native command
+			this.editor._indentImpl = lang.hitch(this, "_indentAndOutdent", "indent");
+			
+			// FF:	Outdent for the list items from the first level's list converts them into sequence of 
+			//		text elements, separated by <BR>s. Attributes of list items are lost.
+			//	Expand native command
+			this.editor._outdentImpl = lang.hitch(this, "_indentAndOutdent", "outdent");
+
+			// FF:	1)Instead of converting <div> to some other block, FF includes newly created block into 
+			//		old <div>. Excessive nesting blocks creates problems for further working with the text.
+			//		2)Formatting contents of more then one list item (but less then all items in the list) 
+			//		caused unexpected merge of their contents.
+			//	Expand native command
+			this.editor._formatblockImpl = lang.hitch(this, "_formatBlocks");
+			
+			this.editor.onLoadDeferred.addCallback(lang.hitch(this, function(){
+				var edPlugins = this.editor._plugins,
+					i, p, ind = edPlugins.length, f = false,
+					h = lang.hitch(this, "_changeState", "mirror"),
+					hl = lang.hitch(this, "_changeState", "ltr"),
+					hr = lang.hitch(this, "_changeState", "rtl");
+				
+				this.editor.addKeyHandler('9', 1, 0, h); //Ctrl-9
+				this.editor.addKeyHandler('8', 1, 0, hl); //Ctrl-8
+				this.editor.addKeyHandler('0', 1, 0, hr); //Ctrl-0
+				for(i = 0; i < edPlugins.length; i++){
+					p = edPlugins[i];
+					if (!p){
+						continue;
+					}
+					if(p.constructor === EnterKeyHandling){						
+						p.destroy();
+						p = null;
+						ind = i;
+					}else if(p.constructor === NormIndentOutdent){
+						this.editor._normalizeIndentOutdent = true;
+						this.editor._indentImpl = lang.hitch(this, "_indentAndOutdent", "indent");
+						this.editor._outdentImpl = lang.hitch(this, "_indentAndOutdent", "outdent");
+					}else if(p.constructor === FontChoice && p.command === "formatBlock"){
+						this.own(aspect.before(p.button, "_execCommand", lang.hitch(this, "_handleNoFormat")));
+					}
+				}
+				this.editor.addPlugin({ctor: EnterKeyHandling, blockNodeForEnter: this.blockMode, blockNodes: /^(?:P|H1|H2|H3|H4|H5|H6|LI|DIV)$/}, ind);
+				p = this.editor._plugins[ind];
+				this.own(aspect.after(p, "handleEnterKey", lang.hitch(this, "_checkNewLine"), true));
+			}));
+			this.own(aspect.after(this.editor, "onNormalizedDisplayChanged", lang.hitch(this, "updateState"), true));
+		},
+
+		_checkNewLine: function(){
+			var range = rangeapi.getSelection(this.editor.window).getRangeAt(0);
+			var curBlock = rangeapi.getBlockAncestor(range.startContainer, null, this.editor.editNode).blockNode;
+			if (curBlock.innerHTML === this.bogusHtmlContent && curBlock.previousSibling){
+				curBlock.style.cssText = curBlock.previousSibling.style.cssText;
+			}else if(curBlock.innerHTML !== this.bogusHtmlContent && curBlock.previousSibling && curBlock.previousSibling.innerHTML === this.bogusHtmlContent){
+				 curBlock.previousSibling.style.cssText = curBlock.style.cssText;
+			}
+		},
+		
+		_handleNoFormat: function(editor, command, choice){
+			if (choice === "noFormat"){
+				return [editor, command, "DIV"];
+			}
+			return arguments;
+		},
+		
+		_execNativeCmd: function(cmd, arg, info){
+			// summary:
+			//		Call native command for nodes inside selection
+			// cmd:
+			//		Name of the command (like "insertorderedlist" or "indent")
+			// arg:
+			//		Arguments of the command
+			// info:
+			//		Object containing
+			//			nodes:  array of all block nodes, which should be handled by this command
+			//			groups: array containing groups of nodes. Nodes from each group should be handled by separate 
+			//					execution of current command
+			//			cells:	array of cells, contents of which should be handled by current command
+			// description:
+			//			Sometimes native commands "insertorderedlist", "insertunorderedlist", "indent",
+			//		"outdent" and "formatblocks" are the cause of various problems. These problems have 
+			//		different levels of severity - from crashing of their executing or damage of the editor's 
+			//		content to creating visually correct results, which however can cause the future problems,  
+			//		not always bidi-specific. For example, Webkit fails with insertlist commands, if selection  
+			//		contains some block element (like <H1> or <DIV>), followed by the table, and few cells of  
+			//		this table.IE fails,when try to handle insertlist command for list items, containing <PRE>.  
+			//		Mozilla and IE produce wrong results for selection,containing more then one cell. Mozilla  
+			//		merges contents of some listitems with "formatblock" command. Safari places DIV's in the 
+			//		same list with newly created list items. Webkit creates multilevel blocks to format the text.   
+			//		IE adds to the list lines of the text,which are outside the selection. Webkit put whole table  
+			//		into list item. All browsers lose direction and alignment styles with outdent command,    
+			//		executed for items from one-level list. Etc.
+			//			We try to avoid these problems and produce correct (and more or less similar) results for     
+			//		all supported browsers. This is achieved by separating the each above-mentioned command into 
+			//		three parts.
+			//			The first ("preparelist","prepareindent","prepareoutdent" and "prepareformat") is performed 
+			//		before corresponding native call. It prepares selected region of the editor's content by 
+			//		rebuilding it with strong block structure and keeps info about each group of selected  
+			//		elements. Separate groups are created for contents of each table cell, as well as for lines of 
+			//		text that are before, after and between tables. In case of webkit and insertlist or formatblocks
+			//		commands, each selected block element is placed into separate "group".
+			//			The second part of the command is native call itself. Native calls are executed separately
+			//		for each group of nodes. This requires to reset a selection, each time limiting it to only   
+			//		the elements of the current group. 
+			//			The third part is perfomed after native call. Its role is to restore missing styles,  
+			//		to delete bogus elements, created in the previous steps, to merge sibling lists etc.  
+			//		Corresponding commands have the same names, as native (e.g., "insertorderedlist',  
+			//		"insertunorderedlist", "indent", "outdent" and "formatblocks"), because just they produce 
+			//		the final result. For IE and Mozilla we call one "post" command per native call. For webkit 
+			//		we call one "post" command per group of elements.
+			
+			// If info contains only one group of elements, we, as usually, perform one native call per selection  
+			if(this._isSimpleInfo(info)){
+				var result = this.editor.document.execCommand(cmd, false, arg);
+				// After some operations (like insert lists into cells of tables) webkit inserts BR before table
+				if(has("webkit")){
+					query("table",this.editor.editNode).prev().forEach(function(x,ind,arr){
+						if(this._hasTag(x,"BR")){
+							x.parentNode.removeChild(x);
+						}
+					},this);
+				}
+				return result;
+			}
+			var sel = rangeapi.getSelection(this.editor.window);
+			if(!sel || sel.rangeCount == 0){
+				return false;
+			}
+			var range = sel.getRangeAt(0), tempRange = range.cloneRange();
+			var startContainer = range.startContainer, startOffset = range.startOffset,
+			endContainer = range.endContainer, endOffset = range.endOffset;
+			for(var i = 0; i < info.groups.length; i++){
+				var group = info.groups[i];
+				// Set selection for currrent group of elements
+				var eOffs = group[group.length-1].childNodes.length;
+				tempRange.setStart(group[0],0);
+				tempRange.setEnd(group[group.length-1],eOffs);
+				sel.removeAllRanges();
+				sel.addRange(tempRange);
+				var table = this.editor.selection.getParentOfType(group[0],["TABLE"]);
+				// Execute native command for current group
+				var returnValue = this.editor.document.execCommand(cmd, false, arg);
+				if(has("webkit")){
+					if(table && this._hasTag(table.previousSibling, "BR")){
+						table.parentNode.removeChild(table.previousSibling);
+					}
+					this.editor.focus();
+					// Keep info about entire selection
+					sel = rangeapi.getSelection(this.editor.window);
+					var internalRange = sel.getRangeAt(0);
+					if(i == 0){
+						startContainer = internalRange.endContainer;
+						startOffset = internalRange.endOffset;
+					}else if(i == info.groups.length-1){
+						endContainer = internalRange.endContainer;
+						endOffset = internalRange.endOffset;
+					}
+				}
+				if(!returnValue){
+					break;
+				}
+				// For webkit we execute "post" command for each group of elements. 
+				if(has("webkit")){
+					this._changeState(cmd);
+				}
+			}
+			// Restore selection
+			sel.removeAllRanges();
+			try{
+				tempRange.setStart(startContainer, startOffset);
+				tempRange.setEnd(endContainer, endOffset);
+				sel.addRange(tempRange);
+			}catch(e){
+			}
+			return true;
+		},
+		
+		_insertLists: function(cmd){
+			// summary:
+			//		Overrides native insertorderlist and insertunorderlist commands.
+			// cmd: 
+			//		Name of the command, one of "insertorderedlist" or "insertunorderedlist"
+			// description:
+			//		Overrides native insertorderlist and insertunorderlist commands with the goal 
+			//		to avoid some bidi-specific problems that arise when these commands are executed. 
+			//		Performed in three steps:
+			//		1)	prepares selected fragment of the document to execution of native command. 
+			//		2)	executes corresponding native command
+			//		3)	updates contents of selected fragment of the document after execution of
+			//			native comand.
+			var info = this._changeState("preparelists",cmd);
+			var returnValue = this._execNativeCmd(cmd, null, info);
+			if(!returnValue){
+				return false;
+			}
+			// For webkit "post" command executed separately for each group of elements.  
+			if(!has("webkit") || this._isSimpleInfo(info)){
+				this._changeState(cmd);
+			} 
+			this._cleanLists();
+			this._mergeLists();
+			return true;
+		},
+		
+		_indentAndOutdent: function(cmd){
+			// summary:
+			//		Overrides native indent and outdent commands.
+			// cmd:
+			//		Name of the command, of of "indent" or "outdent"
+			// description:
+			//		Overrides native indent and outdent commands with the goal to avoid some 
+			//		bidi-specific problems that arise when these commands are executed. 
+			//		Performed in three steps:
+			//		1)	prepares selected fragment of the document to execution of native command
+			//			(outdent only).
+			//		2)	executes corresponding native command
+			//		3)	updates contents of selected fragment of the document after execution of
+			//			native comand.
+			if(this.editor._normalizeIndentOutdent){
+				// To emulate NormalizeIndentOutdent
+				this._changeState("normalize" + cmd);
+				return true;
+			}
+			var info = this._changeState("prepare" + cmd);
+			
+			// If useCSS and styleWithCSS both set to false, mozilla creates blockquotes
+			if(has("mozilla")){
+				var oldValue;
+				try{
+					oldValue = this.editor.document.queryCommandValue("styleWithCSS");
+				}catch(e){
+					oldValue = false;
+				}
+				this.editor.document.execCommand("styleWithCSS", false, true);
+			}
+
+			var returnValue = this._execNativeCmd(cmd, null, info);
+			if(has("mozilla")){
+				this.editor.document.execCommand("styleWithCSS", false, oldValue);
+			}
+			if(!returnValue){
+				return false;
+			}
+			this._changeState(cmd);
+			this._mergeLists();
+			return true;		
+		},
+
+		_formatBlocks: function(arg){
+			// summary:
+			//		Overrides native formatblock command.
+			// arg:
+			//		Tag name of block type, like H1, DIV or P.
+			// description:
+			//		Overrides native formatblock command with the goal to avoid some 
+			//		bidi-specific problems that arise when this command is executed. 
+			//		Performed in three steps:
+			//		1)	prepares selected fragment of the document to execution of native command
+			//			(Mozilla only).
+			//		2)	executes native command
+			//		3)	updates contents of selected fragment of the document after execution of
+			//			native comand.
+			var info;
+			if(has("mozilla") || has("webkit")){
+				info = this._changeState("prepareformat", arg);
+			}
+			if(has("ie") && arg && arg.charAt(0) != "<"){
+				arg = "<" + arg + ">";
+			}
+			var returnValue = this._execNativeCmd("formatblock", arg, info);			
+			if(!returnValue){
+				return false;
+			}
+			if(!has("webkit") || this._isSimpleInfo(info)){
+				this._changeState("formatblock", arg);
+			}
+			this._mergeLists();
+			return true;		
+		},
+		
+		_changeState: function(cmd,arg){
+			// summary:
+			//		Determines and refines current selection and calls method 
+			//		_changeStateOfBlocks(), where given action is actually done
+			// description:
+			//		The main goal of this method is correctly identify the block elements,
+			//		that are at the beginning and end of the current selection. 
+			// return: nodesInfo
+			//		Object containing
+			//			nodes:  array of all block nodes, which should be handled by this command
+			//			groups: array containing groups of nodes. Nodes from each group should be handled by separate 
+			//					execution of current command
+			//			cells:	array of cells, contents of which should be handled by current command
+			if(!this.editor.window){
+				return;
+			}
+			this.editor.focus();
+			var sel = rangeapi.getSelection(this.editor.window);
+			if(!sel || sel.rangeCount == 0){
+				return;
+			}
+			var range = sel.getRangeAt(0), tempRange = range.cloneRange(),
+				startNode, endNode, startOffset, endOffset;
+			startNode = range.startContainer;
+			startOffset = range.startOffset;
+			endNode = range.endContainer;
+			endOffset = range.endOffset;
+			var isCollapsed = startNode === endNode && startOffset == endOffset;
+			if(this._isBlockElement(startNode) || this._hasTagFrom(startNode,this._tableContainers)){
+				while(startNode.hasChildNodes()){
+					if(startOffset == startNode.childNodes.length){
+						startOffset--;
+					}	
+					startNode = startNode.childNodes[startOffset];
+					startOffset = 0;
+				}
+			}
+			tempRange.setStart(startNode, startOffset);
+			startNode = this._getClosestBlock(startNode,"start",tempRange);
+			var supList = rangeapi.getBlockAncestor(startNode, /li/i, this.editor.editNode).blockNode;
+			if(supList && supList !== startNode){
+				startNode = supList;
+			}
+			endNode = tempRange.endContainer;
+			endOffset = tempRange.endOffset;
+			if(this._isBlockElement(endNode) || this._hasTagFrom(endNode,this._tableContainers)){
+				while(endNode.hasChildNodes()){
+					if(endOffset == endNode.childNodes.length){
+						endOffset--;
+					}
+					endNode = endNode.childNodes[endOffset];
+					if(endNode.hasChildNodes()){
+						endOffset = endNode.childNodes.length;
+					}else if(endNode.nodeType == 3 && endNode.nodeValue){
+						endOffset = endNode.nodeValue.length;
+					}else{
+						endOffset = 0;
+					}
+				}
+			}
+			tempRange.setEnd(endNode, endOffset);
+			endNode = this._getClosestBlock(endNode,"end",tempRange);
+			supList = rangeapi.getBlockAncestor(endNode, /li/i, this.editor.editNode).blockNode;
+			if(supList && supList !== endNode){
+				endNode = supList;
+			}
+			sel = rangeapi.getSelection(this.editor.window, true);
+			sel.removeAllRanges();
+			sel.addRange(tempRange);
+			var commonAncestor = rangeapi.getCommonAncestor(startNode, endNode);
+			var nodesInfo = this._changeStateOfBlocks(startNode, endNode, commonAncestor, cmd, arg, tempRange);
+			if(isCollapsed){
+				endNode = tempRange.startContainer;
+				endOffset = tempRange.startOffset;
+				tempRange.setEnd(endNode, endOffset);
+				sel = rangeapi.getSelection(this.editor.window, true);
+				sel.removeAllRanges();
+				sel.addRange(tempRange);				
+			}
+			return nodesInfo;
+		},
+
+		_isBlockElement: function(node){
+			if(!node || node.nodeType != 1){
+				return false;
+			}
+			var display = domStyle.get(node,"display");
+			return (display == 'block' || display == "list-item" || display == "table-cell");
+		},
+		
+		_isInlineOrTextElement: function(node){
+			return !this._isBlockElement(node) && (node.nodeType == 1 || node.nodeType == 3 || node.nodeType == 8);
+		},
+		
+		_isElement: function(node){
+			return node && (node.nodeType == 1 || node.nodeType == 3);
+		},
+		
+		_isBlockWithText: function(node){
+			return node !== this.editor.editNode && this._hasTagFrom(node,this._lineTextArray);
+		},
+		
+		_getBlockAncestor: function(node){
+			while(node.parentNode && !this._isBlockElement(node)){
+				node = node.parentNode;
+			}
+			return node;
+		},
+		
+		_getClosestBlock: function(node, point, tempRange){
+			// summary:
+			//		Searches for a closest block element containing the text which 
+			//		is at a given point of current selection. Refines current
+			//		selection, if text element from start or end point was merged 
+			//		with its neighbors.
+			if(this._isBlockElement(node)){
+				return node;
+			}
+			var parent = node.parentNode,
+				firstSibling, lastSibling,
+				createOwnBlock = false,
+				multiText = false;
+				removeOffset = false;
+			while(true){
+				var sibling = node;
+				createOwnBlock = false;
+				while(true){
+					if(this._isInlineOrTextElement(sibling)){
+						firstSibling = sibling;
+						if(!lastSibling){
+							lastSibling = sibling;
+						}
+					}
+					sibling = sibling.previousSibling;
+					if(!sibling){
+						break;
+					}else if(this._isBlockElement(sibling) || this._hasTagFrom(sibling,this._blockContainers) || this._hasTag(sibling,"BR")){
+						createOwnBlock = true;
+						break;
+					}else if(sibling.nodeType == 3 && sibling.nextSibling.nodeType == 3){
+						// Merge neighboring text elements
+						sibling.nextSibling.nodeValue = sibling.nodeValue + sibling.nextSibling.nodeValue;
+						multiText = true;
+						if(point == "start" && sibling === tempRange.startContainer){
+							tempRange.setStart(sibling.nextSibling, 0);
+						}else if(point == "end" && (sibling === tempRange.endContainer || sibling.nextSibling === tempRange.endContainer)){
+							tempRange.setEnd(sibling.nextSibling, sibling.nextSibling.nodeValue.length);
+						}
+						sibling = sibling.nextSibling;
+						sibling.parentNode.removeChild(sibling.previousSibling);
+						if(!sibling.previousSibling){
+							break;
+						}
+					}
+				}
+				sibling = node;
+				while(true){
+					if(this._isInlineOrTextElement(sibling)){
+						if(!firstSibling){
+							firstSibling = sibling;
+						}
+						lastSibling = sibling;
+					}	
+					sibling = sibling.nextSibling;
+					if(!sibling){
+						break;				
+					}else if(this._isBlockElement(sibling) || this._hasTagFrom(sibling,this._blockContainers)){
+						createOwnBlock = true;
+						break;
+					}else if(this._hasTag(sibling,"BR") && sibling.nextSibling && !(this._isBlockElement(sibling.nextSibling) || 
+							this._hasTagFrom(sibling.nextSibling,this._blockContainers))){
+						lastSibling = sibling;
+						createOwnBlock = true;
+						break;						
+					}else if(sibling.nodeType == 3 && sibling.previousSibling.nodeType == 3){
+						// Merge neighboring text elements
+						sibling.previousSibling.nodeValue += sibling.nodeValue;
+						multiText = true;
+						if(point == "start" && sibling === tempRange.startContainer){
+							tempRange.setStart(sibling.previousSibling, 0);
+						}else if(point == "end" && (sibling === tempRange.endContainer || sibling.previousSibling === tempRange.endContainer)){
+							tempRange.setEnd(sibling.previousSibling, sibling.previousSibling.nodeValue.length);
+						}					
+						sibling = sibling.previousSibling;
+						sibling.parentNode.removeChild(sibling.nextSibling);
+						if(!sibling.nextSibling){
+							break;
+						}
+					}
+				}
+				// If text in the start or end point of the current selection doesn't placed in some block element 
+				// or if it has block siblings, new block, containing this text element (and its inline siblings) is created.
+				if(createOwnBlock || (this._isBlockElement(parent) && 
+						!this._isBlockWithText(parent) && firstSibling)){
+					var origStartOffset = tempRange? tempRange.startOffset : 0,
+						origEndOffset = tempRange? tempRange.endOffset : 0,
+						origStartContainer = tempRange? tempRange.startContainer : null,
+						origEndContainer = tempRange? tempRange.endContainer : null,
+						divs = this._repackInlineElements(firstSibling, lastSibling, parent),
+						div = divs[point == "start"? 0 : divs.length-1];
+						if(tempRange && div && firstSibling === origStartContainer && this._hasTag(firstSibling,"BR")){
+							origStartContainer = div;
+							origStartOffset = 0;
+							if(lastSibling === firstSibling){
+								origEndContainer = origStartContainer;
+								origEndOffset = 0;
+							}
+						}
+					if(tempRange){
+						tempRange.setStart(origStartContainer, origStartOffset);
+						tempRange.setEnd(origEndContainer, origEndOffset);
+					}
+					return div;
+				}
+				if(this._isBlockElement(parent)){
+					return parent;
+				}
+				node = parent;
+				removeOffset = true;
+				parent = parent.parentNode;
+				firstSibling = lastSibling = null;
+			}
+		},
+		
+		_changeStateOfBlocks: function(startNode, endNode, commonAncestor, cmd, arg, tempRange){
+			// summary:
+			//		Collects all block elements, containing text, which are inside of current selection,
+			//		and performs for each of them given action.
+			//		Possible commands and corresponding actions:
+			//			- "ltr":					change direction to left-to-right
+			//			- "rtl":					change direction to right-to-left
+			//			- "mirror":					change direction to opposite
+			//			- "explicitdir":			explicit direction setting
+			//			- "left":					change alignment to left
+			//			- "right":					change alignment to right
+			//			- "center":					change alignment to center
+			//			- "preparelists":			action should be done before executing native insert[un]orderedlist
+			//			- "prepareoutdent":			action should be done before executing native outdent
+			//			- "prepareindent":			action should be done before executing native indent
+			//			- "prepareformat":			action should be done before executing native formatblock
+			//			- "insertunorderedlist":	action should be done after executing native insertunorderedlist
+			//			- "insertorderedlist":		action should be done after executing native insertorderedlist
+			//			- "indent":					action should be done after executing native indent
+			//			- "outdent":				action should be done after executing native outdent
+			//			- "normalizeindent":		emulate indent done by NormalizeIndentOutdent plugin
+			//			- "normalizeoutdent":		emulate outdent done by NormalizeIndentOutdent plugin
+			//			- "formatblock":			action should be done after executing native formatblock
+			var nodes = [];
+			// Refine selection, needed for 'explicitdir' command (full selection)
+			if(startNode === this.editor.editNode){
+				if(!startNode.hasChildNodes()){
+					return;
+				}
+				if(this._isInlineOrTextElement(startNode.firstChild)){
+					this._rebuildBlock(startNode);
+				}
+				startNode = this._getClosestBlock(startNode.firstChild, "start", null);
+			}
+			if(endNode === this.editor.editNode){
+				if(!endNode.hasChildNodes()){
+					return;
+				}
+				if(this._isInlineOrTextElement(endNode.lastChild)){
+					this._rebuildBlock(endNode);
+				}
+				endNode = this._getClosestBlock(endNode.lastChild, "end", null);			
+			}
+			
+			// Collect all selected block elements, which contain or can contain text.
+			// Walk through DOM tree between start and end points of current selection.
+			var origStartOffset = tempRange? tempRange.startOffset : 0,
+				origEndOffset = tempRange? tempRange.endOffset : 0,
+				origStartContainer = tempRange? tempRange.startContainer : null,
+				origEndContainer = tempRange? tempRange.endContainer : null;		
+			var info = this._collectNodes(startNode, endNode, commonAncestor, tempRange, nodes, 
+					origStartContainer, origStartOffset, origEndContainer, origEndOffset, cmd);
+			var nodesInfo = {nodes: nodes, groups: info.groups, cells: info.cells};
+			cmd = cmd.toString();
+			// Execution of specific action for each element from collection
+			switch(cmd){
+				//change direction
+				case "mirror":
+				case "ltr":
+				case "rtl":
+				//change alignment
+				case "left":
+				case "right":
+				case "center":
+				//explicit direction setting
+				case "explicitdir":
+					this._execDirAndAlignment(nodesInfo, cmd, arg);
+					break;
+				//before executing 'insert list' native command
+				case "preparelists":
+					this._prepareLists(nodesInfo, arg);
+					break;
+				//after executing 'insert list' native command
+				case "insertorderedlist":
+				case "insertunorderedlist":
+					this._execInsertLists(nodesInfo);
+					break;
+				//before executing 'outdent' native command
+				case "prepareoutdent":
+					this._prepareOutdent(nodesInfo);
+					break;
+				//before executing 'indent' native command
+				case "prepareindent":
+					this._prepareIndent(nodesInfo);
+					break;
+				//after executing 'indent' native command
+				case "indent":
+					this._execIndent(nodesInfo);
+					break;
+				//after executing 'outdent' native command
+				case "outdent":
+					this._execOutdent(nodesInfo);
+					break;
+				//replace native 'indent' and 'outdent' commands
+				case "normalizeindent":
+					this._execNormalizedIndent(nodesInfo);
+					break;
+				case "normalizeoutdent":
+					this._execNormalizedOutdent(nodesInfo);
+					break;
+				//before 'formatblock' native command
+				case "prepareformat":
+					this._prepareFormat(nodesInfo, arg);
+					break;
+				//after executing 'formatblock' native command
+				case "formatblock":
+					this._execFormatBlocks(nodesInfo, arg);
+					break;				
+				default: console.error("Command " + cmd + " isn't handled");
+			}
+			// Refine selection after changes
+			if(tempRange){		
+				tempRange.setStart(origStartContainer, origStartOffset);
+				tempRange.setEnd(origEndContainer, origEndOffset);				
+				sel = rangeapi.getSelection(this.editor.window, true);
+				sel.removeAllRanges();
+				sel.addRange(tempRange);
+				this.editor.onDisplayChanged();
+			}
+			return nodesInfo;
+		},
+
+		_collectNodes: function(startNode, endNode, commonAncestor, tempRange, nodes, origStartContainer, origStartOffset, origEndContainer, origEndOffset, cmd){
+			// summary:
+			//		Collect all selected block elements, which contain or can contain text.
+			//		Walk through DOM tree between start and end points of current selection.
+			var node = startNode, sibling, child, parent = node.parentNode, divs = [],
+				firstSibling, lastSibling, groups = [], group = [], cells = [], curTD = this.editor.editNode;
+			var saveNodesAndGroups = lang.hitch(this, function(x){
+				nodes.push(x);
+				var cell = this.editor.selection.getParentOfType(x,["TD"]);
+				if(curTD !== cell || has("webkit") && (cmd === "prepareformat" || cmd === "preparelists")){
+					if(group.length){
+						groups.push(group);
+					}
+					group = [];					
+					if(curTD != cell){
+						curTD = cell;
+						if(curTD){
+							cells.push(curTD);
+						}
+					}
+				}
+				group.push(x);
+			});
+			this._rebuildBlock(parent);
+			while(true){
+				if(this._hasTagFrom(node,this._tableContainers)){
+					if(node.firstChild){
+						parent = node;
+						node = node.firstChild;
+						continue;						
+					}
+				}else if(this._isBlockElement(node)){				
+					var supLI = rangeapi.getBlockAncestor(node, /li/i, this.editor.editNode).blockNode;
+					if(supLI && supLI !== node){
+						node = supLI;
+						parent = node.parentNode;
+						continue;
+					}
+					if(!this._hasTag(node,"LI")){		
+						if(node.firstChild){
+							this._rebuildBlock(node);
+							if(this._isBlockElement(node.firstChild) || this._hasTagFrom(node.firstChild,this._tableContainers)){
+								parent = node;
+								node = node.firstChild;
+								continue;
+							}
+						}
+					}
+					if(this._hasTagFrom(node,this._lineTextArray)){
+						saveNodesAndGroups(node);
+					}
+				}else if(this._isInlineOrTextElement(node) && !this._hasTagFrom(node.parentNode,this._tableContainers)){
+					firstSibling = node;
+					while(node){
+						var nextSibling = node.nextSibling;
+						if(this._isInlineOrTextElement(node)){
+							lastSibling = node;						
+							if(this._hasTag(node,"BR")){
+								if(!(this._isBlockElement(parent) && node === parent.lastChild)){
+									divs = this._repackInlineElements(firstSibling, lastSibling, parent);
+									node = divs[divs.length-1];
+									for(var nd = 0; nd < divs.length; nd++){
+										saveNodesAndGroups(divs[nd]);
+									}
+									firstSibling = lastSibling = null;
+									if(nextSibling && this._isInlineOrTextElement(nextSibling)){
+										firstSibling = nextSibling;
+									}
+								}
+							}
+						}else if(this._isBlockElement(node)){
+							break;
+						}	
+						node = nextSibling;
+					}
+					if(!firstSibling){
+						continue;
+					}
+					divs = this._repackInlineElements(firstSibling, lastSibling, parent);
+					node = divs[divs.length-1];
+					for(var nd = 0; nd < divs.length; nd++){
+						saveNodesAndGroups(divs[nd]);
+					}
+				}
+				
+				if(node === endNode){
+					break;
+				}
+				if(node.nextSibling){
+					node = node.nextSibling;
+				}else if(parent !== commonAncestor){
+					while(!parent.nextSibling){
+						node = parent;
+						parent = node.parentNode;
+						if(parent === commonAncestor){
+							break;
+						}
+					}
+					if(parent !== commonAncestor && parent.nextSibling){
+						node = parent.nextSibling;
+						parent = parent.parentNode;
+					}else{
+						break;
+					}
+				}else{ 
+					break;
+				}
+			}
+			if(group.length){
+				if(has("webkit") || curTD){
+					groups.push(group);
+				}else{
+					groups.unshift(group);
+				}
+			}
+			return {groups: groups, cells: cells};
+		},
+
+		_execDirAndAlignment: function(nodesInfo, cmd,arg){
+			// summary:
+			//		Change direction and/or alignment of each node from the given array.
+			switch(cmd){
+			//change direction
+			case "mirror":
+			case "ltr":
+			case "rtl":
+				array.forEach(nodesInfo.nodes, function(x){
+					var style = domStyle.getComputedStyle(x),
+						curDir = style.direction,
+						oppositeDir = curDir == "ltr"? "rtl" : "ltr",
+						realDir = (cmd != "mirror"? cmd : oppositeDir),
+						curAlign = style.textAlign,
+						marginLeft = isNaN(parseInt(style.marginLeft))? 0 : parseInt(style.marginLeft),
+						marginRight = isNaN(parseInt(style.marginRight))? 0 : parseInt(style.marginRight);
+					domAttr.remove(x,"dir");
+					domAttr.remove(x,"align");					
+					domStyle.set(x, {direction: realDir, textAlign: ""});
+					if(this._hasTag(x,"CENTER")){
+						return;
+					}
+					if(curAlign.indexOf("center") >= 0){
+						domStyle.set(x,"textAlign","center");
+					}
+					if(this._hasTag(x,"LI")){
+						this._refineLIMargins(x);
+						var margin = curDir === "rtl"? marginRight : marginLeft; 
+						var level = 0, tNode = x.parentNode, name;
+						if(curDir != domStyle.get(tNode,"direction")){
+							while(tNode !== this.editor.editNode){
+								if(this._hasTagFrom(tNode,["OL","UL"])){
+									level++;
+								}
+								tNode = tNode.parentNode;
+							}
+							margin -= this._getMargins(level);
+						}
+						var styleMargin = realDir == "rtl"? "marginRight" : "marginLeft";
+						var cMargin = domStyle.get(x,styleMargin);
+						var cIndent = isNaN(cMargin)? 0 : parseInt(cMargin);
+						domStyle.set(x,styleMargin,"" + (cIndent + margin) + "px");
+						if(has("webkit")){
+							if(curAlign.indexOf("center") < 0){
+								domStyle.set(x, "textAlign", (realDir == "rtl"? "right" : "left"));
+							}
+						}else if(x.firstChild && x.firstChild.tagName){
+							if(this._hasTagFrom(x.firstChild,this._lineStyledTextArray)){
+								var style = domStyle.getComputedStyle(x),
+									align = this._refineAlignment(style.direction, style.textAlign);
+								if(has("mozilla")){
+									domStyle.set(x.firstChild, {textAlign: align});
+								}else{
+									domStyle.set(x.firstChild, {direction : realDir, textAlign: align});
+								}
+							}
+						}										
+					}else{
+						if(realDir == "rtl" && marginLeft != 0){
+							domStyle.set(x, {marginLeft: "", marginRight: "" + marginLeft + "px"});
+						}else if(realDir == "ltr" && marginRight != 0){
+							domStyle.set(x, {marginRight: "", marginLeft: "" + marginRight + "px"});
+						}
+					}
+				},this);
+				query("table",this.editor.editNode).forEach(function(table,idx,array){
+					var dir = cmd;
+					if(cmd === "mirror"){
+						dir = domStyle.get(table,"direction") === "ltr"? "rtl" : "ltr";
+					}
+					var listTD = query("td",table), first = false, last = false;
+					for(var i = 0; i < nodesInfo.cells.length; i++){
+						if(!first && listTD[0] === nodesInfo.cells[i]){
+							first = true;
+						}else if(listTD[listTD.length-1] === nodesInfo.cells[i]){
+							last = true;
+							break;
+						}
+					}
+					if(first && last){
+						domStyle.set(table,"direction",dir);
+						for(i = 0; i < listTD.length; i++){
+							domStyle.set(listTD[i],"direction",dir);
+						}
+					}
+				},this);
+				break;
+			//change alignment
+			case "left":
+			case "right":
+			case "center":
+				array.forEach(nodesInfo.nodes, function(x){
+					if(this._hasTag(x,"CENTER")){
+						return;
+					}
+					domAttr.remove(x,"align");
+					domStyle.set(x,"textAlign",cmd);
+					if(this._hasTag(x,"LI")){
+						if(x.firstChild && x.firstChild.tagName){
+							if(this._hasTagFrom(x.firstChild,this._lineStyledTextArray)){
+								var style = domStyle.getComputedStyle(x),
+									align = this._refineAlignment(style.direction, style.textAlign);
+								domStyle.set(x.firstChild, "textAlign", align);
+							}
+						}										
+					}					
+				},this);
+				break;
+			//explicit direction setting
+			case "explicitdir":
+				array.forEach(nodesInfo.nodes, function(x){
+					var style = domStyle.getComputedStyle(x),
+						curDir = style.direction;
+					domAttr.remove(x,"dir");										
+					domStyle.set(x, {direction: curDir});
+				},this);
+				break;
+			}		
+		},
+
+		_prepareLists: function(nodesInfo, arg){
+			// summary:
+			//		Perform changes before native insertorderedlist and 
+			//		insertunorderedlist commands for each node from the given array.
+			array.forEach(nodesInfo.nodes, function(x,index,arr){
+				if(has("mozilla") || has("webkit")){
+					//Mozilla not always handles the only block inside cell
+					if(has("mozilla")){
+						var cell = this._getParentFrom(x,["TD"]);
+						if(cell && query("div[tempRole]",cell).length == 0){
+							domConstruct.create("div",{innerHTML: "<span tempRole='true'>" + this.bogusHtmlContent + "</span", tempRole: "true"},cell);
+						}
+					}
+					var name = this._tag(x);
+					var styledSpan;
+					if(has("webkit") && this._hasTagFrom(x,this._lineStyledTextArray) || 
+							(this._hasTag(x,"LI") && this._hasStyledTextLineTag(x.firstChild))){	
+						var savedName = this._hasTag(x,"LI")? this._tag(x.firstChild) : name;
+						if(this._hasTag(x,"LI")){
+							while(x.firstChild.lastChild){
+								domConstruct.place(x.firstChild.lastChild,x.firstChild,"after");
+							}
+							x.removeChild(x.firstChild);
+						}
+						styledSpan = domConstruct.create("span",{innerHTML: this.bogusHtmlContent, bogusFormat: savedName},x,"first");
+					}
+					if(!has("webkit") && name != "DIV" && name != "P" && name != "LI"){
+						return;
+					}
+					// In some cases, when one of insertlists command is executed for list of another type, and selection
+					// includes the last item of this list, webkit loses current selection after native call.
+					// To avoid this we append the list with bogus item, which finally will be removed by "post" action. 
+					if(has("webkit") && this._isListTypeChanged(x, arg) && x === x.parentNode.lastChild){
+						domConstruct.create("li",{tempRole: "true"},x,"after");
+					}
+					if(name == "LI" && x.firstChild && x.firstChild.tagName){
+						if(this._hasTagFrom(x.firstChild,this._lineStyledTextArray)){
+							return;
+						}
+					}
+					// When blocks are converted into list items, their attributes are lost.
+					// We save attributes in some bogus inline element with the goal to restore 
+					// them after execution the command. 						
+					var style = domStyle.getComputedStyle(x),curDir = style.direction,curAlign = style.textAlign;
+					curAlign = this._refineAlignment(curDir, curAlign);
+					var val = this._getLIIndent(x);
+					var margin = val == 0? "" : "" + val + "px"; 
+					if(has("webkit") && name == "LI"){
+						domStyle.set(x,"textAlign","");
+					}						
+					var span = styledSpan? x.firstChild : domConstruct.create("span",{innerHTML: this.bogusHtmlContent},x,"first");
+					domAttr.set(span,"bogusDir",curDir);
+					if(curAlign != ""){
+						domAttr.set(span,"bogusAlign",curAlign);
+					}
+					if(margin){
+						domAttr.set(span,"bogusMargin",margin);
+					}
+				}else if(has("ie")){
+					// When IE executes insertlist command for list item, containing block,
+					// it saves styles of list item in this block. We should then remove 
+					// bogus margins, if list item is converted into the block.
+					if(this._hasTag(x,"LI")){
+						var dir = domStyle.getComputedStyle(x).direction;
+						domStyle.set(x,"marginRight","");
+						domStyle.set(x,"marginLeft","");
+						if(this._getLILevel(x) == 1 && !this._isListTypeChanged(x,cmd)){
+							if(x.firstChild && this._hasTagFrom(x.firstChild,["P","PRE"])){
+								domConstruct.create("span",{bogusIEFormat: this._tag(x.firstChild)},x.firstChild,"first");
+							}
+							//IE fais, when try to handle list items, containing PRE 
+							if(this._hasTag(x.firstChild,"PRE")){
+								var p = domConstruct.create("p",null,x.firstChild,"after");
+								while(x.firstChild.firstChild){
+									domConstruct.place(x.firstChild.firstChild,p,"last");
+								}
+								p.style.cssText = x.style.cssText;
+								x.removeChild(x.firstChild);
+							}
+						}
+					}						
+				}
+			},this);
+			// If selection includes some cells of table and some items of one-level list, which is the table's next sibling,
+			// webkit doesn't complete the action. For example, having <table>...</table><ul><li>One</li><li>Two</li></ul>,
+			// after executing "insertunorderedlist" command, we get <table>...</table><ul><li>One</li>Two.
+			// To avoid this, we add after the table some bogus list, which will be deleted after executing "post native" action.
+			if(has("webkit")){
+				query("table",this.editor.editNode).forEach(function(x,ind,arr){
+					var sibling = x.nextSibling;
+					if(sibling && this._hasTagFrom(sibling,["UL","OL"])){
+						domConstruct.create("UL",{tempRole: "true"},x,"after");
+					}
+				},this);	
+			}			
+		},
+		
+		_execInsertLists: function(nodesInfo){
+			array.forEach(nodesInfo.nodes, function(x,index){
+				if(this._hasTag(x,"LI")){
+					//If one of "styled" text blocks, like <h*> or <pre>, is converted
+					//into list item, it actually is included into new list item, 
+					//created without attributes. This causes problems in subsequent changes 
+					//of orientation or alignment of this list item.	
+					if(x.firstChild && x.firstChild.tagName){
+						if(this._hasTagFrom(x.firstChild,this._lineStyledTextArray)){
+							var style = domStyle.getComputedStyle(x.firstChild),
+								align = this._refineAlignment(style.direction, style.textAlign);
+							domStyle.set(x,{direction: style.direction, textAlign: align});
+							var mLeft = this._getIntStyleValue(x,"marginLeft") + this._getIntStyleValue(x.firstChild,"marginLeft");
+							var mRight = this._getIntStyleValue(x,"marginRight") + this._getIntStyleValue(x.firstChild,"marginRight");
+							var leftMargin = mLeft? "" + mLeft + "px" : "";
+							var rightMargin = mRight? "" + mRight + "px" : "";
+							domStyle.set(x,{marginLeft: leftMargin, marginRight: rightMargin});
+							domStyle.set(x.firstChild,{direction: "", textAlign: ""});
+							if(!has("mozilla")){
+								domStyle.set(x.firstChild,{marginLeft: "", marginRight: ""});
+							}
+						}
+					}
+					//Mozilla sometimes includes few empty text nodes (or text nodes, containing spaces)
+					//to the end of newly created list item
+					while(x.childNodes.length > 1){
+						if(!(x.lastChild.nodeType == 3 && x.lastChild.previousSibling && x.lastChild.previousSibling.nodeType == 3 && lang.trim(x.lastChild.nodeValue) == "")){
+							break;
+						}	
+						x.removeChild(x.lastChild);
+					}
+					if(has("safari")){
+						if(this._hasTag(x.firstChild,"SPAN") && domClass.contains(x.firstChild,"Apple-style-span")){
+							var child = x.firstChild;
+							if(this._hasTag(child.firstChild,"SPAN") && domAttr.has(child.firstChild,"bogusFormat")){
+								while(child.lastChild){
+									domConstruct.place(child.lastChild,child,"after");
+								}
+								x.removeChild(child);
+							}
+						}
+					}
+				}else if(this._hasTag(x,"DIV") && x.childNodes.length == 0){
+					x.parentNode.removeChild(x);
+					return;
+				}				
+				if(has("ie")){
+					// IE always converts list items to <P>
+					if(this._hasTag(x,"P") && this.blockMode.toUpperCase() == "DIV"){
+						if(this._hasTag(x.firstChild,"SPAN") && domAttr.has(x.firstChild,"bogusIEFormat")){
+							if(domAttr.get(x.firstChild,"bogusIEFormat").toUpperCase() === "PRE"){
+								var pre = domConstruct.create("pre",{innerHTML: x.innerHTML},x,"before");
+								pre.style.cssText = x.style.cssText;
+								pre.removeChild(pre.firstChild);
+								x.parentNode.removeChild(x);
+							}else{
+								x.removeChild(x.firstChild);
+							}
+							return;
+						}
+						var nDiv = domConstruct.create("div");
+						nDiv.style.cssText = x.style.cssText;
+						x.parentNode.insertBefore(nDiv,x);
+						while(x.firstChild){
+							nDiv.appendChild(x.firstChild);
+						}
+						x.parentNode.removeChild(x);
+					}	
+					if(!this._hasTag(x,"LI")){
+						return;
+					}
+					this._refineLIMargins(x);											
+					// Instead of converting regular block into list item, IE includes block into the newly created item
+					var div = x.firstChild;
+					if(!this._hasTag(div,"DIV")){
+						return;
+					}
+					if(!(div === x.lastChild)){
+						return;
+					}
+					var style = domStyle.getComputedStyle(div), dir = style.direction, align = style.textAlign,
+						curAlign = domStyle.getComputedStyle(x).textAlign;
+					domStyle.set(x,"direction",dir);
+					align = this._refineAlignment(dir, align);
+					domStyle.set(x,"textAlign",align);
+					while(div.firstChild){
+						x.insertBefore(div.firstChild, div);
+					}
+					x.removeChild(div);
+				}else if(!this._hasTag(x.firstChild,"SPAN")){
+					if(this._hasTag(x,"LI")){
+						this._refineLIMargins(x);
+						if(has("mozilla") && this._hasStyledTextLineTag(x.firstChild)){
+							this._recountLIMargins(x);
+						}
+					}
+					return;
+				}	
+				// Restore attributes and remove bogus elments
+				var hasBogusSpan = false;
+				var indentWithMargin = false;
+				var hasBogusAlign = false;
+				var marginVal = 0; 
+				if(domAttr.has(x.firstChild,"bogusDir")){
+					hasBogusSpan = true;
+					var dir = domAttr.get(x.firstChild,"bogusDir");
+					domStyle.set(x,"direction",dir);
+				}
+				if(domAttr.has(x.firstChild,"bogusAlign")){
+					hasBogusSpan = true;
+					hasBogusAlign = true;
+					var align = domAttr.get(x.firstChild,"bogusAlign");
+					domStyle.set(x,"textAlign",align);
+					var sibling = x.firstChild.nextSibling;
+					if(this._hasTag(sibling,"SPAN") && domStyle.get(sibling,"textAlign") === align){
+						domStyle.set(sibling,"textAlign","");
+						if(sibling.style.cssText == ""){
+							while(sibling.lastChild){
+								domConstruct.place(sibling.lastChild,sibling,"after");
+							}
+							x.removeChild(sibling);
+						}
+					}
+				}
+				if(domAttr.has(x.firstChild,"bogusMargin")){
+					hasBogusSpan = true;
+					indentWithMargin = true;
+					marginVal = parseInt(domAttr.get(x.firstChild,"bogusMargin"));
+					if(!this._hasTag(x,"LI")){
+						var mStyle = domStyle.get(x,"direction") === "rtl"? "marginRight" : "marginLeft";
+						var mVal = this._getIntStyleValue(x,mStyle) + marginVal;							
+						domStyle.set(x,mStyle,(mVal == 0? "" : "" + mVal + "px"));
+					}
+				}					
+				if(domAttr.has(x.firstChild,"bogusFormat")){
+					hasBogusSpan = false;
+					domAttr.remove(x.firstChild,"bogusDir");
+					if(x.firstChild.nextSibling && this._hasTag(x.firstChild.nextSibling,"SPAN")){
+						var bogusStyles = x.firstChild.style.cssText.trim().split(";");
+						var savedStyles = x.firstChild.nextSibling.style.cssText.trim().split(";");
+						for(var i = 0; i < bogusStyles.length; i++){
+							if(bogusStyles[i]){
+								for(var j = 0; j < savedStyles.length; j++){
+									if(bogusStyles[i].trim() == savedStyles[j].trim()){
+										var style = bogusStyles[i].trim().split(":")[0];
+										domStyle.set(x.firstChild.nextSibling,style,"");
+										break;
+									}
+								}
+							}
+						}
+						if(x.firstChild.nextSibling.style.cssText === ""){
+							while(x.firstChild.nextSibling.firstChild){
+								domConstruct.place(x.firstChild.nextSibling.firstChild,x.firstChild.nextSibling,"after");
+							}
+							x.removeChild(x.firstChild.nextSibling);
+						}
+					}
+					var tag = domAttr.get(x.firstChild,"bogusFormat");
+					var block = domConstruct.create(tag,null,x.firstChild,"after");
+					while(block.nextSibling){
+						domConstruct.place(block.nextSibling,block,"last");								
+					}
+					x.removeChild(x.firstChild);
+					if(has("webkit")){
+						if(this._hasTag(x,"LI")){
+							var parent = x.parentNode.parentNode;
+							if(this._hasTag(parent,tag)){
+								domAttr.set(parent,"tempRole","true");
+							}
+						}
+					}
+					if(x.childNodes.length == 1 && !this._hasTag(x,"TD")){
+						if(!has("mozilla") && !this._hasTag(x,"LI")){
+							block.style.cssText = x.style.cssText;
+							domAttr.set(x,"tempRole","true");
+						}else if(!this._hasTag(x,"LI")){
+							block.style.cssText = x.style.cssText;
+							domConstruct.place(block,x,"after");
+							domAttr.set(x,"tempRole","true");
+						}
+					}
+				}
+				if(hasBogusSpan){
+					x.removeChild(x.firstChild);
+				}
+				if(this._hasTag(x,"LI")){
+					// Chrome: if direction of list item is differ from default orientation, text alignment 
+					// of this item should be set explicitly
+					if(has("webkit") && !hasBogusAlign && domStyle.get(x,"textAlign") != "center"){
+						domStyle.set(x,"textAlign",(domStyle.get(x,"direction") == "rtl"? "right" : "left"));
+					}
+					// Safari: when type of the list, having differently directed items, is changed, Safari inserts sometimes
+					// into this list DIV with the contents of previous list item. 
+					if(has("safari") && this._hasTag(x,"DIV")){
+						x.innerHTML = x.nextSibling.innerHTML;
+						x.parentNode.removeChild(x.nextSibling);
+					}
+					var pDiv = x.parentNode.parentNode;
+					if(pDiv !== this.editor.editNode && this._hasTag(pDiv,"DIV")){
+						if(pDiv.childNodes.length == 1){
+							pDiv.parentNode.insertBefore(x.parentNode,pDiv);
+							pDiv.parentNode.removeChild(pDiv);
+						}
+					}
+					this._refineLIMargins(x);						
+					if(indentWithMargin){	
+						this._recountLIMargins(x, marginVal);
+					}
+				}
+			},this);
+			if(has("mozilla")){
+				query("*[tempRole]",this.editor.editNode).forEach(function(x,index,arr){
+					if(this._hasTag(x,"SPAN")){
+						if(domAttr.get(x.parentNode,"tempRole")){
+							return;
+						}else if(this._hasTag(x.parentNode,"LI")){
+							x.parentNode.parentNode.removeChild(x.parentNode);
+							return;
+						}
+					}
+					x.parentNode.removeChild(x);
+				},this);
+			}else if(has("webkit")){
+				query("*[tempRole]",this.editor.editNode).forEach(function(x,index,arr){
+					if(this._hasTag(x, "LI") || this._hasTag(x,"UL")){
+						return;
+					}
+					while(x.lastChild){
+						domConstruct.place(x.lastChild,x,"after");
+					}
+					x.parentNode.removeChild(x);
+				},this);
+			}			
+		},
+		
+		_execNormalizedIndent: function(nodesInfo){
+			array.forEach(nodesInfo.nodes, function(x){
+				var style = domStyle.get(x,"direction") === "rtl"? "marginRight" : "marginLeft";
+				var cMargin = domStyle.get(x,style);
+				var cIndent = isNaN(cMargin)? 0 : parseInt(cMargin);
+				domStyle.set(x,style,"" + (cIndent + this._indentBy) + "px");
+			},this);
+		},
+
+		_execNormalizedOutdent: function(nodesInfo){
+			array.forEach(nodesInfo.nodes, function(x){
+				var style = domStyle.get(x,"direction") === "rtl"? "marginRight" : "marginLeft";
+				var cMargin = domStyle.get(x,style)
+				var cIndent = isNaN(cMargin)? 0 : parseInt(cMargin);
+				var offs = 0;
+				if(x.tagName.toUpperCase() === "LI"){
+					var level = 0, tNode = x.parentNode, name;
+					if(domStyle.get(x,"direction") != domStyle.get(tNode,"direction")){
+						while(tNode !== this.editor.editNode){
+							if(this._hasTagFrom(tNode,["OL","UL"])){
+								level++;
+							}
+							tNode = tNode.parentNode;
+						}
+						offs = this._getMargins(level);
+					}
+				}
+				if(cIndent >= this._indentBy + offs){
+					domStyle.set(x,style,(cIndent == this._indentBy? "" : "" + (cIndent - this._indentBy) + "px"));
+				}
+			},this);			
+		},
+
+		_prepareIndent: function(nodesInfo){
+			array.forEach(nodesInfo.nodes, function(x){
+				if(has("mozilla")){
+					var cell = this._getParentFrom(x,["TD"]);
+					if(!!cell && (query("div[tempRole]",cell).length == 0)){
+						domConstruct.create("div",{innerHTML: this.bogusHtmlContent, tempRole: "true"},cell);
+					}
+					if(this._hasTag(x,"LI")){
+						var indent = this._getLIIndent(x);
+						domAttr.set(x,"tempIndent",indent);
+					}
+				}
+				if(has("webkit") && this._hasTag(x,"LI") && this._hasStyledTextLineTag(x.firstChild)){	
+					var name = this._tag(x.firstChild);
+					while(x.firstChild.lastChild){
+						domConstruct.place(x.firstChild.lastChild,x.firstChild,"after");
+					}
+					x.removeChild(x.firstChild);
+					domConstruct.create("span",{innerHTML: this.bogusHtmlContent, bogusFormat: name},x,"first");
+				}
+			},this);			
+		},
+
+		_prepareOutdent: function(nodesInfo){
+			array.forEach(nodesInfo.nodes, function(x){
+				if(has("mozilla") || has("webkit")){
+					if(has("mozilla")){
+						var cell = this._getParentFrom(x,["TD"]);
+						if(!!cell && (query("div[tempRole]",cell).length == 0)){
+							domConstruct.create("div",{innerHTML: this.bogusHtmlContent, tempRole: "true"},cell);
+						}
+					}
+					// FF: Outdent for the list items from first level's list converts them into sequence of 
+					// text elements, separated by <BR>s. Attributes of list items are lost.
+					// Webkit: Attributes of items, placed into blockquote, are lost after outdent.
+					// We save attributes in some bogus inline element with the goal to restore 
+					// them after execution the command. 					
+					var name = this._tag(x);
+					if(has("mozilla") && name !== "LI"){
+						return;
+					}
+					var styledSpan = null;
+					if(has("webkit")){
+						if(this._hasTag(x,"LI") && this._hasStyledTextLineTag(x.firstChild)){
+							name = this._tag(x.firstChild);
+							var child = x.firstChild;
+							while(child.lastChild){
+								domConstruct.place(child.lastChild,child,"after");									
+							}
+							x.removeChild(x.firstChild);
+							styledSpan = domConstruct.create("span",{innerHTML: this.bogusHtmlContent, bogusFormat: name},x,"first");
+						}
+					}
+					if(x.firstChild && x.firstChild.tagName){     
+						if(this._hasTagFrom(x.firstChild,this._lineStyledTextArray)){
+							if(has("mozilla")){
+								x.firstChild.style.cssText = x.style.cssText;									
+								var margin = domStyle.get(x,"direction") === "rtl"? "marginRight" : "marginLeft";
+								var indent = this._getLIIndent(x);
+								if(indent > 0){
+									domStyle.set(x.firstChild,margin,"" + indent + "px");
+								}
+							}
+							return;
+						}
+					}
+					var style = domStyle.getComputedStyle(x),curDir = style.direction,curAlign = style.textAlign;
+					curAlign = this._refineAlignment(curDir, curAlign);
+					if(has("webkit") && name == "LI"){
+						domStyle.set(x,"textAlign","");
+					}
+					var span = styledSpan? x.firstChild : domConstruct.create("span",{innerHTML: this.bogusHtmlContent},x,"first");
+					domAttr.set(span,"bogusDir",curDir);
+					if(curAlign != ""){
+						domAttr.set(span,"bogusAlign",curAlign);
+					}
+					if(has("mozilla")){
+						var indent = this._getLIIndent(x);
+						domAttr.set(span,"bogusIndent",indent);
+					}
+				}
+				if(has("ie")){
+					if(x.tagName.toUpperCase() == "LI"){
+						domStyle.set(x,"marginLeft","");
+						domStyle.set(x,"marginRight","");
+						if(this._getLILevel(x) == 1){
+							if(x.firstChild && this._hasTagFrom(x.firstChild,["P","PRE"])){
+								domConstruct.create("span",{bogusIEFormat: this._tag(x.firstChild)},x.firstChild,"first");
+							}
+							//IE fais, when try to handle first level list items, containing PRE 
+							if(this._hasTag(x.firstChild,"PRE")){
+								var p = domConstruct.create("p",null,x.firstChild,"after");
+								while(x.firstChild.firstChild){
+									domConstruct.place(x.firstChild.firstChild,p,"last");
+								}
+								p.style.cssText = x.style.cssText;
+								x.removeChild(x.firstChild);
+							}
+						}							
+					}
+				}
+			},this);			
+		},
+
+		_execIndent: function(nodesInfo){
+			array.forEach(nodesInfo.nodes, function(x){
+				if(!has("mozilla")){
+					domStyle.set(x,"margin","");
+				}
+				if(this._hasTag(x,"LI")){
+					var indent = 0;
+					if(has("mozilla") && domAttr.has(x,"tempIndent")){
+						indent = parseInt(domAttr.get(x,"tempIndent"));
+						domAttr.remove(x,"tempIndent");
+					}							
+					this._refineLIMargins(x);
+					if(has("mozilla")){
+						this._recountLIMargins(x,indent);
+					}						
+				}
+				if(domAttr.has(x.firstChild,"bogusFormat")){
+					var tag = domAttr.get(x.firstChild,"bogusFormat");
+					var block = domConstruct.create(tag,null,x.firstChild,"after");
+					while(block.nextSibling){
+						domConstruct.place(block.nextSibling,block,"last");								
+					}
+					x.removeChild(x.firstChild);
+				}
+				if(has("ie") || has("webkit")){
+					// Remove attribute dir from newly created blockquotes
+					var supBq = x.parentNode;
+					while(supBq !== this.editor.editNode){
+						supBq = rangeapi.getBlockAncestor(supBq, /blockquote/i, this.editor.editNode).blockNode;
+						if(!supBq){
+							break;
+						}
+						if(domAttr.has(supBq, "dir")){
+							domAttr.remove(supBq, "dir");
+						}
+						domStyle.set(supBq,"marginLeft","");
+						domStyle.set(supBq,"marginRight","");
+						domStyle.set(supBq,"margin","");
+						supBq = supBq.parentNode;
+					}
+				}
+			},this);
+			if(has("mozilla")){
+				query("div[tempRole]",this.editor.editNode).forEach(function(x,index,arr){
+					x.parentNode.removeChild(x);
+				});
+				query("ul,ol",this.editor.editNode).forEach(function(x,index,arr){						
+					domStyle.set(x,"marginLeft","");
+					domStyle.set(x,"marginRight","");
+				});					
+			}				
+		},
+
+		_execOutdent: function(nodesInfo){
+			array.forEach(nodesInfo.nodes, function(x){
+				if(has("mozilla") || has("webkit")){
+					if(!this._hasTag(x.firstChild,"SPAN")){
+						if(this._hasTag(x,"LI")){
+							this._refineLIMargins(x);
+							if(has("mozilla") && this._hasStyledTextLineTag(x.firstChild)){
+								this._recountLIMargins(x);
+								x.firstChild.style.cssText = "";
+							}
+						}							
+						return;
+					}
+					// Restore attributes and remove bogus elments
+					var hasBogusSpan = false;
+					var isFormatted = false;
+					var indent = 0;
+					if(domAttr.has(x.firstChild,"bogusDir")){
+						hasBogusSpan = true;
+						var dir = domAttr.get(x.firstChild,"bogusDir");
+						domStyle.set(x,"direction",dir);
+					}
+					if(domAttr.has(x.firstChild,"bogusAlign")){
+						hasBogusSpan = true;
+						var align = domAttr.get(x.firstChild,"bogusAlign");
+						domStyle.set(x,"textAlign",align);
+					}
+					if(domAttr.has(x.firstChild,"bogusIndent")){
+						hasBogusSpan = true;
+						indent = parseInt(domAttr.get(x.firstChild,"bogusIndent"));
+						if(!this._hasTag(x, "LI")){
+							var marginStyle = domStyle.get(x,"direction") === "rtl"? "marginRight" : "marginLeft";
+							var marginVal = "" + (this._getIntStyleValue(x,marginStyle) + indent) + "px";
+							domStyle.set(x,marginStyle,marginVal);
+						}
+					}						
+					if(domAttr.has(x.firstChild,"bogusFormat")){
+						hasBogusSpan = true;
+						var tag = domAttr.get(x.firstChild,"bogusFormat");
+						var block = domConstruct.create(tag,null,x.firstChild,"after");
+						while(block.nextSibling){
+							domConstruct.place(block.nextSibling,block,"last");								
+						}
+						if(!this._hasTag(x,"LI")){
+							block.style.cssText = x.style.cssText;
+							isFormatted = true;
+						}
+					}						
+					if(hasBogusSpan){
+						x.removeChild(x.firstChild);
+						if(isFormatted){
+							while(x.lastChild){
+								domConstruct.place(x.lastChild,x,"after");								
+							}
+							domAttr.set(x,"tempRole","true");								
+						}
+					}
+					if(has("webkit") && this._hasTag(x,"LI") && domStyle.get(x,"textAlign") != "center"){
+						domStyle.set(x,"textAlign",(domStyle.get(x,"direction") == "rtl"? "right" : "left"));
+					}						
+					if(has("mozilla") && this._hasTag(x,"LI")){
+						var pDiv = x.parentNode.parentNode;
+						if(pDiv !== this.editor.editNode && this._hasTag(pDiv,"DIV")){
+							if(pDiv.childNodes.length == 1){
+								pDiv.parentNode.insertBefore(x.parentNode,pDiv);
+								pDiv.parentNode.removeChild(pDiv);
+							}
+						}
+					}
+				}
+				if(has("ie")){
+					// IE always converts list items to <P>
+					if(this._hasTag(x,"P") && this.blockMode.toUpperCase() == "DIV"){
+						if(this._hasTag(x.firstChild,"SPAN") && domAttr.has(x.firstChild,"bogusIEFormat")){
+							if(domAttr.get(x.firstChild,"bogusIEFormat").toUpperCase() === "PRE"){
+								var pre = domConstruct.create("pre",{innerHTML: x.innerHTML},x,"before");
+								pre.style.cssText = x.style.cssText;
+								pre.removeChild(pre.firstChild);
+								x.parentNode.removeChild(x);
+							}else{
+								x.removeChild(x.firstChild);
+							}
+							return;
+						}							
+						var nDiv = domConstruct.create("div");
+						nDiv.style.cssText = x.style.cssText;
+						x.parentNode.insertBefore(nDiv,x);
+						while(x.firstChild){
+							nDiv.appendChild(x.firstChild);
+						}
+						x.parentNode.removeChild(x);
+					}	
+				}
+				if(this._hasTag(x,"LI")){
+					this._refineLIMargins(x);
+					if(has("mozilla")){
+						this._recountLIMargins(x,indent);
+					}
+				}											
+			},this);
+			if(has("mozilla") || has("webkit")){
+				query("div[tempRole]",this.editor.editNode).forEach(function(x,index,arr){
+					x.parentNode.removeChild(x);
+				});
+			}			
+		},
+
+		_prepareFormat: function(nodesInfo, arg){
+			array.forEach(nodesInfo.nodes, function(x){
+				// In some cases Mozill'a native 'formatblock' command mistakely merges contents of list items.
+				// For example, for list with three items, containing some text like "one", "two", "three" and first two items selected, 
+				// after changing their format from "None" to "Paragraph" we get from <li>one</li><li>two<li> something like 
+				// <li><p>Onetwo</p></li><li><br></li>. Problem can be solved by 'manual' formatting, 
+				// so with given example we create <li><p>...</p></li> for each list item.
+				if(has("mozilla")){
+					if(this._hasTag(x,"LI")){
+						if(x.firstChild && !this._isBlockElement(x.firstChild)){
+							var div = x.ownerDocument.createElement(arg), sibling = x.firstChild;
+							x.insertBefore(div, x.firstChild);
+							while(sibling){
+								div.appendChild(sibling);
+								sibling = sibling.nextSibling;
+							}
+						}
+						var indent = this._getLIIndent(x);
+						domAttr.set(x,"tempIndent",indent);
+					}						
+				}
+				if(has("webkit")){
+					var styledSpan;
+					// If "fomatblocks" command is executed for list items, which already contain some blocks,
+					// webkit merges contents of items. For example, after calling "formatblocks" with argument "P"
+					// for two items <ul><li><h3>Hello</h3></li><li><h3>World</h3></li></ul> we get one item 
+					// <ul><li><p>Hello<br>World<p></li></ul>. To avoid this, we move contents of each block into 
+					// its parent,delete empty blocks and save info about required format in some bogus spans with 
+					// empty contents. Action, executed after native call, will recreate blocks in required format  
+					// and remove bogus spans.
+					if(this._hasTag(x,"LI")){
+						var savedName = arg;
+						if(this._hasStyledTextLineTag(x.firstChild)){
+							while(x.firstChild.lastChild){
+								domConstruct.place(x.firstChild.lastChild,x.firstChild,"after");
+							}
+							x.removeChild(x.firstChild);
+						}
+						styledSpan = domConstruct.create("span",{innerHTML: this.bogusHtmlContent, bogusFormat: savedName},x,"first");
+					}
+ 					// Webkit lose 'direction' and 'textAlign' styles of reformatted blocks. 
+					// We save info about these styles in attributes of some bogus SPANs with empty contents.					
+					// Action, executed after native call, will restore styles of these blocks and remove bogus spans. 
+					var style = domStyle.getComputedStyle(x),curDir = style.direction,curAlign = style.textAlign;
+					curAlign = this._refineAlignment(curDir, curAlign);
+					var span = styledSpan? x.firstChild : domConstruct.create("span",{innerHTML: this.bogusHtmlContent},x,"first");
+					domAttr.set(span,"bogusDir",curDir);
+					if(curAlign != ""){
+						domAttr.set(span,"bogusAlign",curAlign);
+					}
+				}
+			},this);			
+		},
+		
+		_execFormatBlocks: function(nodesInfo, arg){
+			array.forEach(nodesInfo.nodes, function(x){
+				if(this._hasTagFrom(x, this._lineTextArray)){
+					//FF adds empty text nodes or nodes, containing spaces, after last converted block
+					if(this._hasTag(x.parentNode,"DIV") && x.parentNode !== this.editor.editNode){
+						while(x.parentNode.lastChild){
+							if(!(x.parentNode.lastChild.nodeType == 3 && lang.trim(x.parentNode.lastChild.nodeValue) == "" ||
+									this._hasTag(x.parentNode.lastChild,"BR"))){
+								break;
+							}	
+							x.parentNode.removeChild(x.parentNode.lastChild);
+						}						
+					}
+					if(this._hasTag(x.parentNode,"DIV") && x.parentNode !== this.editor.editNode && x.parentNode.childNodes.length == 1){
+						var	div = x.parentNode, 
+							style = domStyle.getComputedStyle(div),
+							align = this._refineAlignment(style.direction, style.textAlign);
+						domStyle.set(x, {direction: style.direction, textAlign: align});
+						var margin = style.direction === "rtl"? "marginRight" : "marginLeft";
+						var marginVal = parseInt(domStyle.get(div,margin));
+						if(marginVal != 0 && !isNan(marginVal)){
+							domStyle.set(x,margin,marginVal);
+						}
+						div.parentNode.insertBefore(x, div);
+						div.parentNode.removeChild(div);
+					}
+				}
+				if(this._hasTag(x,"LI")){
+					var indent = 0;
+					if(domAttr.has(x,"tempIndent")){
+						indent = parseInt(domAttr.get(x,"tempIndent"));
+						domAttr.remove(x,"tempIndent");
+					}
+					this._refineLIMargins(x);
+					if(indent){
+						this._recountLIMargins(x,indent);
+					}
+					while(x.childNodes.length > 1){
+						if(!(x.lastChild.nodeType == 3 && lang.trim(x.lastChild.nodeValue) == "")){
+							break;
+						}	
+						x.removeChild(x.lastChild);
+					}						
+					if(this._hasTagFrom(x.firstChild,this._lineStyledTextArray)){
+						var style = domStyle.getComputedStyle(x),
+							align = this._refineAlignment(style.direction, style.textAlign);
+						if(!has("mozilla") && !(has("ie") && this._hasTag(x,"LI"))){
+							domStyle.set(x.firstChild, {direction : style.direction, textAlign: align});
+						}
+					}else if(this._hasTag(x.firstChild,"DIV")){
+						var div = x.firstChild;
+						while(div.firstChild){
+							x.insertBefore(div.firstChild, div);
+						}
+						x.removeChild(div);
+					}	
+					// IE doesn't format list items with not formatted content into paragraphs 
+					if(has("ie") && !this._hasTag(x.firstChild,"P") && arg === "<p>"){
+						var p = domConstruct.create("p");
+						var block = this._hasTagFrom(p.nextSibling,this._lineStyledTextArray)? p.nextSibling : x;
+						while(block.firstChild){
+							domConstruct.place(block.firstChild,p,"last");
+						}
+						domConstruct.place(p,x,"first");
+						if(block !== x){
+							x.removeChild(block);
+						}
+					}
+				}	
+				if(has("webkit")){
+					// When "formatblocks" with argument "div" is executed for list items, containing blocks like <h1>
+					// or <pre>, Safari loads contents of these blocks into newly created DIVs, and places these DIVs 
+					// into the same list as next siblings of source items. For example, if we have something like
+					// <li><h3>Hello</h3></li>, we get <li><br></li><div>Hello</div>. So we move contents of these DIV's
+					// into items and set special attributes for future deleting.
+					if(this._hasTag(x,"DIV")){
+						if(domAttr.has(x,"tempRole")){
+							return;
+						}else if(this._hasTag(x.previousSibling,"LI")){
+							while(x.firstChild){
+								domConstruct.place(x.firstChild,x.previousSibling,"last");
+							}
+							domAttr.set(x,"tempRole",true);
+							x = x.previousSibling;
+						}
+					}
+					// Restore attributes and remove bogus elments
+					var hasBogusSpan = false;
+					if(domAttr.has(x.firstChild,"bogusDir")){
+						hasBogusSpan = true;
+						var dir = domAttr.get(x.firstChild,"bogusDir");
+						domStyle.set(x,"direction",dir);
+					}
+					if(domAttr.has(x.firstChild,"bogusAlign")){
+						hasBogusSpan = true;
+						var align = domAttr.get(x.firstChild,"bogusAlign");
+						domStyle.set(x,"textAlign",align);
+					}
+					if(domAttr.has(x.firstChild,"bogusFormat")){
+						hasBogusSpan = true;
+						var tag = domAttr.get(x.firstChild,"bogusFormat");
+						var block;
+						if(tag.toUpperCase() !== "DIV"){
+							block = domConstruct.create(tag,null,x.firstChild,"after");
+							while(block.nextSibling){
+								domConstruct.place(block.nextSibling,block,"last");								
+							}
+						}else{
+							block = x;
+						}						
+						if(has("safari") && this._hasTag(x.nextSibling,"DIV")){
+							while(x.nextSibling.firstChild){
+								domConstruct.place(x.nextSibling.firstChild,block,"last");
+							}
+							domAttr.set(x.nextSibling,"tempRole","true");
+						}
+					}
+					if(hasBogusSpan){
+						x.removeChild(x.firstChild);
+					}
+					if(tag && this._hasTag(x, "LI")){
+						var parent = x.parentNode.parentNode;
+						if(this._hasTag(parent,tag)){
+							domAttr.set(parent,"tempRole","true");
+						}
+					}
+				}
+			},this);
+			// Safari in some cases put ito lists unnecessary divs. They already empty and marked with 'tempRole' attribute.  
+			// Both Chrome and Safari create for each formatted list item its own list and place such lists 
+			// into top-level block elements. In this method above, needed "styled" blocks are already recreated inside 
+			// list items, so corresponding top-level elements become unnecessary. They already marked with 'tempRole' attribute.
+			// Now all elements having 'tempRole' attribute should be removed.
+			if(has("webkit")){
+				query("*[tempRole]",this.editor.editNode).forEach(function(x,index,arr){
+					while(x.lastChild){
+						domConstruct.place(x.lastChild,x,"after");
+					}
+					x.parentNode.removeChild(x);
+				},this);
+			}			
+		},
+		
+		_rebuildBlock: function(block){
+			// summary:
+			//		Finds a sequences of inline elements that are placed 
+			//		within a top-level block element or have block siblings.
+			//		Calls _repackInlneElements(), which moves this sequences 
+			//		into newly created block.
+			var node = block.firstChild, firstSibling, lastSibling;
+			var hasOwnBlock = false;  
+			while(node){
+				if(this._isInlineOrTextElement(node) && !this._hasTagFrom(node,this._tableContainers)){
+					hasOwnBlock = !this._hasTagFrom(block,this._lineTextArray);
+					if(!firstSibling){
+						firstSibling = node;
+					}
+					lastSibling = node;
+				}else if(this._isBlockElement(node) || this._hasTagFrom(node,this._tableContainers)){
+					if(firstSibling){
+						this._repackInlineElements(firstSibling, lastSibling, block);
+						firstSibling = null;
+					}
+					hasOwnBlock = true;
+				}
+				node = node.nextSibling;
+			}
+			if(hasOwnBlock && firstSibling){
+				this._repackInlineElements(firstSibling, lastSibling, block);
+			}
+		},
+		
+		_repackInlineElements: function(firstSibling, lastSibling, parent){
+			// summary:
+			//		Moves sequences of inline elements into 
+			//		newly created blocks
+			// description:
+			//		This method handles sequences of inline elements, which are recognized by the user as 
+			// 		separate line(s) of the text, but are not placed into their own block element. Text direction
+			//		or alignment can't be set for such lines.
+			//		Possibles cases: 
+			//			a) sequence directly belongs to editor's editNode;
+			//			b) sequence has block-level siblings;
+			//			c) sequence has BR in the start or in the middle of it.
+			//		For all these cases we create new block and move elements from the sequence into it.
+			//		We try to preserve explicitly defined styles, which have effect on this line. In case of
+			//		sequences, which directly belong to editNode, it is only direction of the text.
+			var divs = [], div = parent.ownerDocument.createElement(this.blockMode), newDiv;
+			var cssTxt = firstSibling.previousSibling && firstSibling.previousSibling.nodeType == 1? firstSibling.previousSibling.style.cssText : parent.style.cssText;
+			var isEditNode = parent === this.editor.editNode;
+			divs.push(div);
+			firstSibling = parent.replaceChild(div,firstSibling);
+			domConstruct.place(firstSibling,div,"after");
+			if(isEditNode){
+				domStyle.set(div,'direction',domStyle.get(this.editor.editNode,"direction"));
+			}else{
+				div.style.cssText = cssTxt;	
+			}
+			for(var sibling = firstSibling; sibling;){
+				var tSibling = sibling.nextSibling;
+				if(this._isInlineOrTextElement(sibling)){
+					if(this._hasTag(sibling,"BR") && sibling !== lastSibling){
+						newDiv = parent.ownerDocument.createElement(this.blockMode);
+						divs.push(newDiv);
+						sibling = parent.replaceChild(newDiv,sibling);
+						domConstruct.place(sibling,newDiv,"after");
+						if(isEditNode){
+							domStyle.set(newDiv,'direction',domStyle.get(this.editor.editNode,"direction"));
+						}else{
+							newDiv.style.cssText = cssTxt;	
+						}
+					}
+					if((this._hasTag(sibling,"BR") || sibling.nodeType == 8) && !div.hasChildNodes())
+						div.innerHTML = this.bogusHtmlContent;
+					if(this._hasTag(sibling,"BR") && has("ie")){
+						sibling.parentNode.removeChild(sibling);
+					}else if(sibling.nodeType != 8){
+						div.appendChild(sibling);
+					}else{
+						sibling.parentNode.removeChild(sibling);
+					}
+					if(sibling.nodeType == 3 && sibling.previousSibling && sibling.previousSibling.nodeType == 3){
+						sibling.previousSibling.nodeValue += sibling.nodeValue;
+						sibling.parentNode.removeChild(sibling);
+					}
+					if(newDiv){
+						div = newDiv;
+						newDiv = null;
+					}
+				}
+				if(sibling === lastSibling){
+					break;
+				}
+				sibling = tSibling;
+			}
+			return divs;						
+		},
+
+		_preFilterNewLines: function(html){
+			var result = html.split(/(<\/?pre.*>)/i), inPre = false;
+			for(var i = 0; i < result.length; i++){
+				if(result[i].search(/<\/?pre/i) < 0 && !inPre){
+					result[i] = result[i].replace(/\n/g,"").replace(/\t+/g,"\xA0").replace(/^\s+/,"\xA0").replace(/\xA0\xA0+$/,"");
+				}else if(result[i].search(/<\/?pre/i) >= 0){
+					inPre = !inPre;
+				}
+			}
+			return result.join("");
+		},
+		
+		_refineAlignment: function(dir, align){
+			// summary:
+			//		Refine the value, which should be used as textAlign style.
+			// description:
+			//		This method allows to keep textAlign styles only for cases,
+			//		when it is defined explicitly.
+			if(align.indexOf("left") >= 0 && dir == "rtl"){
+				align = "left";
+			}else if(align.indexOf("right") >= 0 && dir == "ltr"){
+				align = "right";
+			}else if(align.indexOf("center") >= 0){
+				align = "center";
+			}else{ 
+				align = "";
+			}
+			return align;
+		},
+
+		_refineLIMargins: function(node){
+			// summary:
+			//		Line items, orientation of which is differ from their parents,
+			//		arn't shown correctly by all browsers.
+			//		Problem is solved by adding corresponding margins.
+			var liDir = domStyle.get(node,"direction"),
+				pDir = domStyle.get(node.parentNode,"direction"),
+				level = 0, tNode = node.parentNode, name, style, offs, val;
+			if(has("webkit")){
+				pDir = domStyle.get(this.editor.editNode,"direction");
+			}
+			while(tNode !== this.editor.editNode){
+				if(this._hasTagFrom(tNode,["OL","UL"])){
+					level++;
+				}
+				tNode = tNode.parentNode;
+			}
+			domStyle.set(node,"marginRight","");
+			domStyle.set(node,"marginLeft","");
+			style = liDir == "rtl"? "marginRight" : "marginLeft";
+			offs = this._getMargins(level);
+			val = "" + offs + "px";
+			if(liDir != pDir){
+				domStyle.set(node,style,val);
+			}
+		},
+		
+		_getMargins: function(level){
+			if(level == 0){
+				return 0;
+			}
+			var margin = 35;
+			if(has("mozilla")){
+				margin = 45;
+			}else if(has("ie")){
+				margin = 25;
+			}
+			return margin + (level-1)*40;
+		},
+		
+		_recountLIMargins: function(node, addValue){
+			var liDir = domStyle.get(node,"direction"), pDir = domStyle.get(node.parentNode,"direction");
+			var margin = liDir == "rtl"? "marginRight" : "marginLeft";
+			var valPx = domStyle.get(node,margin);
+			var val = (isNaN(parseInt(valPx))? 0 : parseInt(valPx)) + (addValue? addValue : 0);
+			if(node.firstChild && node.firstChild.nodeType == 1){
+				valPx = domStyle.get(node.firstChild,margin);
+				val += isNaN(parseInt(valPx))? 0 : parseInt(valPx);
+				domStyle.set(node.firstChild, {marginLeft: "", marginRight: ""});
+			}			
+			if(liDir != pDir){
+				val -= this._getMargins(this._getLILevel(node));
+			}
+			var parentMargin = this._getListMargins(node);
+			if(parentMargin){
+				for(var i = 0; i < parentMargin/40; i++){
+					var newList = domConstruct.create(this._tag(node.parentNode),null,node,"before");
+					domConstruct.place(node,newList,"last");
+				}
+			}
+			if(liDir != pDir){
+				val += this._getMargins(this._getLILevel(node));
+			}							
+			if(val){
+				domStyle.set(node,margin, "" + (val) + "px");
+			}
+		},
+		
+		_getLILevel: function(node){
+			var parent = node.parentNode;
+			var level = 0;
+			while(this._hasTagFrom(parent,["UL","OL"])){
+				level++;
+				parent = parent.parentNode;
+			}
+			return level;
+		},
+
+		_getLIIndent: function(node){
+			var parent = node.parentNode,
+				liDir = domStyle.get(node,"direction"), pDir = domStyle.get(parent,"direction"),
+				margin = liDir === "rtl"? "marginRight" : "marginLeft";
+			var marginVal = this._getIntStyleValue(node,margin);
+			var liMargin = liDir === pDir? 0 : this._getMargins(this._getLILevel(node));
+			return marginVal - liMargin;
+				
+		},
+		
+		_getListMargins: function(node){
+			var parent = node.parentNode;
+			var margin, val = 0, valPx;
+			while(this._hasTagFrom(parent,["UL","OL"])){
+				var pDir = domStyle.get(parent,"direction");
+				margin = pDir == "rtl"? "marginRight" : "marginLeft";
+				valPx = domStyle.get(parent,margin);
+				val += isNaN(parseInt(valPx))? 0 : parseInt(valPx);
+				parent = parent.parentNode;
+			}
+			return val;			
+		},
+		
+		_tag: function(node){
+			return node && node.tagName && node.tagName.toUpperCase();
+		},
+		
+		_hasTag: function(node,tag){
+			return (node && tag && node.tagName && node.tagName.toUpperCase() === tag.toUpperCase());
+		},
+
+		_hasStyledTextLineTag: function(node){
+			return this._hasTagFrom(node, this._lineStyledTextArray);
+		},
+		
+		_hasTagFrom: function(node,arr){
+			return node && arr && node.tagName && array.indexOf(arr, node.tagName.toUpperCase()) >= 0;
+		},
+		
+		_getParentFrom: function(node,arr){
+			if(!node || !arr || !arr.length){
+				return null;
+			}
+			var x = node;
+			while(x !== this.editor.editNode){
+				if(this._hasTagFrom(x,arr)){
+					return x;
+				}
+				x = x.parentNode;
+			}
+			return null;
+		},
+
+		_isSimpleInfo: function(info){
+			// summary:
+			// 	returns true, if all nodes, for which current action should be executed,
+			//  may be handled in the same time (so, all nodes are in the same group)
+			return !info || info.groups.length < 2;
+		},
+		
+		_isListTypeChanged: function(node, cmd){
+			// summary:
+			//	Returns true, if command "insertorderedlist" executed for item from unordered list and 
+			//	if command "insertunorderedlist" executed for item from ordered list
+			if(!this._hasTag(node,"LI")){
+				return false;
+			}
+			var parent = node.parentNode;
+			return (this._hasTag(parent,"UL") && cmd === "insertorderedlist" || this._hasTag(parent,"OL") && cmd === "insertunorderedlist");
+		},
+		
+		_getIntStyleValue: function(node, style){
+			var val = parseInt(domStyle.get(node,style));
+			return isNaN(val)? 0 : val;
+		},
+		
+		_mergeLists: function(){
+			// summary:
+			//	In some cases (like "formatblocks" for list items) lists of the the same type 
+			//	are created as a siblings inside the same parent. These  lists should be merged.
+			var sel = rangeapi.getSelection(this.editor.window);
+			var reselect = sel && sel.rangeCount > 0;
+			if(reselect){
+				var range = sel.getRangeAt(0).cloneRange();
+				var startContainer = range.startContainer, startOffset = range.startOffset,
+					endContainer = range.endContainer, endOffset = range.endOffset;
+			}
+			var wasMerged = false;
+			query("ul,ol",this.editor.editNode).forEach(function(x,ind,arr){
+				if(domAttr.has(x,"tempRole")){
+					x.parentNode.removeChild(x);
+					return;
+				}
+				var sibling = x.nextSibling;
+				while(this._hasTag(sibling,this._tag(x))){
+					while(sibling.firstChild){
+						domConstruct.place(sibling.firstChild,x,"last");
+						wasMerged = true;
+					}
+					domAttr.set(sibling,"tempRole","true");
+					sibling = sibling.nextSibling;
+				}					
+			},this);
+			if(reselect && wasMerged){
+				// Restore selection
+				sel.removeAllRanges();
+				try{
+					range.setStart(startContainer, startOffset);
+					range.setEnd(endContainer, endOffset);
+					sel.addRange(range);
+				}catch(e){
+				}				
+			}			
+		},
+		
+		_cleanLists: function(){
+			// summary:
+			//	Removes remaining bogus elements, creating by the method _prepareLists()
+			if(has("webkit")){
+				query("table", this.editor.editNode).forEach(function(x,ind,arr){
+					var sibling = x.nextSibling;
+					if(this._hasTag(sibling,"UL") && domAttr.get(sibling,"tempRole") === "true"){
+						sibling.parentNode.removeChild(sibling);
+					}
+				},this);
+				query("li[tempRole]", this.editor.editNode).forEach(function(x,ind,arr){
+					if(x.parentNode.childNodes.length == 1){
+						x.parentNode.parentNode.removeChild(x.parentNode);
+					}else{
+						x.parentNode.removeChild(x);
+					}
+				});
+			}
+			var sel = rangeapi.getSelection(this.editor.window);
+			var reselect = sel && sel.rangeCount > 0;
+			if(reselect){
+				var range = sel.getRangeAt(0).cloneRange();
+				var startContainer = range.startContainer, startOffset = range.startOffset,
+					endContainer = range.endContainer, endOffset = range.endOffset;
+			}
+			var wasMoved = false;
+			query("span[bogusDir]", this.editor.editNode).forEach(function(x,ind,arr){
+				var node = x.firstChild, sibling = node;
+				if(node.nodeType == 1){
+					while(node){
+						sibling = node.nextSibling;
+						domConstruct.place(node,x,"after");
+						wasMoved = true;
+						node = sibling;
+					}
+				}
+				x.parentNode.removeChild(x);
+			},this);
+			if(reselect && wasMoved){
+				// Restore selection
+				sel.removeAllRanges();
+				try{
+					range.setStart(startContainer, startOffset);
+					range.setEnd(endContainer, endOffset);
+					sel.addRange(range);
+				}catch(e){
+				}				
+			}
+		}
+	});
+	_Plugin.registry["bidiSupport"] = _Plugin.registry["bidisupport"] = function(args){
+		return new BidiSupport({
+		});
+	};
+	return BidiSupport;
+});

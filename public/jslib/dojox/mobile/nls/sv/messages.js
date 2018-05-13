@@ -1,3 +1,13 @@
-//>>built
-define("dojox/mobile/nls/sv/messages",{CarouselPrevious:"F\u00f6reg\u00e5ende",CarouselNext:"N\u00e4sta",PageIndicatorLabel:"sida $0 av $1"});
-//# sourceMappingURL=messages.js.map
+define({      
+//begin v1.x content
+	// Title of the previous button in Carousel
+	"CarouselPrevious": "Föregående",
+	// Title of the next button in Carousel
+	"CarouselNext": "Nästa",
+	// PageIndicatorLabel: accessibility label for PageIndicator
+	// $0 replaced by the index of the current page
+	// $1 replaced by the total number of pages
+	"PageIndicatorLabel": "sida $0 av $1"
+//end v1.x content
+});
+

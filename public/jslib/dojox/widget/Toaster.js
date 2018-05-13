@@ -1,11 +1,303 @@
-//>>built
-define("dojox/widget/Toaster","dojo/_base/declare dojo/_base/lang dojo/on dojo/aspect dojo/topic dojo/_base/fx dojo/dom-style dojo/dom-class dojo/dom-geometry dijit/registry dijit/_WidgetBase dijit/_TemplatedMixin dijit/BackgroundIframe dojo/fx dojo/has dojo/window".split(" "),function(p,b,A,q,r,t,g,h,k,u,v,w,x,y,z,l){b.getObject("dojox.widget",!0);var m=function(a){return a.substring(0,1).toUpperCase()+a.substring(1)};return p("dojox.widget.Toaster",[v,w],{templateString:'\x3cdiv class\x3d"dijitToasterClip" data-dojo-attach-point\x3d"clipNode"\x3e\x3cdiv class\x3d"dijitToasterContainer" data-dojo-attach-point\x3d"containerNode" data-dojo-attach-event\x3d"onclick:onSelect"\x3e\x3cdiv class\x3d"dijitToasterContent" data-dojo-attach-point\x3d"contentNode"\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e',
-messageTopic:"",messageTypes:{MESSAGE:"message",WARNING:"warning",ERROR:"error",FATAL:"fatal"},defaultType:"message",positionDirection:"br-up",positionDirectionTypes:"br-up br-left bl-up bl-right tr-down tr-left tl-down tl-right".split(" "),duration:2E3,slideDuration:500,separator:"\x3chr\x3e",postCreate:function(){this.inherited(arguments);this.hide();this.ownerDocument.body.appendChild(this.domNode);this.messageTopic&&this.own(r.subscribe(this.messageTopic,b.hitch(this,"_handleMessage")))},_handleMessage:function(a){b.isString(a)?
-this.setContent(a):this.setContent(a.message,a.type,a.duration)},setContent:function(a,n,c){c=void 0===c?this.duration:c;if(this.slideAnim&&("playing"!=this.slideAnim.status()&&this.slideAnim.stop(),"playing"==this.slideAnim.status()||this.fadeAnim&&"playing"==this.fadeAnim.status())){setTimeout(b.hitch(this,function(){this.setContent(a,n,c)}),50);return}for(var d in this.messageTypes)h.remove(this.containerNode,"dijitToaster"+m(this.messageTypes[d]));g.set(this.containerNode,"opacity",1);this._setContent(a);
-h.add(this.containerNode,"dijitToaster"+m(n||this.defaultType));this.show();d=k.getMarginBox(this.containerNode);this._cancelHideTimer();if(this.isVisible)this._placeClip(),this._stickyMessage||this._setHideTimer(c);else{var e=this.containerNode.style,f=this.positionDirection;if(0<=f.indexOf("-up"))e.left="0px",e.top=d.h+10+"px";else if(0<=f.indexOf("-left"))e.left=d.w+10+"px",e.top="0px";else if(0<=f.indexOf("-right"))e.left=0-d.w-10+"px",e.top="0px";else if(0<=f.indexOf("-down"))e.left="0px",e.top=
-0-d.h-10+"px";else throw Error(this.id+".positionDirection is invalid: "+f);this.slideAnim=y.slideTo({node:this.containerNode,top:0,left:0,duration:this.slideDuration,onEnd:b.hitch(this,function(){this.fadeAnim=t.fadeOut({node:this.containerNode,duration:1E3,onEnd:b.hitch(this,function(){this.isVisible=!1;this.hide()})});this.own(this.fadeAnim);this._setHideTimer(c);this.on("select",b.hitch(this,function(){this._cancelHideTimer();this._stickyMessage=!1;this.fadeAnim.play()}));this.isVisible=!0})});
-this.own(this.slideAnim);this.slideAnim.play()}},_setContent:function(a){b.isFunction(a)?a(this):(a&&this.isVisible&&(a=this.contentNode.innerHTML+this.separator+a),this.contentNode.innerHTML=a)},_cancelHideTimer:function(){this._hideTimer&&(clearTimeout(this._hideTimer),this._hideTimer=null)},_setHideTimer:function(a){this._cancelHideTimer();0<a?(this._cancelHideTimer(),this._hideTimer=setTimeout(b.hitch(this,function(a){this.bgIframe&&this.bgIframe.iframe&&(this.bgIframe.iframe.style.display="none");
-this._hideTimer=null;this._stickyMessage=!1;this.fadeAnim.play()}),a)):this._stickyMessage=!0},_placeClip:function(){var a=l.getBox(this.ownerDocument),b=k.getMarginBox(this.containerNode),c=this.clipNode.style;c.height=b.h+"px";c.width=b.w+"px";var d=this.positionDirection;d.match(/^t/)?c.top=a.t+"px":d.match(/^b/)&&(c.top=a.h-b.h-2+a.t+"px");d.match(/^[tb]r-/)?c.left=a.w-b.w-1-a.l+"px":d.match(/^[tb]l-/)?c.left="0px":d.match(/^[tb]c-/)&&(c.left=Math.round((a.w-b.w-1-a.l)/2)+"px");c.clip="rect(0px, "+
-b.w+"px, "+b.h+"px, 0px)";z("ie")&&(this.bgIframe||(this.clipNode.id||(this.clipNode.id=u.getUniqueId("dojox_widget_Toaster_clipNode")),this.bgIframe=new x(this.clipNode)),a=this.bgIframe.iframe)&&(a.style.display="block")},onSelect:function(a){},show:function(){g.set(this.domNode,"display","block");this._placeClip();this._scrollConnected||(this._scrollConnected=q.after(l,"scroll",b.hitch(this,"_placeClip")),this.own(this._scrollConnected))},hide:function(){g.set(this.domNode,"display","none");this._scrollConnected&&
-(this._scrollConnected.remove(),this._scrollConnected=!1);g.set(this.containerNode,"opacity",1)}})});
-//# sourceMappingURL=Toaster.js.map
+define([
+	"dojo/_base/declare", // declare
+	"dojo/_base/lang", // lang.getObject...
+	"dojo/on",
+	"dojo/aspect",
+	"dojo/topic",
+	"dojo/_base/fx", // fx.fadeOut
+	"dojo/dom-style", // domStyle.set
+	"dojo/dom-class", // domClass.add
+	"dojo/dom-geometry", // domGeometry.getMarginBox
+	"dijit/registry",    // registry.getUniqueId()
+	"dijit/_WidgetBase",
+	"dijit/_TemplatedMixin",
+	"dijit/BackgroundIframe",
+	"dojo/fx",
+	"dojo/has",
+	"dojo/window"
+], function(declare, lang, on, aspect, topic, baseFx, domStyle, domClass, domGeometry, registry, _WidgetBase, _TemplatedMixin, BackgroundIframe, coreFx, has, window){
+
+	lang.getObject("dojox.widget", true);
+
+	var capitalize = function(/* String */w){
+	    return w.substring(0,1).toUpperCase() + w.substring(1);
+	};
+
+	return declare("dojox.widget.Toaster", [_WidgetBase, _TemplatedMixin], {
+		// summary:
+		//		Message that slides in from the corner of the screen, used for notifications
+		//		like "new email".
+
+		templateString: '<div class="dijitToasterClip" data-dojo-attach-point="clipNode"><div class="dijitToasterContainer" data-dojo-attach-point="containerNode" data-dojo-attach-event="onclick:onSelect"><div class="dijitToasterContent" data-dojo-attach-point="contentNode"></div></div></div>',
+
+		// messageTopic: String
+		//		Name of topic; anything published to this topic will be displayed as a message.
+		//		Message format is either String or an object like
+		//		{message: "hello word", type: "error", duration: 500}
+		messageTopic: "",
+
+		// messageTypes: Enumeration
+		//		Possible message types.
+		messageTypes: {
+			MESSAGE: "message",
+			WARNING: "warning",
+			ERROR: "error",
+			FATAL: "fatal"
+		},
+
+		// defaultType: String
+		//		If message type isn't specified (see "messageTopic" parameter),
+		//		then display message as this type.
+		//		Possible values in messageTypes enumeration ("message", "warning", "error", "fatal")
+		defaultType: "message",
+
+		// positionDirection: String
+		//		Position from which message slides into screen, one of
+		//		["br-up", "br-left", "bl-up", "bl-right", "tr-down", "tr-left", "tl-down", "tl-right"]
+		positionDirection: "br-up",
+
+		// positionDirectionTypes: Array
+		//		Possible values for positionDirection parameter
+		positionDirectionTypes: ["br-up", "br-left", "bl-up", "bl-right", "tr-down", "tr-left", "tl-down", "tl-right"],
+
+		// duration: Integer
+		//		Number of milliseconds to show message
+		duration: 2000,
+
+		// slideDuration: Integer
+		//		Number of milliseconds for the slide animation, increasing will cause the Toaster
+		//		to slide in more slowly.
+		slideDuration: 500,
+
+		// separator: String
+		//		String used to separate messages if consecutive calls are made to setContent before previous messages go away
+		separator: "<hr>",
+
+		postCreate: function(){
+			this.inherited(arguments);
+			this.hide();
+
+			// place node as a child of body for positioning
+			this.ownerDocument.body.appendChild(this.domNode);
+
+			if(this.messageTopic){
+				this.own(topic.subscribe(this.messageTopic, lang.hitch(this, "_handleMessage")));
+			}
+		},
+
+		_handleMessage: function(/*String|Object*/message){
+			if(lang.isString(message)){
+				this.setContent(message);
+			}else{
+				this.setContent(message.message, message.type, message.duration);
+			}
+		},
+
+		setContent: function(/*String|Function*/message, /*String*/messageType, /*int?*/duration){
+			// summary:
+			//		sets and displays the given message and show duration
+			// message:
+			//		the message. If this is a function, it will be called with this toaster widget as the only argument.
+			// messageType:
+			//		type of message; possible values in messageTypes enumeration ("message", "warning", "error", "fatal")
+			// duration:
+			//		duration in milliseconds to display message before removing it. Widget has default value.
+
+			duration = (duration === undefined) ? this.duration : duration;
+			// sync animations so there are no ghosted fades and such
+			if(this.slideAnim){
+				if(this.slideAnim.status() != "playing"){
+					this.slideAnim.stop();
+				}
+				if(this.slideAnim.status() == "playing" || (this.fadeAnim && this.fadeAnim.status() == "playing")){
+					setTimeout(lang.hitch(this, function(){
+						this.setContent(message, messageType, duration);
+					}), 50);
+					return;
+				}
+			}
+
+			// determine type of content and apply appropriately
+			for(var type in this.messageTypes){
+				domClass.remove(this.containerNode, "dijitToaster" + capitalize(this.messageTypes[type]));
+			}
+
+			domStyle.set(this.containerNode, "opacity", 1);
+
+			this._setContent(message);
+
+			domClass.add(this.containerNode, "dijitToaster" + capitalize(messageType || this.defaultType));
+
+			// now do funky animation of widget appearing from
+			// bottom right of page and up
+			this.show();
+			var nodeSize = domGeometry.getMarginBox(this.containerNode);
+			this._cancelHideTimer();
+			if(this.isVisible){
+				this._placeClip();
+				//update hide timer if no sticky message in stack
+				if(!this._stickyMessage) {
+					this._setHideTimer(duration);
+				}
+			}else{
+				var style = this.containerNode.style;
+				var pd = this.positionDirection;
+				// sets up initial position of container node and slide-out direction
+				if(pd.indexOf("-up") >= 0){
+					style.left=0+"px";
+					style.top=nodeSize.h + 10 + "px";
+				}else if(pd.indexOf("-left") >= 0){
+					style.left=nodeSize.w + 10 +"px";
+					style.top=0+"px";
+				}else if(pd.indexOf("-right") >= 0){
+					style.left = 0 - nodeSize.w - 10 + "px";
+					style.top = 0+"px";
+				}else if(pd.indexOf("-down") >= 0){
+					style.left = 0+"px";
+					style.top = 0 - nodeSize.h - 10 + "px";
+				}else{
+					throw new Error(this.id + ".positionDirection is invalid: " + pd);
+				}
+				this.slideAnim = coreFx.slideTo({
+					node: this.containerNode,
+					top: 0, left: 0,
+					duration: this.slideDuration,
+					onEnd: lang.hitch(this, function(){
+						//we build the fadeAnim here so we dont have to duplicate it later
+						// can't do a fadeHide because we're fading the
+						// inner node rather than the clipping node
+						this.fadeAnim = (baseFx.fadeOut({
+							node: this.containerNode,
+							duration: 1000,
+							onEnd: lang.hitch(this, function(){
+								this.isVisible = false;
+								this.hide();
+							})
+						}));
+						this.own(this.fadeAnim);
+						this._setHideTimer(duration);
+						this.on('select', lang.hitch(this, function(){
+							this._cancelHideTimer();
+							//force clear sticky message
+							this._stickyMessage=false;
+							this.fadeAnim.play();
+						}));
+
+						this.isVisible = true;
+					})
+				});
+				this.own(this.slideAnim);
+				this.slideAnim.play();
+			}
+		},
+
+		_setContent: function(message){
+			if(lang.isFunction(message)){
+				message(this);
+				return;
+			}
+			if(message && this.isVisible){
+				message = this.contentNode.innerHTML + this.separator + message;
+			}
+			this.contentNode.innerHTML = message;
+		},
+		_cancelHideTimer:function(){
+			if (this._hideTimer){
+				clearTimeout(this._hideTimer);
+				this._hideTimer=null;
+			}
+		},
+
+		_setHideTimer:function(duration){
+			this._cancelHideTimer();
+			//if duration == 0 we keep the message displayed until clicked
+			if(duration>0){
+				this._cancelHideTimer();
+				this._hideTimer = setTimeout(lang.hitch(this, function(evt){
+					// we must hide the iframe in order to fade
+					// TODO: figure out how to fade with a BackgroundIframe
+					if(this.bgIframe && this.bgIframe.iframe){
+						this.bgIframe.iframe.style.display="none";
+					}
+					this._hideTimer=null;
+					//force clear sticky message
+					this._stickyMessage=false;
+					this.fadeAnim.play();
+				}), duration);
+			}
+			else
+				this._stickyMessage=true;
+		},
+
+		_placeClip: function(){
+			var view = window.getBox(this.ownerDocument);
+
+			var nodeSize = domGeometry.getMarginBox(this.containerNode);
+
+			var style = this.clipNode.style;
+			// sets up the size of the clipping node
+			style.height = nodeSize.h+"px";
+			style.width = nodeSize.w+"px";
+
+			// sets up the position of the clipping node
+			var pd = this.positionDirection;
+			if(pd.match(/^t/)){
+				style.top = view.t+"px";
+			}else if(pd.match(/^b/)){
+				style.top = (view.h - nodeSize.h - 2 + view.t)+"px";
+			}
+			if(pd.match(/^[tb]r-/)){
+				style.left = (view.w - nodeSize.w - 1 - view.l)+"px";
+			}else if(pd.match(/^[tb]l-/)){
+				style.left = 0 + "px";
+			}else if(pd.match(/^[tb]c-/)){
+				style.left = Math.round((view.w - nodeSize.w - 1 - view.l)/2)+"px";
+			}
+
+			style.clip = "rect(0px, " + nodeSize.w + "px, " + nodeSize.h + "px, 0px)";
+			if(has("ie")){
+				if(!this.bgIframe){
+					if (!this.clipNode.id) {
+						this.clipNode.id = registry.getUniqueId("dojox_widget_Toaster_clipNode");
+					}
+					this.bgIframe = new BackgroundIframe(this.clipNode);
+				}
+				var iframe = this.bgIframe.iframe;
+				if(iframe){ iframe.style.display="block"; }
+			}
+		},
+
+		onSelect: function(/*Event*/e){
+			// summary:
+			//		callback for when user clicks the message
+		},
+
+		show: function(){
+			// summary:'
+			//		show the Toaster
+			domStyle.set(this.domNode, 'display', 'block');
+			this._placeClip();
+
+			if(!this._scrollConnected){
+
+				this._scrollConnected = aspect.after(window, "scroll", lang.hitch(this, "_placeClip"));
+				this.own(this._scrollConnected);
+			}
+		},
+
+		hide: function(){
+			// summary:
+			//		hide the Toaster
+
+			domStyle.set(this.domNode, 'display', 'none');
+
+			if(this._scrollConnected){
+				this._scrollConnected.remove();
+				this._scrollConnected = false;
+			}
+
+			domStyle.set(this.containerNode, "opacity", 1);
+		}
+	});
+
+});

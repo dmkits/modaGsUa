@@ -1,3 +1,15 @@
-//>>built
-define("dojox/widget/nls/sr/ColorPicker",{redLabel:"c",greenLabel:"z",blueLabel:"p",hueLabel:"n",saturationLabel:"Z",valueLabel:"v",degLabel:"\u00b0",hexLabel:"hex",huePickerTitle:"Selektor nijanse",saturationPickerTitle:"Selektor zasi\u0107enosti"});
-//# sourceMappingURL=ColorPicker.js.map
+define({      
+//begin v1.x content
+redLabel: "c",
+greenLabel: "z",
+blueLabel: "p",
+hueLabel: "n",
+saturationLabel: "Z",
+valueLabel: "v", /* aka intensity or brightness */
+degLabel: "\u00B0",
+hexLabel: "hex",
+huePickerTitle: "Selektor nijanse",
+saturationPickerTitle: "Selektor zasićenosti"
+//end v1.x content
+});
+

@@ -1,3 +1,6 @@
-//>>built
-define("dojox/store/db/has",["dojo/has","dojo/sniff"],function(a){a.add("indexeddb",!!(window.indexedDB||window.webkitIndexedDB||window.mozIndexedDB));return a});
-//# sourceMappingURL=has.js.map
+define(['dojo/has', 'dojo/sniff'], function(has){
+	//	summary:
+	//		has() test for indexeddb. 
+	has.add('indexeddb', !!(window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB));
+	return has;
+});

@@ -1,16 +1,500 @@
-//>>built
-define("dojox/charting/plot2d/Indicator","dojo/_base/lang dojo/_base/array dojo/_base/declare ./CartesianBase ./_PlotEvents ./common ../axis2d/common dojox/gfx dojox/lang/utils dojox/gfx/fx dojo/has".split(" "),function(C,G,t,I,J,w,K,u,D,L,H){var M=function(b,c){var e=b.declaredClass,a;if(-1!=e.indexOf("svg"))try{return C.mixin({},b.rawNode.getBBox())}catch(E){}else{if(-1!=e.indexOf("vml")){var d=b.rawNode,g=d.style.display;d.style.display="inline";e=u.pt2px(parseFloat(d.currentStyle.width));a=u.pt2px(parseFloat(d.currentStyle.height));
-e={x:0,y:0,width:e,height:a};z(b,e);d.style.display=g;return e}if(-1!=e.indexOf("silverlight"))return z(b,{width:b.rawNode.actualWidth,height:b.rawNode.actualHeight},.75);if(b.getTextWidth)return e=b.getTextWidth(),d=b.getFont(),a=u.normalizedLength(d?d.size:u.defaultFont.size),e={width:e,height:a},z(b,e,.75),e}return null},z=function(b,c,e){var a=c.width,d=c.height;b=b.getShape();switch(b.align){case "end":c.x=b.x-a;break;case "middle":c.x=b.x-a/2;break;default:c.x=b.x}c.y=b.y-d*(e||1);return c};
-t=t("dojox.charting.plot2d.Indicator",[I,J],{defaultParams:{vertical:!0,fixed:!0,precision:0,lines:!0,labels:"line",markers:!0},optionalParams:{lineStroke:{},outlineStroke:{},shadowStroke:{},lineFill:{},stroke:{},outline:{},shadow:{},fill:{},fillFunc:null,labelFunc:null,font:"",fontColor:"",markerStroke:{},markerOutline:{},markerShadow:{},markerFill:{},markerSymbol:"",values:[],offset:{},start:!1,animate:!1},constructor:function(b,c){this.opt=C.clone(this.defaultParams);D.updateWithObject(this.opt,
-c);"number"==typeof c.values&&(c.values=[c.values]);D.updateWithPattern(this.opt,c,this.optionalParams);this.animate=this.opt.animate},render:function(b,c){if(this.zoom)return this.performZoom(b,c);if(!this.isDirty())return this;this.cleanGroup(null,!0);if(!this.opt.values)return this;this._updateIndicator();return this},_updateIndicator:function(){var b=this.chart.theme,c=this._hAxis.name,e=this._vAxis.name,a=this._hAxis.getScaler().bounds,d=this._vAxis.getScaler().bounds,g={};g[c]=a.from;g[e]=d.from;
-var E=this.toPage(g);g[c]=a.to;g[e]=d.to;var F=this.toPage(g),l=this.events(),a=G.map(this.opt.values,function(a,b){return this._renderIndicator(a,b,c,e,E,F,l,this.animate)},this),d=a.length;if("trend"==this.opt.labels){var g=this.opt.vertical,h=this._data[0][0],k=this._data[d-1][0]-h,h=this.opt.labelFunc?this.opt.labelFunc(-1,this.values,this._data,this.opt.fixed,this.opt.precision):w.getLabel(k,this.opt.fixed,this.opt.precision)+" ("+w.getLabel(100*k/h,!0,2)+"%)";this._renderText(this.getGroup(),
-h,this.chart.theme,g?(a[0].x+a[d-1].x)/2:a[1].x,g?a[0].y:(a[1].y+a[d-1].y)/2,-1,this.opt.values,this._data)}(b=void 0!=this.opt.lineFill?this.opt.lineFill:b.indicator.lineFill)&&1<d&&(g=Math.min(a[0].x1,a[d-1].x1),h=Math.min(a[0].y1,a[d-1].y1),this.getGroup().createRect({x:g,y:h,width:Math.max(a[0].x2,a[d-1].x2)-g,height:Math.max(a[0].y2,a[d-1].y2)-h}).setFill(b).moveToBack())},_renderIndicator:function(b,c,e,a,d,g,E,F){var l=this.chart.theme,h=this.chart.getCoords(),k=this.opt.vertical,v=this.getGroup().createGroup(),
-f={};f[e]=k?b:0;f[a]=k?0:b;H("dojo-bidi")&&(f.x=this._getMarkX(f.x));var f=this.toPage(f),q=k?f.x>=d.x&&f.x<=g.x:f.y>=g.y&&f.y<=d.y,t=f.x-h.x,u=f.y-h.y,m=k?t:d.x-h.x,n=k?d.y-h.y:u,A=k?m:g.x-h.x,x=k?g.y-h.y:n;if(this.opt.lines&&q){var r=this.opt.hasOwnProperty("lineShadow")?this.opt.lineShadow:l.indicator.lineShadow,y=this.opt.hasOwnProperty("lineStroke")?this.opt.lineStroke:l.indicator.lineStroke,p=this.opt.hasOwnProperty("lineOutline")?this.opt.lineOutline:l.indicator.lineOutline;r&&v.createLine({x1:m+
-r.dx,y1:n+r.dy,x2:A+r.dx,y2:x+r.dy}).setStroke(r);p&&(p=w.makeStroke(p),p.width=2*p.width+(y?y.width:0),v.createLine({x1:m,y1:n,x2:A,y2:x}).setStroke(p));v.createLine({x1:m,y1:n,x2:A,y2:x}).setStroke(y)}var z;if(this.opt.markers&&q){var B=this._data[c],D=this;B&&(z=G.map(B,function(c,q){f[e]=k?b:c;f[a]=k?c:b;H("dojo-bidi")&&(f.x=D._getMarkX(f.x));f=this.toPage(f);if(k?f.y<=d.y&&f.y>=g.y:f.x>=d.x&&f.x<=g.x){t=f.x-h.x;u=f.y-h.y;var m=this.opt.markerSymbol?this.opt.markerSymbol:l.indicator.markerSymbol,
-n="M"+t+" "+u+" "+m;r=void 0!=this.opt.markerShadow?this.opt.markerShadow:l.indicator.markerShadow;y=void 0!=this.opt.markerStroke?this.opt.markerStroke:l.indicator.markerStroke;p=void 0!=this.opt.markerOutline?this.opt.markerOutline:l.indicator.markerOutline;r&&v.createPath("M"+(t+r.dx)+" "+(u+r.dy)+" "+m).setFill(r.color).setStroke(r);p&&(p=w.makeStroke(p),p.width=2*p.width+(y?y.width:0),v.createPath(n).setStroke(p));m=v.createPath(n);n=this._shapeFill(void 0!=this.opt.markerFill?this.opt.markerFill:
-l.indicator.markerFill,m.getBoundingBox());m.setFill(n).setStroke(y)}return c},this))}B=this.opt.start?{x:m,y:k?n:x}:{x:k?m:A,y:k?x:n};this.opt.labels&&"trend"!=this.opt.labels&&q&&(this.opt.labelFunc?q=this.opt.labelFunc(c,this.opt.values,this._data,this.opt.fixed,this.opt.precision,this.opt.labels):"markers"==this.opt.labels?(q=G.map(z,function(a){return w.getLabel(a,this.opt.fixed,this.opt.precision)},this),q=1!=q.length?"[ "+q.join(", ")+" ]":q[0]):q=w.getLabel(b,this.opt.fixed,this.opt.precision),
-this._renderText(v,q,l,B.x,B.y,c,this.opt.values,this._data));E&&this._connectEvents({element:"indicator",run:this.run?this.run[c]:void 0,shape:v,value:b});F&&this._animateIndicator(v,k,k?n:m,k?n+x:m+A,F);return C.mixin(B,{x1:m,y1:n,x2:A,y2:x})},_animateIndicator:function(b,c,e,a,d){L.animateTransform(C.delegate({shape:b,duration:1200,transform:[{name:"translate",start:c?[0,e]:[e,0],end:[0,0]},{name:"scale",start:c?[1,1/a]:[1/a,1],end:[1,1]},{name:"original"}]},d)).play()},clear:function(){this.inherited(arguments);
-this._data=[]},addSeries:function(b){this.inherited(arguments);this._data.push(b.data)},_renderText:function(b,c,e,a,d,g,t,u){this.opt.offset&&(a+=this.opt.offset.x,d+=this.opt.offset.y);c=K.createText.gfx(this.chart,b,a,d,this.opt.vertical?"middle":this.opt.start?"start":"end",c,this.opt.font?this.opt.font:e.indicator.font,this.opt.fontColor?this.opt.fontColor:e.indicator.fontColor);a=M(c,c.getShape().text);this.opt.vertical&&!this.opt.start&&(a.y+=a.height/2,c.setShape({y:d+a.height/2}));a.x-=2;
---a.y;a.width+=4;a.height+=2;a.r=this.opt.radius?this.opt.radius:e.indicator.radius;var l=void 0!=this.opt.shadow?this.opt.shadow:e.indicator.shadow;d=void 0!=this.opt.stroke?this.opt.stroke:e.indicator.stroke;var h=void 0!=this.opt.outline?this.opt.outline:e.indicator.outline;l&&b.createRect(a).setFill(l.color).setStroke(l);h&&(h=w.makeStroke(h),h.width=2*h.width+(d?d.width:0),b.createRect(a).setStroke(h));e=this.opt.fillFunc?this.opt.fillFunc(g,t,u):void 0!=this.opt.fill?this.opt.fill:e.indicator.fill;
-b.createRect(a).setFill(this._shapeFill(e,a)).setStroke(d);c.moveToFront()},getSeriesStats:function(){return C.delegate(w.defaultStats)}});H("dojo-bidi")&&t.extend({_getMarkX:function(b){return this.chart.isRightToLeft()?this.chart.axes.x.scaler.bounds.to+this.chart.axes.x.scaler.bounds.from-b:b}});return t});
-//# sourceMappingURL=Indicator.js.map
+define(["dojo/_base/lang", "dojo/_base/array", "dojo/_base/declare", "./CartesianBase", "./_PlotEvents", "./common",
+    "../axis2d/common", "dojox/gfx", "dojox/lang/utils", "dojox/gfx/fx", "dojo/has"],
+	function(lang, array, declare, CartesianBase, _PlotEvents, dcpc, dcac, gfx, du, fx, has){
+
+	// all the code below should be removed when http://trac.dojotoolkit.org/ticket/11299 will be available
+	var getBoundingBox = function(shape){
+		return getTextBBox(shape, shape.getShape().text);
+	};
+	var getTextBBox = function(s, t){
+		var c = s.declaredClass;
+		var w, h;
+		if(c.indexOf("svg")!=-1){
+			// try/catch the FF native getBBox error. cheaper than walking up in the DOM
+			// hierarchy to check the conditions (bench show /10 )
+			try {
+				return lang.mixin({}, s.rawNode.getBBox());
+			}catch (e){
+				return null;
+			}
+		}else if(c.indexOf("vml")!=-1){
+			var rawNode = s.rawNode, _display = rawNode.style.display;
+			rawNode.style.display = "inline";
+			w = gfx.pt2px(parseFloat(rawNode.currentStyle.width));
+			h = gfx.pt2px(parseFloat(rawNode.currentStyle.height));
+			var sz = {x: 0, y: 0, width: w, height: h};
+			// in VML, the width/height we get are in view coordinates
+			// in our case we don't zoom the view so that is ok
+			// It's impossible to get the x/y from the currentStyle.left/top,
+			// because all negative coordinates are 'clipped' to 0.
+			// (x:0 + translate(-100) -> x=0
+			computeLocation(s, sz);
+			rawNode.style.display = _display;
+			return sz;
+		}else if(c.indexOf("silverlight")!=-1){
+			var bb = {width: s.rawNode.actualWidth, height: s.rawNode.actualHeight};
+			return computeLocation(s, bb, 0.75);
+		}else if(s.getTextWidth){
+			// canvas
+			w = s.getTextWidth();
+			var font = s.getFont();
+			var fz = font ? font.size : gfx.defaultFont.size;
+			h = gfx.normalizedLength(fz);
+			sz = {width: w, height: h};
+			computeLocation(s, sz, 0.75);
+			return sz;
+		}
+		return null;
+	};
+	var computeLocation =  function(s, sz, coef){
+		var width = sz.width, height = sz.height, sh = s.getShape(), align = sh.align;
+		switch (align) {
+		case "end":
+			sz.x = sh.x - width;
+			break;
+		case "middle":
+			sz.x = sh.x - width / 2;
+			break;
+		case "start":
+		default:
+			sz.x = sh.x;
+		break;
+		}
+		coef = coef || 1;
+		sz.y = sh.y - height*coef; // rough approximation of the ascent!...
+		return sz;
+	};
+
+	/*=====
+	declare("dojox.charting.plot2d.__IndicatorCtorArgs", dojox.charting.plot2d.__CartesianCtorArgs, {
+		// summary:
+		//		A special keyword arguments object that is specific to a indicator "plot".
+
+		// lines: Boolean?
+		//		Whether the indicator lines are visible or not. The lines are displayed for each of the
+		//		'values' of the indicator. Default is true.
+		lines: true,
+
+		// labels: String?
+		//		Describes how the indicator labels are displayed.
+		//		Possible values are:
+		//		`"line"` for displaying the value of each indicator line,
+		//		`"marker"` for displaying the values of the markers of each indicator line,
+		//		`"trend"` for displaying the percentage variation from the first to the last indicator line,
+		//		`"none"` to prevent any label to display.
+		//		Default is "line".
+		labels: "line",
+
+		// markers: Boolean?
+		//		Whether the markers on the indicator lines are visible or not. The markers are displayed for each
+		//		of the indicator lines using the series attached to the indicator plot. Default is true.
+		markers: true,
+
+		// values: Boolean
+		//		The data values at which each of the indicator line is drawn. For a single value a Number can be provided
+		//		otherwise an Array of Number is required. fault is [].
+		values: [],
+
+		// offset: {x, y}?
+		//		A pair of (x, y) pixel coordinate to specifiy the offset between the end of the indicator line and the
+		//		position at which the labels are rendered. Default is no offset.
+		offset: {},
+
+		// start: Boolean?
+		//		Whether the label is rendered at the start or end of the indicator line. Default is false meaning end of
+		//		the line.
+		start: false,
+
+		// animate: Boolean?|Number?
+		//		Whether or not to animate the chart to place. When a Number it specifies the duration of the animation.
+		//		Default is false.
+		animate: false,
+
+		// vertical: Boolean?
+		//		Whether the indicator is vertical or not. Default is true.
+		vertical: true,
+
+		// fixed: Boolean?
+		//		Whether a fixed precision must be applied to data values for display. Default is true.
+		fixed: true,
+
+		// precision: Number?
+		//		The precision at which to round data values for display. Default is 0.
+		precision: 0,
+
+		// lineStroke: dojo/gfx/Stroke?
+		//		An optional stroke to use for indicator line.
+		lineStroke: {},
+
+		// lineOutline: dojo/gfx/Stroke?
+		//		An optional outline to use for indicator line.
+		lineOutline: {},
+
+		// lineShadow: dojo/gfx/Stroke?
+		//		An optional shadow to use for indicator line.
+		lineShadow: {},
+
+		// stroke: dojo.gfx.Stroke?
+		//		An optional stroke to use for indicator label background.
+		stroke: {},
+
+		// outline: dojo.gfx.Stroke?
+		//		An optional outline to use for indicator label background.
+		outline: {},
+
+		// shadow: dojo.gfx.Stroke?
+		//		An optional shadow to use for indicator label background.
+		shadow: {},
+
+		// fill: dojo.gfx.Fill?
+		//		An optional fill to use for indicator label background.
+		fill: {},
+
+		// fillFunc: Function?
+		//		An optional function to use to compute label background fill. It takes precedence over
+		//		fill property when available.
+		//	|		function fillFunc(index, values, data) {}
+		//		`index` is the index in the values array of the label being drawn.
+		//		`values` is the entire array of values.
+		//		`data` is the entire array of marker values.
+		fillFunc: null,
+
+		// labelFunc: Function?
+		//		An optional function to use to compute label text. It takes precedence over
+		//		the default text when available.
+		//	|		function labelFunc(index, values, data, fixed, precision, labels) {}
+		//		`index` is the index in the values array of the label being drawn.
+		//		`values` is the entire array of values.
+		//		`data` is the entire array of marker values.
+		//		`fixed` is true if fixed precision must be applied.
+		//		`precision` is the requested precision to be applied.
+		//		`labels` is the labels mode of the indicator.
+		labelFunc: null,
+
+		// font: String?
+		//		A font definition to use for indicator label background.
+		font: "",
+
+		// fontColor: String|dojo.Color?
+		//		The color to use for indicator label background.
+		fontColor: "",
+
+		// markerStroke: dojo.gfx.Stroke?
+		//		An optional stroke to use for indicator marker.
+		markerStroke: {},
+
+		// markerOutline: dojo.gfx.Stroke?
+		//		An optional outline to use for indicator marker.
+		markerOutline: {},
+
+		// markerShadow: dojo.gfx.Stroke?
+		//		An optional shadow to use for indicator marker.
+		markerShadow: {},
+
+		// markerFill: dojo.gfx.Fill?
+		//		An optional fill to use for indicator marker.
+		markerFill: {},
+
+		// markerSymbol: String?
+		//		An optional symbol string to use for indicator marker.
+		markerSymbol: "",
+	});
+	=====*/
+
+	var Indicator = declare("dojox.charting.plot2d.Indicator", [CartesianBase, _PlotEvents], {
+		// summary:
+		//		A "faux" plot that can be placed behind or above other plots to represent a line or multi-line
+		//		threshold on the chart.
+		defaultParams: {
+			vertical: true,
+			fixed: true,
+			precision: 0,
+			lines: true,
+			labels: "line", // "line" | "trend" | "markers" | "none"
+			markers: true
+		},
+		optionalParams: {
+			lineStroke: {},
+			outlineStroke: {},
+			shadowStroke: {},
+			lineFill: {},
+			stroke:		{},
+			outline:	{},
+			shadow:		{},
+			fill:		{},
+			fillFunc:  null,
+			labelFunc: null,
+			font:		"",
+			fontColor:	"",
+			markerStroke:		{},
+			markerOutline:		{},
+			markerShadow:		{},
+			markerFill:			{},
+			markerSymbol:		"",
+			values: [],
+			offset: {},
+			start: false,
+			animate: false
+		},
+
+		constructor: function(chart, kwArgs){
+			// summary:
+			//		Create the faux Grid plot.
+			// chart: dojox/charting/Chart
+			//		The chart this plot belongs to.
+			// kwArgs: dojox.charting.plot2d.__GridCtorArgs?
+			//		An optional keyword arguments object to help define the parameters of the underlying grid.
+			this.opt = lang.clone(this.defaultParams);
+			du.updateWithObject(this.opt, kwArgs);
+			if(typeof kwArgs.values == "number"){
+				kwArgs.values = [ kwArgs.values ];
+			}
+			du.updateWithPattern(this.opt, kwArgs, this.optionalParams);
+			this.animate = this.opt.animate;
+		},
+		render: function(dim, offsets){
+			if(this.zoom){
+				return this.performZoom(dim, offsets);
+			}
+
+			if(!this.isDirty()){
+				return this;
+			}
+
+			this.cleanGroup(null, true);
+
+			if(!this.opt.values){
+				return this;
+			}
+
+			this._updateIndicator();
+			return this;
+		},
+		_updateIndicator: function(){
+			var t = this.chart.theme;
+			var hn = this._hAxis.name, vn = this._vAxis.name,
+				hb = this._hAxis.getScaler().bounds, vb = this._vAxis.getScaler().bounds;
+			var o = {};
+			o[hn] = hb.from;
+			o[vn] = vb.from;
+			var min = this.toPage(o);
+			o[hn] = hb.to;
+			o[vn] = vb.to;
+			var max = this.toPage(o);
+			var events = this.events();
+			var results = array.map(this.opt.values, function(value, index){
+				return this._renderIndicator(value, index, hn, vn, min, max, events, this.animate);
+			}, this);
+			var length = results.length;
+			if(this.opt.labels == "trend"){
+				var v = this.opt.vertical;
+				var first = this._data[0][0];
+				var last = this._data[length - 1][0];
+				var delta = last-first;
+				var text = this.opt.labelFunc?this.opt.labelFunc(-1, this.values, this._data, this.opt.fixed, this.opt.precision):
+						(dcpc.getLabel(delta, this.opt.fixed, this.opt.precision)+" ("+dcpc.getLabel(100*delta/first, true, 2)+"%)");
+				this._renderText(this.getGroup(), text, this.chart.theme, v?(results[0].x+results[length - 1].x)/2:results[1].x,
+					v?results[0].y:(results[1].y+results[length - 1].y)/2, -1, this.opt.values, this._data);
+			}
+			var lineFill = this.opt.lineFill!=undefined?this.opt.lineFill:t.indicator.lineFill;
+			if(lineFill && length > 1){
+				var x0 = Math.min(results[0].x1, results[length - 1].x1);
+				var y0 =  Math.min(results[0].y1, results[length - 1].y1);
+				var r = this.getGroup().createRect({x: x0, y: y0, width: Math.max(results[0].x2, results[length - 1].x2) - x0,
+															 height: Math.max(results[0].y2, results[length - 1].y2) - y0}).
+					setFill(lineFill);
+				r.moveToBack();
+			}
+		},
+		_renderIndicator: function(coord, index, hn, vn, min, max, events, animate){
+			var t = this.chart.theme, c = this.chart.getCoords(), v = this.opt.vertical;
+
+			var g = this.getGroup().createGroup();
+			var mark = {};
+			mark[hn] = v?coord:0;
+			mark[vn] = v?0:coord;
+			if(has("dojo-bidi")){
+				mark.x = this._getMarkX(mark.x);
+			}
+			mark = this.toPage(mark);
+			var visible = v?mark.x >= min.x && mark.x <= max.x:mark.y >= max.y && mark.y <= min.y;
+
+			var cx = mark.x - c.x, cy = mark.y - c.y;
+			var x1 = v?cx:min.x - c.x, y1 = v?min.y - c.y:cy, x2 = v?x1:max.x - c.x, y2 = v?max.y - c.y:y1;
+
+			if(this.opt.lines && visible){
+				var sh = this.opt.hasOwnProperty("lineShadow")?this.opt.lineShadow:t.indicator.lineShadow,
+					ls = this.opt.hasOwnProperty("lineStroke")?this.opt.lineStroke:t.indicator.lineStroke,
+					ol = this.opt.hasOwnProperty("lineOutline")?this.opt.lineOutline:t.indicator.lineOutline;
+				if(sh){
+					g.createLine({x1: x1 + sh.dx, y1: y1 + sh.dy, x2: x2 + sh.dx, y2: y2 + sh.dy}).setStroke(sh);
+				}
+				if(ol){
+					ol = dcpc.makeStroke(ol);
+					ol.width = 2 * ol.width + (ls?ls.width:0);
+					g.createLine({x1: x1, y1: y1, x2: x2, y2: y2}).setStroke(ol);
+				}
+				g.createLine({x1: x1, y1: y1, x2: x2, y2: y2}).setStroke(ls);
+			}
+
+			// series items represent markers on the indicator
+			var data;
+			if(this.opt.markers && visible){
+				var d = this._data[index];
+				var self = this;
+				if(d){
+					data = array.map(d, function(value, index){
+						mark[hn] = v?coord:value;
+						mark[vn] = v?value:coord;
+						if(has("dojo-bidi")){
+							mark.x = self._getMarkX(mark.x);
+						}
+						mark = this.toPage(mark);
+						if(v?mark.y <= min.y && mark.y >= max.y:mark.x >= min.x && mark.x <= max.x){
+							cx = mark.x - c.x
+							cy = mark.y - c.y;
+							var ms = this.opt.markerSymbol?this.opt.markerSymbol:t.indicator.markerSymbol,
+								path = "M" + cx + " " + cy + " " + ms;
+							sh = this.opt.markerShadow!=undefined?this.opt.markerShadow:t.indicator.markerShadow;
+							ls = this.opt.markerStroke!=undefined?this.opt.markerStroke:t.indicator.markerStroke;
+							ol = this.opt.markerOutline!=undefined?this.opt.markerOutline:t.indicator.markerOutline;
+							if(sh){
+								var sp = "M" + (cx + sh.dx) + " " + (cy + sh.dy) + " " + ms;
+								g.createPath(sp).setFill(sh.color).setStroke(sh);
+							}
+							if(ol){
+								ol = dcpc.makeStroke(ol);
+								ol.width = 2 * ol.width + (ls?ls.width:0);
+								g.createPath(path).setStroke(ol);
+							}
+
+							var shape = g.createPath(path);
+							var sf = this._shapeFill(this.opt.markerFill != undefined?this.opt.markerFill:t.indicator.markerFill, shape.getBoundingBox());
+							shape.setFill(sf).setStroke(ls);
+						}
+						return value;
+					}, this);
+				}
+			}
+			var ctext;
+			if(this.opt.start){
+				ctext = {
+					x: v?x1:x1,
+					y: v?y1:y2
+				};
+			}else{
+				ctext = {
+					x: v?x1:x2,
+					y: v?y2:y1
+				};
+			}
+
+			if(this.opt.labels && this.opt.labels != "trend" && visible){
+				var text;
+				if(this.opt.labelFunc){
+					text = this.opt.labelFunc(index, this.opt.values, this._data,
+						this.opt.fixed, this.opt.precision, this.opt.labels);
+				}else{
+					if(this.opt.labels == "markers"){
+						text = array.map(data, function(value){
+							return dcpc.getLabel(value, this.opt.fixed, this.opt.precision);
+						}, this);
+						text = text.length != 1 ? "[ "+text.join(", ")+" ]" : text[0];
+					}else{
+						text = dcpc.getLabel(coord, this.opt.fixed, this.opt.precision);
+					}
+				}
+				this._renderText(g, text, t, ctext.x, ctext.y, index, this.opt.values, this._data);
+			}
+
+			if(events){
+				this._connectEvents({
+					element: "indicator",
+					run:     this.run?this.run[index]:undefined,
+					shape:   g,
+					value:   coord
+				});
+			}
+
+			if(animate){
+				this._animateIndicator(g, v, v?y1:x1, v?(y1 + y2):(x1 + x2), animate);
+			}
+
+			return lang.mixin(ctext, {x1: x1, y1: y1, x2: x2, y2: y2});
+		},
+		_animateIndicator: function(shape, vertical, offset, size, animate){
+			var transStart = vertical ? [0, offset] : [offset, 0];
+			var scaleStart = vertical ? [1, 1 / size] : [1 / size, 1];
+			fx.animateTransform(lang.delegate({
+				shape: shape,
+				duration: 1200,
+				transform: [
+					{name: "translate", start: transStart, end: [0, 0]},
+					{name: "scale", start: scaleStart, end: [1, 1]},
+					{name: "original"}
+				]
+			}, animate)).play();
+		},
+		clear: function(){
+			this.inherited(arguments);
+			this._data = [];
+		},
+		addSeries: function(run){
+			this.inherited(arguments);
+			this._data.push(run.data);
+		},
+		_renderText: function(g, text, t, x, y, index, values, data){
+			if(this.opt.offset){
+				x += this.opt.offset.x;
+				y += this.opt.offset.y;
+			}
+			var label = dcac.createText.gfx(
+				this.chart,
+				g,
+				x, y,
+				this.opt.vertical? "middle" : (this.opt.start ? "start":"end"),
+				text, 
+                this.opt.font?this.opt.font:t.indicator.font, 
+                this.opt.fontColor?this.opt.fontColor:t.indicator.fontColor);
+			var b = getBoundingBox(label);
+            if(this.opt.vertical && !this.opt.start) {
+                b.y += b.height/2;
+                label.setShape({y: y+b.height/2});
+            }
+			b.x-=2; b.y-=1; b.width+=4; b.height+=2; 
+            b.r = this.opt.radius?this.opt.radius:t.indicator.radius;
+			var sh = this.opt.shadow!=undefined?this.opt.shadow:t.indicator.shadow,
+				ls = this.opt.stroke!=undefined?this.opt.stroke:t.indicator.stroke,
+				ol = this.opt.outline!=undefined?this.opt.outline:t.indicator.outline;
+			if(sh){
+				g.createRect(b).setFill(sh.color).setStroke(sh);
+			}
+			if(ol){
+				ol = dcpc.makeStroke(ol);
+				ol.width = 2 * ol.width + (ls?ls.width:0);
+				g.createRect(b).setStroke(ol);
+			}
+			var f = this.opt.fillFunc?this.opt.fillFunc(index, values, data):(this.opt.fill!=undefined?this.opt.fill:t.indicator.fill);
+			g.createRect(b).setFill(this._shapeFill(f, b)).setStroke(ls);
+			label.moveToFront();
+		},
+		getSeriesStats: function(){
+			// summary:
+			//		Returns default stats (irrelevant for this type of plot).
+			// returns: Object
+			//		{hmin, hmax, vmin, vmax} min/max in both directions.
+			return lang.delegate(dcpc.defaultStats);
+		}
+	});
+	if(has("dojo-bidi")){
+		Indicator.extend({
+			_getMarkX: function(x){
+				if(this.chart.isRightToLeft()){
+					return this.chart.axes.x.scaler.bounds.to + this.chart.axes.x.scaler.bounds.from - x;
+				}
+				return x;
+			}			
+		});
+	}
+	return Indicator;
+});

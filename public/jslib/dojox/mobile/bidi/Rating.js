@@ -1,3 +1,17 @@
-//>>built
-define("dojox/mobile/bidi/Rating",["dojo/_base/declare","dojo/dom-style","../_css3"],function(b,c,d){return b(null,{_setCustomTransform:function(a){c.set(a,d.add({"float":"right"},{transform:"scaleX(-1)"}));return a}})});
-//# sourceMappingURL=Rating.js.map
+define([
+	"dojo/_base/declare",
+	"dojo/dom-style",
+	"../_css3"
+], function(declare, domStyle, css3){
+
+	// module:
+	//		mobile/bidi/Rating
+
+	return declare(null, {
+
+		_setCustomTransform:function(/*Object*/parent){
+			domStyle.set(parent, css3.add({"float":"right"}, {transform:"scaleX(-1)"}));
+			return parent;
+		}
+	});
+});

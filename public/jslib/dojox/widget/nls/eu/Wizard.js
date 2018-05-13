@@ -1,3 +1,8 @@
-//>>built
-define("dojox/widget/nls/eu/Wizard",{next:"Hurrengoa",previous:"Aurrekoa",done:"Eginda"});
-//# sourceMappingURL=Wizard.js.map
+define({      
+//begin v1.x content
+next: "Hurrengoa",
+previous: "Aurrekoa",
+done: "Eginda"
+//end v1.x content
+});
+

@@ -1,3 +1,15 @@
-//>>built
-define("dojox/widget/nls/eu/ColorPicker",{redLabel:"g",greenLabel:"b",blueLabel:"u",hueLabel:"t",saturationLabel:"a",valueLabel:"i",degLabel:"\u00b0",hexLabel:"hex",huePickerTitle:"Tonuen hautatzailea",saturationPickerTitle:"Asetasunaren hautatzailea"});
-//# sourceMappingURL=ColorPicker.js.map
+define({      
+//begin v1.x content
+redLabel: "g",
+greenLabel: "b",
+blueLabel: "u",
+hueLabel: "t",
+saturationLabel: "a",
+valueLabel: "i", /* aka intensity or brightness */
+degLabel: "\u00B0",
+hexLabel: "hex",
+huePickerTitle: "Tonuen hautatzailea",
+saturationPickerTitle: "Asetasunaren hautatzailea"
+//end v1.x content
+});
+

@@ -1,3 +1,7 @@
-//>>built
-define("dojox/editor/plugins/nls/cs/BidiSupport",{ltr:"Sm\u011br textu zleva doprava",rtl:"Sm\u011br textu zprava doleva"});
-//# sourceMappingURL=BidiSupport.js.map
+define({      
+//begin v1.x content
+	"ltr": "Směr textu zleva doprava",
+	"rtl": "Směr textu zprava doleva"
+//end v1.x content
+});
+

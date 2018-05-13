@@ -1,3 +1,7 @@
-//>>built
-define("dojox/editor/plugins/nls/bs/CollapsibleToolbar",{collapse:"Skupi traku s alatima editora",expand:"Pro\u0161iri traku s alatima editora"});
-//# sourceMappingURL=CollapsibleToolbar.js.map
+define({      
+//begin v1.x content
+	"collapse": "Skupi traku s alatima editora",
+	"expand": "Proširi traku s alatima editora"
+//end v1.x content
+});
+

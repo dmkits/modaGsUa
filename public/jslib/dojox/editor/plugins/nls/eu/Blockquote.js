@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/eu/Blockquote",{blockquote:"Blockquote"});
-//# sourceMappingURL=Blockquote.js.map
+define({      
+//begin v1.x content
+	"blockquote": "Blockquote"
+//end v1.x content
+});
+

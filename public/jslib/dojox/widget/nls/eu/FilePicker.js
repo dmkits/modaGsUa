@@ -1,3 +1,8 @@
-//>>built
-define("dojox/widget/nls/eu/FilePicker",{name:"Izena",path:"Bide-izena",size:"Tamaina (byte-etan)"});
-//# sourceMappingURL=FilePicker.js.map
+define({      
+//begin v1.x content
+	name: "Izena",
+	path: "Bide-izena",
+	size: "Tamaina (byte-etan)"
+//end v1.x content
+});
+

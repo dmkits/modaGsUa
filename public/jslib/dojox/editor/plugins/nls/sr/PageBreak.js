@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/sr/PageBreak",{pageBreak:"Prelom stranice"});
-//# sourceMappingURL=PageBreak.js.map
+define({      
+//begin v1.x content
+	"pageBreak": "Prelom stranice"
+//end v1.x content
+});
+

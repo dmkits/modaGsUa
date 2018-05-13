@@ -1,3 +1,7 @@
-//>>built
-define("dojox/store/LocalDB",["./db/has!indexeddb?./db/IndexedDB:./db/SQL"],function(a){return a});
-//# sourceMappingURL=LocalDB.js.map
+define(["./db/has!indexeddb?./db/IndexedDB:./db/SQL"],
+	function(LocalDB){
+	//	summary:
+	//		The module defines an object store based on local database access
+	//		./db/IndexDB if detected or ./db/SQL otherwise
+	return LocalDB;
+});

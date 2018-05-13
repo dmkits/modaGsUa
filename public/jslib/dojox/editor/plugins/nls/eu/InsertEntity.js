@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/eu/InsertEntity",{insertEntity:"Txertatu sinboloa"});
-//# sourceMappingURL=InsertEntity.js.map
+define({      
+//begin v1.x content
+	insertEntity: "Txertatu sinboloa"
+//end v1.x content
+});
+

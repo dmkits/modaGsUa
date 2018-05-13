@@ -1,3 +1,7 @@
-//>>built
-define("dojox/form/BusyDropDownButton",["./_BusyButtonMixin","dijit/form/DropDownButton","dojo/_base/declare"],function(a,b,c){return c("dojox.form.BusyDropDownButton",[b,a],{})});
-//# sourceMappingURL=BusyDropDownButton.js.map
+define([
+	"./_BusyButtonMixin",
+	"dijit/form/DropDownButton",
+	"dojo/_base/declare"
+], function(_BusyButtonMixin, DropDownButton, declare){
+return declare("dojox.form.BusyDropDownButton", [DropDownButton, _BusyButtonMixin], {});
+});

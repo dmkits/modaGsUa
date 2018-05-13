@@ -1,18 +1,656 @@
-//>>built
-define("dojox/fx/split","dojo/_base/lang dojo/dom dojo/_base/window dojo/_base/html dojo/dom-geometry dojo/dom-construct dojo/dom-attr dojo/_base/fx dojo/fx ./_base dojo/fx/easing dojo/_base/connect".split(" "),function(y,t,C,f,z,A,D,w,E,F,u,k){var m=y.getObject("dojox.fx");y.mixin(m,{_split:function(a){a.rows=a.rows||3;a.columns=a.columns||3;a.duration=a.duration||1E3;for(var c=a.node=t.byId(a.node),g=c.parentNode,n=C.body();g&&g!=n&&"static"==f.style(g,"position");)g=g.parentNode;for(var b=g!=n?
-z.position(g,!0):{x:0,y:0},g=z.position(c,!0),p=f.style(c,"height"),d=f.style(c,"width"),v=f.style(c,"borderLeftWidth")+f.style(c,"borderRightWidth"),r=f.style(c,"borderTopWidth")+f.style(c,"borderBottomWidth"),n=Math.ceil(p/a.rows),e=Math.ceil(d/a.columns),h=A.create(c.tagName,{style:{position:"absolute",padding:0,margin:0,border:"none",top:g.y-b.y+"px",left:g.x-b.x+"px",height:p+r+"px",width:d+v+"px",background:"none",overflow:a.crop?"hidden":"visible",zIndex:f.style(c,"zIndex")}},c,"after"),b=
-[],v=A.create(c.tagName,{style:{position:"absolute",border:"none",padding:0,margin:0,height:n+v+"px",width:e+r+"px",overflow:"hidden"}}),r=0,p=a.rows;r<p;r++)for(var d=0,x=a.columns;d<x;d++){var l=y.clone(v),q=y.clone(c),B=r*n,m=d*e;q.style.filter="";D.remove(q,"id");f.style(l,{border:"none",overflow:"hidden",top:B+"px",left:m+"px"});f.style(q,{position:"static",opacity:"1",marginTop:-B+"px",marginLeft:-m+"px"});l.appendChild(q);h.appendChild(l);l=a.pieceAnimation(l,d,r,g);y.isArray(l)?b=b.concat(l):
-b.push(l)}c=E.combine(b);k.connect(c,"onEnd",c,function(){h.parentNode.removeChild(h)});a.onPlay&&k.connect(c,"onPlay",c,a.onPlay);a.onEnd&&k.connect(c,"onEnd",c,a.onEnd);return c},explode:function(a){var c=a.node=t.byId(a.node);a.rows=a.rows||3;a.columns=a.columns||3;a.distance=a.distance||1;a.duration=a.duration||1E3;a.random=a.random||0;a.fade||(a.fade=!0);"undefined"==typeof a.sync&&(a.sync=!0);a.random=Math.abs(a.random);a.pieceAnimation=function(c,b,g,d){var v=d.h/a.rows,r=d.w/a.columns,e=2*
-a.distance,h=a.duration,x=c.style,l=parseInt(x.top),q=parseInt(x.left),p=0,n=0,m=0;a.random&&(p=Math.random()*a.random+Math.max(1-a.random,0),e*=p,h*=p,p=a.unhide&&a.sync||!a.unhide&&!a.sync?a.duration-h:0,n=Math.random()-.5,m=Math.random()-.5);g=(d.h-v)/2-v*g;b=(d.w-r)/2-r*b;d=Math.sqrt(Math.pow(b,2)+Math.pow(g,2));var k=parseInt(l-g*e+d*m),t=parseInt(q-b*e+d*n),e=w.animateProperty({node:c,duration:h,delay:p,easing:a.easing||(a.unhide?u.sinOut:u.circOut),beforeBegin:a.unhide?function(){a.fade&&f.style(c,
-{opacity:"0"});x.top=k+"px";x.left=t+"px"}:void 0,properties:{top:a.unhide?{start:k,end:l}:{start:l,end:k},left:a.unhide?{start:t,end:q}:{start:q,end:t}}});return a.fade?(h=w.animateProperty({node:c,duration:h,delay:p,easing:a.fadeEasing||u.quadOut,properties:{opacity:a.unhide?{start:"0",end:"1"}:{start:"1",end:"0"}}}),a.unhide?[h,e]:[e,h]):e};var g=m._split(a);a.unhide?k.connect(g,"onEnd",null,function(){f.style(c,{opacity:"1"})}):k.connect(g,"onPlay",null,function(){f.style(c,{opacity:"0"})});return g},
-converge:function(a){a.unhide=!0;return m.explode(a)},disintegrate:function(a){var c=a.node=t.byId(a.node);a.rows=a.rows||5;a.columns=a.columns||5;a.duration=a.duration||1500;a.interval=a.interval||a.duration/(a.rows+2*a.columns);a.distance=a.distance||1.5;a.random=a.random||0;"undefined"==typeof a.fade&&(a.fade=!0);var g=Math.abs(a.random),n=a.duration-(a.rows+a.columns)*a.interval;a.pieceAnimation=function(c,d,b,r){var e=c.style;d=Math.random()*(a.rows+a.columns)*a.interval*g+Math.max(1-g,0)*(a.reverseOrder||
-0>a.distance?(d+b)*a.interval:(a.rows+a.columns-(d+b))*a.interval);var h={};a.unhide?(h.top={start:parseInt(e.top)-r.h*a.distance,end:parseInt(e.top)},a.fade&&(h.opacity={start:"0",end:"1"})):(h.top={end:parseInt(e.top)+r.h*a.distance},a.fade&&(h.opacity={end:"0"}));return w.animateProperty({node:c,duration:n,delay:d,easing:a.easing||(a.unhide?u.sinIn:u.circIn),properties:h,beforeBegin:a.unhide?function(){a.fade&&f.style(c,{opacity:"0"});e.top=h.top.start+"px"}:void 0})};var b=m._split(a);a.unhide?
-k.connect(b,"onEnd",b,function(){f.style(c,{opacity:"1"})}):k.connect(b,"onPlay",b,function(){f.style(c,{opacity:"0"})});return b},build:function(a){a.unhide=!0;return m.disintegrate(a)},shear:function(a){var c=a.node=t.byId(a.node);a.rows=a.rows||6;a.columns=a.columns||6;a.duration=a.duration||1E3;a.interval=a.interval||0;a.distance=a.distance||1;a.random=a.random||0;"undefined"==typeof a.fade&&(a.fade=!0);var g=Math.abs(a.random),n=a.duration-(a.rows+a.columns)*Math.abs(a.interval);a.pieceAnimation=
-function(c,d,b,r){var e=!(d%2),h=!(b%2);d=Math.random()*n*g+Math.max(1-g,0)*(a.reverseOrder?(a.rows+a.columns-(d+b))*a.interval:(d+b)*a.interval);var f={},l=c.style;a.fade&&(f.opacity=a.unhide?{start:"0",end:"1"}:{end:"0"});1==a.columns?e=h:1==a.rows&&(h=!e);b=parseInt(l.left);var q=parseInt(l.top),p=a.distance*r.w;r=a.distance*r.h;a.unhide?e==h?f.left=e?{start:b-p,end:b}:{start:b+p,end:b}:f.top=e?{start:q+r,end:q}:{start:q-r,end:q}:e==h?f.left=e?{end:b-p}:{end:b+p}:f.top=e?{end:q+r}:{end:q-r};return w.animateProperty({node:c,
-duration:n,delay:d,easing:a.easing||u.sinInOut,properties:f,beforeBegin:a.unhide?function(){a.fade&&(l.opacity="0");e==h?l.left=f.left.start+"px":l.top=f.top.start+"px"}:void 0})};var b=m._split(a);a.unhide?k.connect(b,"onEnd",b,function(){f.style(c,{opacity:"1"})}):k.connect(b,"onPlay",b,function(){f.style(c,{opacity:"0"})});return b},unShear:function(a){a.unhide=!0;return m.shear(a)},pinwheel:function(a){var c=a.node=t.byId(a.node);a.rows=a.rows||4;a.columns=a.columns||4;a.duration=a.duration||
-1E3;a.interval=a.interval||0;a.distance=a.distance||1;a.random=a.random||0;"undefined"==typeof a.fade&&(a.fade=!0);var g=a.duration-(a.rows+a.columns)*Math.abs(a.interval);a.pieceAnimation=function(c,p,d,n){var b=n.h/a.rows,e=n.w/a.columns,h=!(p%2),k=!(d%2);p=Math.random()*g*a.random+Math.max(1-a.random,0)*(0>a.interval?(a.rows+a.columns-(p+d))*a.interval*-1:(p+d)*a.interval);d={};var l=c.style;a.fade&&(d.opacity=a.unhide?{start:0,end:1}:{end:0});1==a.columns?h=!k:1==a.rows&&(k=h);var q=parseInt(l.left),
-m=parseInt(l.top);h&&(k?d.top=a.unhide?{start:m+b*a.distance,end:m}:{start:m,end:m+b*a.distance}:d.left=a.unhide?{start:q+e*a.distance,end:q}:{start:q,end:q+e*a.distance});h!=k?d.width=a.unhide?{start:e*(1-a.distance),end:e}:{start:e,end:e*(1-a.distance)}:d.height=a.unhide?{start:b*(1-a.distance),end:b}:{start:b,end:b*(1-a.distance)};return w.animateProperty({node:c,duration:g,delay:p,easing:a.easing||u.sinInOut,properties:d,beforeBegin:a.unhide?function(){a.fade&&f.style(c,"opacity",0);h?k?l.top=
-m+b*(1-a.distance)+"px":l.left=q+e*(1-a.distance)+"px":(l.left=q+"px",l.top=m+"px");h!=k?l.width=e*(1-a.distance)+"px":l.height=b*(1-a.distance)+"px"}:void 0})};var n=m._split(a);a.unhide?k.connect(n,"onEnd",n,function(){f.style(c,{opacity:"1"})}):k.connect(n,"play",n,function(){f.style(c,{opacity:"0"})});return n},unPinwheel:function(a){a.unhide=!0;return m.pinwheel(a)},blockFadeOut:function(a){var c=a.node=t.byId(a.node);a.rows=a.rows||5;a.columns=a.columns||5;a.duration=a.duration||1E3;a.interval=
-a.interval||a.duration/(a.rows+2*a.columns);a.random=a.random||0;var g=Math.abs(a.random),n=a.duration-(a.rows+a.columns)*a.interval;a.pieceAnimation=function(b,c,k,m){return w.animateProperty({node:b,duration:n,delay:Math.random()*a.duration*g+Math.max(1-g,0)*(a.reverseOrder?(a.rows+a.columns-(c+k))*Math.abs(a.interval):(c+k)*a.interval),easing:a.easing||u.sinInOut,properties:{opacity:a.unhide?{start:"0",end:"1"}:{start:"1",end:"0"}},beforeBegin:a.unhide?function(){f.style(b,{opacity:"0"})}:function(){b.style.filter=
-""}})};var b=m._split(a);a.unhide?k.connect(b,"onEnd",b,function(){f.style(c,{opacity:"1"})}):k.connect(b,"onPlay",b,function(){f.style(c,{opacity:"0"})});return b},blockFadeIn:function(a){a.unhide=!0;return m.blockFadeOut(a)}});return F});
-//# sourceMappingURL=split.js.map
+define(["dojo/_base/lang", "dojo/dom", "dojo/_base/window", "dojo/_base/html", "dojo/dom-geometry", 
+		"dojo/dom-construct", "dojo/dom-attr", "dojo/_base/fx", "dojo/fx", "./_base", "dojo/fx/easing", "dojo/_base/connect"],
+	function(lang, dom, winUtil, htmlUtil, domGeom, domConstruct, domAttr, baseFx, coreFx, fxExt, easingUtil, connectUtil){
+var dojoxFx = lang.getObject("dojox.fx");
+lang.mixin(dojoxFx,{
+	_split: function(/*Object*/ args){
+		// summary:
+		//		Split a node into rectangular pieces and animate them.
+		// description:
+		//		Returns an animation that will split the node into a grid
+		//		of pieces that move independently.
+		// args:
+		//		- args.crop: Boolean - If true, pieces will only be visible inside node's boundaries
+		//		- args.rows: Integer - The number of horizontal pieces (default is 3)
+		//		- args.columns: Integer - The number of vertical pieces (default is 3)
+		//		- args.pieceAnimation: Function(piece, x, y, coords) - Returns either the dojo.Animation
+		//		  or an array of dojo.Animation objects for the piece at location (x, y) in the node's grid;
+		//		  coords is the result of dojo.coords(args.node, true);
+
+		args.rows = args.rows || 3;
+		args.columns = args.columns || 3;
+		args.duration = args.duration || 1000;
+
+		var node = args.node = dom.byId(args.node),
+			parentNode = node.parentNode,
+			pNode = parentNode,
+			body = winUtil.body(),
+			_pos = "position"
+		;
+
+		while(pNode && pNode != body && htmlUtil.style(pNode, _pos) == "static"){
+			pNode = pNode.parentNode;
+		}
+
+		var pCoords = pNode != body ? domGeom.position(pNode, true) : { x: 0, y: 0 },
+			coords = domGeom.position(node, true),
+			nodeHeight = htmlUtil.style(node, "height"),
+			nodeWidth = htmlUtil.style(node, "width"),
+			hBorder = htmlUtil.style(node, "borderLeftWidth") + htmlUtil.style(node, "borderRightWidth"),
+			vBorder = htmlUtil.style(node, "borderTopWidth") + htmlUtil.style(node, "borderBottomWidth"),
+			pieceHeight = Math.ceil(nodeHeight / args.rows),
+			pieceWidth = Math.ceil(nodeWidth / args.columns),
+			container = domConstruct.create(node.tagName, {
+				style: {
+					position: "absolute",
+					padding: 0,
+					margin: 0,
+					border:"none",
+					top: coords.y - pCoords.y + "px",
+					left: coords.x - pCoords.x + "px",
+					height: nodeHeight + vBorder + "px",
+					width: nodeWidth + hBorder + "px",
+					background: "none",
+					overflow: args.crop ? "hidden" : "visible",
+					zIndex: htmlUtil.style(node, "zIndex")
+				}
+			}, node, "after"),
+			animations = [],
+			pieceHelper = domConstruct.create(node.tagName, {
+				style: {
+					position: "absolute",
+					border: "none",
+					padding: 0,
+					margin: 0,
+					height: pieceHeight + hBorder + "px",
+					width: pieceWidth + vBorder + "px",
+					overflow: "hidden"
+				}
+			});
+
+		// Create the pieces and their animations
+		for(var y = 0, ly = args.rows; y < ly; y++){
+			for(var x = 0, lx = args.columns; x < lx; x++){
+				// Create the piece
+				var piece = lang.clone(pieceHelper),
+					pieceContents = lang.clone(node),
+					pTop = y * pieceHeight,
+					pLeft = x * pieceWidth
+				;
+
+				// IE hack
+				pieceContents.style.filter = "";
+
+				// removing the id attribute from the cloned nodes
+				domAttr.remove(pieceContents, "id");
+
+				htmlUtil.style(piece, {
+					border: "none",
+					overflow: "hidden",
+					top: pTop + "px",
+					left: pLeft + "px"
+				});
+				htmlUtil.style(pieceContents, {
+					position: "static",
+					opacity: "1",
+					marginTop: -pTop + "px",
+					marginLeft: -pLeft + "px"
+				});
+				piece.appendChild(pieceContents);
+				container.appendChild(piece);
+
+				var pieceAnimation = args.pieceAnimation(piece, x, y, coords);
+				if(lang.isArray(pieceAnimation)){
+					// if pieceAnimation is an array, append its elements
+					animations = animations.concat(pieceAnimation);
+				}else{
+					// otherwise, append it
+					animations.push(pieceAnimation);
+				}
+			}
+		}
+		var anim = coreFx.combine(animations);
+		connectUtil.connect(anim, "onEnd", anim, function(){
+			container.parentNode.removeChild(container);
+		});
+		if(args.onPlay){
+			connectUtil.connect(anim, "onPlay", anim, args.onPlay);
+		}
+		if(args.onEnd){
+			connectUtil.connect(anim, "onEnd", anim, args.onEnd);
+		}
+		return anim; // dojo.Animation
+	},
+
+	explode: function(/*Object*/ args){
+		// summary:
+		//		Explode a node into rectangular pieces
+		// description:
+		//		Returns an animation that will split the node into a grid
+		//		of pieces that fly away from the center.
+		// args:
+		//		- args.rows: Integer - The number of horizontal pieces (default is 3)
+		//		- args.columns: Integer - The number of vertical pieces (default is 3)
+		//		- args.random: Float - If set, pieces fly to random distances, for random durations,
+		//							   and in slightly random directions.  The value defines how much
+		//							   randomness is introduced.
+		//		- args.distance: Float - Multiplier for the distance the pieces fly (even when random)
+		//		- args.fade: Boolean - If true, pieces fade out while in motion (default is true)
+		//		- args.fadeEasing: Function - If args.fade is true, the fade animations use this easing function
+		//		- args.unhide: Boolean - If true, the animation is reversed
+		//		- args.sync: Boolean - If args.unhide is true, all the pieces converge at the same time
+		//							   (default is true)
+
+		var node = args.node = dom.byId(args.node);
+		args.rows = args.rows || 3;
+		args.columns = args.columns || 3;
+		args.distance = args.distance || 1;
+		args.duration = args.duration || 1000;
+		args.random = args.random || 0;
+		if(!args.fade){
+			args.fade = true;
+		}
+		if(typeof args.sync == "undefined"){
+			args.sync = true;
+		}
+		args.random = Math.abs(args.random);
+
+		// Returns the animation object for each piece
+		args.pieceAnimation = function(piece, x, y, coords){
+			var pieceHeight = coords.h / args.rows,
+				pieceWidth = coords.w / args.columns,
+				distance = args.distance * 2,
+				duration = args.duration,
+				ps = piece.style,
+				startTop = parseInt(ps.top),
+				startLeft = parseInt(ps.left),
+				delay = 0,
+				randomX = 0,
+				randomY = 0;
+
+			if(args.random){
+				var seed = (Math.random() * args.random) + Math.max(1 - args.random, 0);
+				distance *= seed;
+				duration *= seed;
+				// To syncronize, give each piece an appropriate delay so they end together
+				delay = ((args.unhide && args.sync) || (!args.unhide && !args.sync)) ? (args.duration - duration) : 0;
+				// Slightly randomize the direction of each piece
+				randomX = Math.random() - 0.5;
+				randomY = Math.random() - 0.5;
+			}
+
+			var distanceY = ((coords.h - pieceHeight) / 2 - pieceHeight * y),
+				distanceX = ((coords.w - pieceWidth) / 2 - pieceWidth * x),
+				distanceXY = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2)),
+				endTop = parseInt(startTop - distanceY * distance + distanceXY * randomY),
+				endLeft = parseInt(startLeft - distanceX * distance + distanceXY * randomX)
+			;
+
+			// Create the animation objects for the piece
+			// These are separate anim objects so they can have different curves
+			var pieceSlide = baseFx.animateProperty({
+				node: piece,
+				duration: duration,
+				delay: delay,
+				easing: (args.easing || (args.unhide ? easingUtil.sinOut : easingUtil.circOut)),
+				beforeBegin: (args.unhide ? function(){
+						if(args.fade){
+							htmlUtil.style(piece, { opacity: "0"});
+						}
+						ps.top = endTop + "px";
+						ps.left = endLeft + "px";
+					} : undefined),
+				properties: {
+					top: (args.unhide ? { start: endTop, end: startTop } : { start: startTop, end: endTop }),
+					left: (args.unhide ? { start: endLeft, end: startLeft } : { start: startLeft, end: endLeft })
+				}
+			});
+			if(args.fade){
+				var pieceFade = baseFx.animateProperty({
+					node: piece,
+					duration: duration,
+					delay: delay,
+					easing: (args.fadeEasing || easingUtil.quadOut),
+					properties: {
+						opacity: (args.unhide ? { start: "0", end: "1" } : { start: "1", end: "0" })
+					}
+				});
+
+				// return both animations as an array
+				return (args.unhide ? [pieceFade, pieceSlide] : [pieceSlide, pieceFade]);
+			}else{
+				// Otherwise return only the slide animation
+				return pieceSlide;
+			}
+		};
+
+		var anim = dojoxFx._split(args);
+		if(args.unhide){
+			connectUtil.connect(anim, "onEnd", null, function(){
+				htmlUtil.style(node, {opacity: "1" });
+			});
+		}else{
+			connectUtil.connect(anim, "onPlay", null, function(){
+				htmlUtil.style(node, { opacity: "0" });
+			});
+		}
+		return anim; // dojo.Animation
+	},
+
+	converge: function(/*Object*/ args){
+		args.unhide = true;
+		return dojoxFx.explode(args);
+	},
+
+	disintegrate: function(/*Object*/ args){
+		// summary:
+		//		Split a node into rectangular pieces and let them fall
+		// description:
+		//		Returns an animation that will split the node into a grid
+		//		of pieces that drop.
+		// args:
+		//		- args.rows: Integer - The number of horizontal pieces (default is 5)
+		//		- args.columns: Integer - The number of vertical pieces (default is 5)
+		//		- args.interval: Float - The number of milliseconds between each piece's animation
+		//		- args.distance: Float - The number of the node's heights to drop (default is 1.5)
+		//		- args.fade: Boolean - If true, pieces fade out while in motion (default is true)
+		//		- args.random: Float - If set, pieces fall in random order. The value defines how much
+		//							   randomness is introduced.
+		//		- args.reverseOrder: Boolean - If true, pieces animate in reversed order
+		//		- args.unhide: Boolean - If true, the peices fall from above and land in place
+		var node = args.node = dom.byId(args.node);
+
+		args.rows = args.rows || 5;
+		args.columns = args.columns || 5;
+		args.duration = args.duration || 1500;
+		args.interval = args.interval || args.duration / (args.rows + args.columns * 2);
+		args.distance = args.distance || 1.5;
+		args.random = args.random || 0;
+		if(typeof args.fade == "undefined"){
+			args.fade = true;
+		}
+
+		var random = Math.abs(args.random),
+			duration = args.duration - (args.rows + args.columns) * args.interval;
+
+		// Returns the animation object for each piece
+		args.pieceAnimation = function(piece, x, y, coords){
+
+			var randomDelay = Math.random() * (args.rows + args.columns) * args.interval,
+				ps = piece.style,
+
+			// If distance is negative, start from the top right instead of bottom left
+				uniformDelay = (args.reverseOrder || args.distance < 0) ?
+					((x + y) * args.interval) :
+					(((args.rows + args.columns) - (x + y)) * args.interval),
+				delay = randomDelay * random + Math.max(1 - random, 0) * uniformDelay,
+			// Create the animation object for the piece
+				properties = {}
+			;
+			if(args.unhide){
+				properties.top = {
+					start: (parseInt(ps.top) - coords.h * args.distance),
+					end: parseInt(ps.top)
+				};
+				if(args.fade){
+					properties.opacity = {start: "0", end: "1"};
+				}
+			}else{
+				properties.top = {end: (parseInt(ps.top) + coords.h * args.distance)};
+				if(args.fade){
+					properties.opacity = {end: "0"};
+				}
+			}
+			var pieceAnimation = baseFx.animateProperty({
+				node: piece,
+				duration: duration,
+				delay: delay,
+				easing: (args.easing || (args.unhide ? easingUtil.sinIn : easingUtil.circIn)),
+				properties: properties,
+				beforeBegin: (args.unhide ? function(){
+					if(args.fade){
+						htmlUtil.style(piece, { opacity: "0" });
+					}
+					ps.top = properties.top.start + "px";
+				} : undefined)
+			});
+
+			return pieceAnimation;
+		};
+
+		var anim = dojoxFx._split(args);
+		if(args.unhide){
+			connectUtil.connect(anim, "onEnd", anim, function(){
+				htmlUtil.style(node, { opacity: "1" });
+			});
+		}else{
+			connectUtil.connect(anim, "onPlay", anim, function(){
+				htmlUtil.style(node, { opacity: "0" });
+			});
+		}
+		return anim; // dojo.Animation
+	},
+
+	build: function(/*Object*/ args){
+		args.unhide = true;
+		return dojoxFx.disintegrate(args);
+	},
+
+	shear: function(/*Object*/ args){
+		// summary:
+		//		Split a node into rectangular pieces and slide them in alternating directions
+		// description:
+		//		Returns an animation that will split the node into a grid
+		//		of pieces that slide in alternating directions.
+		// args:
+		//		- args.rows: Integer - The number of horizontal pieces (default is 6)
+		//		- args.columns: Integer - The number of vertical pieces (default is 6)
+		//		- args.interval: Float - The number of milliseconds between each piece's animation (default is 0)
+		//		- args.distance: Float - The multiple of the node's dimensions to slide (default is 1)
+		//		- args.fade: Boolean - If true, pieces fade out while in motion (default is true)
+		//		- args.random: Float - If true, pieces have a random delay. The value defines how much
+		//							   randomness is introduced
+		//		- args.reverseOrder: Boolean - If true, pieces animate in reversed order
+		//		- args.unhide: Boolean - If true, the animation is reversed
+
+		var node = args.node = dom.byId(args.node);
+
+		args.rows = args.rows || 6;
+		args.columns = args.columns || 6;
+		args.duration = args.duration || 1000;
+		args.interval = args.interval || 0;
+		args.distance = args.distance || 1;
+		args.random = args.random || 0;
+		if(typeof(args.fade) == "undefined"){
+			args.fade = true;
+		}
+		var random = Math.abs(args.random),
+			duration = (args.duration - (args.rows + args.columns) * Math.abs(args.interval))
+		;
+
+		// Returns the animation object for each piece
+		args.pieceAnimation = function(piece, x, y, coords){
+
+			// Since x an y start at 0, the opposite is true...
+			var colIsOdd = !(x % 2),
+				rowIsOdd = !(y % 2),
+				randomDelay = Math.random() * duration,
+				uniformDelay = (args.reverseOrder) ?
+					(((args.rows + args.columns) - (x + y)) * args.interval) :
+					((x + y) * args.interval),
+				delay = randomDelay * random + Math.max(1 - random, 0) * uniformDelay,
+				properties = {},
+				ps = piece.style
+			;
+
+			if(args.fade){
+				properties.opacity = (args.unhide ? { start: "0", end: "1" } : { end: "0" });
+			}
+
+			// If we have only rows or columns, ignore the other dimension
+			if(args.columns == 1){
+				colIsOdd = rowIsOdd;
+			}else if(args.rows == 1){
+				rowIsOdd = !colIsOdd;
+			}
+
+			// Determine the piece's direction
+			var left = parseInt(ps.left),
+				top = parseInt(ps.top),
+				distanceX = args.distance*coords.w,
+				distanceY = args.distance*coords.h
+			;
+			if(args.unhide){
+				if(colIsOdd == rowIsOdd){
+					properties.left = colIsOdd ? {start: (left - distanceX), end: left} : {start: (left + distanceX), end: left};
+				}else{
+					properties.top = colIsOdd ? {start: (top + distanceY), end: top} : {start: (top - distanceY), end: top};
+				}
+			}else{
+				if(colIsOdd == rowIsOdd){
+					properties.left = colIsOdd ? {end: (left - distanceX)} : {end: (left + distanceX)};
+				}else{
+					properties.top = colIsOdd ? {end: (top + distanceY)} : {end: (top - distanceY)};
+				}
+			}
+
+			// Create the animation object for the piece
+			var pieceAnimation = baseFx.animateProperty({
+				node: piece,
+				duration: duration,
+				delay: delay,
+				easing: (args.easing || easingUtil.sinInOut),
+				properties: properties,
+				beforeBegin: (args.unhide ? function(){
+					if(args.fade){
+						ps.opacity = "0";
+					}
+					if(colIsOdd == rowIsOdd){
+						ps.left = properties.left.start + "px";
+					}else{
+						ps.top = properties.top.start + "px";
+					}
+				} : undefined)
+			});
+
+			return pieceAnimation;
+		};
+
+		var anim = dojoxFx._split(args);
+		if(args.unhide){
+			connectUtil.connect(anim, "onEnd", anim, function(){
+				htmlUtil.style(node, { opacity: "1" });
+			});
+		}else{
+			connectUtil.connect(anim, "onPlay", anim, function(){
+				htmlUtil.style(node, { opacity: "0" });
+			});
+		}
+		return anim; // dojo.Animation
+	},
+
+	unShear: function(/*Object*/ args){
+		args.unhide = true;
+		return dojoxFx.shear(args);
+	},
+
+	pinwheel: function(/*Object*/ args){
+		// summary:
+		//		Split a node into rectangular pieces and wipe them in alternating directions
+		// description:
+		//		Returns an animation that will split the node into a grid
+		//		of pieces that wipe in alternating directions.
+		// args:
+		//		- args.rows: Integer - The number of horizontal pieces (default is 4)
+		//		- args.columns: Integer - The number of vertical pieces (default is 4)
+		//		- args.interval: Float - The number of milliseconds between each piece's animation (default is 0)
+		//		- args.distance: Float - The percentage of the piece's dimensions the piece should wipe
+		//		- args.fade: Boolean - If true, pieces fade out while in motion (default is true)
+		//		- args.random: Float - If true, pieces have a random delay. The value defines how much
+		//							   randomness is introduced.
+		//		- args.unhide: Boolean - If true, the animation is reversed
+
+		var node = args.node = dom.byId(args.node);
+
+		args.rows = args.rows || 4;
+		args.columns = args.columns || 4;
+		args.duration = args.duration || 1000;
+		args.interval = args.interval || 0;
+		args.distance = args.distance || 1;
+		args.random = args.random || 0;
+		if(typeof args.fade == "undefined"){
+			args.fade = true;
+		}
+		var duration = (args.duration - (args.rows + args.columns) * Math.abs(args.interval));
+
+		// Returns the animation object for each piece
+		args.pieceAnimation = function(piece, x, y, coords){
+			var pieceHeight = coords.h / args.rows,
+				pieceWidth = coords.w / args.columns,
+
+				// because x an y start at 0, the opposite is true...
+				colIsOdd = !(x % 2),
+				rowIsOdd = !(y % 2),
+
+				randomDelay = Math.random() * duration,
+				uniformDelay = (args.interval < 0) ?
+					(((args.rows + args.columns) - (x + y)) * args.interval * -1) :
+					((x + y) * args.interval),
+				delay = randomDelay * args.random + Math.max(1 - args.random, 0) * uniformDelay,
+				properties = {},
+				ps = piece.style
+			;
+
+			if(args.fade){
+				properties.opacity = (args.unhide ? {start: 0, end: 1} : {end:0});
+			}
+
+			// If we have only rows or columns, ignore the other dimension
+			if(args.columns == 1){
+				colIsOdd = !rowIsOdd;
+			}else if(args.rows == 1){
+				rowIsOdd = colIsOdd;
+			}
+
+			// Determine the piece's direction
+			var left = parseInt(ps.left),
+				top = parseInt(ps.top)
+			;
+			if(colIsOdd){
+				if(rowIsOdd){
+					properties.top = args.unhide ?
+						{ start: top + pieceHeight * args.distance, end: top} :
+						{ start: top, end: top + pieceHeight * args.distance} ;
+				}else{
+					properties.left = args.unhide ?
+						{ start: left + pieceWidth * args.distance, end: left } :
+						{ start: left, end: left + pieceWidth * args.distance } ;
+				}
+			}
+			if(colIsOdd != rowIsOdd){
+				properties.width = args.unhide ?
+					{ start: pieceWidth * (1 - args.distance), end: pieceWidth } :
+					{ start: pieceWidth, end: pieceWidth * (1 - args.distance) } ;
+			}else{
+				properties.height = args.unhide ?
+					{ start: pieceHeight * (1 - args.distance), end: pieceHeight } :
+					{ start: pieceHeight, end: pieceHeight * (1 - args.distance) } ;
+			}
+
+			// Create the animation object for the piece
+			var pieceAnimation = baseFx.animateProperty({
+				node: piece,
+				duration: duration,
+				delay: delay,
+				easing: (args.easing || easingUtil.sinInOut),
+				properties: properties,
+				beforeBegin: (args.unhide ? function(){
+					if(args.fade){
+						htmlUtil.style(piece, "opacity", 0);
+					}
+					if(colIsOdd){
+						if(rowIsOdd){
+							ps.top = (top + pieceHeight * (1 - args.distance)) + "px";
+						}else{
+							ps.left = (left + pieceWidth * (1 - args.distance)) + "px";
+						}
+					}else{
+						ps.left = left + "px";
+						ps.top = top + "px";
+					}
+					if(colIsOdd != rowIsOdd){
+						ps.width = (pieceWidth * (1 - args.distance)) + "px";
+					}else{
+						ps.height = (pieceHeight * (1 - args.distance)) + "px";
+					}
+				} : undefined)
+			});
+
+			return pieceAnimation;
+		};
+
+		var anim = dojoxFx._split(args);
+		if(args.unhide){
+			connectUtil.connect(anim, "onEnd", anim, function(){
+				htmlUtil.style(node, { opacity: "1" });
+			});
+		}else{
+			connectUtil.connect(anim, "play", anim, function(){
+				htmlUtil.style(node, { opacity: "0" });
+			});
+		}
+		return anim; // dojo.Animation
+	},
+
+	unPinwheel: function(/*Object*/ args){
+		args.unhide = true;
+		return dojoxFx.pinwheel(args); // dojo.Animation
+	},
+
+	blockFadeOut: function(/*Object*/ args){
+		// summary:
+		//		Split a node into rectangular pieces and fade them
+		// description:
+		//		Returns an animation that will split the node into a grid
+		//		of pieces that fade in or out.
+		// args:
+		//		- args.rows: Integer - The number of horizontal pieces (default is 5)
+		//		- args.columns: Integer - The number of vertical pieces (default is 5)
+		//		- args.interval: Float - The number of milliseconds between each piece's animation (default is 0)
+		//		- args.random: Float - If true, pieces have a random delay. The value defines how much
+		//							   randomness is introduced
+		//		- args.reverseOrder: Boolean - If true, pieces animate in reversed order
+		//		- args.unhide: Boolean - If true, the animation is reversed
+
+		var node = args.node = dom.byId(args.node);
+
+		args.rows = args.rows || 5;
+		args.columns = args.columns || 5;
+		args.duration = args.duration || 1000;
+		args.interval = args.interval || args.duration / (args.rows + args.columns * 2);
+		args.random = args.random || 0;
+		var random = Math.abs(args.random),
+			duration = args.duration - (args.rows + args.columns) * args.interval
+		;
+
+		// Returns the animation object for each piece
+		args.pieceAnimation = function(piece, x, y, coords){
+			var randomDelay = Math.random() * args.duration,
+				uniformDelay = (args.reverseOrder) ?
+					(((args.rows + args.columns) - (x + y)) * Math.abs(args.interval)) :
+					((x + y) * args.interval),
+				delay = randomDelay * random + Math.max(1 - random, 0) * uniformDelay,
+			// Create the animation object for the piece
+				pieceAnimation = baseFx.animateProperty({
+					node: piece,
+					duration: duration,
+					delay: delay,
+					easing: (args.easing || easingUtil.sinInOut),
+					properties: {
+						opacity: (args.unhide ? {start: "0", end: "1"} : {start: "1", end: "0"})
+					},
+					beforeBegin: (args.unhide ? function(){ htmlUtil.style(piece, { opacity: "0" });} : function(){ piece.style.filter = ""; })
+				});
+
+			return pieceAnimation;
+		};
+		var anim = dojoxFx._split(args);
+		if(args.unhide){
+			connectUtil.connect(anim, "onEnd", anim, function(){
+				htmlUtil.style(node, { opacity: "1" });
+			});
+		}else{
+			connectUtil.connect(anim, "onPlay", anim, function(){
+				htmlUtil.style(node, { opacity: "0" });
+			});
+		}
+		return anim; // dojo.Animation
+	},
+
+	blockFadeIn: function(/*Object*/ args){
+		args.unhide = true;
+		return dojoxFx.blockFadeOut(args); // dojo.Animation
+	}
+});
+return fxExt;
+});

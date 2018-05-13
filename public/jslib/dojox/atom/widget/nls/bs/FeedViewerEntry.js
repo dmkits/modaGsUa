@@ -1,3 +1,6 @@
-//>>built
-define("dojox/atom/widget/nls/bs/FeedViewerEntry",{deleteButton:"[Izbri\u0161i]"});
-//# sourceMappingURL=FeedViewerEntry.js.map
+define({      
+//begin v1.x content
+	deleteButton: "[Izbriši]"
+//end v1.x content
+});
+

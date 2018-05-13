@@ -1,3 +1,14 @@
-//>>built
-define("dojox/charting/plot2d/ClusteredColumns",["dojo/_base/declare","dojo/_base/array","./Columns","./common"],function(c,d,e,f){return c("dojox.charting.plot2d.ClusteredColumns",e,{getBarProperties:function(){var b=this.series.length;d.forEach(this.series,function(a){a.hidden&&b--});var a=f.calculateBarSize(this._hScaler.bounds.scale,this.opt,b);return{gap:a.gap,width:a.size,thickness:a.size,clusterSize:b}}})});
-//# sourceMappingURL=ClusteredColumns.js.map
+define(["dojo/_base/declare", "dojo/_base/array", "./Columns", "./common"], 
+	function(declare, array, Columns, dc){
+
+	return declare("dojox.charting.plot2d.ClusteredColumns", Columns, {
+		// summary:
+		//		A plot representing grouped or clustered columns (vertical bars)
+		getBarProperties: function(){
+			var length = this.series.length;
+			array.forEach(this.series, function(serie){if(serie.hidden){length--;}});
+			var f = dc.calculateBarSize(this._hScaler.bounds.scale, this.opt, length);
+			return {gap: f.gap, width: f.size, thickness: f.size, clusterSize: length};
+		}
+	});
+});

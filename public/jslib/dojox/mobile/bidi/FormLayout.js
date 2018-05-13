@@ -1,3 +1,18 @@
-//>>built
-define("dojox/mobile/bidi/FormLayout",["dojo/_base/declare","dojo/dom-class"],function(a,b){return a(null,{buildRendering:function(){this.inherited(arguments);!this.isLeftToRight()&&this.rightAlign&&b.add(this.domNode,"mblFormLayoutRightAlignRtl")}})});
-//# sourceMappingURL=FormLayout.js.map
+define([
+	"dojo/_base/declare",
+	"dojo/dom-class"
+], function(declare, domClass){
+
+	// module:
+	//		mobile/bidi/FormLayout
+
+	return declare(null, {
+
+		buildRendering:function(){
+			this.inherited(arguments);
+			if(!this.isLeftToRight() && this.rightAlign){
+				domClass.add(this.domNode, "mblFormLayoutRightAlignRtl");
+			}
+		}
+	});
+});

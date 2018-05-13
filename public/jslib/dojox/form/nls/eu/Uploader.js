@@ -1,3 +1,6 @@
-//>>built
-define("dojox/form/nls/eu/Uploader",{label:"Hautatu fitxategiak..."});
-//# sourceMappingURL=Uploader.js.map
+define({      
+//begin v1.x content
+	label: "Hautatu fitxategiak..."
+//end v1.x content
+});
+

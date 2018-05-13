@@ -1,4 +1,51 @@
-//>>built
-define("dojox/encoding/easy64",["dojo/_base/lang"],function(c){c=c.getObject("dojox.encoding.easy64",!0);var g=function(a,e,f){for(var b=0;b<e;b+=3)f.push(String.fromCharCode((a[b]>>>2)+33),String.fromCharCode(((a[b]&3)<<4)+(a[b+1]>>>4)+33),String.fromCharCode(((a[b+1]&15)<<2)+(a[b+2]>>>6)+33),String.fromCharCode((a[b+2]&63)+33))};c.encode=function(a){var e=[],f=a.length%3,b=a.length-f;g(a,b,e);if(f){for(a=a.slice(b);3>a.length;)a.push(0);g(a,3,e);for(a=3;a>f;e.pop(),--a);}return e.join("")};c.decode=
-function(a){var e=a.length,f=[],b=[0,0,0,0],c,d,g;for(c=0;c<e;c+=4){for(d=0;4>d;++d)b[d]=a.charCodeAt(c+d)-33;for(d=g=e-c;4>d;b[++d]=0);f.push((b[0]<<2)+(b[1]>>>4),((b[1]&15)<<4)+(b[2]>>>2),((b[2]&3)<<6)+b[3]);for(d=g;4>d;++d,f.pop());}return f};return c});
-//# sourceMappingURL=easy64.js.map
+define(["dojo/_base/lang"], function(lang) {
+	var easy64 = lang.getObject("dojox.encoding.easy64", true);
+	var c = function(input, length, result){
+		for(var i = 0; i < length; i += 3){
+			result.push(
+				String.fromCharCode((input[i] >>> 2) + 33),
+				String.fromCharCode(((input[i] & 3) << 4) + (input[i + 1] >>> 4) + 33),
+				String.fromCharCode(((input[i + 1] & 15) << 2) + (input[i + 2] >>> 6) + 33),
+				String.fromCharCode((input[i + 2] & 63) + 33)
+			);
+		}
+	};
+
+	easy64.encode = function(input){
+		// summary:
+		//		encodes input data in easy64 string
+		// input: Array
+		//		an array of numbers (0-255) to encode
+		var result = [], reminder = input.length % 3, length = input.length - reminder;
+		c(input, length, result);
+		if(reminder){
+			var t = input.slice(length);
+			while(t.length < 3){ t.push(0); }
+			c(t, 3, result);
+			for(var i = 3; i > reminder; result.pop(), --i);
+		}
+		return result.join("");	// String
+	};
+
+	easy64.decode = function(input){
+		// summary:
+		//		decodes the input string back to array of numbers
+		// input: String
+		//		the input string to decode
+		var n = input.length, r = [], b = [0, 0, 0, 0], i, j, d;
+		for(i = 0; i < n; i += 4){
+			for(j = 0; j < 4; ++j){ b[j] = input.charCodeAt(i + j) - 33; }
+			d = n - i;
+			for(j = d; j < 4; b[++j] = 0);
+			r.push(
+				(b[0] << 2) + (b[1] >>> 4),
+				((b[1] & 15) << 4) + (b[2] >>> 2),
+				((b[2] & 3) << 6) + b[3]
+			);
+			for(j = d; j < 4; ++j, r.pop());
+		}
+		return r;
+	};
+
+	return easy64;
+});

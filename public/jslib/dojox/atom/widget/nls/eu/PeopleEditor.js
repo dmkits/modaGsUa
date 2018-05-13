@@ -1,3 +1,8 @@
-//>>built
-define("dojox/atom/widget/nls/eu/PeopleEditor",{add:"Gehitu",addAuthor:"Gehitu egilea",addContributor:"Gehitu kolaboratzailea"});
-//# sourceMappingURL=PeopleEditor.js.map
+define({      
+//begin v1.x content
+	add: "Gehitu",
+	addAuthor: "Gehitu egilea",
+	addContributor: "Gehitu kolaboratzailea"
+//end v1.x content
+});
+

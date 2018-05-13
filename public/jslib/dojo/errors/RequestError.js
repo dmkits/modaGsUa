@@ -1,9 +1,15 @@
-/*
-	Copyright (c) 2004-2016, The JS Foundation All Rights Reserved.
-	Available via Academic Free License >= 2.1 OR the modified BSD license.
-	see: http://dojotoolkit.org/license for details
-*/
+define(['./create'], function(create){
+	// module:
+	//		dojo/errors/RequestError
 
-//>>built
-define("dojo/errors/RequestError",["./create"],function(a){return a("RequestError",function(a,b){this.response=b})});
-//# sourceMappingURL=RequestError.js.map
+	/*=====
+	 return function(){
+		 // summary:
+		 //		TODOC
+	 };
+	 =====*/
+
+	return create("RequestError", function(message, response){
+		this.response = response;
+	});
+});

@@ -1,5 +1,75 @@
-//>>built
-define("dojox/mvc/parserExtension","require dojo/_base/kernel dojo/_base/lang dojo/has!dojo-parser?:dojo/_base/window dojo/has dojo/has!dojo-mobile-parser?:dojo/parser dojo/has!dojo-parser?:dojox/mobile/parser dojox/mvc/_atBindingMixin dojox/mvc/Element".split(" "),function(p,f,q,r,c,a,n,g){c.add("dom-qsa",!!document.createElement("div").querySelectorAll);try{c.add("dojo-parser",!!p("dojo/parser"))}catch(d){}try{c.add("dojo-mobile-parser",!!p("dojox/mobile/parser"))}catch(d){}if(c("dojo-parser")){var u=
-a.scan;a.scan=function(d,t){return u.apply(this,q._toArray(arguments)).then(function(h){for(var k=(t.scope||f._scopeName)+"Type",e="data-"+(t.scope||f._scopeName)+"-type",l=c("dom-qsa")?d.querySelectorAll("["+g.prototype.dataBindAttr+"]"):d.getElementsByTagName("*"),b=0,a=l.length;b<a;b++){var m=l[b];m.getAttribute(e)||m.getAttribute(k)||!m.getAttribute(g.prototype.dataBindAttr)||h.push({types:["dojox/mvc/Element"],node:m})}return h})}}if(c("dojo-mobile-parser")){var v=n.parse;n.parse=function(d,
-a){var h=((a||{}).scope||f._scopeName)+"Type",k="data-"+((a||{}).scope||f._scopeName)+"-type";nodes=c("dom-qsa")?(d||r.body()).querySelectorAll("["+g.prototype.dataBindAttr+"]"):(d||r.body()).getElementsByTagName("*");for(var e=0,l=nodes.length;e<l;e++){var b=nodes[e];b.getAttribute(k)||b.getAttribute(h)||!b.getAttribute(g.prototype.dataBindAttr)||b.setAttribute(k,"dojox/mvc/Element")}return v.apply(this,q._toArray(arguments))}}return a||n});
-//# sourceMappingURL=parserExtension.js.map
+define([
+	"require",
+	"dojo/_base/kernel",
+	"dojo/_base/lang",
+	"dojo/has!dojo-parser?:dojo/_base/window",
+	"dojo/has",
+	"dojo/has!dojo-mobile-parser?:dojo/parser",
+	"dojo/has!dojo-parser?:dojox/mobile/parser",
+	"dojox/mvc/_atBindingMixin",
+	"dojox/mvc/Element"
+], function(require, kernel, lang, win, has, parser, mobileParser, _atBindingMixin){
+
+	// module:
+	//		dojox/mvc/parserExtension
+	// summary:
+	//		A extension of Dojo parser that allows data binding without specifying data-dojo-type.
+
+	has.add("dom-qsa", !!document.createElement("div").querySelectorAll);
+	try{ has.add("dojo-parser", !!require("dojo/parser"));  }catch(e){}
+	try{ has.add("dojo-mobile-parser", !!require("dojox/mobile/parser")); }catch(e){}
+
+	if(has("dojo-parser")){
+		var oldScan = parser.scan;
+
+		parser.scan = function(/*DOMNode?*/ root, /*Object*/ options){
+			// summary:
+			//		Find list of DOM nodes that has data-dojo-bind, but not data-dojo-type.
+			//		And add them to list of DOM nodes to instantiate widget (dojox/mvc/Element).
+
+			return oldScan.apply(this, lang._toArray(arguments)).then(function(list){
+				var dojoType = (options.scope || kernel._scopeName) + "Type",			// typically "dojoType"
+				 attrData = "data-" + (options.scope || kernel._scopeName) + "-",	// typically "data-dojo-"
+				 dataDojoType = attrData + "type";									// typically "data-dojo-type"
+
+				for(var nodes = has("dom-qsa") ? root.querySelectorAll("[" + _atBindingMixin.prototype.dataBindAttr + "]") : root.getElementsByTagName("*"), i = 0, l = nodes.length; i < l; i++){
+					var node = nodes[i], foundBindingInAttribs = false;
+					if(!node.getAttribute(dataDojoType) && !node.getAttribute(dojoType) && node.getAttribute(_atBindingMixin.prototype.dataBindAttr)){
+						list.push({
+							types: ["dojox/mvc/Element"],
+							node: node
+						});
+					}
+				}
+
+				return list;
+			});
+		};
+	}
+
+	if(has("dojo-mobile-parser")){
+		var oldParse = mobileParser.parse;
+
+		mobileParser.parse = function(/*DOMNode?*/ root, /*Object*/ options){
+			// summary:
+			//		Find list of DOM nodes that has data-dojo-bind, but not data-dojo-type.
+			//		Set dojox/mvc/Element to their data-dojo-type.
+
+			var dojoType = ((options || {}).scope || kernel._scopeName) + "Type",		// typically "dojoType"
+			 attrData = "data-" + ((options || {}).scope || kernel._scopeName) + "-",	// typically "data-dojo-"
+			 dataDojoType = attrData + "type";											// typically "data-dojo-type"
+			 nodes = has("dom-qsa") ? (root || win.body()).querySelectorAll("[" + _atBindingMixin.prototype.dataBindAttr + "]") : (root || win.body()).getElementsByTagName("*");
+
+			for(var i = 0, l = nodes.length; i < l; i++){
+				var node = nodes[i], foundBindingInAttribs = false, bindingsInAttribs = [];
+				if(!node.getAttribute(dataDojoType) && !node.getAttribute(dojoType) && node.getAttribute(_atBindingMixin.prototype.dataBindAttr)){
+					node.setAttribute(dataDojoType, "dojox/mvc/Element");
+				}
+			}
+
+			return oldParse.apply(this, lang._toArray(arguments));
+		};
+	}
+
+	return parser || mobileParser;
+});

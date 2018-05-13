@@ -1,2 +1,109 @@
-//>>built
-require({cache:{"dijit/main":function(){define(["dojo/_base/kernel"],function(_1){return _1.dijit;});},"dojox/main":function(){define(["dojo/_base/kernel"],function(_2){return _2.dojox;});},"dojo/require":function(){define(["./_base/loader"],function(_3){return {dynamic:0,normalize:function(id){return id;},load:_3.require};});},"dojox/mobile/compat":function(){define(["dojo/_base/lang","dojo/sniff"],function(_4,_5){var dm=_4.getObject("dojox.mobile",true);if(!(_5("webkit")||_5("ie")===10)||(!_5("ie")&&_5("trident")>6)){var s="dojox/mobile/_compat";require([s]);}return dm;});}}});define("dojox/mobile/app/compat",["dojo","dijit","dojox","dojo/require!dojox/mobile/compat"],function(_6,_7,_8){_6.provide("dojox.mobile.app.compat");_6.require("dojox.mobile.compat");_6.extend(_8.mobile.app.AlertDialog,{_doTransition:function(_9){var h=_6.marginBox(this.domNode.firstChild).h;var _a=this.controller.getWindowSize().h;var _b=_a-h;var _c=_a;var _d=_6.fx.slideTo({node:this.domNode,duration:400,top:{start:_9<0?_b:_c,end:_9<0?_c:_b}});var _e=_6[_9<0?"fadeOut":"fadeIn"]({node:this.mask,duration:400});var _f=_6.fx.combine([_d,_e]);var _10=this;_6.connect(_f,"onEnd",this,function(){if(_9<0){_10.domNode.style.display="none";_6.destroy(_10.domNode);_6.destroy(_10.mask);}});_f.play();}});_6.extend(_8.mobile.app.List,{deleteRow:function(){var row=this._selectedRow;_6.style(row,{visibility:"hidden",minHeight:"0px"});_6.removeClass(row,"hold");var _11=_6.contentBox(row).h;_6.animateProperty({node:row,duration:800,properties:{height:{start:_11,end:1},paddingTop:{end:0},paddingBottom:{end:0}},onEnd:this._postDeleteAnim}).play();}});if(_8.mobile.app.ImageView&&!_6.create("canvas").getContext){_6.extend(_8.mobile.app.ImageView,{buildRendering:function(){this.domNode.innerHTML="ImageView widget is not supported on this browser."+"Please try again with a modern browser, e.g. "+"Safari, Chrome or Firefox";this.canvas={};},postCreate:function(){}});}if(_8.mobile.app.ImageThumbView){_6.extend(_8.mobile.app.ImageThumbView,{place:function(_12,x,y){_6.style(_12,{top:y+"px",left:x+"px",visibility:"visible"});}});}});
+dojo.provide("dojox.mobile.app.compat");
+dojo.require("dojox.mobile.compat");
+
+// summary:
+//		CSS3 compatibility module for apps
+// description:
+//		This module provides support for some of the CSS3 features to djMobile
+//		for non-CSS3 browsers, such as IE or Firefox.
+//		If you load this module, it directly replaces some of the methods of
+//		djMobile instead of subclassing. This way, html pages remains the same
+//		regardless of whether this compatibility module is used or not.
+//		Recommended usage is as follows. the code below loads dojox.mobile.compat
+//		only when isWebKit is true.
+//
+//		dojo.require("dojox.mobile");
+//		dojo.requireIf(!dojo.isWebKit, "dojox.mobile.appCompat");
+
+dojo.extend(dojox.mobile.app.AlertDialog, {
+	_doTransition: function(dir){
+		console.log("in _doTransition and this = ", this);
+
+		var h = dojo.marginBox(this.domNode.firstChild).h;
+
+		var bodyHeight = this.controller.getWindowSize().h;
+	
+		var high = bodyHeight - h;
+		var low = bodyHeight;
+
+		var anim1 = dojo.fx.slideTo({
+			node: this.domNode,
+			duration: 400,
+			top: {start: dir < 0 ? high : low, end: dir < 0 ? low: high}
+		});
+
+		var anim2 = dojo[dir < 0 ? "fadeOut" : "fadeIn"]({
+			node: this.mask,
+			duration: 400
+		});
+	
+		var anim = dojo.fx.combine([anim1, anim2]);
+	
+		var _this = this;
+
+		dojo.connect(anim, "onEnd", this, function(){
+			if(dir < 0){
+				_this.domNode.style.display = "none";
+				dojo.destroy(_this.domNode);
+				dojo.destroy(_this.mask);
+			}
+		});
+		anim.play();
+	}
+});
+
+dojo.extend(dojox.mobile.app.List, {
+	deleteRow: function(){
+		console.log("deleteRow in compat mode", row);
+	
+		var row = this._selectedRow;
+		// First make the row invisible
+		// Put it back where it came from
+		dojo.style(row, {
+			visibility: "hidden",
+			minHeight: "0px"
+		});
+		dojo.removeClass(row, "hold");
+	
+	
+		// Animate reducing it's height to zero, then delete the data from the
+		// array
+		var height = dojo.contentBox(row).h;
+		dojo.animateProperty({
+				node: row,
+				duration: 800,
+				properties: {
+				height: {start: height, end: 1},
+				paddingTop: {end: 0},
+				paddingBottom: {end: 0}
+			},
+			onEnd: this._postDeleteAnim
+		}).play();
+	}
+});
+
+if(dojox.mobile.app.ImageView && !dojo.create("canvas").getContext){
+	dojo.extend(dojox.mobile.app.ImageView, {
+		buildRendering: function(){
+			this.domNode.innerHTML =
+				"ImageView widget is not supported on this browser."
+				+ "Please try again with a modern browser, e.g. "
+				+ "Safari, Chrome or Firefox";
+			this.canvas = {};
+		},
+		
+		postCreate: function(){}
+	});
+}
+
+if(dojox.mobile.app.ImageThumbView){
+	dojo.extend(dojox.mobile.app.ImageThumbView, {
+		place: function(node, x, y){
+			dojo.style(node, {
+				top: y + "px",
+				left: x + "px",
+				visibility: "visible"
+			});
+		}
+	})
+}

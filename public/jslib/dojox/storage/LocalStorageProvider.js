@@ -1,7 +1,204 @@
-//>>built
-define("dojox/storage/LocalStorageProvider","dojo/_base/declare dojox/storage/Provider dojox/storage/manager dojo/_base/array dojo/_base/lang dojo/json".split(" "),function(f,k,g,l,m,h){f=f("dojox.storage.LocalStorageProvider",[k],{store:null,initialize:function(){this.store=localStorage;this.initialized=!0;g.loaded()},isAvailable:function(){return"undefined"!=typeof localStorage},put:function(a,b,c,d){this._assertIsValidKey(a);d=d||this.DEFAULT_NAMESPACE;this._assertIsValidNamespace(d);var e=this.getFullKey(a,
-d);b=h.stringify(b);try{this.store.setItem(e,b),c&&c(this.SUCCESS,a,null,d)}catch(n){c&&c(this.FAILED,a,n.toString(),d)}},get:function(a,b){this._assertIsValidKey(a);b=b||this.DEFAULT_NAMESPACE;this._assertIsValidNamespace(b);a=this.getFullKey(a,b);return h.parse(this.store.getItem(a))},getKeys:function(a){a=a||this.DEFAULT_NAMESPACE;this._assertIsValidNamespace(a);a="__"+a+"_";for(var b=[],c=0;c<this.store.length;c++){var d=this.store.key(c);this._beginsWith(d,a)&&(d=d.substring(a.length),b.push(d))}return b},
-clear:function(a){a=a||this.DEFAULT_NAMESPACE;this._assertIsValidNamespace(a);a="__"+a+"_";for(var b=[],c=0;c<this.store.length;c++)this._beginsWith(this.store.key(c),a)&&b.push(this.store.key(c));l.forEach(b,m.hitch(this.store,"removeItem"))},remove:function(a,b){b=b||this.DEFAULT_NAMESPACE;this._assertIsValidNamespace(b);this.store.removeItem(this.getFullKey(a,b))},getNamespaces:function(){var a=[this.DEFAULT_NAMESPACE],b={};b[this.DEFAULT_NAMESPACE]=!0;for(var c=/^__([^_]*)_/,d=0;d<this.store.length;d++){var e=
-this.store.key(d);1==c.test(e)&&(e=e.match(c)[1],"undefined"==typeof b[e]&&(b[e]=!0,a.push(e)))}return a},isPermanent:function(){return!0},getMaximumSize:function(){return dojox.storage.SIZE_NO_LIMIT},hasSettingsUI:function(){return!1},isValidKey:function(a){return null===a||void 0===a?!1:/^[0-9A-Za-z_-]*$/.test(a)},isValidNamespace:function(a){return null===a||void 0===a?!1:/^[0-9A-Za-z-]*$/.test(a)},getFullKey:function(a,b){return"__"+b+"_"+a},_beginsWith:function(a,b){return b.length>a.length?
-!1:a.substring(0,b.length)===b},_assertIsValidNamespace:function(a){if(!1===this.isValidNamespace(a))throw Error("Invalid namespace given: "+a);},_assertIsValidKey:function(a){if(!1===this.isValidKey(a))throw Error("Invalid key given: "+a);}});g.register("dojox.storage.LocalStorageProvider",new f);return f});
-//# sourceMappingURL=LocalStorageProvider.js.map
+define([
+	"dojo/_base/declare",
+	"dojox/storage/Provider",
+	"dojox/storage/manager",
+	"dojo/_base/array",
+	"dojo/_base/lang",
+	"dojo/json"
+], function(declare, Provider, storageManager, array, lang, JSON){
+	var LocalStorageProvider = declare("dojox.storage.LocalStorageProvider", [Provider], {
+		store: null,
+		initialize: function(){
+
+			this.store = localStorage;
+
+			this.initialized = true;
+			storageManager.loaded();
+		},
+
+		isAvailable: function(){ /*Boolean*/
+			return typeof localStorage != "undefined";
+		},
+
+		put: function(	/*string*/ key,
+						/*object*/ value,
+						/*function*/ resultsHandler,
+						/*string?*/ namespace){
+
+			// TODO: Use the events as specified in http://dev.w3.org/html5/webstorage/#the-storage-event ?
+			//	Currently, the storage event is not reliable around browsers.
+
+			this._assertIsValidKey(key);
+
+			namespace = namespace||this.DEFAULT_NAMESPACE;
+			this._assertIsValidNamespace(namespace);
+
+			var fullKey = this.getFullKey(key,namespace);
+
+			// prepending a prefix to a string value
+			// will result in that prefix not being
+			// usable as a value, so we better use
+			// toJson() always.
+			value = JSON.stringify(value);
+
+			try { // ua may raise an QUOTA_EXCEEDED_ERR exception
+				this.store.setItem(fullKey,value);
+
+				if(resultsHandler){
+					resultsHandler(this.SUCCESS, key, null, namespace);
+				}
+			} catch(e) {
+				if(resultsHandler){
+					resultsHandler(this.FAILED, key, e.toString(), namespace);
+				}
+			}
+		},
+
+		get: function(/*string*/ key, /*string?*/ namespace){ /*Object*/
+			this._assertIsValidKey(key);
+
+			namespace = namespace||this.DEFAULT_NAMESPACE;
+			this._assertIsValidNamespace(namespace);
+
+			// get our full key name, which is namespace + key
+			key = this.getFullKey(key, namespace);
+
+			return JSON.parse(this.store.getItem(key));
+		},
+
+		getKeys: function(/*string?*/ namespace){ /*Array*/
+			namespace = namespace||this.DEFAULT_NAMESPACE;
+			this._assertIsValidNamespace(namespace);
+
+			namespace = '__'+namespace+'_'
+
+			var keys = [];
+			for(var i = 0; i < this.store.length; i++){
+				var currentKey = this.store.key(i);
+				if(this._beginsWith(currentKey,namespace)){
+					currentKey = currentKey.substring(namespace.length);
+					keys.push(currentKey);
+				}
+			}
+
+			return keys;
+		},
+
+		clear: function(/*string?*/ namespace){
+			// Um, well, the 'specs' in Provider.js say that if
+			// no namespace is given, this method should nuke
+			// the *complete* storage. As other components might
+			// be using localStorage too, this might not be a
+			// good idea, so this method won't do it.
+
+			namespace = namespace||this.DEFAULT_NAMESPACE;
+			this._assertIsValidNamespace(namespace);
+
+			namespace = '__'+namespace+'_';
+
+			var keys = [];
+			for(var i = 0; i < this.store.length; i++){
+				if(this._beginsWith(this.store.key(i),namespace)){
+					keys.push(this.store.key(i));
+				}
+			}
+
+			array.forEach(keys, lang.hitch(this.store, "removeItem"));
+		},
+
+		remove: function(/*string*/ key, /*string?*/ namespace){
+			namespace = namespace||this.DEFAULT_NAMESPACE;
+			this._assertIsValidNamespace(namespace);
+
+			this.store.removeItem(this.getFullKey(key, namespace));
+		},
+
+		getNamespaces: function(){ /*string[]*/
+			// There must be a better way than
+			// to execute a regex on *every*
+			// item in the store.
+
+			var results = [ this.DEFAULT_NAMESPACE];
+
+			var found = {};
+			found[this.DEFAULT_NAMESPACE] = true;
+			var tester = /^__([^_]*)_/;
+
+			for(var i = 0; i < this.store.length; i++){
+				var currentKey = this.store.key(i);
+				if(tester.test(currentKey) == true){
+					var currentNS = currentKey.match(tester)[1];
+					if(typeof found[currentNS] == "undefined"){
+						found[currentNS] = true;
+						results.push(currentNS);
+					}
+				}
+			}
+
+			return results;
+		},
+
+		isPermanent: function(){ /*Boolean*/
+			return true;
+		},
+
+		getMaximumSize: function(){ /* mixed */
+			return dojox.storage.SIZE_NO_LIMIT;
+		},
+
+		hasSettingsUI: function(){ /*Boolean*/
+			return false;
+		},
+
+		isValidKey: function(/*string*/ keyName){ /*Boolean*/
+			if(keyName === null || keyName === undefined){
+				return false;
+			}
+
+			return /^[0-9A-Za-z_-]*$/.test(keyName);
+		},
+
+		isValidNamespace: function(/*string*/ keyName){ /*Boolean*/
+			// we *must* prevent namespaces from having
+			// underscores - else lookup of namespaces
+			// via RegEx (e.g. in getNamespaces ) would
+			// return wrong results.
+			//
+			// The only way around this would be to
+			// disallow underscores in keys.
+
+			if(keyName === null || keyName === undefined){
+				return false;
+			}
+
+			return /^[0-9A-Za-z-]*$/.test(keyName);
+		},
+
+		getFullKey: function(key, namespace){
+			// checks for valid namespace and
+			// key are already performed.
+			return "__" + namespace + "_" + key;
+		},
+
+		_beginsWith: function(/* string */ haystack, /* string */ needle) {
+			if(needle.length > haystack.length) {
+				return false;
+			}
+			return haystack.substring(0,needle.length) === needle;
+		},
+
+		_assertIsValidNamespace: function(/* string */ namespace){
+			if(this.isValidNamespace(namespace) === false){
+				throw new Error("Invalid namespace given: " + namespace);
+			}
+		},
+
+		_assertIsValidKey: function(/* string */ key){
+			if(this.isValidKey(key) === false){
+				throw new Error("Invalid key given: " + key);
+			}
+		}
+	});
+	storageManager.register("dojox.storage.LocalStorageProvider", new LocalStorageProvider());
+	return LocalStorageProvider;
+});

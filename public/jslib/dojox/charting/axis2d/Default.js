@@ -1,26 +1,980 @@
-//>>built
-define("dojox/charting/axis2d/Default","dojo/_base/lang dojo/_base/array dojo/sniff dojo/_base/declare dojo/_base/connect dojo/dom-geometry ./Invisible ../scaler/linear ./common dojox/gfx dojox/lang/utils dojox/lang/functional dojo/has!dojo-bidi?../bidi/axis2d/Default".split(" "),function(C,P,S,T,U,ba,L,V,X,z,W,Q,ca){L=T(S("dojo-bidi")?"dojox.charting.axis2d.NonBidiDefault":"dojox.charting.axis2d.Default",L,{defaultParams:{vertical:!1,fixUpper:"none",fixLower:"none",natural:!1,leftBottom:!0,includeZero:!1,
-fixed:!0,majorLabels:!0,minorTicks:!0,minorLabels:!0,microTicks:!1,rotation:0,htmlLabels:!0,enableCache:!1,dropLabels:!0,labelSizeChange:!1,position:"leftOrBottom"},optionalParams:{min:0,max:1,from:0,to:1,majorTickStep:4,minorTickStep:2,microTickStep:1,labels:[],labelFunc:null,maxLabelSize:0,maxLabelCharCount:0,trailingSymbol:null,stroke:{},majorTick:{},minorTick:{},microTick:{},tick:{},font:"",fontColor:"",title:"",titleGap:0,titleFont:"",titleFontColor:"",titleOrientation:""},constructor:function(a,
-c){this.opt=C.clone(this.defaultParams);W.updateWithObject(this.opt,c);W.updateWithPattern(this.opt,c,this.optionalParams);this.opt.enableCache&&(this._textFreePool=[],this._lineFreePool=[],this._textUsePool=[],this._lineUsePool=[]);this._invalidMaxLabelSize=!0;c&&"position"in c||(this.opt.position=this.opt.leftBottom?"leftOrBottom":"rightOrTop");this.renderingOptions={"shape-rendering":"crispEdges"}},setWindow:function(a,c){a!=this.scale&&(this._invalidMaxLabelSize=!0);return this.inherited(arguments)},
-_groupLabelWidth:function(a,c,g){if(!a.length)return 0;50<a.length&&(a.length=50);C.isObject(a[0])&&(a=Q.map(a,function(a){return a.text}));g&&(a=Q.map(a,function(a){return 0==C.trim(a).length?"":a.substring(0,g)+this.trailingSymbol},this));a=a.join("\x3cbr\x3e");return z._base._getTextBox(a,{font:c}).w||0},_getMaxLabelSize:function(a,c,g,h,f,l){if(null==this._maxLabelSize&&6==arguments.length){var k=this.opt;this.scaler.minMinorStep=this._prevMinMinorStep=0;var b=C.clone(k);delete b.to;delete b.from;
-var p=V.buildScaler(a,c,g,b,k.to-k.from);p.minMinorStep=0;this._majorStart=p.major.start;k=V.buildTicks(p,k);if(l&&k){var u=p=0,d=function(a){a.label&&this.push(a.label)},e=[];this.opt.majorLabels&&(P.forEach(k.major,d,e),p=this._groupLabelWidth(e,f,b.maxLabelCharCount),b.maxLabelSize&&(p=Math.min(b.maxLabelSize,p)));e=[];this.opt.dropLabels&&this.opt.minorLabels&&(P.forEach(k.minor,d,e),u=this._groupLabelWidth(e,f,b.maxLabelCharCount),b.maxLabelSize&&(u=Math.min(b.maxLabelSize,u)));this._maxLabelSize=
-{majLabelW:p,minLabelW:u,majLabelH:l,minLabelH:l}}else this._maxLabelSize=null}return this._maxLabelSize},calculate:function(a,c,g){this.inherited(arguments);this.scaler.minMinorStep=this._prevMinMinorStep;if((this._invalidMaxLabelSize||g!=this._oldSpan)&&Infinity!=a&&-Infinity!=c){this._invalidMaxLabelSize=!1;this.opt.labelSizeChange&&(this._maxLabelSize=null);this._oldSpan=g;var h=this.opt,f=this.chart.theme.axis,l=h.rotation%360,k=this.chart.theme.axis.tick.labelGap,b=h.font||f.majorTick&&f.majorTick.font||
-f.tick&&f.tick.font,f=b?z.normalizedLength(z.splitFontString(b).size):0,b=this._getMaxLabelSize(a,c,g,l,b,f);"number"!=typeof k&&(k=4);if(b&&h.dropLabels){var h=Math.abs(Math.cos(l*Math.PI/180)),p=Math.abs(Math.sin(l*Math.PI/180));0>l&&(l+=360);switch(l){case 0:case 180:this.vertical?l=f:(l=b.majLabelW,f=b.minLabelW);break;case 90:case 270:this.vertical?(l=b.majLabelW,f=b.minLabelW):l=f;break;default:l=this.vertical?Math.min(b.majLabelW,f/h):Math.min(b.majLabelW,f/p),f=Math.min(Math.sqrt(b.minLabelW*
-b.minLabelW+f*f),this.vertical?f*h+b.minLabelW*p:b.minLabelW*h+f*p)}this.scaler.minMinorStep=this._prevMinMinorStep=Math.max(l,f)+k;this._skipInterval=this.scaler.minMinorStep<=this.scaler.minor.tick*this.scaler.bounds.scale?0:Math.floor((l+k)/(this.scaler.major.tick*this.scaler.bounds.scale))}else this._skipInterval=0}this.ticks=V.buildTicks(this.scaler,this.opt);return this},getOffsets:function(){var a={l:0,r:0,t:0,b:0};if(!this.scaler)return a;var c=this.opt,g=this.chart.theme.axis,h=this.chart.theme.axis.tick.labelGap,
-f=c.titleFont||g.title&&g.title.font,g=0==c.titleGap?0:c.titleGap||g.title&&g.title.gap,l=this.chart.theme.getTick("major",c),k=this.chart.theme.getTick("minor",c),f=f?z.normalizedLength(z.splitFontString(f).size):0,b=c.rotation%360,p=c.position,u="rightOrTop"!==p,d=Math.abs(Math.cos(b*Math.PI/180)),e=Math.abs(Math.sin(b*Math.PI/180));this.trailingSymbol=void 0===c.trailingSymbol||null===c.trailingSymbol?this.trailingSymbol:c.trailingSymbol;"number"!=typeof h&&(h=4);0>b&&(b+=360);var r=this._getMaxLabelSize();
-if(r){var q=Math.ceil(Math.max(r.majLabelW,r.minLabelW))+1,m=Math.ceil(Math.max(r.majLabelH,r.minLabelH))+1;if(this.vertical)switch(r=u?"l":"r",b){case 0:case 180:a[r]="center"===p?0:q;a.t=a.b=m/2;break;case 90:case 270:a[r]=m;a.t=a.b=q/2;break;default:45>=b||180<b&&225>=b?(a[r]=m*e/2+q*d,a[u?"t":"b"]=m*d/2+q*e,a[u?"b":"t"]=m*d/2):315<b||180>b&&135<b?(a[r]=m*e/2+q*d,a[u?"b":"t"]=m*d/2+q*e,a[u?"t":"b"]=m*d/2):90>b||180<b&&270>b?(a[r]=m*e+q*d,a[u?"t":"b"]=m*d+q*e):(a[r]=m*e+q*d,a[u?"b":"t"]=m*d+q*e)}else switch(r=
-u?"b":"t",b){case 0:case 180:a[r]="center"===p?0:m;a.l=a.r=q/2;break;case 90:case 270:a[r]=q;a.l=a.r=m/2;break;default:45<=b&&90>=b||225<=b&&270>=b?(a[r]=m*d/2+q*e,a[u?"r":"l"]=m*e/2+q*d,a[u?"l":"r"]=m*e/2):90<=b&&135>=b||270<=b&&315>=b?(a[r]=m*d/2+q*e,a[u?"l":"r"]=m*e/2+q*d,a[u?"r":"l"]=m*e/2):45>b||180<b&&225>b?(a[r]=m*d+q*e,a[u?"r":"l"]=m*e+q*d):(a[r]=m*d+q*e,a[u?"l":"r"]=m*e+q*d)}a[r]="center"===p?0:a[r]+(h+Math.max(0<l.length?l.length:0,0<k.length?k.length:0)+(c.title?f+g:0))}return a},cleanGroup:function(a){this.opt.enableCache&&
-this.group&&(this._lineFreePool=this._lineFreePool.concat(this._lineUsePool),this._lineUsePool=[],this._textFreePool=this._textFreePool.concat(this._textUsePool),this._textUsePool=[]);this.inherited(arguments)},createText:function(a,c,g,h,f,l,k,b,p){if(!this.opt.enableCache||"html"==a)return X.createText[a](this.chart,c,g,h,f,l,k,b,p);0<this._textFreePool.length?(a=this._textFreePool.pop(),a.setShape({x:g,y:h,text:l,align:f}),c.add(a)):a=X.createText[a](this.chart,c,g,h,f,l,k,b);this._textUsePool.push(a);
-return a},createLine:function(a,c){var g;this.opt.enableCache&&0<this._lineFreePool.length?(g=this._lineFreePool.pop(),g.setShape(c),a.add(g)):g=a.createLine(c);this.opt.enableCache&&this._lineUsePool.push(g);return g},render:function(a,c){var g,h,f,l,k,b,p,u,d,e,r,q,m,I,C=this._isRtl();if(!this.dirty||!this.scaler)return this;var v=this.opt;d=this.chart.theme.axis;var J=v.position,y="rightOrTop"!==J,t=v.rotation%360,x=0,F,n,x=this.chart.theme.axis.tick.labelGap,D=v.font||d.majorTick&&d.majorTick.font||
-d.tick&&d.tick.font,N=v.titleFont||d.title&&d.title.font,L=v.fontColor||d.majorTick&&d.majorTick.fontColor||d.tick&&d.tick.fontColor||"black",T=v.titleFontColor||d.title&&d.title.fontColor||"black";k=0==v.titleGap?0:v.titleGap||d.title&&d.title.gap||15;var K=v.titleOrientation||d.title&&d.title.orientation||"axis",A=this.chart.theme.getTick("major",v),B=this.chart.theme.getTick("minor",v),Y=this.chart.theme.getTick("micro",v),U="stroke"in v?v.stroke:d.stroke,w=D?z.normalizedLength(z.splitFontString(D).size):
-0;b=Math.abs(Math.cos(t*Math.PI/180));F=Math.abs(Math.sin(t*Math.PI/180));var O=N?z.normalizedLength(z.splitFontString(N).size):0;"number"!=typeof x&&(x=4);0>t&&(t+=360);var R=this._getMaxLabelSize(),R=R&&R.majLabelW;if(this.vertical){m=a.height-c.b;I=void 0;r=c.t;q=void 0;d=(a.height-c.b+c.t)/2;e=void 0;F=w*F+(R||0)*b+x+Math.max(0<A.length?A.length:0,0<B.length?B.length:0)+O+k;p=0;u=-1;h=g=0;k=1;b=0;f=x;l=0;switch(t){case 0:n="end";h=.4*w;break;case 90:n="middle";g=-w;break;case 180:n="start";h=
-.4*-w;break;case 270:n="middle";break;default:45>t?(n="end",h=.4*w):90>t?(n="end",h=.4*w):135>t?n="start":225>t?(n="start",h=.4*-w):270>t?(n="start",g=y?0:.4*w):315>t?(n="end",g=y?0:.4*w):(n="end",h=.4*w)}if(y)I=q="center"===J?a.width/2:c.l,x=K&&"away"==K?90:270,e=c.l-F+(270==x?O:0),k=-1,f=-f;else switch(I=q=a.width-c.r,x=K&&"axis"==K?90:270,e=a.width-c.r+F-(270==x?0:O),n){case "start":n="end";break;case "end":n="start";break;case "middle":g+=w}}else{I=c.l;m=void 0;q=a.width-c.r;r=void 0;e=(a.width-
-c.r+c.l)/2;d=void 0;F=w*b+(R||0)*F+x+Math.max(0<A.length?A.length:0,0<B.length?B.length:0)+O+k;p=C?-1:1;k=h=g=u=0;b=1;f=0;l=x;switch(t){case 0:n="middle";h=w;break;case 90:n="start";g=.4*-w;break;case 180:n="middle";break;case 270:n="end";g=.4*w;break;default:45>t?(n="start",h=y?w:0):135>t?(n="start",g=.4*-w):180>t?(n="start",h=y?0:-w):225>t?(n="end",h=y?0:-w):315>t?(n="end",h=y?.4*w:0):(n="end",h=y?w:0)}if(y)m=r="center"===J?a.height/2:a.height-c.b,x=K&&"axis"==K?180:0,d=a.height-c.b+F-(x?O:0);else switch(m=
-r=c.t,x=K&&"away"==K?180:0,d=c.t-F+(x?0:O),b=-1,l=-l,n){case "start":n="end";break;case "end":n="start";break;case "middle":h-=w}}this.cleanGroup();var M=this.group,J=this.scaler,y=this.ticks,Z=V.getTransformerFromModel(this.scaler),E=v.title&&x||t||!this.opt.htmlLabels||S("ie")||S("opera")?"gfx":"html",G=k*A.length,H=b*A.length,aa=this._skipInterval;M.createLine({x1:I,y1:m,x2:q,y2:r}).setStroke(U);v.title&&(N=X.createText[E](this.chart,M,e,d,"middle",v.title,N,T),"html"==E?this.htmlElements.push(N):
-N.setTransform(z.matrix.rotategAt(x,e,d)));if(null==y)return this.dirty=!1,this;var W=0<y.major.length?(y.major[0].value-this._majorStart)/J.major.tick:0,Q=this.opt.majorLabels;P.forEach(y.major,function(a,b){var d=Z(a.value),c=(C?q:I)+p*d,k=m+u*d;b+=W;this.createLine(M,{x1:c,y1:k,x2:c+G,y2:k+H}).setStroke(A);if(a.label&&(!aa||0==(b-(1+aa))%(1+aa))){var e=v.maxLabelCharCount?this.getTextWithLimitCharCount(a.label,D,v.maxLabelCharCount):{text:a.label,truncated:!1},e=v.maxLabelSize?this.getTextWithLimitLength(e.text,
-D,v.maxLabelSize,e.truncated):e,d=this.createText(E,M,c+(0<A.length?G:0)+f+(t?0:g),k+(0<A.length?H:0)+l+(t?0:h),n,e.text,D,L);e.truncated&&this.chart.formatTruncatedLabel(d,a.label,E);e.truncated&&this.labelTooltip(d,this.chart,a.label,e.text,D,E);"html"==E?this.htmlElements.push(d):t&&d.setTransform([{dx:g,dy:h},z.matrix.rotategAt(t,c+(0<A.length?G:0)+f,k+(0<A.length?H:0)+l)])}},this);G=k*B.length;H=b*B.length;Q=this.opt.minorLabels&&J.minMinorStep<=J.minor.tick*J.bounds.scale;P.forEach(y.minor,
-function(a){var b=Z(a.value),d=(C?q:I)+p*b,c=m+u*b;this.createLine(M,{x1:d,y1:c,x2:d+G,y2:c+H}).setStroke(B);if(Q&&a.label){var e=v.maxLabelCharCount?this.getTextWithLimitCharCount(a.label,D,v.maxLabelCharCount):{text:a.label,truncated:!1},e=v.maxLabelSize?this.getTextWithLimitLength(e.text,D,v.maxLabelSize,e.truncated):e,b=this.createText(E,M,d+(0<B.length?G:0)+f+(t?0:g),c+(0<B.length?H:0)+l+(t?0:h),n,e.text,D,L);e.truncated&&this.chart.formatTruncatedLabel(b,a.label,E);e.truncated&&this.labelTooltip(b,
-this.chart,a.label,e.text,D,E);"html"==E?this.htmlElements.push(b):t&&b.setTransform([{dx:g,dy:h},z.matrix.rotategAt(t,d+(0<B.length?G:0)+f,c+(0<B.length?H:0)+l)])}},this);G=k*Y.length;H=b*Y.length;P.forEach(y.micro,function(a){var b=Z(a.value);a=I+p*b;b=m+u*b;this.createLine(M,{x1:a,y1:b,x2:a+G,y2:b+H}).setStroke(Y)},this);this.dirty=!1;return this},labelTooltip:function(a,c,g,h,f,l){var k=["dijit/Tooltip"],b={type:"rect"},p=["above","below"];h=z._base._getTextBox(h,{font:f}).w||0;f=f?z.normalizedLength(z.splitFontString(f).size):
-0;"html"==l?(C.mixin(b,ba.position(a.firstChild,!0)),b.width=Math.ceil(h),b.height=Math.ceil(f),this._events.push({shape:dojo,handle:U.connect(a.firstChild,"onmouseover",this,function(a){require(k,function(a){a.show(g,b,p)})})}),this._events.push({shape:dojo,handle:U.connect(a.firstChild,"onmouseout",this,function(a){require(k,function(a){a.hide(b)})})})):(l=a.getShape(),c=c.getCoords(),b=C.mixin(b,{x:l.x-h/2,y:l.y}),b.x+=c.x,b.y+=c.y,b.x=Math.round(b.x),b.y=Math.round(b.y),b.width=Math.ceil(h),b.height=
-Math.ceil(f),this._events.push({shape:a,handle:a.connect("onmouseenter",this,function(a){require(k,function(a){a.show(g,b,p)})})}),this._events.push({shape:a,handle:a.connect("onmouseleave",this,function(a){require(k,function(a){a.hide(b)})})}))},_isRtl:function(){return!1}});return S("dojo-bidi")?T("dojox.charting.axis2d.Default",[L,ca]):L});
-//# sourceMappingURL=Default.js.map
+define(["dojo/_base/lang", "dojo/_base/array", "dojo/sniff", "dojo/_base/declare",
+	"dojo/_base/connect", "dojo/dom-geometry", "./Invisible",
+	"../scaler/linear", "./common", "dojox/gfx", "dojox/lang/utils", "dojox/lang/functional",
+	"dojo/has!dojo-bidi?../bidi/axis2d/Default"],
+	function(lang, arr, has, declare, connect, domGeom, Invisible,
+			lin, acommon, g, du, df, BidiDefault){
+
+	/*=====
+	var __AxisCtorArgs = {
+		// summary:
+		//		Optional arguments used in the definition of an axis.
+		// vertical: Boolean?
+		//		A flag that says whether an axis is vertical (i.e. y axis) or horizontal. Default is false (horizontal).
+		// fixUpper: String?
+		//		Align the greatest value on the axis with the specified tick level. Options are "major", "minor", "micro", or "none".  Defaults to "none".
+		// fixLower: String?
+		//		Align the smallest value on the axis with the specified tick level. Options are "major", "minor", "micro", or "none".  Defaults to "none".
+		// natural: Boolean?
+		//		Ensure tick marks are made on "natural" numbers. Defaults to false.
+		// leftBottom: Boolean?
+		//		Deprecated: use position instead. The position of a vertical axis; if true, will be placed against the left-bottom corner of the chart.  Defaults to true.
+		// includeZero: Boolean?
+		//		Include 0 on the axis rendering.  Default is false.
+		// fixed: Boolean?
+		//		Force all axis labels to be fixed numbers.  Default is true.
+		// majorLabels: Boolean?
+		//		Flag to draw labels at major ticks. Default is true.
+		// minorTicks: Boolean?
+		//		Flag to draw minor ticks on an axis.  Default is true.
+		// minorLabels: Boolean?
+		//		Flag to labels on minor ticks when there is enough space. Default is true.
+		// microTicks: Boolean?
+		//		Flag to draw micro ticks on an axis. Default is false.
+		// htmlLabels: Boolean?
+		//		Flag to use HTML (as opposed to the native vector graphics engine) to draw labels. Default is true.
+		// min: Number?
+		//		The smallest value on an axis. Default is 0.
+		// max: Number?
+		//		The largest value on an axis. Default is 1.
+		// from: Number?
+		//		Force the chart to render data visible from this value. Default is 0.
+		// to: Number?
+		//		Force the chart to render data visible to this value. Default is 1.
+		// majorTickStep: Number?
+		//		The amount to skip before a major tick is drawn. When not set the major ticks step is computed from
+		//		the data range.
+		// minorTickStep: Number?
+		//		The amount to skip before a minor tick is drawn. When not set the minor ticks step is computed from
+		//		the data range.
+		// microTickStep: Number?
+		//		The amount to skip before a micro tick is drawn. When not set the micro ticks step is computed from
+		// labels: Object[]?
+		//		An array of labels for major ticks, with corresponding numeric values, ordered by value.
+		// labelFunc: Function?
+		//		An optional function to use to compute label text. It takes precedence over
+		//		the default text when available. The function must be of the following form:
+		//	|		function labelFunc(text, value, precision) {}
+		//		`text` is the already pre-formatted text. Pre-formatting is done using `dojo/number` is available, `Date.toFixed` otherwise.
+		//		`value`  is the raw axis value.
+		//		`precision` is the requested precision to be applied.
+		// maxLabelSize: Number?
+		//		The maximum size, in pixels, for a label.  To be used with the optional label function.
+		// stroke: dojox.gfx.Stroke?
+		//		An optional stroke to be used for drawing an axis.
+		// majorTick: Object?
+		//		An object containing a dojox.gfx.Stroke, and a length (number) for a major tick.
+		// minorTick: Object?
+		//		An object containing a dojox.gfx.Stroke, and a length (number) for a minor tick.
+		// microTick: Object?
+		//		An object containing a dojox.gfx.Stroke, and a length (number) for a micro tick.
+		// tick: Object?
+		//		An object containing a dojox.gfx.Stroke, and a length (number) for a tick.
+		// font: String?
+		//		An optional font definition (as used in the CSS font property) for labels.
+		// fontColor: String|dojo.Color?
+		//		An optional color to be used in drawing labels.
+		// titleGap: Number?
+		//		An optional grap between axis title and axis label
+		// titleFont: String?
+		//		An optional font definition for axis title
+		// titleFontColor: String?
+		//		An optional axis title color
+		// titleOrientation: String?
+		//		An optional orientation for axis title. "axis" means the title facing the axis, "away" means facing away.
+		//		If no value is set "axis" is used.
+		// enableCache: Boolean?
+		//		Whether the ticks and labels are cached from one rendering to another. This improves the rendering performance of
+		//		successive rendering but penalize the first rendering. For labels it is only working with gfx labels
+		//		not html ones.  Default false.
+		// dropLabels: Boolean?
+		//		Whether the axis automatically drops labels at regular interval or not to avoid labels overlapping.
+		//		This gives better results but require more computations.  You can disable it to save computation
+		//		time when you know your labels won't overlap. Default is true.
+		// labelSizeChange: Boolean?
+		//		Indicates to the axis whether the axis labels are changing their size on zoom. If false this allows to
+		//		optimize the axis by avoiding recomputing labels maximum size on zoom actions. Default is false.
+		// position: String?
+		//		The position of the axis. Values: "leftOrBottom", "center" or "rightOrTop". Default is "leftOrBottom".
+	};
+	=====*/
+
+	var centerAnchorLimit = 45;	// in degrees
+
+	var Default = declare(has("dojo-bidi")? "dojox.charting.axis2d.NonBidiDefault" : "dojox.charting.axis2d.Default", Invisible, {
+		// summary:
+		//		The default axis object used in dojox.charting.  See dojox.charting.Chart.addAxis for details.
+
+		// defaultParams: Object
+		//		The default parameters used to define any axis.
+		// optionalParams: Object
+		//		Any optional parameters needed to define an axis.
+
+		/*=====
+		// TODO: the documentation tools need these to be pre-defined in order to pick them up
+		//	correctly, but the code here is partially predicated on whether or not the properties
+		//	actually exist.  For now, we will leave these undocumented but in the code for later. -- TRT
+
+		// opt: Object
+		//		The actual options used to define this axis, created at initialization.
+		// scaler: Object
+		//		The calculated helper object to tell charts how to draw an axis and any data.
+		// ticks: Object
+		//		The calculated tick object that helps a chart draw the scaling on an axis.
+		// dirty: Boolean
+		//		The state of the axis (whether it needs to be redrawn or not)
+		// scale: Number
+		//		The current scale of the axis.
+		// offset: Number
+		//		The current offset of the axis.
+
+		opt: null,
+		scaler: null,
+		ticks: null,
+		dirty: true,
+		scale: 1,
+		offset: 0,
+		=====*/
+		defaultParams: {
+			vertical:	false,		// true for vertical axis
+			fixUpper:	"none",	// align the upper on ticks: "major", "minor", "micro", "none"
+			fixLower:	"none",	// align the lower on ticks: "major", "minor", "micro", "none"
+			natural:	 false,		// all tick marks should be made on natural numbers
+			leftBottom:  true,		// position of the axis, used with "vertical" - deprecated: use position instead
+			includeZero: false,		// 0 should be included
+			fixed:	   true,		// all labels are fixed numbers
+			majorLabels: true,		// draw major labels
+			minorTicks:  true,		// draw minor ticks
+			minorLabels: true,		// draw minor labels
+			microTicks:  false,		// draw micro ticks
+			rotation:	0,			// label rotation angle in degrees
+			htmlLabels:  true,		// use HTML to draw labels
+			enableCache: false,		// whether we cache or not
+			dropLabels: true,		// whether we automatically drop overlapping labels or not
+			labelSizeChange: false, // whether the labels size change on zoom
+			position: "leftOrBottom" // position of the axis: "leftOrBottom" (default), "center" or "rightOrTop"
+		},
+		optionalParams: {
+			min:			0,	// minimal value on this axis
+			max:			1,	// maximal value on this axis
+			from:			0,	// visible from this value
+			to:				1,	// visible to this value
+			majorTickStep:	4,	// major tick step
+			minorTickStep:	2,	// minor tick step
+			microTickStep:	1,	// micro tick step
+			labels:			[],	// array of labels for major ticks
+			// with corresponding numeric values
+			// ordered by values
+			labelFunc:		null, // function to compute label values
+			maxLabelSize:	0,	// size in px. For use with labelFunc
+			maxLabelCharCount:	0,	// size in word count.
+			trailingSymbol:	null,
+
+			// TODO: add support for minRange!
+			// minRange:		1,	// smallest distance from min allowed on the axis
+
+			// theme components
+			stroke:			{},	// stroke for an axis
+			majorTick:		{},	// stroke + length for a tick
+			minorTick:		{},	// stroke + length for a tick
+			microTick:		{},	// stroke + length for a tick
+			tick:		   {},	// stroke + length for a tick
+			font:			"",	// font for labels
+			fontColor:		"",	// color for labels as a string
+			title:				 "",	// axis title
+			titleGap:			 0,		// gap between axis title and axis label
+			titleFont:			 "",		// axis title font
+			titleFontColor:		 "",		// axis title font color
+			titleOrientation:	 ""		// "axis" means the title facing the axis, "away" means facing away
+		},
+
+		constructor: function(chart, kwArgs){
+			// summary:
+			//		The constructor for an axis.
+			// chart: dojox/charting/Chart
+			//		The chart the axis belongs to.
+			// kwArgs: __AxisCtorArgs?
+			//		Any optional keyword arguments to be used to define this axis.
+			this.opt = lang.clone(this.defaultParams);
+			du.updateWithObject(this.opt, kwArgs);
+			du.updateWithPattern(this.opt, kwArgs, this.optionalParams);
+			if(this.opt.enableCache){
+				this._textFreePool = [];
+				this._lineFreePool = [];
+				this._textUsePool = [];
+				this._lineUsePool = [];
+			}
+			this._invalidMaxLabelSize = true;
+			// replace deprecated leftBotton to position
+			if(!(kwArgs && ('position' in kwArgs))){
+			    this.opt.position = this.opt.leftBottom ? "leftOrBottom" : "rightOrTop";
+			}			
+			this.renderingOptions = { "shape-rendering": "crispEdges" };
+		},
+		setWindow: function(scale, offset){
+			// summary:
+			//		Set the drawing "window" for the axis.
+			// scale: Number
+			//		The new scale for the axis.
+			// offset: Number
+			//		The new offset for the axis.
+			// returns: dojox/charting/axis2d/Default
+			//		The reference to the axis for functional chaining.
+			if(scale != this.scale){
+				// if scale changed we need to recompute new max label size
+				this._invalidMaxLabelSize = true;
+			}
+			return this.inherited(arguments);
+		},
+
+		_groupLabelWidth: function(labels, font, wcLimit){
+			if(!labels.length){
+				return 0;
+			}
+			if(labels.length > 50){
+				// let's avoid degenerated cases
+				labels.length = 50;
+			}
+			if(lang.isObject(labels[0])){
+				labels = df.map(labels, function(label){ return label.text; });
+			}
+			if(wcLimit){
+				labels = df.map(labels, function(label){
+					return lang.trim(label).length == 0 ? "" : label.substring(0, wcLimit) + this.trailingSymbol;
+				}, this);
+			}
+			var s = labels.join("<br>");
+			return g._base._getTextBox(s, {font: font}).w || 0;
+		},
+
+		_getMaxLabelSize: function(min, max, span, rotation, font, size){
+			if(this._maxLabelSize == null && arguments.length == 6){
+				var o = this.opt;
+				// everything might have changed, reset the minMinorStep value
+				this.scaler.minMinorStep = this._prevMinMinorStep = 0;
+				var ob = lang.clone(o);
+				delete ob.to;
+				delete ob.from;
+				// build all the ticks from min, to max not from to to _but_ using the step
+				// that would be used if we where just displaying from to to from.
+				var sb = lin.buildScaler(min, max, span, ob, o.to - o.from);
+				sb.minMinorStep = 0;
+				this._majorStart = sb.major.start;
+				// we build all the ticks not only the ones we need to draw in order to get
+				// a correct drop rate computation that works for any offset of this scale
+				var tb = lin.buildTicks(sb, o);
+				// if there is not tick at all tb is null
+				if(size && tb){
+					var majLabelW = 0, minLabelW = 0; // non rotated versions
+					// we first collect all labels when needed
+					var tickLabelFunc = function(tick){
+						if(tick.label){
+							this.push(tick.label);
+						}
+					};
+					var labels = [];
+					if(this.opt.majorLabels){
+						arr.forEach(tb.major, tickLabelFunc, labels);
+						majLabelW = this._groupLabelWidth(labels, font, ob.maxLabelCharCount);
+						if(ob.maxLabelSize){
+							majLabelW = Math.min(ob.maxLabelSize, majLabelW);
+						}
+					}
+					// do the minor labels computation only if dropLabels is set
+					labels = [];
+					if(this.opt.dropLabels && this.opt.minorLabels){
+						arr.forEach(tb.minor, tickLabelFunc, labels);
+						minLabelW = this._groupLabelWidth(labels, font, ob.maxLabelCharCount);
+						if(ob.maxLabelSize){
+							minLabelW = Math.min(ob.maxLabelSize, minLabelW);
+						}
+					}
+					this._maxLabelSize = {
+						majLabelW: majLabelW, minLabelW: minLabelW,
+						majLabelH: size, minLabelH: size
+					};
+				}else{
+					this._maxLabelSize = null;
+				}
+			}
+			return this._maxLabelSize;
+		},
+
+		calculate: function(min, max, span){
+			this.inherited(arguments);
+			// when the scale has not changed there is no reason for minMinorStep to change
+			this.scaler.minMinorStep = this._prevMinMinorStep;
+			// we want to recompute the dropping mechanism only when the scale or the size of the axis is changing
+			// not when for example when we scroll (otherwise effect would be weird)
+			if((this._invalidMaxLabelSize || span != this._oldSpan) && (min != Infinity && max != -Infinity)){
+				this._invalidMaxLabelSize = false;
+				if(this.opt.labelSizeChange){
+					this._maxLabelSize = null;
+				}
+				this._oldSpan = span;
+				var o = this.opt;
+				var ta = this.chart.theme.axis, rotation = o.rotation % 360,
+					labelGap = this.chart.theme.axis.tick.labelGap,
+					// TODO: we use one font --- of major tick, we need to use major and minor fonts
+					font = o.font || (ta.majorTick && ta.majorTick.font) || (ta.tick && ta.tick.font),
+					size = font ? g.normalizedLength(g.splitFontString(font).size) : 0,
+					// even if we don't drop label we need to compute max size for offsets
+					labelW = this._getMaxLabelSize(min, max, span, rotation, font, size);
+				if(typeof labelGap != "number"){
+					labelGap = 4; // in pixels
+				}
+				if(labelW && o.dropLabels){
+					var cosr = Math.abs(Math.cos(rotation * Math.PI / 180)),
+						sinr = Math.abs(Math.sin(rotation * Math.PI / 180));
+					var majLabelW, minLabelW;
+					if(rotation < 0){
+						rotation += 360;
+					}
+					switch(rotation){
+						case 0:
+						case 180:
+							// trivial cases: horizontal labels
+							if(this.vertical){
+								majLabelW = minLabelW = size;
+							}else{
+								majLabelW = labelW.majLabelW;
+								minLabelW = labelW.minLabelW;
+							}
+							break;
+						case 90:
+						case 270:
+							// trivial cases: vertical
+							if(this.vertical){
+								majLabelW = labelW.majLabelW;
+								minLabelW = labelW.minLabelW;
+							}else{
+								majLabelW = minLabelW = size;
+							}
+							break;
+						default:
+							// all major labels are parallel they can't collapse except if the two ticks are
+							// closer than the height of the text * cos(90-rotation)
+							majLabelW  = this.vertical ? Math.min(labelW.majLabelW, size / cosr) : Math.min(labelW.majLabelW, size / sinr);
+							// for minor labels we need to rotated them
+							var gap1 = Math.sqrt(labelW.minLabelW * labelW.minLabelW + size * size),
+								gap2 = this.vertical ? size * cosr + labelW.minLabelW * sinr : labelW.minLabelW * cosr + size * sinr;
+							minLabelW = Math.min(gap1, gap2);
+							break;
+					}
+					// we need to check both minor and major labels fit a minor step
+					this.scaler.minMinorStep = this._prevMinMinorStep =  Math.max(majLabelW, minLabelW) + labelGap;
+					var canMinorLabel = this.scaler.minMinorStep <= this.scaler.minor.tick * this.scaler.bounds.scale;
+					if(!canMinorLabel){
+						// we can't place minor labels, let's see if we can place major ones
+						// in a major step and if not which skip interval we must follow
+						this._skipInterval = Math.floor((majLabelW + labelGap) / (this.scaler.major.tick * this.scaler.bounds.scale));
+					}else{
+						// everything fit well
+						this._skipInterval = 0;
+					}
+				}else{
+					// drop label disabled
+					this._skipInterval = 0;
+				}
+			}
+			// computes the tick subset we need for that scale/offset
+			this.ticks = lin.buildTicks(this.scaler, this.opt);
+			return this;
+		},
+
+		getOffsets: function(){
+			// summary:
+			//		Get the physical offset values for this axis (used in drawing data series). This method is not
+			//		supposed to be called by the users but internally.
+			// returns: Object
+			//		The calculated offsets in the form of { l, r, t, b } (left, right, top, bottom).
+			var s = this.scaler, offsets = { l: 0, r: 0, t: 0, b: 0 };
+			if(!s){
+				return offsets;
+			}
+			var o = this.opt,
+				ta = this.chart.theme.axis,
+				labelGap = this.chart.theme.axis.tick.labelGap,
+				// TODO: we use one font --- of major tick, we need to use major and minor fonts
+				taTitleFont = o.titleFont || (ta.title && ta.title.font),
+				taTitleGap = (o.titleGap==0) ? 0 : o.titleGap || (ta.title && ta.title.gap),
+				taMajorTick = this.chart.theme.getTick("major", o),
+				taMinorTick = this.chart.theme.getTick("minor", o),
+				tsize = taTitleFont ? g.normalizedLength(g.splitFontString(taTitleFont).size) : 0,
+				rotation = o.rotation % 360, position = o.position, 
+				leftBottom = position !== "rightOrTop",
+				cosr = Math.abs(Math.cos(rotation * Math.PI / 180)),
+				sinr = Math.abs(Math.sin(rotation * Math.PI / 180));
+			this.trailingSymbol = (o.trailingSymbol === undefined || o.trailingSymbol === null) ?
+				this.trailingSymbol : o.trailingSymbol;
+			if(typeof labelGap != "number"){
+				labelGap = 4; // in pixels
+			}
+			if(rotation < 0){
+				rotation += 360;
+			}
+			var maxLabelSize = this._getMaxLabelSize(); // don't need parameters, calculate has been called before => we use cached value
+			if(maxLabelSize){
+				var side;
+				var labelWidth = Math.ceil(Math.max(maxLabelSize.majLabelW, maxLabelSize.minLabelW)) + 1,
+					size = Math.ceil(Math.max(maxLabelSize.majLabelH, maxLabelSize.minLabelH)) + 1;
+				if(this.vertical){
+					side = leftBottom ? "l" : "r";
+					switch(rotation){
+						case 0:
+						case 180:
+							offsets[side] = position === "center" ? 0 : labelWidth;
+							offsets.t = offsets.b = size / 2;
+							break;
+						case 90:
+						case 270:
+							offsets[side] = size;
+							offsets.t = offsets.b = labelWidth / 2;
+							break;
+						default:
+							if(rotation <= centerAnchorLimit || (180 < rotation && rotation <= (180 + centerAnchorLimit))){
+								offsets[side] = size * sinr / 2 + labelWidth * cosr;
+								offsets[leftBottom ? "t" : "b"] = size * cosr / 2 + labelWidth * sinr;
+								offsets[leftBottom ? "b" : "t"] = size * cosr / 2;
+							}else if(rotation > (360 - centerAnchorLimit) || (180 > rotation && rotation > (180 - centerAnchorLimit))){
+								offsets[side] = size * sinr / 2 + labelWidth * cosr;
+								offsets[leftBottom ? "b" : "t"] = size * cosr / 2 + labelWidth * sinr;
+								offsets[leftBottom ? "t" : "b"] = size * cosr / 2;
+							}else if(rotation < 90 || (180 < rotation && rotation < 270)){
+								offsets[side] = size * sinr + labelWidth * cosr;
+								offsets[leftBottom ? "t" : "b"] = size * cosr + labelWidth * sinr;
+							}else{
+								offsets[side] = size * sinr + labelWidth * cosr;
+								offsets[leftBottom ? "b" : "t"] = size * cosr + labelWidth * sinr;
+							}
+							break;
+					}
+					if(position === "center"){
+					    offsets[side] = 0;
+					}
+					else{					
+					    offsets[side] += labelGap + Math.max(taMajorTick.length > 0?taMajorTick.length:0,
+														 taMinorTick.length > 0?taMinorTick.length:0) + (o.title ? (tsize + taTitleGap) : 0);
+					}
+				}else{
+					side = leftBottom ? "b" : "t";
+					switch(rotation){
+						case 0:
+						case 180:
+							offsets[side] = position === "center" ? 0 : size;
+							offsets.l = offsets.r = labelWidth / 2;
+							break;
+						case 90:
+						case 270:
+							offsets[side] = labelWidth;
+							offsets.l = offsets.r = size / 2;
+							break;
+						default:
+							if((90 - centerAnchorLimit) <= rotation && rotation <= 90 || (270 - centerAnchorLimit) <= rotation && rotation <= 270){
+								offsets[side] = size * cosr / 2 + labelWidth * sinr;
+								offsets[leftBottom ? "r" : "l"] = size * sinr / 2 + labelWidth * cosr;
+								offsets[leftBottom ? "l" : "r"] = size * sinr / 2;
+							}else if(90 <= rotation && rotation <= (90 + centerAnchorLimit) || 270 <= rotation && rotation <= (270 + centerAnchorLimit)){
+								offsets[side] = size * cosr / 2 + labelWidth * sinr;
+								offsets[leftBottom ? "l" : "r"] = size * sinr / 2 + labelWidth * cosr;
+								offsets[leftBottom ? "r" : "l"] = size * sinr / 2;
+							}else if(rotation < centerAnchorLimit || (180 < rotation && rotation < (180 + centerAnchorLimit))){
+								offsets[side] = size * cosr + labelWidth * sinr;
+								offsets[leftBottom ? "r" : "l"] = size * sinr + labelWidth * cosr;
+							}else{
+								offsets[side] = size * cosr + labelWidth * sinr;
+								offsets[leftBottom ? "l" : "r"] = size * sinr + labelWidth * cosr;
+							}
+							break;
+					}
+					if(position === "center"){
+					    offsets[side] = 0;
+					}
+					else{					
+					offsets[side] += labelGap + Math.max(taMajorTick.length > 0?taMajorTick.length:0,
+														 taMinorTick.length > 0?taMinorTick.length:0) + (o.title ? (tsize + taTitleGap) : 0);
+					}
+				}
+			}
+			return offsets;	//	Object
+		},
+		cleanGroup: function(creator){
+			if(this.opt.enableCache && this.group){
+				this._lineFreePool = this._lineFreePool.concat(this._lineUsePool);
+				this._lineUsePool = [];
+				this._textFreePool = this._textFreePool.concat(this._textUsePool);
+				this._textUsePool = [];
+			}
+			this.inherited(arguments);
+		},
+		createText: function(labelType, creator, x, y, align, textContent, font, fontColor, labelWidth){
+			if(!this.opt.enableCache || labelType=="html"){
+				return acommon.createText[labelType](
+						this.chart,
+						creator,
+						x,
+						y,
+						align,
+						textContent,
+						font,
+						fontColor,
+						labelWidth
+					);
+			}
+			var text;
+			if(this._textFreePool.length > 0){
+				text = this._textFreePool.pop();
+				text.setShape({x: x, y: y, text: textContent, align: align});
+				// For now all items share the same font, no need to re-set it
+				//.setFont(font).setFill(fontColor);
+				// was cleared, add it back
+				creator.add(text);
+			}else{
+				text = acommon.createText[labelType](
+						this.chart,
+						creator,
+						x,
+						y,
+						align,
+						textContent,
+						font,
+						fontColor						
+					);			
+			}
+			this._textUsePool.push(text);
+			return text;
+		},
+		createLine: function(creator, params){
+			var line;
+			if(this.opt.enableCache && this._lineFreePool.length > 0){
+				line = this._lineFreePool.pop();
+				line.setShape(params);
+				// was cleared, add it back
+				creator.add(line);
+			}else{
+				line = creator.createLine(params);
+			}
+			if(this.opt.enableCache){
+				this._lineUsePool.push(line);
+			}
+			return line;
+		},
+		render: function(dim, offsets){
+			// summary:
+			//		Render/draw the axis.
+			// dim: Object
+			//		An object of the form { width, height}.
+			// offsets: Object
+			//		An object of the form { l, r, t, b }.
+			// returns: dojox/charting/axis2d/Default
+			//		The reference to the axis for functional chaining.
+			
+			var isRtl = this._isRtl();	// chart mirroring
+			if(!this.dirty || !this.scaler){
+				return this;	//	dojox/charting/axis2d/Default
+			}
+			// prepare variable
+			var o = this.opt, ta = this.chart.theme.axis, position = o.position, 
+			       leftBottom = position !== "rightOrTop", rotation = o.rotation % 360,
+				start, stop, titlePos, titleRotation=0, titleOffset, axisVector, tickVector, anchorOffset, labelOffset, labelAlign,
+				labelGap = this.chart.theme.axis.tick.labelGap,
+				// TODO: we use one font --- of major tick, we need to use major and minor fonts
+				taFont = o.font || (ta.majorTick && ta.majorTick.font) || (ta.tick && ta.tick.font),
+				taTitleFont = o.titleFont || (ta.title && ta.title.font),
+				// TODO: we use one font color --- we need to use different colors
+				taFontColor = o.fontColor || (ta.majorTick && ta.majorTick.fontColor) || (ta.tick && ta.tick.fontColor) || "black",
+				taTitleFontColor = o.titleFontColor || (ta.title && ta.title.fontColor) || "black",
+				taTitleGap = (o.titleGap==0) ? 0 : o.titleGap || (ta.title && ta.title.gap) || 15,
+				taTitleOrientation = o.titleOrientation || (ta.title && ta.title.orientation) || "axis",
+				taMajorTick = this.chart.theme.getTick("major", o),
+				taMinorTick = this.chart.theme.getTick("minor", o),
+				taMicroTick = this.chart.theme.getTick("micro", o),
+
+				taStroke = "stroke" in o ? o.stroke : ta.stroke,
+				size = taFont ? g.normalizedLength(g.splitFontString(taFont).size) : 0,
+				cosr = Math.abs(Math.cos(rotation * Math.PI / 180)),
+				sinr = Math.abs(Math.sin(rotation * Math.PI / 180)),
+				tsize = taTitleFont ? g.normalizedLength(g.splitFontString(taTitleFont).size) : 0;
+			if(typeof labelGap != "number"){
+				labelGap = 4; // in pixels
+			}
+			if(rotation < 0){
+				rotation += 360;
+			}
+			var cachedLabelW = this._getMaxLabelSize();
+			cachedLabelW = cachedLabelW && cachedLabelW.majLabelW;
+			if(this.vertical){
+				start = {y: dim.height - offsets.b};
+				stop  = {y: offsets.t};
+				titlePos = {y: (dim.height - offsets.b + offsets.t)/2};
+				titleOffset = size * sinr + (cachedLabelW || 0) * cosr + labelGap + Math.max(taMajorTick.length > 0?taMajorTick.length:0,
+																		 					 taMinorTick.length > 0?taMinorTick.length:0) +
+					tsize + taTitleGap;
+				axisVector = {x: 0, y: -1};
+				labelOffset = {x: 0, y: 0};
+				tickVector = {x: 1, y: 0};
+				anchorOffset = {x: labelGap, y: 0};
+				switch(rotation){
+					case 0:
+						labelAlign = "end";
+						labelOffset.y = size * 0.4;
+						break;
+					case 90:
+						labelAlign = "middle";
+						labelOffset.x = -size;
+						break;
+					case 180:
+						labelAlign = "start";
+						labelOffset.y = -size * 0.4;
+						break;
+					case 270:
+						labelAlign = "middle";
+						break;
+					default:
+						if(rotation < centerAnchorLimit){
+							labelAlign = "end";
+							labelOffset.y = size * 0.4;
+						}else if(rotation < 90){
+							labelAlign = "end";
+							labelOffset.y = size * 0.4;
+						}else if(rotation < (180 - centerAnchorLimit)){
+							labelAlign = "start";
+						}else if(rotation < (180 + centerAnchorLimit)){
+							labelAlign = "start";
+							labelOffset.y = -size * 0.4;
+						}else if(rotation < 270){
+							labelAlign = "start";
+							labelOffset.x = leftBottom ? 0 : size * 0.4;
+						}else if(rotation < (360 - centerAnchorLimit)){
+							labelAlign = "end";
+							labelOffset.x = leftBottom ? 0 : size * 0.4;
+						}else{
+							labelAlign = "end";
+							labelOffset.y = size * 0.4;
+						}
+				}
+				if(leftBottom){
+					start.x = stop.x = position === "center" ? dim.width/2 : offsets.l;
+					titleRotation = (taTitleOrientation && taTitleOrientation == "away") ? 90 : 270;
+					titlePos.x = offsets.l - titleOffset + (titleRotation == 270 ? tsize : 0);
+					tickVector.x = -1;
+					anchorOffset.x = -anchorOffset.x;
+				}else{
+					start.x = stop.x = dim.width - offsets.r;
+					titleRotation = (taTitleOrientation && taTitleOrientation == "axis") ? 90 : 270;
+					titlePos.x = dim.width - offsets.r + titleOffset - (titleRotation == 270 ? 0 : tsize);
+					switch(labelAlign){
+						case "start":
+							labelAlign = "end";
+							break;
+						case "end":
+							labelAlign = "start";
+							break;
+						case "middle":
+							labelOffset.x += size;
+							break;
+					}
+				}
+			}else{
+				start = {x: offsets.l};
+				stop  = {x: dim.width - offsets.r};
+				titlePos = {x: (dim.width - offsets.r + offsets.l)/2};
+				titleOffset = size * cosr + (cachedLabelW || 0) * sinr + labelGap + Math.max(taMajorTick.length > 0?taMajorTick.length:0,
+																		 					 taMinorTick.length > 0?taMinorTick.length:0) +
+					tsize + taTitleGap;
+				axisVector = {x: isRtl ? -1 : 1, y: 0}; 	// chart mirroring
+				labelOffset = {x: 0, y: 0};
+				tickVector = {x: 0, y: 1};
+				anchorOffset = {x: 0, y: labelGap};
+				switch(rotation){
+					case 0:
+						labelAlign = "middle";
+						labelOffset.y = size;
+						break;
+					case 90:
+						labelAlign = "start";
+						labelOffset.x = -size * 0.4;
+						break;
+					case 180:
+						labelAlign = "middle";
+						break;
+					case 270:
+						labelAlign = "end";
+						labelOffset.x = size * 0.4;
+						break;
+					default:
+						if(rotation < (90 - centerAnchorLimit)){
+							labelAlign = "start";
+							labelOffset.y = leftBottom ? size : 0;
+						}else if(rotation < (90 + centerAnchorLimit)){
+							labelAlign = "start";
+							labelOffset.x = -size * 0.4;
+						}else if(rotation < 180){
+							labelAlign = "start";
+							labelOffset.y = leftBottom ? 0 : -size;
+						}else if(rotation < (270 - centerAnchorLimit)){
+							labelAlign = "end";
+							labelOffset.y = leftBottom ? 0 : -size;
+						}else if(rotation < (270 + centerAnchorLimit)){
+							labelAlign = "end";
+							labelOffset.y = leftBottom ? size * 0.4 : 0;
+						}else{
+							labelAlign = "end";
+							labelOffset.y = leftBottom ? size : 0;
+						}
+				}
+				if(leftBottom){
+					start.y = stop.y = position === "center" ? dim.height/2 : dim.height - offsets.b;
+					titleRotation = (taTitleOrientation && taTitleOrientation == "axis") ? 180 : 0;
+					titlePos.y = dim.height - offsets.b + titleOffset - (titleRotation ? tsize : 0);
+				}else{
+					start.y = stop.y = offsets.t;
+					titleRotation = (taTitleOrientation && taTitleOrientation == "away") ? 180 : 0;
+					titlePos.y = offsets.t - titleOffset + (titleRotation ? 0 : tsize);
+					tickVector.y = -1;
+					anchorOffset.y = -anchorOffset.y;
+					switch(labelAlign){
+						case "start":
+							labelAlign = "end";
+							break;
+						case "end":
+							labelAlign = "start";
+							break;
+						case "middle":
+							labelOffset.y -= size;
+							break;
+					}
+				}
+			}
+
+			// render shapes
+
+			this.cleanGroup();
+
+			var s = this.group,
+				c = this.scaler,
+				t = this.ticks,
+				f = lin.getTransformerFromModel(this.scaler),
+				// GFX Canvas now supports labels, so let's _not_ fallback to HTML anymore on canvas, just use
+				// HTML labels if explicitly asked + no rotation + no IE + no Opera
+				labelType = (!o.title || !titleRotation) && !rotation && this.opt.htmlLabels && !has("ie") && !has("opera") ? "html" : "gfx",
+				dx = tickVector.x * taMajorTick.length,
+				dy = tickVector.y * taMajorTick.length,
+				skip = this._skipInterval;
+
+			s.createLine({
+				x1: start.x,
+				y1: start.y,
+				x2: stop.x,
+				y2: stop.y
+			}).setStroke(taStroke);
+
+			//create axis title
+			if(o.title){
+				var axisTitle = acommon.createText[labelType](
+					this.chart,
+					s,
+					titlePos.x,
+					titlePos.y,
+					"middle",
+					o.title,
+					taTitleFont,
+					taTitleFontColor
+				);
+				if(labelType == "html"){
+					this.htmlElements.push(axisTitle);
+				}else{
+					//as soon as rotation is provided, labelType won't be "html"
+					//rotate gfx labels
+					axisTitle.setTransform(g.matrix.rotategAt(titleRotation, titlePos.x, titlePos.y));
+				}
+			}
+
+			// go out nicely instead of try/catch
+			if(t == null){
+				this.dirty = false;
+				return this;
+			}
+
+			var rel = (t.major.length > 0)?(t.major[0].value - this._majorStart) / c.major.tick:0;
+			var canLabel = this.opt.majorLabels;
+			arr.forEach(t.major, function(tick, i){
+				var offset = f(tick.value), elem,
+					x = (isRtl ? stop.x : start.x) + axisVector.x * offset, // chart mirroring
+					y = start.y + axisVector.y * offset;
+				i += rel;
+				this.createLine(s, {
+					x1: x, y1: y,
+					x2: x + dx,
+					y2: y + dy
+				}).setStroke(taMajorTick);
+				if(tick.label && (!skip || (i - (1 + skip)) % (1 + skip) == 0)){
+					var label = o.maxLabelCharCount ? this.getTextWithLimitCharCount(tick.label, taFont, o.maxLabelCharCount) : {
+						text: tick.label,
+						truncated: false
+					};
+					label = o.maxLabelSize ? this.getTextWithLimitLength(label.text, taFont, o.maxLabelSize, label.truncated) : label;
+					elem = this.createText(labelType,
+						s,
+						x + (taMajorTick.length > 0 ? dx : 0) + anchorOffset.x + (rotation ? 0 : labelOffset.x),
+						y + (taMajorTick.length > 0 ? dy : 0) + anchorOffset.y + (rotation ? 0 : labelOffset.y),
+						labelAlign,
+						label.text,
+						taFont,
+						taFontColor
+						//cachedLabelW
+					);
+					// if bidi support was required, the textDir is "auto" and truncation
+					// took place, we need to update the dir of the element for cases as:
+					// Fool label: 111111W (W for bidi character)
+					// truncated label: 11...
+					// in this case for auto textDir the dir will be "ltr" which is wrong.
+					if(label.truncated){
+						this.chart.formatTruncatedLabel(elem, tick.label, labelType);
+					}
+					label.truncated && this.labelTooltip(elem, this.chart, tick.label, label.text, taFont, labelType);
+					if(labelType == "html"){
+						this.htmlElements.push(elem);
+					}else if(rotation){
+						elem.setTransform([
+							{dx: labelOffset.x, dy: labelOffset.y},
+							g.matrix.rotategAt(
+								rotation,
+								x + (taMajorTick.length > 0 ? dx : 0) + anchorOffset.x,
+								y + (taMajorTick.length > 0 ? dy : 0) + anchorOffset.y
+							)
+						]);
+					}
+				}
+			}, this);
+
+			dx = tickVector.x * taMinorTick.length;
+			dy = tickVector.y * taMinorTick.length;
+			canLabel = this.opt.minorLabels && c.minMinorStep <= c.minor.tick * c.bounds.scale;
+			arr.forEach(t.minor, function(tick){
+				var offset = f(tick.value), elem,
+					x = (isRtl ? stop.x : start.x)  + axisVector.x * offset,
+					y = start.y + axisVector.y * offset; // chart mirroring
+				this.createLine(s, {
+					x1: x, y1: y,
+					x2: x + dx,
+					y2: y + dy
+				}).setStroke(taMinorTick);
+				if(canLabel && tick.label){
+					var label = o.maxLabelCharCount ? this.getTextWithLimitCharCount(tick.label, taFont, o.maxLabelCharCount) : {
+						text: tick.label,
+						truncated: false
+					};
+					label = o.maxLabelSize ? this.getTextWithLimitLength(label.text, taFont, o.maxLabelSize, label.truncated) : label;
+					elem = this.createText(labelType,
+						s,
+						x + (taMinorTick.length > 0 ? dx : 0) + anchorOffset.x + (rotation ? 0 : labelOffset.x),
+						y + (taMinorTick.length  > 0 ? dy : 0) + anchorOffset.y + (rotation ? 0 : labelOffset.y),
+						labelAlign,
+						label.text,
+						taFont,
+						taFontColor
+						//cachedLabelW
+					);
+					// if bidi support was required, the textDir is "auto" and truncation
+					// took place, we need to update the dir of the element for cases as:
+					// Fool label: 111111W (W for bidi character)
+					// truncated label: 11...
+					// in this case for auto textDir the dir will be "ltr" which is wrong.
+					if(label.truncated){
+						this.chart.formatTruncatedLabel(elem, tick.label, labelType);
+					}
+					label.truncated && this.labelTooltip(elem, this.chart, tick.label, label.text, taFont, labelType);
+					if(labelType == "html"){
+						this.htmlElements.push(elem);
+					}else if(rotation){
+						elem.setTransform([
+							{dx: labelOffset.x, dy: labelOffset.y},
+							g.matrix.rotategAt(
+								rotation,
+								x + (taMinorTick.length > 0 ? dx : 0) + anchorOffset.x,
+								y + (taMinorTick.length > 0 ? dy : 0) + anchorOffset.y
+							)
+						]);
+					}
+				}
+			}, this);
+
+			dx = tickVector.x * taMicroTick.length;
+			dy = tickVector.y * taMicroTick.length;
+			arr.forEach(t.micro, function(tick){
+				var offset = f(tick.value),
+					x = start.x + axisVector.x * offset,
+					y = start.y + axisVector.y * offset;
+					this.createLine(s, {
+						x1: x, y1: y,
+						x2: x + dx,
+						y2: y + dy
+					}).setStroke(taMicroTick);
+			}, this);
+
+			this.dirty = false;
+			return this;	//	dojox/charting/axis2d/Default
+		},
+		labelTooltip: function(elem, chart, label, truncatedLabel, font, elemType){
+			var modules = ["dijit/Tooltip"];
+			var aroundRect = {type: "rect"}, position = ["above", "below"],
+				fontWidth = g._base._getTextBox(truncatedLabel, {font: font}).w || 0,
+				fontHeight = font ? g.normalizedLength(g.splitFontString(font).size) : 0;
+			if(elemType == "html"){
+				lang.mixin(aroundRect, domGeom.position(elem.firstChild, true));
+				aroundRect.width = Math.ceil(fontWidth);
+				aroundRect.height = Math.ceil(fontHeight);
+				this._events.push({
+					shape:  dojo,
+					handle: connect.connect(elem.firstChild, "onmouseover", this, function(e){
+						require(modules, function(Tooltip){
+							Tooltip.show(label, aroundRect, position);
+						});
+					})
+				});
+				this._events.push({
+					shape:  dojo,
+					handle: connect.connect(elem.firstChild, "onmouseout", this, function(e){
+						require(modules, function(Tooltip){
+							Tooltip.hide(aroundRect);
+						});
+					})
+				});
+			}else{
+				var shp = elem.getShape(),
+					lt = chart.getCoords();
+				aroundRect = lang.mixin(aroundRect, {
+					x: shp.x - fontWidth / 2,
+					y: shp.y
+				});
+				aroundRect.x += lt.x;
+				aroundRect.y += lt.y;
+				aroundRect.x = Math.round(aroundRect.x);
+				aroundRect.y = Math.round(aroundRect.y);
+				aroundRect.width = Math.ceil(fontWidth);
+				aroundRect.height = Math.ceil(fontHeight);
+				this._events.push({
+					shape:  elem,
+					handle: elem.connect("onmouseenter", this, function(e){
+						require(modules, function(Tooltip){
+							Tooltip.show(label, aroundRect, position);
+						});
+					})
+				});
+				this._events.push({
+					shape:  elem,
+					handle: elem.connect("onmouseleave", this, function(e){
+						require(modules, function(Tooltip){
+							Tooltip.hide(aroundRect);
+						});
+					})
+				});
+			}
+		},
+		_isRtl: function(){
+			return false;
+		}
+	});
+	return has("dojo-bidi")? declare("dojox.charting.axis2d.Default", [Default, BidiDefault]) : Default;
+});

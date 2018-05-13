@@ -1,5 +1,104 @@
-//>>built
-define("dojox/drawing/plugins/tools/Iconize",["dojo","../../util/oo","../_Plugin","../../manager/_registry"],function(f,b,l,m){b=b.declare(l,function(c){},{onClick:function(){var c,e;for(e in this.stencils.stencils)if("path"==this.stencils.stencils[e].shortType){c=this.stencils.stencils[e];break}c&&this.makeIcon(c.points)},makeIcon:function(c){var e=1E4,b=1E4;c.forEach(function(a){void 0===a.x||isNaN(a.x)||(e=Math.min(e,a.x),b=Math.min(b,a.y))});var g=0,h=0;c.forEach(function(a){void 0===a.x||isNaN(a.x)||
-(a.x=Number((a.x-e).toFixed(1)),a.y=Number((a.y-b).toFixed(1)),g=Math.max(g,a.x),h=Math.max(h,a.y))});c.forEach(function(a){a.x=60*Number((a.x/g).toFixed(1))+20;a.y=60*Number((a.y/h).toFixed(1))+20});var d="[\n";f.forEach(c,function(a,b){d+="{\t";a.t&&(d+="t:'"+a.t+"'");void 0===a.x||isNaN(a.x)||(a.t&&(d+=", "),d+="x:"+a.x+",\t\ty:"+a.y);d+="\t}";b!=c.length-1&&(d+=",");d+="\n"});var d=d+"]",k=f.byId("data");k&&(k.value=d)}});b.setup={name:"dojox.drawing.plugins.tools.Iconize",tooltip:"Iconize Tool",
-iconClass:"iconPan"};f.setObject("dojox.drawing.plugins.tools.Iconize",b);m.register(b.setup,"plugin");return b});
-//# sourceMappingURL=Iconize.js.map
+define(["dojo", "../../util/oo", "../_Plugin", "../../manager/_registry"],
+function(dojo, oo, Plugin, registry){
+
+//dojox.drawing.plugins.tools.Iconize = 
+var Iconize = oo.declare(
+	Plugin,
+	function(options){
+	
+	},
+	{
+		// summary:
+		//		Somewhat of internal use...
+		//		Outputs a path to be used as an icon. Will end up being a
+		//		sub-icon under Export options
+
+		onClick: function(){
+			var item;
+			for(var nm in this.stencils.stencils){
+				console.log(" stanceil item:", this.stencils.stencils[nm].id, this.stencils.stencils[nm])
+				if(this.stencils.stencils[nm].shortType=="path"){
+					item = this.stencils.stencils[nm];
+					break;
+				}
+			}
+			if(item){
+				console.log("click Iconize plugin", item.points);
+				this.makeIcon(item.points);
+			}
+		},
+		makeIcon: function(/*Array*/p){
+			var rnd = function(n){
+				return Number(n.toFixed(1));
+			}
+			
+			var x = 10000;
+			var y = 10000;
+			p.forEach(function(pt){
+				if(pt.x!==undefined && !isNaN(pt.x)){
+					x = Math.min(x, pt.x);
+					y = Math.min(y, pt.y);
+				}
+			});
+			
+			var xmax = 0;
+			var ymax = 0;
+			p.forEach(function(pt){
+				if(pt.x!==undefined && !isNaN(pt.x)){
+					pt.x = rnd(pt.x - x);
+					//console.log("Y:", pt.y, y, pt.y - y)
+					pt.y = rnd(pt.y - y);
+					xmax = Math.max(xmax, pt.x);
+					ymax = Math.max(ymax, pt.y);
+				}
+			});
+			
+			console.log("xmax:", xmax, "ymax:", ymax)
+			
+			var s = 60
+			var m = 20
+			
+			p.forEach(function(pt){
+				pt.x = rnd(pt.x / xmax) * s + m;
+				pt.y = rnd(pt.y / ymax) * s + m;
+			});
+			
+			var txt = "[\n";
+			dojo.forEach(p, function(pt, i){
+				txt += "{\t"
+				if(pt.t){
+					txt += "t:'"+pt.t+"'"
+				}
+				if(pt.x!==undefined && !isNaN(pt.x)){
+					if(pt.t){
+						txt += ", ";
+					}
+					txt += "x:"+pt.x+",\t\ty:"+pt.y;
+				}
+				txt += "\t}";
+				if(i!=p.length-1){
+					txt += ","
+				}
+				txt += "\n"
+			});
+			txt+="]"
+			
+			console.log(txt)
+			var n = dojo.byId("data");
+			if(n){
+				n.value = txt;
+			}
+		}
+	}
+);
+
+Iconize.setup = {
+	name:"dojox.drawing.plugins.tools.Iconize",
+	tooltip:"Iconize Tool",
+	iconClass:"iconPan"
+};
+dojo.setObject('dojox.drawing.plugins.tools.Iconize', Iconize);
+registry.register(Iconize.setup, "plugin");
+
+return Iconize;
+});

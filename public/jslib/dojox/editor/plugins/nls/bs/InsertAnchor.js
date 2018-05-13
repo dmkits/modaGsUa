@@ -1,3 +1,11 @@
-//>>built
-define("dojox/editor/plugins/nls/bs/InsertAnchor",{insertAnchor:"Umetni sidro",title:"Osobine sidra",anchor:"Ime:",text:"Opis:",set:"Postav",cancel:"Odustani"});
-//# sourceMappingURL=InsertAnchor.js.map
+define({      
+//begin v1.x content
+	insertAnchor: "Umetni sidro",
+	title: "Osobine sidra",
+	anchor: "Ime:",
+	text: "Opis:",
+	set: "Postav",
+	cancel: "Odustani"
+//end v1.x content
+});
+

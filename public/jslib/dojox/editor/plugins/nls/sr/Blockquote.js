@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/sr/Blockquote",{blockquote:"Citat pasusa"});
-//# sourceMappingURL=Blockquote.js.map
+define({      
+//begin v1.x content
+	"blockquote": "Citat pasusa"
+//end v1.x content
+});
+

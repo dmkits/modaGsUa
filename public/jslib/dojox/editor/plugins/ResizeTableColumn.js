@@ -1,9 +1,297 @@
-//>>built
-define("dojox/editor/plugins/ResizeTableColumn",["dojo","dijit","dojox","./TablePlugins"],function(b,v,B,A){var q=b.declare("dojox.editor.plugins.ResizeTableColumn",A,{constructor:function(){this.isLtr=this.dir?"ltr"==this.dir:b._isBodyLtr();this.ruleDiv=b.create("div",{style:"top: -10000px; z-index: 10001"},b.body(),"last")},setEditor:function(m){function r(a,e){var c=b.query("\x3e td",a.parentNode);switch(e){case "first":return c[0]==a;case "last":return c[c.length-1]==a;default:return!1}}function q(a){for(a=
-a.nextSibling;a&&(!a.tagName||"td"!=a.tagName.toLowerCase());)a=a.nextSibling;return a}function t(a){for(;(a=a.parentNode)&&"table"!=a.tagName.toLowerCase(););return a}function z(a){for(var e=b.query("td",t(a)),c=e.length,d=0;d<c;d++)if(b.position(e[d]).x==b.position(a).x)return e[d];return null}function u(a,e){function c(a,b){if(!b)return 0;if("medium"==b)return 1;if(b.slice&&"px"==b.slice(-2))return parseFloat(b);with(a){var c=style.left,d=runtimeStyle.left;runtimeStyle.left=currentStyle.left;try{style.left=
-b,b=style.pixelLeft}catch(w){b=0}style.left=c;runtimeStyle.left=d}return b}if(b.isIE){var d=a.currentStyle,f=c(a,d.borderLeftWidth),g=c(a,d.borderRightWidth),h=c(a,d.paddingLeft),d=c(a,d.paddingRight);a.style.width=e-f-g-h-d}else b.marginBox(a,{w:e})}var h=this.ruleDiv;this.editor=m;this.editor.customUndo=!0;this.onEditorLoaded();m.onLoadDeferred.addCallback(b.hitch(this,function(){this.connect(this.editor.editNode,"onmousemove",function(a){var e=b.position(m.iframe,!0),c=e.x,d=a.clientX;if(this.isDragging){var f=
-this.activeCell;a=b.position(f);e=a.x;a=a.w;var g=q(f),l,k,n=b.position(t(f).parentNode),f=n.x,n=n.w;g&&(l=b.position(g),k=l.x,l=l.w);(this.isLtr&&(h.headerColumn&&g&&f<d&&d<e+a||!g&&e<d&&d<f+n||g&&e<d&&d<k+l)||!this.isLtr&&(h.headerColumn&&g&&f>d&&d>e||!g&&e+a>d&&d>f||g&&e+a>d&&d>k))&&b.style(h,{left:c+d+"px"})}else if(k=a.target,k.tagName&&"td"==k.tagName.toLowerCase()){l=b.position(k);a=l.x;g=l.w;c=c+l.x-2;if(this.isLtr){if(h.headerColumn=!0,!r(k,"first")||d>a+g/2)c+=g,h.headerColumn=!1}else h.headerColumn=
-!1,r(k,"first")&&d>a+g/2&&(c+=g,h.headerColumn=!0);b.style(h,{position:"absolute",cursor:"col-resize",display:"block",width:"4px",backgroundColor:"transparent",top:e.y+l.y+"px",left:c+"px",height:l.h+"px"});this.activeCell=k}else b.style(h,{display:"none",top:"-10000px"})});this.connect(h,"onmousedown",function(a){var e=b.position(m.iframe,!0),c=b.position(t(this.activeCell));this.isDragging=!0;b.style(m.editNode,{cursor:"col-resize"});b.style(h,{width:"1px",left:a.clientX+"px",top:e.y+c.y+"px",height:c.h+
-"px",backgroundColor:"#777"})});this.connect(h,"onmouseup",function(a){var e=this.activeCell,c=b.position(e),d=c.w,f=c.x,c=q(e),g,l,k=b.position(m.iframe).x,n=t(e),v=b.position(n),p=n.getAttribute("cellspacing");a=a.clientX;var w=z(e),x,y;if(!p||0>(p=parseInt(p,10)))p=2;c&&(g=b.position(c),l=g.x,g=g.w,x=z(c));this.isLtr?h.headerColumn?f=k+f+d-a:(f=a-k-f,c&&(y=k+l+g-a-p)):h.headerColumn?f=a-k-f:(f=k+f+d-a,c&&(y=a-k-l-p));this.isDragging=!1;u(w,f);c&&(h.headerColumn||u(x,y));(h.headerColumn&&r(e,"first")||
-r(e,"last"))&&b.marginBox(n,{w:v.w+f-d});u(w,b.position(e).w);c&&u(x,b.position(c).w);b.style(m.editNode,{cursor:"auto"});b.style(h,{display:"none",top:"-10000px"});this.activeCell=null})}))}});b.subscribe(v._scopeName+".Editor.getPlugin",null,function(b){if(!b.plugin&&b.args&&b.args.command){var m=b.args.command.charAt(0).toLowerCase()+b.args.command.substring(1,b.args.command.length);"resizeTableColumn"==m&&(b.plugin=new q({commandName:m}))}});return q});
-//# sourceMappingURL=ResizeTableColumn.js.map
+define([
+	"dojo",
+	"dijit",
+	"dojox",
+	"./TablePlugins"
+], function(dojo, dijit, dojox, TablePlugins) {
+
+
+	var ResizeTableColumn = dojo.declare("dojox.editor.plugins.ResizeTableColumn",	TablePlugins, {
+
+		constructor: function(){
+			// summary:
+			//		Because IE will ignore the cursor style when the editMode of the document is on,
+			//		we need to create a div within the outer document to mimic the behavior of drag&drop
+			this.isLtr = this.dir ? (this.dir == "ltr") : dojo._isBodyLtr();
+			this.ruleDiv = dojo.create("div",
+				{style: "top: -10000px; z-index: 10001"},
+				dojo.body(), "last");
+		},
+		
+		setEditor: function(editor){
+			// summary:
+			//		Handle the drag&drop events
+			// editor:
+			//		The editor which this plugin belongs to
+			// tags:
+			//		protected
+			var ruleDiv = this.ruleDiv;
+			
+			this.editor = editor;
+			this.editor.customUndo = true;
+			this.onEditorLoaded();
+			
+			// The content of the editor is loaded asynchronously, so the function
+			// should be called when it is loaded.
+			editor.onLoadDeferred.addCallback(dojo.hitch(this, function(){
+				this.connect(this.editor.editNode, "onmousemove", function(evt){
+					var editorCoords = dojo.position(editor.iframe, true),
+						ex = editorCoords.x, cx = evt.clientX;
+					
+					if(!this.isDragging){
+						// If it is just a movement, put the div at the edge of the
+						// target cell so that when the cursor hover on it, it will
+						// change to the col-resize style.
+						var obj = evt.target;
+						
+						if(obj.tagName && obj.tagName.toLowerCase() == "td"){
+							var objCoords = dojo.position(obj), ox = objCoords.x, ow = objCoords.w,
+								pos = ex + objCoords.x - 2;
+							if(this.isLtr){
+								ruleDiv.headerColumn = true;
+								if(!isBoundary(obj, "first") || cx > ox + ow / 2){
+									pos += ow;
+									ruleDiv.headerColumn = false;
+								}
+							}else{
+								ruleDiv.headerColumn = false;
+								if(isBoundary(obj, "first") && cx > ox + ow / 2){
+									pos += ow;
+									ruleDiv.headerColumn = true;
+								}
+							}
+							dojo.style(ruleDiv, {
+								position: "absolute",
+								cursor: "col-resize",
+								display: "block",
+								width: "4px",
+								backgroundColor: "transparent",
+								top: editorCoords.y + objCoords.y + "px",
+								left: pos + "px",
+								height: objCoords.h + "px"
+							});
+							this.activeCell = obj;
+						}else{
+							dojo.style(ruleDiv, {display: "none", top: "-10000px"});
+						}
+					}else{
+						// Begin to drag&drop
+						var activeCell = this.activeCell,
+							activeCoords = dojo.position(activeCell), ax = activeCoords.x, aw = activeCoords.w,
+							sibling = nextSibling(activeCell), siblingCoords, sx, sw,
+							containerCoords = dojo.position(getTable(activeCell).parentNode),
+							ctx = containerCoords.x, ctw = containerCoords.w;
+						
+						if(sibling){
+							siblingCoords = dojo.position(sibling);
+							sx = siblingCoords.x;
+							sw = siblingCoords.w;
+						}
+						
+						// The leading and trailing columns can only be sized to the extent of the containing div.
+						if(this.isLtr &&
+								((ruleDiv.headerColumn && sibling && ctx < cx && cx < ax + aw) ||
+									((!sibling && ax < cx && cx < ctx + ctw) || (sibling && ax < cx && cx < sx + sw))) ||
+							!this.isLtr &&
+								((ruleDiv.headerColumn && sibling && ctx > cx && cx > ax) ||
+									((!sibling && ax + aw > cx && cx > ctx) || (sibling && ax + aw > cx && cx > sx)))){
+							dojo.style(ruleDiv, {left: ex + cx + "px"});
+						}
+					}
+				});
+				
+				this.connect(ruleDiv, "onmousedown", function(evt){
+					var editorCoords = dojo.position(editor.iframe, true),
+						tableCoords = dojo.position(getTable(this.activeCell));
+					
+					this.isDragging = true;
+					dojo.style(editor.editNode, {cursor: "col-resize"});
+					dojo.style(ruleDiv, {
+						width: "1px",
+						left: evt.clientX + "px",
+						top: editorCoords.y + tableCoords.y + "px",
+						height: tableCoords.h + "px",
+						backgroundColor: "#777"
+					});
+				});
+				
+				this.connect(ruleDiv, "onmouseup", function(evt){
+					var activeCell = this.activeCell,
+						activeCoords = dojo.position(activeCell), aw = activeCoords.w, ax = activeCoords.x,
+						sibling = nextSibling(activeCell), siblingCoords, sx, sw,
+						editorCoords = dojo.position(editor.iframe), ex = editorCoords.x,
+						table = getTable(activeCell), tableCoords = dojo.position(table),
+						cs = table.getAttribute("cellspacing"),
+						cx = evt.clientX,
+						headerCell = getHeaderCell(activeCell), headerSibling,
+						newWidth, newSiblingWidth;
+					
+					if(!cs || (cs = parseInt(cs, 10)) < 0){ cs = 2; }
+					
+					if(sibling){
+						siblingCoords = dojo.position(sibling);
+						sx = siblingCoords.x;
+						sw = siblingCoords.w;
+						headerSibling = getHeaderCell(sibling);
+					}
+					
+					// The delta width is either taken from or added to the adjacent column on the trailing edge.
+					// Sizing the rightmost or leftmost columns affects only those columns.
+					if(this.isLtr){
+						if(ruleDiv.headerColumn){
+							newWidth = ex + ax + aw - cx;
+						}else{
+							newWidth = cx - ex - ax;
+							if(sibling) { newSiblingWidth = ex + sx + sw - cx - cs; }
+						}
+					}else{
+						if(ruleDiv.headerColumn){
+							newWidth = cx - ex - ax;
+						}else{
+							newWidth = ex + ax + aw - cx;
+							if(sibling) { newSiblingWidth = cx - ex - sx - cs; }
+						}
+					}
+					
+					this.isDragging = false;
+					marginBox(headerCell, newWidth);
+					if(sibling){
+						if(!ruleDiv.headerColumn){
+							marginBox(headerSibling, newSiblingWidth);
+						}
+					}
+					if(ruleDiv.headerColumn && isBoundary(activeCell, "first") || isBoundary(activeCell, "last")){
+						dojo.marginBox(table, {w: tableCoords.w + newWidth - aw});
+					}
+					// Do it again to consolidate the result,
+					// because maybe the cell cannot be so narrow as you specified.
+					marginBox(headerCell, dojo.position(activeCell).w);
+					if(sibling){
+						marginBox(headerSibling, dojo.position(sibling).w);
+					}
+					dojo.style(editor.editNode, {cursor: "auto"});
+					dojo.style(ruleDiv, {display: "none", top: "-10000px"});
+					this.activeCell = null;
+				});
+			}));
+			
+			function isBoundary(/*DomNode*/ n, /*String*/ b){
+				// summary:
+				//		Check if the current cell is in the first column or
+				//		in the last column.
+				// n:
+				//		The node of a table cell
+				// b:
+				//		Indicate if the cell node is compared with the first coluln
+				//		or the last column
+				var nodes = dojo.query("> td", n.parentNode);
+				switch(b){
+					case "first":
+						return nodes[0] == n;
+					case "last":
+						return nodes[nodes.length - 1] == n;
+					default:
+						return false;
+				}
+			}
+			
+			function nextSibling(/*DomNode*/ node){
+				// summary:
+				//		Get the next cell in row
+				// node:
+				//		The table cell
+				node = node.nextSibling
+				while(node){
+					if(node.tagName && node.tagName.toLowerCase() == "td"){
+						break;
+					}
+					node = node.nextSibling
+				}
+				return node;
+			}
+			
+			function getTable(/*DomNode*/ t){
+				// summary:
+				//		Get the table that this cell belongs to.
+				// t:
+				//		The table cell
+				while((t = t.parentNode) && t.tagName.toLowerCase() != "table"){}
+				return t;
+			}
+			
+			function getHeaderCell(/*DomNode*/ t){
+				// summary:
+				//		Get the table cell in the first row that shares the same
+				//		column with the node t.
+				// t:
+				//		The node of the table cell
+				var tds = dojo.query("td", getTable(t)),
+					len = tds.length;
+				for(var i = 0; i < len; i++){
+					if(dojo.position(tds[i]).x == dojo.position(t).x){
+						return tds[i];
+					}
+				}
+				return null;
+			}
+			
+			function marginBox(/*DomNode*/ node, /*Number*/ width){
+				// summary:
+				//		In IE, if the border width of the td is not specified in table, the default value is 1px,
+				//		though it is marked "medium".
+				// node:
+				//		The node to be set width
+				// width:
+				//		The new width of the node
+				if(dojo.isIE){
+					var s = node.currentStyle,
+						bl = px(node, s.borderLeftWidth), br = px(node, s.borderRightWidth),
+						pl = px(node, s.paddingLeft), pr = px(node, s.paddingRight);
+					
+					node.style.width = width - bl - br - pl - pr;
+				}else{
+					dojo.marginBox(node, {w: width});
+				}
+				
+				function px(element, avalue){
+					if(!avalue){ return 0; }
+					if(avalue == "medium"){ return 1; }
+					// style values can be floats, client code may
+					// want to round this value for integer pixels.
+					if(avalue.slice && avalue.slice(-2) == 'px'){ return parseFloat(avalue); }
+					with(element){
+						var sLeft = style.left;
+						var rsLeft = runtimeStyle.left;
+						runtimeStyle.left = currentStyle.left;
+						try{
+							// 'avalue' may be incompatible with style.left, which can cause IE to throw
+							// this has been observed for border widths using "thin", "medium", "thick" constants
+							// those particular constants could be trapped by a lookup
+							// but perhaps there are more
+							style.left = avalue;
+							avalue = style.pixelLeft;
+						}catch(e){
+							avalue = 0;
+						}
+						style.left = sLeft;
+						runtimeStyle.left = rsLeft;
+					}
+					return avalue;
+				}
+			}
+		}
+	});
+
+	dojo.subscribe(dijit._scopeName + ".Editor.getPlugin",null,function(o){
+		if(o.plugin){ return; }
+		// make first character lower case
+		if(o.args && o.args.command){
+			var cmd = o.args.command.charAt(0).toLowerCase() + o.args.command.substring(1, o.args.command.length);
+			if(cmd == "resizeTableColumn"){
+				o.plugin = new ResizeTableColumn({commandName: cmd});
+			}
+		}
+	});
+
+	return ResizeTableColumn;
+});

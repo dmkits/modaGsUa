@@ -1,9 +1,214 @@
-//>>built
-define("dojox/charting/plot2d/common","dojo/_base/lang dojo/_base/array dojo/_base/Color dojox/gfx dojox/lang/functional ../scaler/common".split(" "),function(r,t,q,u,x,v){var l=r.getObject("dojox.charting.plot2d.common",!0);return r.mixin(l,{doIfLoaded:v.doIfLoaded,makeStroke:function(b){if(!b)return b;if("string"==typeof b||b instanceof q)b={color:b};return u.makeParameters(u.defaultStroke,b)},augmentColor:function(b,e){var a=new q(b),c=new q(e);c.a=a.a;return c},augmentStroke:function(b,e){var a=
-l.makeStroke(b);a&&(a.color=l.augmentColor(a.color,e));return a},augmentFill:function(b,e){new q(e);return"string"==typeof b||b instanceof q?l.augmentColor(b,e):b},defaultStats:{vmin:Number.POSITIVE_INFINITY,vmax:Number.NEGATIVE_INFINITY,hmin:Number.POSITIVE_INFINITY,hmax:Number.NEGATIVE_INFINITY},collectSimpleStats:function(b,e){for(var a=r.delegate(l.defaultStats),c=0;c<b.length;++c)for(var f=b[c],d=0;d<f.data.length;d++)if(!e(f.data[d])){if("number"==typeof f.data[d]){var d=a.vmin,w=a.vmax;t.forEach(f.data,
-function(c,d){if(!e(c)){var b=d+1,f=c;isNaN(f)&&(f=0);a.hmin=Math.min(a.hmin,b);a.hmax=Math.max(a.hmax,b);a.vmin=Math.min(a.vmin,f);a.vmax=Math.max(a.vmax,f)}})}else{var g=a.hmin,m=a.hmax,d=a.vmin,w=a.vmax;"xmin"in f&&"xmax"in f&&"ymin"in f&&"ymax"in f||t.forEach(f.data,function(c,b){if(!e(c)){var d="x"in c?c.x:b+1,f=c.y;isNaN(d)&&(d=0);isNaN(f)&&(f=0);a.hmin=Math.min(a.hmin,d);a.hmax=Math.max(a.hmax,d);a.vmin=Math.min(a.vmin,f);a.vmax=Math.max(a.vmax,f)}});"xmin"in f&&(a.hmin=Math.min(g,f.xmin));
-"xmax"in f&&(a.hmax=Math.max(m,f.xmax))}"ymin"in f&&(a.vmin=Math.min(d,f.ymin));"ymax"in f&&(a.vmax=Math.max(w,f.ymax));break}return a},calculateBarSize:function(b,e,a){a||(a=1);var c=(b-2*e.gap)/a;"minBarSize"in e&&(c=Math.max(c,e.minBarSize));"maxBarSize"in e&&(c=Math.min(c,e.maxBarSize));c=Math.max(c,1);return{size:c,gap:(b-c*a)/2}},collectStackedStats:function(b){var e=r.clone(l.defaultStats);if(b.length){e.hmin=Math.min(e.hmin,1);e.hmax=x.foldl(b,"seed, run -\x3e Math.max(seed, run.data.length)",
-e.hmax);for(var a=0;a<e.hmax;++a){var c=b[0].data[a],c=c&&("number"==typeof c?c:c.y);isNaN(c)&&(c=0);e.vmin=Math.min(e.vmin,c);for(var f=1;f<b.length;++f){var d=b[f].data[a],d=d&&("number"==typeof d?d:d.y);isNaN(d)&&(d=0);c+=d}e.vmax=Math.max(e.vmax,c)}}return e},curve:function(b,e){var a=b.slice(0);"x"==e&&(a[a.length]=a[0]);return t.map(a,function(c,f){if(0==f)return"M"+c.x+","+c.y;if(!isNaN(e)){var d=c.x-a[f-1].x;return"C"+(c.x-d/e*(e-1))+","+a[f-1].y+" "+(c.x-d/e)+","+c.y+" "+c.x+","+c.y}if("X"==
-e||"x"==e||"S"==e){var b,g=a[f-1],d=a[f],m,h,n,k=1/6;1==f?(b="x"==e?a[a.length-2]:g,k=1/3):b=a[f-2];f==a.length-1?(m="x"==e?a[1]:d,k=1/3):m=a[f+1];h=Math.sqrt((d.x-g.x)*(d.x-g.x)+(d.y-g.y)*(d.y-g.y));n=Math.sqrt((d.x-b.x)*(d.x-b.x)+(d.y-b.y)*(d.y-b.y));var l=Math.sqrt((m.x-g.x)*(m.x-g.x)+(m.y-g.y)*(m.y-g.y)),p=n*k,k=l*k;p>h/2&&k>h/2?(p=h/2,k=h/2):p>h/2?(p=h/2,k=h/2*l/n):k>h/2&&(k=h/2,p=h/2*n/l);"S"==e&&(b==g&&(p=0),d==m&&(k=0));h=g.x+p*(d.x-b.x)/n;b=g.y+p*(d.y-b.y)/n;n=d.x-k*(m.x-g.x)/l;g=d.y-k*(m.y-
-g.y)/l}return"C"+(h+","+b+" "+n+","+g+" "+d.x+","+d.y)}).join(" ")},getLabel:function(b,e,a){return v.doIfLoaded("dojo/number",function(c){return(e?c.format(b,{places:a}):c.format(b))||""},function(){return e?b.toFixed(a):b.toString()})}})});
-//# sourceMappingURL=common.js.map
+define(["dojo/_base/lang", "dojo/_base/array", "dojo/_base/Color", 
+		"dojox/gfx", "dojox/lang/functional", "../scaler/common"], 
+	function(lang, arr, Color, g, df, sc){
+	
+	var common = lang.getObject("dojox.charting.plot2d.common", true);
+	
+	return lang.mixin(common, {	
+		doIfLoaded: sc.doIfLoaded,
+		makeStroke: function(stroke){
+			if(!stroke){ return stroke; }
+			if(typeof stroke == "string" || stroke instanceof Color){
+				stroke = {color: stroke};
+			}
+			return g.makeParameters(g.defaultStroke, stroke);
+		},
+		augmentColor: function(target, color){
+			var t = new Color(target),
+				c = new Color(color);
+			c.a = t.a;
+			return c;
+		},
+		augmentStroke: function(stroke, color){
+			var s = common.makeStroke(stroke);
+			if(s){
+				s.color = common.augmentColor(s.color, color);
+			}
+			return s;
+		},
+		augmentFill: function(fill, color){
+			var fc, c = new Color(color);
+			if(typeof fill == "string" || fill instanceof Color){
+				return common.augmentColor(fill, color);
+			}
+			return fill;
+		},
+
+		defaultStats: {
+			vmin: Number.POSITIVE_INFINITY, vmax: Number.NEGATIVE_INFINITY,
+			hmin: Number.POSITIVE_INFINITY, hmax: Number.NEGATIVE_INFINITY
+		},
+
+		collectSimpleStats: function(series, isNullValue){
+			var stats = lang.delegate(common.defaultStats);
+			for(var i = 0; i < series.length; ++i){
+				var run = series[i];
+				for(var j = 0; j < run.data.length; j++){
+					if(!isNullValue(run.data[j])){
+						if(typeof run.data[j] == "number"){
+							// 1D case
+							var old_vmin = stats.vmin, old_vmax = stats.vmax;
+							arr.forEach(run.data, function(val, i){
+								if(!isNullValue(val)){
+									var x = i + 1, y = val;
+									if(isNaN(y)){ y = 0; }
+									stats.hmin = Math.min(stats.hmin, x);
+									stats.hmax = Math.max(stats.hmax, x);
+									stats.vmin = Math.min(stats.vmin, y);
+									stats.vmax = Math.max(stats.vmax, y);
+								}
+							});
+							if("ymin" in run){ stats.vmin = Math.min(old_vmin, run.ymin); }
+							if("ymax" in run){ stats.vmax = Math.max(old_vmax, run.ymax); }
+						}else{
+							// 2D case
+							var old_hmin = stats.hmin, old_hmax = stats.hmax,
+								old_vmin = stats.vmin, old_vmax = stats.vmax;
+							if(!("xmin" in run) || !("xmax" in run) || !("ymin" in run) || !("ymax" in run)){
+								arr.forEach(run.data, function(val, i){
+									if(!isNullValue(val)){
+										var x = "x" in val ? val.x : i + 1, y = val.y;
+										if(isNaN(x)){ x = 0; }
+										if(isNaN(y)){ y = 0; }
+										stats.hmin = Math.min(stats.hmin, x);
+										stats.hmax = Math.max(stats.hmax, x);
+										stats.vmin = Math.min(stats.vmin, y);
+										stats.vmax = Math.max(stats.vmax, y);
+									}
+								});
+							}
+							if("xmin" in run){ stats.hmin = Math.min(old_hmin, run.xmin); }
+							if("xmax" in run){ stats.hmax = Math.max(old_hmax, run.xmax); }
+							if("ymin" in run){ stats.vmin = Math.min(old_vmin, run.ymin); }
+							if("ymax" in run){ stats.vmax = Math.max(old_vmax, run.ymax); }
+						}
+
+						break;
+					}
+				}
+			}
+			return stats;
+		},
+
+		calculateBarSize: function(/* Number */ availableSize, /* Object */ opt, /* Number? */ clusterSize){
+			if(!clusterSize){
+				clusterSize = 1;
+			}
+			var gap = opt.gap, size = (availableSize - 2 * gap) / clusterSize;
+			if("minBarSize" in opt){
+				size = Math.max(size, opt.minBarSize);
+			}
+			if("maxBarSize" in opt){
+				size = Math.min(size, opt.maxBarSize);
+			}
+			size = Math.max(size, 1);
+			gap = (availableSize - size * clusterSize) / 2;
+			return {size: size, gap: gap};	// Object
+		},
+
+		collectStackedStats: function(series){
+			// collect statistics
+			var stats = lang.clone(common.defaultStats);
+			if(series.length){
+				// 1st pass: find the maximal length of runs
+				stats.hmin = Math.min(stats.hmin, 1);
+				stats.hmax = df.foldl(series, "seed, run -> Math.max(seed, run.data.length)", stats.hmax);
+				// 2nd pass: stack values
+				for(var i = 0; i < stats.hmax; ++i){
+					var v = series[0].data[i];
+					v = v && (typeof v == "number" ? v : v.y);
+					if(isNaN(v)){ v = 0; }
+					stats.vmin = Math.min(stats.vmin, v);
+					for(var j = 1; j < series.length; ++j){
+						var t = series[j].data[i];
+						t = t && (typeof t == "number" ? t : t.y);
+						if(isNaN(t)){ t = 0; }
+						v += t;
+					}
+					stats.vmax = Math.max(stats.vmax, v);
+				}
+			}
+			return stats;
+		},
+
+		curve: function(/* Number[] */a, /* Number|String */tension){
+			//	FIX for #7235, submitted by Enzo Michelangeli.
+			//	Emulates the smoothing algorithms used in a famous, unnamed spreadsheet
+			//		program ;)
+			var array = a.slice(0);
+			if(tension == "x") {
+				array[array.length] = array[0];   // add a last element equal to the first, closing the loop
+			}
+			var p=arr.map(array, function(item, i){
+				if(i==0){ return "M" + item.x + "," + item.y; }
+				if(!isNaN(tension)) { // use standard Dojo smoothing in tension is numeric
+					var dx=item.x-array[i-1].x, dy=array[i-1].y;
+					return "C"+(item.x-(tension-1)*(dx/tension))+","+dy+" "+(item.x-(dx/tension))+","+item.y+" "+item.x+","+item.y;
+				} else if(tension == "X" || tension == "x" || tension == "S") {
+					// use Excel "line smoothing" algorithm (http://xlrotor.com/resources/files.shtml)
+					var p0, p1 = array[i-1], p2 = array[i], p3;
+					var bz1x, bz1y, bz2x, bz2y;
+					var f = 1/6;
+					if(i==1) {
+						if(tension == "x") {
+							p0 = array[array.length-2];
+						} else { // "tension == X || tension == "S"
+							p0 = p1;
+						}
+						f = 1/3;
+					} else {
+						p0 = array[i-2];
+					}
+					if(i==(array.length-1)) {
+						if(tension == "x") {
+							p3 = array[1];
+						} else { // "tension == X || tension == "S"
+							p3 = p2;
+						}
+						f = 1/3;
+					} else {
+						p3 = array[i+1];
+					}
+					var p1p2 = Math.sqrt((p2.x-p1.x)*(p2.x-p1.x)+(p2.y-p1.y)*(p2.y-p1.y));
+					var p0p2 = Math.sqrt((p2.x-p0.x)*(p2.x-p0.x)+(p2.y-p0.y)*(p2.y-p0.y));
+					var p1p3 = Math.sqrt((p3.x-p1.x)*(p3.x-p1.x)+(p3.y-p1.y)*(p3.y-p1.y));
+
+					var p0p2f = p0p2 * f;
+					var p1p3f = p1p3 * f;
+
+					if(p0p2f > p1p2/2 && p1p3f > p1p2/2) {
+						p0p2f = p1p2/2;
+						p1p3f = p1p2/2;
+					} else if(p0p2f > p1p2/2) {
+						p0p2f = p1p2/2;
+						p1p3f = p1p2/2 * p1p3/p0p2;
+					} else if(p1p3f > p1p2/2) {
+						p1p3f = p1p2/2;
+						p0p2f = p1p2/2 * p0p2/p1p3;
+					}
+
+					if(tension == "S") {
+						if(p0 == p1) { p0p2f = 0; }
+						if(p2 == p3) { p1p3f = 0; }
+					}
+
+					bz1x = p1.x + p0p2f*(p2.x - p0.x)/p0p2;
+					bz1y = p1.y + p0p2f*(p2.y - p0.y)/p0p2;
+					bz2x = p2.x - p1p3f*(p3.x - p1.x)/p1p3;
+					bz2y = p2.y - p1p3f*(p3.y - p1.y)/p1p3;
+				}
+				return "C"+(bz1x+","+bz1y+" "+bz2x+","+bz2y+" "+p2.x+","+p2.y);
+			});
+			return p.join(" ");
+		},
+		
+		getLabel: function(/*Number*/number, /*Boolean*/fixed, /*Number*/precision){
+			return sc.doIfLoaded("dojo/number", function(numberLib){
+				return (fixed ? numberLib.format(number, {places : precision}) :
+					numberLib.format(number)) || "";
+			}, function(){
+				return fixed ? number.toFixed(precision) : number.toString();
+			});
+		}
+	});
+});

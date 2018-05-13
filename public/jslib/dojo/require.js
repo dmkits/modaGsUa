@@ -1,9 +1,7 @@
-/*
-	Copyright (c) 2004-2016, The JS Foundation All Rights Reserved.
-	Available via Academic Free License >= 2.1 OR the modified BSD license.
-	see: http://dojotoolkit.org/license for details
-*/
-
-//>>built
-define("dojo/require",["./_base/loader"],function(a){return{dynamic:0,normalize:function(a){return a},load:a.require}});
-//# sourceMappingURL=require.js.map
+define(["./_base/loader"], function(loader){
+	return {
+		dynamic:0,
+		normalize:function(id){return id;},
+		load:loader.require
+	};
+});

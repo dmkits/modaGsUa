@@ -1,12 +1,350 @@
-//>>built
-define("dojox/gfx/fx","dojo/_base/lang ./_base ./matrix dojo/_base/Color dojo/_base/array dojo/_base/fx dojo/_base/connect dojo/sniff".split(" "),function(C,q,l,r,t,m,f,w){function u(b,a){this.start=b;this.end=a}function x(b,a,c){this.start=b;this.end=a;this.units=c}function y(b,a){this.start=b;this.end=a;this.temp=new r}function g(b){this.values=b;this.length=b.length}function v(b,a){this.values=b;this.def=a?a:{}}function z(b,a){this.stack=b;this.original=a}function A(b,a,c,e){if(b.values)return new g(b.values);
-var d,k;k=b.start?q.normalizeColor(b.start):d=a?c?a[c]:a:e;b.end?b=q.normalizeColor(b.end):(d||(d=a?c?a[c]:a:e),b=d);return new y(k,b)}var p=q.fx={};u.prototype.getValue=function(b){return(this.end-this.start)*b+this.start};x.prototype.getValue=function(b){return(this.end-this.start)*b+this.start+this.units};y.prototype.getValue=function(b){return r.blendColors(this.start,this.end,b,this.temp)};g.prototype.getValue=function(b){return this.values[Math.min(Math.floor(b*this.length),this.length-1)]};
-v.prototype.getValue=function(b){var a=C.clone(this.def),c;for(c in this.values)a[c]=this.values[c].getValue(b);return a};z.prototype.getValue=function(b){var a=[];t.forEach(this.stack,function(c){if(c instanceof l.Matrix2D)a.push(c);else if("original"==c.name&&this.original)a.push(this.original);else if("matrix"==c.name){if(c.start instanceof l.Matrix2D&&c.end instanceof l.Matrix2D){var e=new l.Matrix2D,d;for(d in c.start)e[d]=(c.end[d]-c.start[d])*b+c.start[d];a.push(e)}}else c.name in l&&(e=l[c.name],
-"function"!=typeof e?a.push(e):(d=t.map(c.start,function(d,a){return(c.end[a]-d)*b+d}),e=e.apply(l,d),e instanceof l.Matrix2D&&a.push(e)))},this);return a};var B=new r(0,0,0,0);p.animateStroke=function(b){b.easing||(b.easing=m._defaultEasing);var a=new m.Animation(b),c=b.shape,e;f.connect(a,"beforeBegin",a,function(){e=c.getStroke();var d=b.color,a={},h;d&&(a.color=A(d,e,"color",B));(d=b.style)&&d.values&&(a.style=new g(d.values));if(d=b.width){var n=d,f=e;n.values?h=new g(n.values):(d=n.start?n.start:
-h=f?f.width:1,n.end?h=n.end:"number"!=typeof h&&(h=f?f.width:1),h=new u(d,h));a.width=h}(d=b.cap)&&d.values&&(a.cap=new g(d.values));if(d=b.join)d.values?a.join=new g(d.values):(h=d.start?d.start:e&&e.join||0,d=d.end?d.end:e&&e.join||0,"number"==typeof h&&"number"==typeof d&&(a.join=new u(h,d)));this.curve=new v(a,e)});f.connect(a,"onAnimate",c,"setStroke");return a};p.animateFill=function(b){b.easing||(b.easing=m._defaultEasing);var a=new m.Animation(b),c=b.shape,e;f.connect(a,"beforeBegin",a,function(){e=
-c.getFill();var a=b.color;a&&(this.curve=A(a,e,"",B))});f.connect(a,"onAnimate",c,"setFill");return a};p.animateFont=function(b){b.easing||(b.easing=m._defaultEasing);var a=new m.Animation(b),c=b.shape,e;f.connect(a,"beforeBegin",a,function(){e=c.getFont();var a=b.style,k={},h,f;a&&a.values&&(k.style=new g(a.values));(a=b.variant)&&a.values&&(k.variant=new g(a.values));(a=b.weight)&&a.values&&(k.weight=new g(a.values));(a=b.family)&&a.values&&(k.family=new g(a.values));(a=b.size)&&a.units&&(h=parseFloat(a.start?
-a.start:c.font&&c.font.size||"0"),f=parseFloat(a.end?a.end:c.font&&c.font.size||"0"),k.size=new x(h,f,a.units));this.curve=new v(k,e)});f.connect(a,"onAnimate",c,"setFont");return a};p.animateTransform=function(b){b.easing||(b.easing=m._defaultEasing);var a=new m.Animation(b),c=b.shape,e;f.connect(a,"beforeBegin",a,function(){e=c.getTransform();this.curve=new z(b.transform,e)});f.connect(a,"onAnimate",c,"setTransform");if("svg"===q.renderer&&(9<=w("ie")||w("ff")))var d=[f.connect(a,"onBegin",a,function(){for(var a=
-c.getParent();a&&a.getParent;)a=a.getParent();a&&(c.__svgContainer=a.rawNode.parentNode,c.__svgRoot=a.rawNode,c.__svgRoot&&c.__svgRoot.getAttribute&&(c.__svgWidth=parseInt(c.__svgRoot.getAttribute("width"),10),isNaN(c.__svgWidth)&&delete c.__svgWidth))}),f.connect(a,"onAnimate",a,function(){try{if(c.__svgContainer){var a=c.__svgContainer.style.visibility;c.__svgContainer.style.visibility="visible";c.__svgContainer.style.visibility=a;var b=c.__svgWidth;if(!isNaN(b))try{c.__svgRoot.setAttribute("width",
-b-5E-6),c.__svgRoot.setAttribute("width",b)}catch(n){}}}catch(n){}}),f.connect(a,"onEnd",a,function(){t.forEach(d,f.disconnect);if(c.__svgContainer){var a=c.__svgContainer;if(null==a.getAttribute("__gotVis")){a.setAttribute("__gotVis",!0);var b=c.__svgContainer.style.visibility,e=c.__svgRoot,g=c.__svgWidth;a.style.visibility="visible";setTimeout(function(){try{a.style.visibility=b;a.removeAttribute("__gotVis");a=null;try{isNaN(g)||(e.setAttribute("width",g-5E-6),e.setAttribute("width",g))}catch(D){}}catch(D){}},
-100)}}delete c.__svgContainer;delete c.__svgRoot;delete c.__svgWidth})];return a};return p});
-//# sourceMappingURL=fx.js.map
+define(["dojo/_base/lang", "./_base", "./matrix", "dojo/_base/Color", "dojo/_base/array", "dojo/_base/fx", "dojo/_base/connect", "dojo/sniff"], 
+  function(lang, g, m, Color, arr, fx, Hub, has){
+	var fxg = g.fx = {};
+
+	// Generic interpolators. Should they be moved to dojox.fx?
+
+	function InterpolNumber(start, end){
+		this.start = start, this.end = end;
+	}
+	InterpolNumber.prototype.getValue = function(r){
+		return (this.end - this.start) * r + this.start;
+	};
+
+	function InterpolUnit(start, end, units){
+		this.start = start, this.end = end;
+		this.units = units;
+	}
+	InterpolUnit.prototype.getValue = function(r){
+		return (this.end - this.start) * r + this.start + this.units;
+	};
+
+	function InterpolColor(start, end){
+		this.start = start, this.end = end;
+		this.temp = new Color();
+	}
+	InterpolColor.prototype.getValue = function(r){
+		return Color.blendColors(this.start, this.end, r, this.temp);
+	};
+
+	function InterpolValues(values){
+		this.values = values;
+		this.length = values.length;
+	}
+	InterpolValues.prototype.getValue = function(r){
+		return this.values[Math.min(Math.floor(r * this.length), this.length - 1)];
+	};
+
+	function InterpolObject(values, def){
+		this.values = values;
+		this.def = def ? def : {};
+	}
+	InterpolObject.prototype.getValue = function(r){
+		var ret = lang.clone(this.def);
+		for(var i in this.values){
+			ret[i] = this.values[i].getValue(r);
+		}
+		return ret;
+	};
+
+	function InterpolTransform(stack, original){
+		this.stack = stack;
+		this.original = original;
+	}
+	InterpolTransform.prototype.getValue = function(r){
+		var ret = [];
+		arr.forEach(this.stack, function(t){
+			if(t instanceof m.Matrix2D){
+				ret.push(t);
+				return;
+			}
+			if(t.name == "original" && this.original){
+				ret.push(this.original);
+				return;
+			}
+ 			// Adding support for custom matrices
+ 			if(t.name == "matrix"){
+ 				if((t.start instanceof m.Matrix2D) && (t.end instanceof m.Matrix2D)){
+ 					var transfMatrix = new m.Matrix2D();
+ 					for(var p in t.start) {
+ 						transfMatrix[p] = (t.end[p] - t.start[p])*r + t.start[p];
+ 					}
+ 					ret.push(transfMatrix);
+ 				}
+ 				return;
+ 			}
+			if(!(t.name in m)){ return; }
+			var f = m[t.name];
+			if(typeof f != "function"){
+				// constant
+				ret.push(f);
+				return;
+			}
+			var val = arr.map(t.start, function(v, i){
+							return (t.end[i] - v) * r + v;
+						}),
+				matrix = f.apply(m, val);
+			if(matrix instanceof m.Matrix2D){
+				ret.push(matrix);
+			}
+		}, this);
+		return ret;
+	};
+
+	var transparent = new Color(0, 0, 0, 0);
+
+	function getColorInterpol(prop, obj, name, def){
+		if(prop.values){
+			return new InterpolValues(prop.values);
+		}
+		var value, start, end;
+		if(prop.start){
+			start = g.normalizeColor(prop.start);
+		}else{
+			start = value = obj ? (name ? obj[name] : obj) : def;
+		}
+		if(prop.end){
+			end = g.normalizeColor(prop.end);
+		}else{
+			if(!value){
+				value = obj ? (name ? obj[name] : obj) : def;
+			}
+			end = value;
+		}
+		return new InterpolColor(start, end);
+	}
+
+	function getNumberInterpol(prop, obj, name, def){
+		if(prop.values){
+			return new InterpolValues(prop.values);
+		}
+		var value, start, end;
+		if(prop.start){
+			start = prop.start;
+		}else{
+			start = value = obj ? obj[name] : def;
+		}
+		if(prop.end){
+			end = prop.end;
+		}else{
+			if(typeof value != "number"){
+				value = obj ? obj[name] : def;
+			}
+			end = value;
+		}
+		return new InterpolNumber(start, end);
+	}
+
+	fxg.animateStroke = function(/*Object*/ args){
+		// summary:
+		//		Returns an animation which will change stroke properties over time.
+		// args:
+		//		an object defining the animation setting.
+		// example:
+		//	|	fxg.animateStroke{{
+		//	|		shape: shape,
+		//	|		duration: 500,
+		//	|		color: {start: "red", end: "green"},
+		//	|		width: {end: 15},
+		//	|		join:  {values: ["miter", "bevel", "round"]}
+		//	|	}).play();
+		if(!args.easing){ args.easing = fx._defaultEasing; }
+		var anim = new fx.Animation(args), shape = args.shape, stroke;
+		Hub.connect(anim, "beforeBegin", anim, function(){
+			stroke = shape.getStroke();
+			var prop = args.color, values = {}, value, start, end;
+			if(prop){
+				values.color = getColorInterpol(prop, stroke, "color", transparent);
+			}
+			prop = args.style;
+			if(prop && prop.values){
+				values.style = new InterpolValues(prop.values);
+			}
+			prop = args.width;
+			if(prop){
+				values.width = getNumberInterpol(prop, stroke, "width", 1);
+			}
+			prop = args.cap;
+			if(prop && prop.values){
+				values.cap = new InterpolValues(prop.values);
+			}
+			prop = args.join;
+			if(prop){
+				if(prop.values){
+					values.join = new InterpolValues(prop.values);
+				}else{
+					start = prop.start ? prop.start : (stroke && stroke.join || 0);
+					end = prop.end ? prop.end : (stroke && stroke.join || 0);
+					if(typeof start == "number" && typeof end == "number"){
+						values.join = new InterpolNumber(start, end);
+					}
+				}
+			}
+			this.curve = new InterpolObject(values, stroke);
+		});
+		Hub.connect(anim, "onAnimate", shape, "setStroke");
+		return anim; // dojo.Animation
+	};
+
+	fxg.animateFill = function(/*Object*/ args){
+		// summary:
+		//		Returns an animation which will change fill color over time.
+		//		Only solid fill color is supported at the moment
+		// args:
+		//		an object defining the animation setting.
+		// example:
+		//	|	gfx.animateFill{{
+		//	|		shape: shape,
+		//	|		duration: 500,
+		//	|		color: {start: "red", end: "green"}
+		//	|	}).play();
+		if(!args.easing){ args.easing = fx._defaultEasing; }
+		var anim = new fx.Animation(args), shape = args.shape, fill;
+		Hub.connect(anim, "beforeBegin", anim, function(){
+			fill = shape.getFill();
+			var prop = args.color, values = {};
+			if(prop){
+				this.curve = getColorInterpol(prop, fill, "", transparent);
+			}
+		});
+		Hub.connect(anim, "onAnimate", shape, "setFill");
+		return anim; // dojo.Animation
+	};
+
+	fxg.animateFont = function(/*Object*/ args){
+		// summary:
+		//		Returns an animation which will change font properties over time.
+		// args:
+		//		an object defining the animation setting.
+		// example:
+		//	|	gfx.animateFont{{
+		//	|		shape: shape,
+		//	|		duration: 500,
+		//	|		variant: {values: ["normal", "small-caps"]},
+		//	|		size:  {end: 10, units: "pt"}
+		//	|	}).play();
+		if(!args.easing){ args.easing = fx._defaultEasing; }
+		var anim = new fx.Animation(args), shape = args.shape, font;
+		Hub.connect(anim, "beforeBegin", anim, function(){
+			font = shape.getFont();
+			var prop = args.style, values = {}, value, start, end;
+			if(prop && prop.values){
+				values.style = new InterpolValues(prop.values);
+			}
+			prop = args.variant;
+			if(prop && prop.values){
+				values.variant = new InterpolValues(prop.values);
+			}
+			prop = args.weight;
+			if(prop && prop.values){
+				values.weight = new InterpolValues(prop.values);
+			}
+			prop = args.family;
+			if(prop && prop.values){
+				values.family = new InterpolValues(prop.values);
+			}
+			prop = args.size;
+			if(prop && prop.units){
+				start = parseFloat(prop.start ? prop.start : (shape.font && shape.font.size || "0"));
+				end = parseFloat(prop.end ? prop.end : (shape.font && shape.font.size || "0"));
+				values.size = new InterpolUnit(start, end, prop.units);
+			}
+			this.curve = new InterpolObject(values, font);
+		});
+		Hub.connect(anim, "onAnimate", shape, "setFont");
+		return anim; // dojo.Animation
+	};
+
+	fxg.animateTransform = function(/*Object*/ args){
+		// summary:
+		//		Returns an animation which will change transformation over time.
+		// args:
+		//		an object defining the animation setting.
+		// example:
+		//	|	gfx.animateTransform{{
+		//	|		shape: shape,
+		//	|		duration: 500,
+		//	|		transform: [
+		//	|			{name: "translate", start: [0, 0], end: [200, 200]},
+		//	|			{name: "original"}
+		//	|		]
+		//	|	}).play();
+		if(!args.easing){ args.easing = fx._defaultEasing; }
+		var anim = new fx.Animation(args), shape = args.shape, original;
+		Hub.connect(anim, "beforeBegin", anim, function(){
+			original = shape.getTransform();
+			this.curve = new InterpolTransform(args.transform, original);
+		});
+		Hub.connect(anim, "onAnimate", shape, "setTransform");
+		if(g.renderer === "svg" && (has("ie") >= 9 || has("ff"))){
+			// fix http://bugs.dojotoolkit.org/ticket/16879
+			var handlers = [
+					Hub.connect(anim, "onBegin", anim, function(){
+						var parent = shape.getParent();
+						while(parent && parent.getParent){
+							parent = parent.getParent();
+						}
+						if(parent){
+							shape.__svgContainer = parent.rawNode.parentNode;
+							shape.__svgRoot = parent.rawNode;
+							if(shape.__svgRoot && shape.__svgRoot.getAttribute){
+								shape.__svgWidth = parseInt(shape.__svgRoot.getAttribute("width"), 10);
+								if(isNaN(shape.__svgWidth)){
+									delete shape.__svgWidth;
+								}
+							}
+						}
+					}),
+					Hub.connect(anim, "onAnimate", anim, function(){
+						try{
+							if(shape.__svgContainer){
+								var ov = shape.__svgContainer.style.visibility;
+								shape.__svgContainer.style.visibility = "visible";
+								var pokeNode = shape.__svgContainer.offsetHeight;
+								shape.__svgContainer.style.visibility = ov;
+								var width = shape.__svgWidth;
+								if(!isNaN(width)){
+									try{
+										shape.__svgRoot.setAttribute("width", width  - 0.000005);
+										shape.__svgRoot.setAttribute("width", width);
+									}catch(ignore){}
+								}
+							}
+						}catch(e){}
+					}),
+					Hub.connect(anim, "onEnd", anim, function(){
+						arr.forEach(handlers, Hub.disconnect);
+						if(shape.__svgContainer){
+							var sn = shape.__svgContainer;
+							if(sn.getAttribute("__gotVis") == null){
+								sn.setAttribute("__gotVis", true);
+								var ov = shape.__svgContainer.style.visibility;
+								var root = shape.__svgRoot;
+								var width = shape.__svgWidth;
+								sn.style.visibility = "visible";
+								setTimeout(function(){
+									try{
+										sn.style.visibility = ov;
+										sn.removeAttribute("__gotVis");
+										sn = null;
+										try{
+											if(!isNaN(width)){
+												root.setAttribute("width", width - 0.000005);
+												root.setAttribute("width", width);
+											}
+										}catch(ignore){}
+									}catch(e){}
+								},100);
+							}
+						}
+						delete shape.__svgContainer;
+						delete shape.__svgRoot;
+						delete shape.__svgWidth;
+					})
+				];
+		}
+		return anim; // dojo.Animation
+	};
+	
+	return fxg;
+});

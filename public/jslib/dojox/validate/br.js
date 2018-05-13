@@ -1,7 +1,284 @@
-//>>built
-define("dojox/validate/br",["dojo/_base/lang","./_base"],function(h,k){var l=h.getObject("br",!0,k);l.isValidCnpj=function(a){if(!h.isString(a)){if(!a)return!1;for(a+="";14>a.length;)a="0"+a}if(k.isNumberFormat(a,{format:["##.###.###/####-##","########/####-##","############-##","##############"]})){a=a.replace("/","").replace(/\./g,"").replace("-","");var c=[],d=[],b,e,g;for(b=0;10>b;b++){g="";for(e=0;e<a.length;e++)g+=""+b;if(a===g)return!1}for(b=0;12>b;b++)c.push(parseInt(a.charAt(b),10));for(b=
-12;14>b;b++)d.push(parseInt(a.charAt(b),10));a=[9,8,7,6,5,4,3,2,9,8,7,6].reverse();for(b=e=0;b<c.length;b++)e+=c[b]*a[b];b=f(e);if(b==d[0]){e=0;a=[9,8,7,6,5,4,3,2,9,8,7,6,5].reverse();c.push(b);for(b=0;b<c.length;b++)e+=c[b]*a[b];if(f(e)===d[1])return!0}}return!1};l.computeCnpjDv=function(a){if(!h.isString(a)){if(!a)return"";for(a+="";12>a.length;)a="0"+a}if(k.isNumberFormat(a,{format:["##.###.###/####","########/####","############"]})){a=a.replace("/","").replace(/\./g,"");var c=[],d,b,e;for(d=
-0;10>d;d++){e="";for(b=0;b<a.length;b++)e+=""+d;if(a===e)return""}for(d=0;d<a.length;d++)c.push(parseInt(a.charAt(d),10));b=[9,8,7,6,5,4,3,2,9,8,7,6].reverse();for(d=e=0;d<c.length;d++)e+=c[d]*b[d];a=f(e);e=0;b=[9,8,7,6,5,4,3,2,9,8,7,6,5].reverse();c.push(a);for(d=0;d<c.length;d++)e+=c[d]*b[d];c=f(e);return""+a+c}return""};l.isValidCpf=function(a){if(!h.isString(a)){if(!a)return!1;for(a+="";11>a.length;)a="0"+a}if(k.isNumberFormat(a,{format:["###.###.###-##","#########-##","###########"]})){a=a.replace("-",
-"").replace(/\./g,"");var c=[],d=[],b,e,g;for(b=0;10>b;b++){g="";for(e=0;e<a.length;e++)g+=""+b;if(a===g)return!1}for(b=0;9>b;b++)c.push(parseInt(a.charAt(b),10));for(b=9;12>b;b++)d.push(parseInt(a.charAt(b),10));a=[9,8,7,6,5,4,3,2,1].reverse();for(b=e=0;b<c.length;b++)e+=c[b]*a[b];b=f(e);if(b==d[0]){e=0;a=[9,8,7,6,5,4,3,2,1,0].reverse();c.push(b);for(b=0;b<c.length;b++)e+=c[b]*a[b];if(f(e)===d[1])return!0}}return!1};l.computeCpfDv=function(a){if(!h.isString(a)){if(!a)return"";for(a+="";9>a.length;)a=
-"0"+a}if(k.isNumberFormat(a,{format:["###.###.###","#########"]})){a=a.replace(/\./g,"");var c=[];for(i=0;10>i;i++){tmp="";for(j=0;j<a.length;j++)tmp+=""+i;if(a===tmp)return""}for(i=0;i<a.length;i++)c.push(parseInt(a.charAt(i),10));var d=[9,8,7,6,5,4,3,2,1].reverse(),b=0;for(i=0;i<c.length;i++)b+=c[i]*d[i];a=f(b);b=0;d=[9,8,7,6,5,4,3,2,1,0].reverse();c.push(a);for(i=0;i<c.length;i++)b+=c[i]*d[i];c=f(b);return""+a+c}return""};var f=function(a){a%=11;10===a&&(a=0);return a};return l});
-//# sourceMappingURL=br.js.map
+define(["dojo/_base/lang", "./_base"], function(lang, validate){
+
+var br = lang.getObject("br", true, validate);
+br.isValidCnpj = function(/*String*/value){
+	// summary:
+	//		Validates a CNPJ/CGC number
+	// value: String
+	//		The CNPJ/CGC number in ##.###.###/####-##, ########/####-##,
+	//		############-## or ############## format
+	if(!lang.isString(value)){
+		if(!value){
+			return false;
+		}
+		value = value + "";
+		while(value.length < 14){
+			value = "0" + value;
+		}
+	}
+	var flags = {
+		format: [
+			"##.###.###/####-##",
+			"########/####-##",
+			"############-##",
+			"##############"
+		]
+	};
+	if(validate.isNumberFormat(value, flags)){
+		// Matched the initial test, so break this down into the
+		// parts to be validated.
+		value = value.replace("/", "").replace(/\./g, "").replace("-", "");
+		var cgc = [];
+		var dv = [];
+		var i, j, tmp;
+
+		// Check for obvious bad combos
+		// all 0s to all 9's.
+		for(i = 0; i < 10; i++){
+			tmp = "";
+			for(j = 0; j < value.length; j++){
+				tmp += "" + i;
+			}
+			if(value === tmp){
+				return false;
+			}
+		}
+
+		//Split out the DV from the main number.
+		for(i = 0; i < 12; i++){
+			cgc.push(parseInt(value.charAt(i), 10));
+		}
+		for(i = 12; i < 14; i++){
+			dv.push(parseInt(value.charAt(i), 10));
+		}
+		
+		var base = [9,8,7,6,5,4,3,2,9,8,7,6].reverse();
+		var sum = 0;
+		for(i = 0; i < cgc.length; i++){
+			sum += cgc[i] * base[i];
+		}
+		var dv0 = calcDv(sum);
+		if(dv0 == dv[0]){
+			// Still seems valid, keep going.
+			sum = 0;
+			base = [9,8,7,6,5,4,3,2,9,8,7,6,5].reverse();
+			cgc.push(dv0);
+			for(i = 0; i < cgc.length; i++){
+				sum += cgc[i] * base[i];
+			}
+			var dv1 = calcDv(sum);
+			if(dv1 === dv[1]){
+				// Whew, looks valid.
+				return true;
+			}
+		}
+	}
+	return false;
+};
+
+br.computeCnpjDv = function(/*String*/value){
+	// summary:
+	//		Generate the DV code (checksum part) for a Cnpj number
+	// value:
+	//		The CGC number in ##.###.###/#### or ############ format
+	if(!lang.isString(value)){
+		if(!value){
+			return "";
+		}
+		value = value + "";
+		while(value.length < 12){
+			value = "0" + value;
+		}
+	}
+	var flags = {
+		format: [
+			"##.###.###/####",
+			"########/####",
+			"############"
+		]
+	};
+	if(validate.isNumberFormat(value, flags)){
+		// Matched the initial test, so break this down into the
+		// parts to compute the DV.
+		value = value.replace("/", "").replace(/\./g, "");
+		var cgc = [];
+		var i, j, tmp;
+
+		// Check for obvious bad combos
+		// all 0s to all 9's.
+		for(i = 0; i < 10; i++){
+			tmp = "";
+			for(j = 0; j < value.length; j++){
+				tmp += "" + i;
+			}
+			if(value === tmp){
+				return "";
+			}
+		}
+
+		for(i = 0; i < value.length; i++){
+			cgc.push(parseInt(value.charAt(i), 10));
+		}
+		var base = [9,8,7,6,5,4,3,2,9,8,7,6].reverse();
+		var sum = 0;
+		for(i = 0; i < cgc.length; i++){
+			sum += cgc[i] * base[i];
+		}
+		var dv0 = calcDv(sum);
+		sum = 0;
+		base = [9,8,7,6,5,4,3,2,9,8,7,6,5].reverse();
+		cgc.push(dv0);
+		for(i = 0; i < cgc.length; i++){
+			sum += cgc[i] * base[i];
+		}
+		var dv1 = calcDv(sum);
+		return ("" + dv0) + dv1;
+	}
+	return "";
+};
+
+
+br.isValidCpf = function(/*String*/value){
+	// summary:
+	//		Validates a CPF number
+	// value: String
+	//		The CPF number in #########-## or ###########,
+	//		format
+	if(!lang.isString(value)){
+		if(!value){
+			return false;
+		}
+		value = value + "";
+		while(value.length < 11){
+			value = "0" + value;
+		}
+	}
+	var flags = {
+		format: [
+			"###.###.###-##",
+			"#########-##",
+			"###########"
+		]
+	};
+	if(validate.isNumberFormat(value, flags)){
+		// Matched the initial test, so break this down into the
+		// parts to be validated.
+		value = value.replace("-", "").replace(/\./g, "");
+		var cpf = [];
+		var dv = [];
+		var i, j, tmp;
+
+		// Check for obvious bad combos
+		// all 0s to all 9's.
+		for(i = 0; i < 10; i++){
+			tmp = "";
+			for(j = 0; j < value.length; j++){
+				tmp += "" + i;
+			}
+			if(value === tmp){
+				return false;
+			}
+		}
+
+		//Split out the DV from the main number.
+		for(i = 0; i < 9; i++){
+			cpf.push(parseInt(value.charAt(i), 10));
+		}
+		for(i = 9; i < 12; i++){
+			dv.push(parseInt(value.charAt(i), 10));
+		}
+		
+		var base = [9,8,7,6,5,4,3,2,1].reverse();
+		var sum = 0;
+		for(i = 0; i < cpf.length; i++){
+			sum += cpf[i] * base[i];
+		}
+		var dv0 = calcDv(sum);
+		if(dv0 == dv[0]){
+			// Still seems valid, keep going.
+			sum = 0;
+			base = [9,8,7,6,5,4,3,2,1,0].reverse();
+			cpf.push(dv0);
+			for(i = 0; i < cpf.length; i++){
+				sum += cpf[i] * base[i];
+			}
+			var dv1 = calcDv(sum);
+			if(dv1 === dv[1]){
+				// Whew, looks valid.
+				return true;
+			}
+		}
+	}
+	return false;
+};
+
+br.computeCpfDv = function(/*String*/value){
+	// summary:
+	//		Generate the DV code (checksum part) for a CPF number
+	// value: String
+	//		The CPF number in ######### format
+	if(!lang.isString(value)){
+		if(!value){
+			return "";
+		}
+		value = value + "";
+		while(value.length < 9){
+			value = "0" + value;
+		}
+	}
+	var flags = {
+		format: [
+			"###.###.###",
+			"#########"
+		]
+	};
+	if(validate.isNumberFormat(value, flags)){
+		// Matched the initial test, so break this down into the
+		// parts to compute the DV.
+		value = value.replace(/\./g, "");
+		var cpf = [];
+		
+		// Check for obvious bad combos
+		// all 0s to all 9's.
+		for(i = 0; i < 10; i++){
+			tmp = "";
+			for(j = 0; j < value.length; j++){
+				tmp += "" + i;
+			}
+			if(value === tmp){
+				return "";
+			}
+		}
+
+		for(i = 0; i < value.length; i++){
+			cpf.push(parseInt(value.charAt(i), 10));
+		}
+		var base = [9,8,7,6,5,4,3,2,1].reverse();
+		var sum = 0;
+		for(i = 0; i < cpf.length; i++){
+			sum += cpf[i] * base[i];
+		}
+		var dv0 = calcDv(sum);
+		sum = 0;
+		base = [9,8,7,6,5,4,3,2,1,0].reverse();
+		cpf.push(dv0);
+		for(i = 0; i < cpf.length; i++){
+			sum += cpf[i] * base[i];
+		}
+		var dv1 = calcDv(sum);
+		return ("" + dv0) + dv1;
+	}
+	return "";
+};
+
+var calcDv = function(/*Number*/sum) {
+	var dv = sum % 11;
+	//If dv is 10, it is represented as 0:
+	if (dv === 10) {
+		dv = 0;
+	}
+	return dv;
+};
+
+return br;
+});

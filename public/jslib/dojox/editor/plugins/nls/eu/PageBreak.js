@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/eu/PageBreak",{pageBreak:"Orrialde-jauzia"});
-//# sourceMappingURL=PageBreak.js.map
+define({      
+//begin v1.x content
+	"pageBreak": "Orrialde-jauzia"
+//end v1.x content
+});
+

@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/sr/Save",{save:"Sa\u010duvaj"});
-//# sourceMappingURL=Save.js.map
+define({      
+//begin v1.x content
+	"save": "Sačuvaj"
+//end v1.x content
+});
+

@@ -1,3 +1,7 @@
-//>>built
-define("dojox/editor/plugins/nls/bs/TextColor",{setButtonText:"Postavi",cancelButtonText:"Odustani"});
-//# sourceMappingURL=TextColor.js.map
+define({      
+//begin v1.x content
+	"setButtonText": "Postavi",
+	"cancelButtonText": "Odustani"
+//end v1.x content
+});
+

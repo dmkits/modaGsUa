@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/bs/Save",{save:"Spremi"});
-//# sourceMappingURL=Save.js.map
+define({      
+//begin v1.x content
+	"save": "Spremi"
+//end v1.x content
+});
+

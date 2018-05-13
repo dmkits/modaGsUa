@@ -1,3 +1,13 @@
-//>>built
-define("dojox/editor/plugins/nls/bs/LocalImage",{insertImageTitle:"Umetni sliku",url:"Slika",browse:"Pregledavanje...",text:"Opis",set:"Umetni",invalidMessage:"Neva\u017ee\u0107i tip datoteke slika",prePopuTextUrl:"Unesi URL sliku",prePopuTextBrowse:" ili pregledaj lokalnu datoteku"});
-//# sourceMappingURL=LocalImage.js.map
+define({      
+//begin v1.x content
+	insertImageTitle: "Umetni sliku",
+	url: "Slika",
+	browse: "Pregledavanje...",
+	text: "Opis",
+	set: "Umetni",
+	invalidMessage: "Nevažeći tip datoteke slika",
+	prePopuTextUrl: "Unesi URL sliku",
+	prePopuTextBrowse: " ili pregledaj lokalnu datoteku"
+//end v1.x content
+});
+

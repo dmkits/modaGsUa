@@ -1,14 +1,329 @@
-//>>built
-define("dojox/mobile/Switch","dojo/_base/array dojo/_base/connect dojo/_base/declare dojo/_base/event dojo/_base/window dojo/dom-class dojo/dom-construct dojo/dom-style dojo/dom-attr dojo/touch dijit/_Contained dijit/_WidgetBase ./sniff ./_maskUtils ./common dojo/has!dojo-bidi?dojox/mobile/bidi/Switch".split(" "),function(r,t,n,u,p,g,k,b,l,m,h,v,e,w,q,x){h=n(e("dojo-bidi")?"dojox.mobile.NonBidiSwitch":"dojox.mobile.Switch",[v,h],{value:"on",name:"",leftLabel:"ON",rightLabel:"OFF",shape:"mblSwDefaultShape",
-tabIndex:"0",_setTabIndexAttr:"",baseClass:"mblSwitch",role:"",buildRendering:function(){this.templateString||(this.domNode=this.srcNodeRef&&"SPAN"===this.srcNodeRef.tagName?this.srcNodeRef:k.create("span"));q._setTouchAction(this.domNode,"none");this.inherited(arguments);if(!this.templateString){var a=this.srcNodeRef&&this.srcNodeRef.className||this.className||this["class"];if(a=a.match(/mblSw.*Shape\d*/))this.shape=a;g.add(this.domNode,this.shape);this.domNode.innerHTML='\x3cdiv class\x3d"mblSwitchInner"\x3e\x3cdiv class\x3d"mblSwitchBg mblSwitchBgLeft"\x3e\x3cdiv class\x3d"mblSwitchText mblSwitchTextLeft"\x3e\x3c/div\x3e\x3c/div\x3e\x3cdiv class\x3d"mblSwitchBg mblSwitchBgRight"\x3e\x3cdiv class\x3d"mblSwitchText mblSwitchTextRight"\x3e\x3c/div\x3e\x3c/div\x3e\x3cdiv class\x3d"mblSwitchKnob"\x3e\x3c/div\x3e\x3cinput type\x3d"hidden"'+
-(this.name?' name\x3d"'+this.name+'"':"")+' value\x3d"'+this.value+'"\x3e\x3c/div\x3e\x3c/div\x3e';a=this.inner=this.domNode.firstChild;this.left=a.childNodes[0];this.right=a.childNodes[1];this.knob=a.childNodes[2];this.input=a.childNodes[3]}l.set(this.domNode,"role","checkbox");l.set(this.domNode,"aria-checked","on"===this.value?"true":"false");this.switchNode=this.domNode;e("windows-theme")&&(a=k.create("div",{className:"mblSwitchContainer"}),this.labelNode=k.create("label",{"class":"mblSwitchLabel",
-"for":this.id},a),a.appendChild(this.domNode.cloneNode(!0)),this.domNode=a,this.focusNode=a.childNodes[1],this.labelNode.innerHTML="off"==this.value?this.rightLabel:this.leftLabel,this.switchNode=this.domNode.childNodes[1],a=this.inner=this.domNode.childNodes[1].firstChild,this.left=a.childNodes[0],this.right=a.childNodes[1],this.knob=a.childNodes[2],this.input=a.childNodes[3])},postCreate:function(){this.connect(this.switchNode,"onclick","_onClick");this.connect(this.switchNode,"onkeydown","_onClick");
-this._startHandle=this.connect(this.switchNode,m.press,"onTouchStart");this._initialValue=this.value},startup:function(){var a=this._started;this.inherited(arguments);a||this.resize()},resize:function(){if(e("windows-theme"))b.set(this.domNode,"width","100%");else{var a=b.get(this.domNode,"width"),f=a+"px",a=a-b.get(this.knob,"width")+"px";b.set(this.left,"width",f);b.set(this.right,this.isLeftToRight()?{width:f,left:a}:{width:f});b.set(this.left.firstChild,"width",a);b.set(this.right.firstChild,
-"width",a);b.set(this.knob,"left",a);"off"==this.value&&b.set(this.inner,"left",this.isLeftToRight()?"-"+a:0);this._hasMaskImage=!1;this._createMaskImage()}},_changeState:function(a,f){var c="on"===a;this.left.style.display="";this.right.style.display="";this.inner.style.left="";f&&g.add(this.switchNode,"mblSwitchAnimation");g.remove(this.switchNode,c?"mblSwitchOff":"mblSwitchOn");g.add(this.switchNode,c?"mblSwitchOn":"mblSwitchOff");l.set(this.switchNode,"aria-checked",c?"true":"false");c||e("windows-theme")||
-(this.inner.style.left=(this.isLeftToRight()?-(b.get(this.domNode,"width")-b.get(this.knob,"width")):0)+"px");var d=this;d.defer(function(){d.left.style.display=c?"":"none";d.right.style.display=c?"none":"";g.remove(d.switchNode,"mblSwitchAnimation")},f?300:0)},_createMaskImage:function(){this._timer&&(this._timer.remove(),delete this._timer);if(!this._hasMaskImage){var a=b.get(this.domNode,"width"),f=b.get(this.domNode,"height");this._width=a-b.get(this.knob,"width");this._hasMaskImage=!0;if(e("mask-image")){var c=
-b.get(this.left,"borderTopLeftRadius");if("0px"!=c){var d=c.split(" "),c=parseFloat(d[0]),d=1==d.length?c:parseFloat(d[1]);(this.shape+"Mask"+a+f+c+d).replace(/\./,"_");w.createRoundMask(this.switchNode,0,0,0,0,a,f,c,d,1)}}}},_onClick:function(a){a&&"keydown"===a.type&&13!==a.keyCode||!1===this.onClick(a)||this._moved||(this._set("value",this.input.value="on"==this.value?"off":"on"),this._changeState(this.value,!0),this.onStateChanged(this.value))},onClick:function(){},onTouchStart:function(a){this._moved=
-!1;this.innerStartX=this.inner.offsetLeft;this._conn||(this._conn=[this.connect(this.inner,m.move,"onTouchMove"),this.connect(p.doc,m.release,"onTouchEnd")],e("windows-theme")&&this._conn.push(this.connect(p.doc,"MSPointerCancel","onTouchEnd")));this.touchStartX=a.touches?a.touches[0].pageX:a.clientX;this.left.style.display="";this.right.style.display="";u.stop(a);this._createMaskImage()},onTouchMove:function(a){a.preventDefault();if(a.targetTouches){if(1!=a.targetTouches.length)return;a=a.targetTouches[0].clientX-
-this.touchStartX}else a=a.clientX-this.touchStartX;var b=this.innerStartX+a;b<=-(this._width-10)&&(b=-this._width);-10<=b&&(b=0);this.inner.style.left=b+"px";10<Math.abs(a)&&(this._moved=!0)},onTouchEnd:function(a){r.forEach(this._conn,t.disconnect);this._conn=null;this.innerStartX==this.inner.offsetLeft?e("touch")&&e("clicks-prevented")&&q._sendClick(this.inner,a):(a=this.inner.offsetLeft<-(this._width/2)?"off":"on",a=this._newState(a),this._changeState(a,!0),a!=this.value&&(this._set("value",this.input.value=
-a),this.onStateChanged(a)))},_newState:function(a){return a},onStateChanged:function(a){this.labelNode&&(this.labelNode.innerHTML="off"==a?this.rightLabel:this.leftLabel)},_setValueAttr:function(a){this._changeState(a,!1);this.value!=a&&(this._set("value",this.input.value=a),this.onStateChanged(a))},_setLeftLabelAttr:function(a){this.leftLabel=a;this.left.firstChild.innerHTML=this._cv?this._cv(a):a},_setRightLabelAttr:function(a){this.rightLabel=a;this.right.firstChild.innerHTML=this._cv?this._cv(a):
-a},reset:function(){this.set("value",this._initialValue)}});return e("dojo-bidi")?n("dojox.mobile.Switch",[h,x]):h});
-//# sourceMappingURL=Switch.js.map
+define([
+	"dojo/_base/array",
+	"dojo/_base/connect",
+	"dojo/_base/declare",
+	"dojo/_base/event",
+	"dojo/_base/window",
+	"dojo/dom-class",
+	"dojo/dom-construct",
+	"dojo/dom-style",
+	"dojo/dom-attr",
+	"dojo/touch",
+	"dijit/_Contained",
+	"dijit/_WidgetBase",
+	"./sniff",
+	"./_maskUtils",
+	"./common",
+	"dojo/has!dojo-bidi?dojox/mobile/bidi/Switch"
+], function(array, connect, declare, event, win, domClass, domConstruct, domStyle, domAttr, touch, Contained, WidgetBase, has, maskUtils, dm, BidiSwitch){
+
+	// module:
+	//		dojox/mobile/Switch
+
+	var Switch = declare(has("dojo-bidi") ? "dojox.mobile.NonBidiSwitch" : "dojox.mobile.Switch", [WidgetBase, Contained],{
+		// summary:
+		//		A toggle switch with a sliding knob.
+		// description:
+		//		Switch is a toggle switch with a sliding knob. You can either
+		//		tap or slide the knob to toggle the switch. The onStateChanged
+		//		handler is called when the switch is manipulated.
+
+		// value: String
+		//		The initial state of the switch: "on" or "off". The default
+		//		value is "on".
+		value: "on",
+
+		// name: String
+		//		A name for a hidden input field, which holds the current value.
+		name: "",
+
+		// leftLabel: String
+		//		The left-side label of the switch.
+		leftLabel: "ON",
+
+		// rightLabel: String
+		//		The right-side label of the switch.
+		rightLabel: "OFF",
+
+		// shape: String
+		//		The shape of the switch.
+		//		"mblSwDefaultShape", "mblSwSquareShape", "mblSwRoundShape1",
+		//		"mblSwRoundShape2", "mblSwArcShape1" or "mblSwArcShape2".
+		//		The default value is "mblSwDefaultShape".
+		shape: "mblSwDefaultShape",
+
+		// tabIndex: String
+		//		Tabindex setting for this widget so users can hit the tab key to
+		//		focus on it.
+		tabIndex: "0",
+		_setTabIndexAttr: "", // sets tabIndex to domNode
+
+		/* internal properties */
+		baseClass: "mblSwitch",
+		// role: [private] String
+		//		The accessibility role.
+		role: "", // a11y
+
+		buildRendering: function(){
+			if(!this.templateString){ // true if this widget is not templated
+				this.domNode = (this.srcNodeRef && this.srcNodeRef.tagName === "SPAN") ?
+					this.srcNodeRef : domConstruct.create("span");
+			}
+			// prevent browser scrolling on IE10 (evt.preventDefault() is not enough)
+			dm._setTouchAction(this.domNode, "none");
+			this.inherited(arguments);
+			if(!this.templateString){ // true if this widget is not templated
+				var c = (this.srcNodeRef && this.srcNodeRef.className) || this.className || this["class"];
+				if((c = c.match(/mblSw.*Shape\d*/))){ this.shape = c; }
+				domClass.add(this.domNode, this.shape);
+				var nameAttr = this.name ? " name=\"" + this.name + "\"" : "";
+				this.domNode.innerHTML =
+					  '<div class="mblSwitchInner">'
+					+	'<div class="mblSwitchBg mblSwitchBgLeft">'
+					+		'<div class="mblSwitchText mblSwitchTextLeft"></div>'
+					+	'</div>'
+					+	'<div class="mblSwitchBg mblSwitchBgRight">'
+					+		'<div class="mblSwitchText mblSwitchTextRight"></div>'
+					+	'</div>'
+					+	'<div class="mblSwitchKnob"></div>'
+					+	'<input type="hidden"'+nameAttr+' value="'+this.value+'"></div>'
+					+ '</div>';
+				var n = this.inner = this.domNode.firstChild;
+				this.left = n.childNodes[0];
+				this.right = n.childNodes[1];
+				this.knob = n.childNodes[2];
+				this.input = n.childNodes[3];
+			}
+			domAttr.set(this.domNode, "role", "checkbox"); //a11y
+			domAttr.set(this.domNode, "aria-checked", (this.value === "on") ? "true" : "false"); //a11y
+
+			this.switchNode = this.domNode;
+
+			if(has("windows-theme")) {
+				var rootNode = domConstruct.create("div", {className: "mblSwitchContainer"});
+				this.labelNode = domConstruct.create("label", {"class": "mblSwitchLabel", "for": this.id}, rootNode);
+				rootNode.appendChild(this.domNode.cloneNode(true));
+				this.domNode = rootNode;
+				this.focusNode = rootNode.childNodes[1];
+				this.labelNode.innerHTML = (this.value=="off") ? this.rightLabel : this.leftLabel;
+				this.switchNode = this.domNode.childNodes[1];
+				var inner = this.inner = this.domNode.childNodes[1].firstChild;
+				this.left = inner.childNodes[0];
+				this.right = inner.childNodes[1];
+				this.knob = inner.childNodes[2];
+				this.input = inner.childNodes[3];
+			}
+		},
+
+		postCreate: function(){
+			this.connect(this.switchNode, "onclick", "_onClick");
+			this.connect(this.switchNode, "onkeydown", "_onClick"); // for desktop browsers
+			this._startHandle = this.connect(this.switchNode, touch.press, "onTouchStart");
+			this._initialValue = this.value; // for reset()
+		},
+
+		startup: function(){
+			var started = this._started;
+			this.inherited(arguments);
+			if(!started){
+				this.resize();
+			}
+		},
+
+		resize: function(){
+			if(has("windows-theme")){
+				// Override the custom CSS width (if any) to avoid misplacement.
+				// Per design, the windows theme does not allow resizing the controls.
+				// The label of the switch is placed next to the switch, and a custom
+				// width would only have the effect to increase the distance between the
+				// label and the switch, which is undesired. Hence, on windows theme,
+				// ensure the width of root DOM node is 100%.
+				domStyle.set(this.domNode, "width", "100%");
+			}else{
+				var value = domStyle.get(this.domNode,"width");
+				var outWidth = value + "px";
+				var innWidth = (value - domStyle.get(this.knob,"width")) + "px";
+				domStyle.set(this.left, "width", outWidth);
+				domStyle.set(this.right,this.isLeftToRight()?{width: outWidth, left: innWidth}:{width: outWidth});
+				domStyle.set(this.left.firstChild, "width", innWidth);
+				domStyle.set(this.right.firstChild, "width", innWidth);
+				domStyle.set(this.knob, "left", innWidth);
+				if(this.value == "off"){
+					domStyle.set(this.inner, "left", this.isLeftToRight()?("-" + innWidth):0);
+				}
+				this._hasMaskImage = false;
+				this._createMaskImage();
+			}
+		},
+
+		_changeState: function(/*String*/state, /*Boolean*/anim){
+			var on = (state === "on");
+			this.left.style.display = "";
+			this.right.style.display = "";
+			this.inner.style.left = "";
+			if(anim){
+				domClass.add(this.switchNode, "mblSwitchAnimation");
+			}
+			domClass.remove(this.switchNode, on ? "mblSwitchOff" : "mblSwitchOn");
+			domClass.add(this.switchNode, on ? "mblSwitchOn" : "mblSwitchOff");
+			domAttr.set(this.switchNode, "aria-checked", on ? "true" : "false"); //a11y
+
+			if(!on && !has("windows-theme")){
+				this.inner.style.left  = (this.isLeftToRight()?(-(domStyle.get(this.domNode,"width") - domStyle.get(this.knob,"width"))):0) + "px";
+			}
+
+			var _this = this;
+			_this.defer(function(){
+				_this.left.style.display = on ? "" : "none";
+				_this.right.style.display = !on ? "" : "none";
+				domClass.remove(_this.switchNode, "mblSwitchAnimation");
+			}, anim ? 300 : 0);
+		},
+
+		_createMaskImage: function(){
+			if(this._timer){
+				 this._timer.remove();
+				 delete this._timer;
+			}
+			if(this._hasMaskImage){ return; }
+			var w = domStyle.get(this.domNode,"width"), h = domStyle.get(this.domNode,"height");
+			this._width = (w - domStyle.get(this.knob,"width"));
+			this._hasMaskImage = true;
+			if(!(has("mask-image"))){ return; }
+			var rDef = domStyle.get(this.left, "borderTopLeftRadius");
+			if(rDef == "0px"){ return; }
+			var rDefs = rDef.split(" ");
+			var rx = parseFloat(rDefs[0]), ry = (rDefs.length == 1) ? rx : parseFloat(rDefs[1]);
+			var id = (this.shape+"Mask"+w+h+rx+ry).replace(/\./,"_");
+
+			maskUtils.createRoundMask(this.switchNode, 0, 0, 0, 0, w, h, rx, ry, 1);
+		},
+
+		_onClick: function(e){
+			// summary:
+			//		Internal handler for click events.
+			// tags:
+			//		private
+			if(e && e.type === "keydown" && e.keyCode !== 13){ return; }
+			if(this.onClick(e) === false){ return; } // user's click action
+			if(this._moved){ return; }
+			this._set("value", this.input.value = (this.value == "on") ? "off" : "on");
+			this._changeState(this.value, true);
+			this.onStateChanged(this.value);
+		},
+
+		onClick: function(/*Event*/ /*===== e =====*/){
+			// summary:
+			//		User defined function to handle clicks
+			// tags:
+			//		callback
+		},
+
+		onTouchStart: function(/*Event*/e){
+			// summary:
+			//		Internal function to handle touchStart events.
+			this._moved = false;
+			this.innerStartX = this.inner.offsetLeft;
+			if(!this._conn){
+				this._conn = [
+					this.connect(this.inner, touch.move, "onTouchMove"),
+					this.connect(win.doc, touch.release, "onTouchEnd")
+				];
+
+				/* While moving the slider knob sometimes IE fires MSPointerCancel event. That prevents firing
+				MSPointerUp event (http://msdn.microsoft.com/ru-ru/library/ie/hh846776%28v=vs.85%29.aspx) so the
+				knob can be stuck in the middle of the switch. As a fix we handle MSPointerCancel event with the
+				same lintener as for MSPointerUp event.
+				*/
+				if(has("windows-theme")){
+					this._conn.push(this.connect(win.doc, "MSPointerCancel", "onTouchEnd"));
+				}
+			}
+			this.touchStartX = e.touches ? e.touches[0].pageX : e.clientX;
+			this.left.style.display = "";
+			this.right.style.display = "";
+			event.stop(e);
+			this._createMaskImage();
+		},
+
+		onTouchMove: function(/*Event*/e){
+			// summary:
+			//		Internal function to handle touchMove events.
+			e.preventDefault();
+			var dx;
+			if(e.targetTouches){
+				if(e.targetTouches.length != 1){ return; }
+				dx = e.targetTouches[0].clientX - this.touchStartX;
+			}else{
+				dx = e.clientX - this.touchStartX;
+			}
+			var pos = this.innerStartX + dx;
+			var d = 10;
+			if(pos <= -(this._width-d)){ pos = -this._width; }
+			if(pos >= -d){ pos = 0; }
+			this.inner.style.left = pos + "px";
+			if(Math.abs(dx) > d){
+				this._moved = true;
+			}
+		},
+
+		onTouchEnd: function(/*Event*/e){
+			// summary:
+			//		Internal function to handle touchEnd events.
+			array.forEach(this._conn, connect.disconnect);
+			this._conn = null;
+			if(this.innerStartX == this.inner.offsetLeft){
+				// need to send a synthetic click?
+				if(has("touch") && has("clicks-prevented")){
+					dm._sendClick(this.inner, e);
+				}
+				return;
+			}
+			var newState = (this.inner.offsetLeft < -(this._width/2)) ? "off" : "on";
+			newState = this._newState(newState);
+			this._changeState(newState, true);
+			if(newState != this.value){
+				this._set("value", this.input.value = newState);
+				this.onStateChanged(newState);
+			}
+		},
+		_newState: function(newState){
+			return newState;
+		},
+		onStateChanged: function(/*String*/newState){
+			// summary:
+			//		Stub function to connect to from your application.
+			// description:
+			//		Called when the state has been changed.
+			if (this.labelNode) {
+				this.labelNode.innerHTML = newState=='off' ? this.rightLabel : this.leftLabel;
+			}
+		},
+
+		_setValueAttr: function(/*String*/value){
+			this._changeState(value, false);
+			if(this.value != value){
+				this._set("value", this.input.value = value);
+				this.onStateChanged(value);
+			}
+		},
+
+		_setLeftLabelAttr: function(/*String*/label){
+			this.leftLabel = label;
+			this.left.firstChild.innerHTML = this._cv ? this._cv(label) : label;
+		},
+
+		_setRightLabelAttr: function(/*String*/label){
+			this.rightLabel = label;
+			this.right.firstChild.innerHTML = this._cv ? this._cv(label) : label;
+		},
+
+		reset: function(){
+			// summary:
+			//		Reset the widget's value to what it was at initialization time
+			this.set("value", this._initialValue);
+		}
+	});
+
+	return has("dojo-bidi") ? declare("dojox.mobile.Switch", [Switch, BidiSwitch]) : Switch;
+});

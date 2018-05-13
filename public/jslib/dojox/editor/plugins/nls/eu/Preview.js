@@ -1,3 +1,6 @@
-//>>built
-define("dojox/editor/plugins/nls/eu/Preview",{preview:"Aurrebista"});
-//# sourceMappingURL=Preview.js.map
+define({      
+//begin v1.x content
+	"preview": "Aurrebista"
+//end v1.x content
+});
+

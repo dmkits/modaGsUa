@@ -1,3 +1,7 @@
-//>>built
-define("dojox/form/nls/sr/CheckedMultiSelect",{invalidMessage:"Mora biti izabrana makar jedna stavka.",multiSelectLabelText:"{num} stavki izabrano"});
-//# sourceMappingURL=CheckedMultiSelect.js.map
+define({      
+//begin v1.x content
+	invalidMessage: "Mora biti izabrana makar jedna stavka.",
+	multiSelectLabelText: "{num} stavki izabrano"
+//end v1.x content
+});
+

@@ -1,3 +1,7 @@
-//>>built
-define("dojox/editor/plugins/nls/eu/BidiSupport",{ltr:"Ezkerretik eskumarako testu-norabidea",rtl:"Eskumatik ezkerrerako testu-norabidea"});
-//# sourceMappingURL=BidiSupport.js.map
+define({      
+//begin v1.x content
+	"ltr": "Ezkerretik eskumarako testu-norabidea",
+	"rtl": "Eskumatik ezkerrerako testu-norabidea"
+//end v1.x content
+});
+

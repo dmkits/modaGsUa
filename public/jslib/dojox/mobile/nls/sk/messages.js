@@ -1,3 +1,13 @@
-//>>built
-define("dojox/mobile/nls/sk/messages",{CarouselPrevious:"Predch\u00e1dzaj\u00faci",CarouselNext:"Nasleduj\u00faci",PageIndicatorLabel:"str\u00e1nka $0 z $1"});
-//# sourceMappingURL=messages.js.map
+define({      
+//begin v1.x content
+	// Title of the previous button in Carousel
+	"CarouselPrevious": "Predchádzajúci",
+	// Title of the next button in Carousel
+	"CarouselNext": "Nasledujúci",
+	// PageIndicatorLabel: accessibility label for PageIndicator
+	// $0 replaced by the index of the current page
+	// $1 replaced by the total number of pages
+	"PageIndicatorLabel": "stránka $0 z $1"
+//end v1.x content
+});
+

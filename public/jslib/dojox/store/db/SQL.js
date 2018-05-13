@@ -1,12 +1,321 @@
-//>>built
-define("dojox/store/db/SQL","dojo/_base/declare dojo/Deferred dojo/when dojo/store/util/QueryResults dojo/_base/lang dojo/promise/all".split(" "),function(t,u,m,v,q,n){function r(a){return a&&q.mixin(a,JSON.parse(a.__extra))}var w=/(.*)\*$/;return t([],{constructor:function(a){var e=a.dbConfig;this.database=openDatabase(a.dbName||"dojo-db","1.0","dojo-db",4194304);var f=this.indexPrefix=a.indexPrefix||"idx_",d=a.table||a.storeName;this.table=(a.table||a.storeName).replace(/[^\w]/g,"_");a=[];this.indices=
-e.stores[d];this.repeatingIndices={};for(var b in this.indices)this.indices[b].multiEntry&&(this.repeatingIndices[b]=!0);if(!e.available){for(d in e.stores){var g=e.stores[d],h=d.replace(/[^\w]/g,"_"),k=g[this.idProperty],c=["__extra",this.idProperty+" "+(k&&k.autoIncrement?"INTEGER PRIMARY KEY AUTOINCREMENT":"PRIMARY KEY")],k=[this.idProperty];for(b in g)b!=this.idProperty&&c.push(b);a.push(this.executeSql("CREATE TABLE IF NOT EXISTS "+h+" ("+c.join(",")+")"));for(b in g)b!=this.idProperty&&(g[b].multiEntry?
-(k.push(b),c=h+"_repeating_"+b,a.push(this.executeSql("CREATE TABLE IF NOT EXISTS "+c+" (id,value)")),a.push(this.executeSql("CREATE INDEX IF NOT EXISTS idx_"+c+"_id ON "+c+"(id)")),a.push(this.executeSql("CREATE INDEX IF NOT EXISTS idx_"+c+"_value ON "+c+"(value)"))):(a.push(this.executeSql("ALTER TABLE "+h+" ADD "+b).then(null,function(){})),!1!==g[b].indexed&&a.push(this.executeSql("CREATE INDEX IF NOT EXISTS "+f+h+"_"+b+" ON "+h+"("+b+")"))))}e.available=n(a)}this.available=e.available},idProperty:"id",
-selectColumns:["*"],get:function(a){return m(this.executeSql("SELECT "+this.selectColumns.join(",")+" FROM "+this.table+" WHERE "+this.idProperty+"\x3d?",[a]),function(a){return 0<a.rows.length?r(a.rows.item(0)):void 0})},getIdentity:function(a){return a[this.idProperty]},remove:function(a){return this.executeSql("DELETE FROM "+this.table+" WHERE "+this.idProperty+"\x3d?",[a])},identifyGeneratedKey:!0,add:function(a,e){var f=[],d=[],b=[],g={},h=[],k=this,c;for(c in a)a.hasOwnProperty(c)&&(c in this.indices||
-c==this.idProperty?this.repeatingIndices[c]?h.push(function(b){return n(a[c].map(function(a){return k.executeSql("INSERT INTO "+k.table+"_repeating_"+c+" (value, id) VALUES (?, ?)",[a,b])}))}):(b.push(c),d.push("?"),f.push(a[c])):g[c]=a[c]);b.push("__extra");d.push("?");f.push(JSON.stringify(g));var l=this.idProperty;this.identifyGeneratedKey&&(f.idColumn=l);d="INSERT INTO "+this.table+" ("+b.join(",")+") VALUES ("+d.join(",")+")";return m(this.executeSql(d,f),function(c){var b=c.insertId;a[l]=b;
-return n(h.map(function(a){return a(b)})).then(function(){return b})})},put:function(a,e){e=e||{};var f=e.id||a[this.idProperty],d=e.overwrite;if(void 0===d){var b=this;return this.get(f).then(function(c){return(e.overwrite=!!c)?(e.overwrite=!0,b.put(a,e)):b.add(a,e)})}if(!d)return b.add(a,e);var d="UPDATE "+this.table+" SET ",g=[],h=[],k={},c;for(c in a)if(a.hasOwnProperty(c))if(c in this.indices||c==this.idProperty)if(this.repeatingIndices[c]){this.executeSql("DELETE FROM "+this.table+"_repeating_"+
-c+" WHERE id\x3d?",[f]);for(var l=a[c],p=0;p<l.length;p++)this.executeSql("INSERT INTO "+this.table+"_repeating_"+c+" (value, id) VALUES (?, ?)",[l[p],f])}else h.push(c+"\x3d?"),g.push(a[c]);else k[c]=a[c];h.push("__extra\x3d?");g.push(JSON.stringify(k));d+=h.join(",")+" WHERE "+this.idProperty+"\x3d?";g.push(a[this.idProperty]);return m(this.executeSql(d,g),function(a){return f})},query:function(a,e){function f(a){var c=[],b;for(b in a){var e=function(a){var b=a&&a.match&&a.match(w);if(b)return k.push(b[1]+
-"%")," LIKE ?";k.push(a);return"\x3d?"},d=a[b];if(d)if(d.contains){var f=g.table+"_repeating_"+b;c.push(d.contains.map(function(a){return g.idProperty+" IN (SELECT id FROM "+f+" WHERE value"+e(a)+")"}).join(" AND "));continue}else if("object"==typeof d&&("from"in d||"to"in d)){var l=d.excludeFrom?"\x3e":"\x3e\x3d",m=d.excludeTo?"\x3c":"\x3c\x3d";"from"in d?(k.push(d.from),"to"in d?(k.push(d.to),c.push("("+h+"."+b+l+"? AND "+h+"."+b+m+"?)")):c.push(h+"."+b+l+"?")):(k.push(d.to),c.push(h+"."+b+m+"?"));
-continue}c.push(h+"."+b+e(d))}return c.join(" AND ")}e=e||{};var d="FROM "+this.table,b,g=this,h=this.table,k=[];a.forEach?(b=a.map(f).join(") OR ("))&&(b="("+b+")"):b=f(a);b&&(b=" WHERE "+b);e.sort&&(b+=" ORDER BY "+e.sort.map(function(a){return h+"."+a.attribute+" "+(a.descending?"desc":"asc")}));var c=b;e.count&&(c+=" LIMIT "+e.count);e.start&&(c+=" OFFSET "+e.start);c=q.delegate(this.executeSql("SELECT * "+d+c,k).then(function(a){for(var b=[],c=0;c<a.rows.length;c++)b.push(r(a.rows.item(c)));
-return b}));g=this;c.total={then:function(a,c){return g.executeSql("SELECT COUNT(*) "+d+b,k).then(function(a){return a.rows.item(0)["COUNT(*)"]}).then(a,c)}};return new v(c)},executeSql:function(a,e){var f=new u,d,b;this.database.transaction(function(g){g.executeSql(a,e,function(a,b){f.resolve(d=b)},function(a,d){f.reject(b=d)})});if(d)return d;if(b)throw b;return f.promise}})});
-//# sourceMappingURL=SQL.js.map
+define(['dojo/_base/declare', 'dojo/Deferred', 'dojo/when', 'dojo/store/util/QueryResults', 'dojo/_base/lang', 'dojo/promise/all'], function(declare, Deferred, when, QueryResults, lang, all) {
+	//	module:
+	//		./store/db/SQL
+	//  summary:
+	//		This module implements the Dojo object store API using the WebSQL database
+	var wildcardRe = /(.*)\*$/;
+	function convertExtra(object){
+		// converts the 'extra' data on sql rows that can contain expando properties outside of the defined column
+		return object && lang.mixin(object, JSON.parse(object.__extra));
+	}
+	return declare([], {
+		constructor: function(config){
+			var dbConfig = config.dbConfig;
+			// open the database and get it configured
+			// args are short_name, version, display_name, and size
+			this.database = openDatabase(config.dbName || "dojo-db", '1.0', 'dojo-db', 4*1024*1024);
+			var indexPrefix = this.indexPrefix = config.indexPrefix || "idx_";
+			var storeName = config.table || config.storeName;
+			this.table = (config.table || config.storeName).replace(/[^\w]/g, '_');
+			var promises = []; // for all the structural queries
+			// the indices for this table
+			this.indices = dbConfig.stores[storeName];
+			this.repeatingIndices = {};
+			for(var index in this.indices){
+				// we support multiEntry property to simulate the similar behavior in IndexedDB, we track these because we use the
+				if(this.indices[index].multiEntry){
+					this.repeatingIndices[index] = true;
+				}
+			}
+			if(!dbConfig.available){
+				// the configuration where we create any necessary tables and indices
+				for(var storeName in dbConfig.stores){
+					var storeConfig = dbConfig.stores[storeName];
+					var table = storeName.replace(/[^\w]/g, '_');
+					// the __extra property contains any expando properties in JSON form
+					var idConfig = storeConfig[this.idProperty];
+					var indices = ['__extra', this.idProperty + ' ' + ((idConfig && idConfig.autoIncrement) ? 'INTEGER PRIMARY KEY AUTOINCREMENT' : 'PRIMARY KEY')];
+					var repeatingIndices = [this.idProperty];
+					for(var index in storeConfig){
+						if(index != this.idProperty){
+							indices.push(index);
+						}
+					}
+					promises.push(this.executeSql("CREATE TABLE IF NOT EXISTS " + table+ ' ('
+						+ indices.join(',') +
+					')'));
+					for(var index in storeConfig){
+						if(index != this.idProperty){
+							if(storeConfig[index].multiEntry){
+								// it is "repeating" property, meaning that we expect it to have an array, and we want to index each item in the array
+								// we will search on it using a nested select
+								repeatingIndices.push(index);
+								var repeatingTable = table+ '_repeating_' + index;
+								promises.push(this.executeSql("CREATE TABLE IF NOT EXISTS " + repeatingTable + ' (id,value)'));
+								promises.push(this.executeSql("CREATE INDEX IF NOT EXISTS idx_" + repeatingTable + '_id ON ' + repeatingTable + '(id)'));
+								promises.push(this.executeSql("CREATE INDEX IF NOT EXISTS idx_" + repeatingTable + '_value ON ' + repeatingTable + '(value)'));
+							}else{
+								promises.push(this.executeSql("ALTER TABLE " + table + ' ADD ' + index).then(null, function(){
+									/* suppress failed alter table statements*/
+								}));
+								// otherwise, a basic index will do
+								if(storeConfig[index].indexed !== false){
+									promises.push(this.executeSql("CREATE INDEX IF NOT EXISTS " + indexPrefix +
+										table + '_' + index + ' ON ' + table + '(' + index + ')'));
+								}
+							}
+						}
+					}
+				}
+				dbConfig.available = all(promises);
+			}
+			this.available = dbConfig.available;
+		},
+		idProperty: "id",
+		selectColumns: ["*"],
+		get: function(id){
+			// basic get() operation, query by id property
+			return when(this.executeSql("SELECT " + this.selectColumns.join(",") + " FROM " + this.table + " WHERE " + this.idProperty + "=?", [id]), function(result){
+				return result.rows.length > 0 ? convertExtra(result.rows.item(0)) : undefined;
+			});
+		},
+		getIdentity: function(object){
+			return object[this.idProperty];
+		},
+		remove: function(id){
+			return this.executeSql("DELETE FROM " + this.table + " WHERE " + this.idProperty + "=?", [id]); // Promise
+			// TODO: remove from repeating rows too
+		},
+		identifyGeneratedKey: true,
+		add: function(object, directives){
+			// An add() wiill translate to an INSERT INTO in SQL
+			var params = [], vals = [], cols = [];
+			var extra = {};
+			var actionsWithId = [];
+			var store = this;
+			for(var i in object){
+				if(object.hasOwnProperty(i)){
+					if(i in this.indices || i == this.idProperty){
+						if(this.repeatingIndices[i]){
+							// we will need to add to the repeating table for the given field/column,
+							// but it must take place after the insert, so we know the id
+							actionsWithId.push(function(id){
+								var array = object[i];
+								return all(array.map(function(value){
+									return store.executeSql('INSERT INTO ' + store.table + '_repeating_' + i + ' (value, id) VALUES (?, ?)', [value, id]);
+								}));
+							});
+						}else{
+							// add to the columns and values for SQL statement
+							cols.push(i);
+							vals.push('?');
+							params.push(object[i]);
+						}
+					}else{
+						extra[i] = object[i];
+					}
+				}
+			}
+			// add the "extra" expando data as well
+			cols.push('__extra');
+			vals.push('?');
+			params.push(JSON.stringify(extra));
+			
+			var idColumn = this.idProperty;
+			if(this.identifyGeneratedKey){
+				params.idColumn = idColumn;
+			}
+			var sql = "INSERT INTO " + this.table + " (" + cols.join(',') + ") VALUES (" + vals.join(',') + ")";
+			return when(this.executeSql(sql, params), function(results) {
+				var id = results.insertId;
+				object[idColumn] = id;
+				// got the id now, perform the insertions for the repeating data
+				return all(actionsWithId.map(function(func){
+					return func(id);
+				})).then(function(){
+					return id;
+				});
+			});
+		},
+		put: function(object, directives){
+			// put, if overwrite is not specified, we have to do a get() to determine if we need to do an INSERT INTO (via add), or an UPDATE
+			directives = directives || {};
+			var id = directives.id || object[this.idProperty];
+			var overwrite = directives.overwrite;
+			if(overwrite === undefined){
+				// can't tell if we need to do an INSERT or UPDATE, do a get() to find out
+				var store = this;
+				return this.get(id).then(function(previous){
+					if((directives.overwrite = !!previous)){
+						directives.overwrite = true;
+						return store.put(object, directives);
+					}else{
+						return store.add(object, directives);
+					}
+				});
+			}
+			if(!overwrite){
+				return store.add(object, directives);
+			}
+			var sql = "UPDATE " + this.table + " SET ";
+			var params = [];
+			var cols = [];
+			var extra = {};
+			var promises = [];
+			for(var i in object){
+				if(object.hasOwnProperty(i)){
+					if(i in this.indices || i == this.idProperty){
+						if(this.repeatingIndices[i]){
+							// update the repeating value tables
+							this.executeSql('DELETE FROM ' + this.table + '_repeating_' + i + ' WHERE id=?', [id]);
+							var array = object[i];
+							for(var j = 0; j < array.length; j++){
+								this.executeSql('INSERT INTO ' + this.table + '_repeating_' + i + ' (value, id) VALUES (?, ?)', [array[j], id]);
+							}
+						}else{
+							cols.push(i + "=?");
+							params.push(object[i]);
+						}
+					}else{
+						extra[i] = object[i];
+					}
+				}
+			}
+			cols.push("__extra=?");
+			params.push(JSON.stringify(extra));
+			// create the SETs for the SQL
+			sql += cols.join(',') + " WHERE " + this.idProperty + "=?";
+			params.push(object[this.idProperty]);
+
+			return when(this.executeSql(sql, params), function(result){
+				return id;
+			});
+		},
+		query: function(query, options){
+			options = options || {};
+			var from = 'FROM ' + this.table;
+			var condition;
+			var addedWhere;
+			var store = this;
+			var table = this.table;
+			var params = [];
+			if(query.forEach){
+				// a set of OR'ed conditions
+				condition = query.map(processObjectQuery).join(') OR (');
+				if(condition){
+					condition = '(' + condition + ')';
+				}
+			}else{
+				// regular query
+				condition = processObjectQuery(query);
+			}
+			if(condition){
+				condition = ' WHERE ' + condition;
+			}
+			function processObjectQuery(query){
+				// we are processing an object query, that needs to be translated to WHERE conditions, AND'ed
+				var conditions = [];
+				for(var i in query){
+					var filterValue = query[i];
+					function convertWildcard(value){
+						// convert to LIKE if it ends with a *
+						var wildcard = value && value.match && value.match(wildcardRe);
+						if(wildcard){
+							params.push(wildcard[1] + '%');
+							return ' LIKE ?';
+						}
+						params.push(value);
+						return '=?';
+					}
+					if(filterValue){
+						if(filterValue.contains){
+							// search within the repeating table
+							var repeatingTable = store.table + '_repeating_' + i;
+							conditions.push(filterValue.contains.map(function(value){
+								return store.idProperty + ' IN (SELECT id FROM ' + repeatingTable + ' WHERE ' + 
+									'value' + convertWildcard(value) + ')';
+							}).join(' AND '));
+							continue;
+						}else if(typeof filterValue == 'object' && ("from" in filterValue || "to" in filterValue)){
+							// a range object, convert to appropriate SQL operators
+							var fromComparator = filterValue.excludeFrom ? '>' : '>=';
+							var toComparator = filterValue.excludeTo ? '<' : '<=';
+							if('from' in filterValue){
+								params.push(filterValue.from);
+								if('to' in filterValue){
+									params.push(filterValue.to);
+									conditions.push('(' + table + '.' + i + fromComparator + '? AND ' +
+										table + '.' + i + toComparator + '?)');
+								}else{
+									conditions.push(table + '.' + i + fromComparator + '?');
+								}
+							}else{
+								params.push(filterValue.to);
+								conditions.push(table + '.' + i + toComparator + '?');
+							}
+							continue;
+						}
+					}
+					// regular value equivalence
+					conditions.push(table + '.' + i + convertWildcard(filterValue));
+				}
+				return conditions.join(' AND ');
+			}
+			
+			if(options.sort){
+				condition += ' ORDER BY ' +
+				options.sort.map(function(sort){
+					return table + '.' + sort.attribute + ' ' + (sort.descending ? 'desc' : 'asc');
+				});
+			}
+
+			var limitedCondition = condition;
+			if(options.count){
+				limitedCondition += " LIMIT " + options.count;
+			}
+			if(options.start){
+				limitedCondition += " OFFSET " + options.start;
+			}
+			var results = lang.delegate(this.executeSql('SELECT * ' + from + limitedCondition, params).then(function(sqlResults){
+				// get the results back and do any conversions on it
+				var results = [];
+				for(var i = 0; i < sqlResults.rows.length; i++){
+					results.push(convertExtra(sqlResults.rows.item(i)));
+				}
+				return results;
+			}));
+			var store = this;
+			results.total = {
+					then: function(callback,errback){
+						// lazily do a total, using the same query except with a COUNT(*) and without the limits
+						return store.executeSql('SELECT COUNT(*) ' + from + condition, params).then(function(sqlResults){
+							return sqlResults.rows.item(0)['COUNT(*)'];
+						}).then(callback,errback);
+					}
+				};
+			return new QueryResults(results);
+		},
+
+		executeSql: function(sql, parameters){
+			// send it off to the DB
+			var deferred = new Deferred();
+			var result, error;
+			this.database.transaction(function(transaction){
+				transaction.executeSql(sql, parameters, function(transaction, value){
+					deferred.resolve(result = value);
+				}, function(transaction, e){
+					deferred.reject(error = e);
+				});
+			});
+			// return synchronously if the data is already available.
+			if(result){
+				return result;
+			}
+			if(error){
+				throw error;
+			}
+			return deferred.promise;
+		}
+		
+	});
+});

@@ -1,3 +1,9 @@
-//>>built
-define("dojox/atom/widget/nls/bs/FeedEntryEditor",{doNew:"[novo]",edit:"[uredi]",save:"[sa\u010duvaj]",cancel:"[otka\u017ei]"});
-//# sourceMappingURL=FeedEntryEditor.js.map
+define({      
+//begin v1.x content
+	doNew: "[novo]",
+	edit: "[uredi]",
+	save: "[sačuvaj]",
+	cancel: "[otkaži]"
+//end v1.x content
+});
+

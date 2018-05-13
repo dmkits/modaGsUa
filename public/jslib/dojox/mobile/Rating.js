@@ -1,5 +1,92 @@
-//>>built
-define("dojox/mobile/Rating","dojo/_base/declare dojo/_base/lang dojo/dom-construct dijit/_WidgetBase ./iconUtils dojo/has dojo/has!dojo-bidi?dojox/mobile/bidi/Rating".split(" "),function(c,l,e,b,h,k,m){b=c(k("dojo-bidi")?"dojox.mobile.NonBidiRating":"dojox.mobile.Rating",[b],{image:"",numStars:5,value:0,alt:"",baseClass:"mblRating",buildRendering:function(){this.inherited(arguments);this.domNode.style.display="inline-block";var a=this.imgNode=e.create("img");this.connect(a,"onload",l.hitch(this,
-function(){this.set("value",this.value)}));h.createIcon(this.image,null,a)},_setValueAttr:function(a){this._set("value",a);var b=this.imgNode.height;if(0!=b){e.empty(this.domNode);var d,c,f=this.imgNode.width/3;for(d=0;d<this.numStars;d++){c=d<=a-1?0:d>=a?f:2*f;var g=e.create("div",{style:{"float":"left"}},this.domNode);this.isLeftToRight()||(g=this._setCustomTransform(g));h.createIcon(this.image,"0,"+c+","+f+","+b,null,this.alt,g)}}},_setCustomTransform:function(a){return a}});return k("dojo-bidi")?
-c("dojox.mobile.Rating",[b,m]):b});
-//# sourceMappingURL=Rating.js.map
+define([
+	"dojo/_base/declare",
+	"dojo/_base/lang",
+	"dojo/dom-construct",
+	"dijit/_WidgetBase",
+	"./iconUtils",
+	"dojo/has",
+	"dojo/has!dojo-bidi?dojox/mobile/bidi/Rating"
+], function(declare, lang, domConstruct, WidgetBase, iconUtils, has, BidiRating){
+
+	// module:
+	//		dojox/mobile/Rating
+
+	
+	var Rating = declare(has("dojo-bidi") ? "dojox.mobile.NonBidiRating" : "dojox.mobile.Rating", [WidgetBase], {
+		// summary:
+		//		A widget that displays a rating, usually with stars.
+		// description:
+		//		This widget simply shows the specified number of stars. It is a
+		//		read-only widget, and has no editing capability.
+
+		// image: String
+		//		Path to a star image, which includes three stars, full star,
+		//		empty star, and half star, from left to right.
+		image: "",
+
+		// numStars: Number
+		//		The number of stars to show.
+		numStars: 5,
+
+		// value: Number
+		//		The current value of the Rating.
+		value: 0,
+
+		// alt: String
+		//		An alternate text for the icon image.
+		alt: "",
+
+		/* internal properties */
+		
+		// baseClass: String
+		//		The name of the CSS class of this widget.
+		baseClass: "mblRating",
+
+		buildRendering: function(){
+			this.inherited(arguments);
+			this.domNode.style.display = "inline-block";
+			var img = this.imgNode = domConstruct.create("img");
+			this.connect(img, "onload",
+				lang.hitch(this, function(){ this.set("value", this.value); }));
+			iconUtils.createIcon(this.image, null, img);
+		},
+
+		_setValueAttr: function(/*Number*/value){
+			// summary:
+			//		Sets the value of the Rating.
+			// tags:
+			//		private
+			this._set("value", value);
+			var h = this.imgNode.height;
+			if(h == 0){ return; } // loading of image has not been completed yet
+			domConstruct.empty(this.domNode);
+			var i, left, w = this.imgNode.width / 3;
+			for(i = 0; i < this.numStars; i++){
+				if(i <= value - 1){
+					left = 0; // full
+				}else if(i >= value){
+					left = w; // empty
+				}else{
+					left = w * 2; // half
+				}
+				var parent = domConstruct.create("div", {
+					style: {"float": "left"}
+				}, this.domNode);
+				if(!this.isLeftToRight()){
+					parent = this._setCustomTransform(parent);
+				}
+				iconUtils.createIcon(this.image,
+					"0," + left + "," + w + "," + h, null, this.alt, parent);
+			}
+		},
+		
+		_setCustomTransform: function(/*Object*/parent){
+			// summary:
+			//		To be implemented in bidi/Rating.js.
+			return parent;
+		}
+	});
+	
+	return has("dojo-bidi") ? declare("dojox.mobile.Rating", [Rating, BidiRating]) : Rating;
+
+});

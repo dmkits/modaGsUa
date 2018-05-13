@@ -1,3 +1,7 @@
-//>>built
-define("dojox/form/nls/bs/PasswordValidator",{nomatchMessage:"Lozinka ne odgovara.",badPasswordMessage:"Neva\u017ee\u0107a lozinka."});
-//# sourceMappingURL=PasswordValidator.js.map
+define({      
+//begin v1.x content
+        nomatchMessage: "Lozinka ne odgovara.",
+	badPasswordMessage: "Nevažeća lozinka."
+//end v1.x content
+});
+

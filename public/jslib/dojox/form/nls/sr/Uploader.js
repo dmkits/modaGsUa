@@ -1,3 +1,6 @@
-//>>built
-define("dojox/form/nls/sr/Uploader",{label:"Izaberi datoteke..."});
-//# sourceMappingURL=Uploader.js.map
+define({      
+//begin v1.x content
+	label: "Izaberi datoteke..."
+//end v1.x content
+});
+

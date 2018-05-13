@@ -1,3 +1,13 @@
-//>>built
-define("dojox/mobile/nls/ar/messages",{CarouselPrevious:"\u200f\u0633\u0627\u0628\u0642\u200f",CarouselNext:"\u062a\u0627\u0644\u064a",PageIndicatorLabel:"\u0627\u0644\u0635\u0641\u062d\u0629 $0 \u0645\u0646 $1"});
-//# sourceMappingURL=messages.js.map
+define({      
+//begin v1.x content
+	// Title of the previous button in Carousel
+	"CarouselPrevious": "‏سابق‏",
+	// Title of the next button in Carousel
+	"CarouselNext": "تالي",
+	// PageIndicatorLabel: accessibility label for PageIndicator
+	// $0 replaced by the index of the current page
+	// $1 replaced by the total number of pages
+	"PageIndicatorLabel": "الصفحة $0 من $1"
+//end v1.x content
+});
+
