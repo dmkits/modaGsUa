@@ -55,35 +55,31 @@ module.exports.init = function(app){
             });
     });
     app.get("/docs/rec/getNewRecData", function(req, res){
-        t_Rec.getDataItem(req.uuid,{fields:["MAXNUMBER"],fieldsFunctions:{"MAXNUMBER":{function:"maxPlus1", sourceField:"NUMBER"}},
+        t_Rec.getDataItem({uuid:req.uuid, fields:["maxDocID"],fieldsFunctions:{"maxDocID":{function:"maxPlus1", sourceField:"DocID"}},
                 conditions:{"1=1":null}},
             function(result){
-                var newNumber=(result&&result.item)?result.item["MAXNUMBER"]:"", docDate=dateFormat(new Date(),"yyyy-mm-dd");
-                dirUnits.getDataItem(req.uuid,{fields:["NAME"],conditions:{"ID=":"0"}}, function(result){
-                    var unitName=(result&&result.item)?result.item["NAME"]:"";
-                    dirContractors.getDataItem(req.uuid,{fields:["NAME"],conditions:{"ID=":"1"}}, function(result){
-                        var supplierName=(result&&result.item)?result.item["NAME"]:"";
-                        sysCurrency.getDataItem(req.uuid,{ fields:["CODE","CODENAME"],
-                                fieldsFunctions:{"CODENAME":{function:"concat",fields:["CODE","' ('","NAME","')'"]}},
-                                conditions:{"ID=":"0"} },
+                var newDocID=(result&&result.item)?result.item["maxDocID"]:"", newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
+                r_Ours.getDataItem({uuid:req.uuid, fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
+                    var ourName=(result&&result.item)?result.item["OurName"]:"";
+                    r_Stocks.getDataItem({uuid:req.uuid, fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
+                        var stockName=(result&&result.item)?result.item["StockName"]:"";
+                        r_Currs.getDataItem({uuid:req.uuid, fields:["CurrName"], conditions:{"CurrID=":"0"} },
                             function(result){
-                                var sysCurrencyCode=(result&&result.item)?result.item["CODE"]:"";
-                                var sysCurrencyCodeName=(result&&result.item)?result.item["CODENAME"]:"";
-                                dirProdsCollections.getDataItem(req.uuid,{ fields:["NAME"], conditions:{"ID=":"1"} },
+                                var currName=(result&&result.item)?result.item["CurrName"]:"";
+                                r_Comps.getDataItem({uuid:req.uuid, fields:["CompName"], conditions:{"CompID=":"0"} },
                                     function(result){
-                                        var dirProductsCollectionName=(result&&result.item)?result.item["NAME"]:"";
-                                        //sysDocStates.getDataItem({fields:["NAME"],conditions:{"ID=":"0"}}, function(result){
-                                        //});
-                                        wrh_pinvs.setDataItem(req.uuid,{
-                                                fields:["NUMBER","DOCDATE","UNIT_NAME","SUPPLIER_NAME","SUPPLIER_ORDER_NUM","SUPPLIER_INV_NUM",
-                                                    "CURRENCY_CODE","CURRENCY_CODENAME", "PRODUCT_COLLECTION", "DOCSTATE_NAME", "DOCCOUNT","DOCQTYSUM","DOCSUM",
-                                                    "RATE","BASE_FACTOR"],
-                                                values:[newNumber,docDate,unitName,supplierName,"","",
-                                                    sysCurrencyCode,sysCurrencyCodeName, dirProductsCollectionName, "",0,0,0,
-                                                    1, 2]},
-                                            function(result){
-                                                res.send(result);
-                                            });
+                                        var compName=(result&&result.item)?result.item["CompName"]:"";
+                                        r_States.getDataItem({uuid:req.uuid, fields:["StateName"],conditions:{"StateCode=":"0"}}, function(result){
+                                            var stateName=(result&&result.item)?result.item["StateName"]:"";
+                                            t_Rec.setDataItem({
+                                                    fields:["DocID","DocDate","OurName","StockName","CurrName","KursCC","CompName",
+                                                        "TQty","TSumCC_wt", "StateName"],
+                                                    values:[newDocID,newDocDate,ourName,stockName,currName,1,compName,
+                                                        0,0,stateName]},
+                                                function(result){
+                                                    res.send(result);
+                                                });
+                                        });
                                     });
                             });
                     });
@@ -92,31 +88,31 @@ module.exports.init = function(app){
     });
     app.post("/docs/rec/storeRecData", function(req, res){
         var storeData=req.body;
-        dirUnits.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["UNIT_NAME"]}}, function(result){
+        r_Ours.getDataItem({uuid:req.uuid, fields:["OurID"],conditions:{"OurName=":storeData["OurName"]}}, function(result){
             if(!result.item){
-                res.send({ error:"Cannot finded unit by name!"});
+                res.send({ error:"Cannot finded Our by OurName!"});
                 return;
             }
-            storeData["UNIT_ID"]=result.item["ID"];
-            dirContractors.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["SUPPLIER_NAME"]}}, function(result){
+            storeData["OurID"]=result.item["OurID"];
+            r_Stocks.getDataItem({uuid:req.uuid, fields:["StockID"],conditions:{"StockName=":storeData["StockName"]}}, function(result){
                 if(!result.item){
-                    res.send({ error:"Cannot finded conractor by name!"});
+                    res.send({ error:"Cannot finded Stock by StockName!"});
                     return;
                 }
-                storeData["SUPPLIER_ID"]=result.item["ID"];
-                sysCurrency.getDataItem(req.uuid,{fields:["ID"],conditions:{"CODE=":storeData["CURRENCY_CODE"]}}, function(result){
+                storeData["StockID"]=result.item["StockID"];
+                r_Currs.getDataItem({uuid:req.uuid, fields:["CurrID"],conditions:{"CurrName=":storeData["CurrName"]}}, function(result){
                     if(!result.item){
-                        res.send({ error:"Cannot finded currency by code!"});
+                        res.send({ error:"Cannot finded Curr by CurrName!"});
                         return;
                     }
-                    storeData["CURRENCY_ID"]=result.item["ID"];
-                    dirProdsCollections.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["PRODUCT_COLLECTION"]}}, function(result){
-                        storeData["COLLECTION_ID"]=result.item["ID"];
-                        var docStateID=0;
-                        sysDocStates.getDataItem(req.uuid,{fields:["ID"],conditions:{"NAME=":storeData["DOCSTATE_NAME"]}}, function(result){
-                            if(result.item) docStateID=result.item["ID"];
-                            storeData["DOCSTATE_ID"]=docStateID;
-                            wrh_pinvs.storeTableDataItem(req.uuid,{tableColumns:wrhPInvsListTableColumns, idFieldName:"ID", storeTableData:storeData},
+                    storeData["CurrID"]=result.item["CurrID"];
+                    r_Comps.getDataItem({uuid:req.uuid, fields:["CompID"],conditions:{"CompName=":storeData["CompName"]}}, function(result){
+                        storeData["CompID"]=result.item["CompID"];
+                        var stateCode=0;
+                        r_States.getDataItem({uuid:req.uuid, fields:["StateCode"],conditions:{"StateName=":storeData["StateName"]}}, function(result){
+                            if(result.item) stateCode=result.item["StateCode"];
+                            storeData["StateCode"]=stateCode;
+                            t_Rec.storeTableDataItem({uuid:req.uuid, tableColumns:tRecsListTableColumns, idFieldName:"ChID", storeTableData:storeData},
                                 function(result){
                                     res.send(result);
                                 });

@@ -151,7 +151,7 @@ module.exports.initValidateDataModels=function(uuid,dataModelsList, errs, result
 };
 
 /**
- * params = { source,
+ * params = { uuid, source,
  *      fields = [ <fieldName> or <functionFieldName>, ... ],
  *      fieldsSources = { <fieldName>:<sourceName>.<sourceFieldName>, ... },
  *      fieldsFunctions = {
@@ -168,7 +168,7 @@ module.exports.initValidateDataModels=function(uuid,dataModelsList, errs, result
  * fieldsFunctions[].function: "maxPlus1" / "concat"
  * resultCallback = function(err, recordset)
  */
-function _getSelectItems(params,resultCallback){                    log.debug("_getSelectItems params:",params,{});//test
+function _getSelectItems(params,resultCallback){                                                        //log.debug("_getSelectItems params:",params,{});//test
     if(!params){                                                                                        log.error("FAILED _getSelectItems! Reason: no function parameters!");//test
         resultCallback("FAILED _getSelectItems! Reason: no function parameters!");
         return;
@@ -290,7 +290,7 @@ function _getSelectItems(params,resultCallback){                    log.debug("_
 }
 module.exports.getSelectItems=_getSelectItems;
 /**
- * params = { source,
+ * params = { uuid, source,
  *      fields = [<tableFieldName>,<tableFieldName>,<tableFieldName>,...],
  *      conditions={ <condition>:<conditionValue>, ... },
  *      order = "<orderFieldsList>"
@@ -328,7 +328,7 @@ function _getDataItems(params, resultCallback){                                 
     });
 }
 /**
- * params = { source,
+ * params = { uuid, source,
  *      fields = [<tableFieldName>,<tableFieldName>,<tableFieldName>,...],
  *      fieldsFunctions = {
  *          <fieldName>:
@@ -354,7 +354,7 @@ function _getDataItem(params, resultCallback){
 }
 
 /**
- * params = { source, valueField, labelField,
+ * params = { uuid, source, valueField, labelField,
  *      conditions={ <condition>:<conditionValue>, ... },
   *     order = "<orderFieldsList>"
  * }
@@ -391,7 +391,7 @@ function _getDataItemsForSelect(params, resultCallback){
     });
 }
 /**
- * params = { source, comboboxFields = { <tableComboboxFieldName>:<sourceFieldName>, ... },
+ * params = { uuid, source, comboboxFields = { <tableComboboxFieldName>:<sourceFieldName>, ... },
  *      joinedDMSources=[ <joinedSourceName>, ... ]
  *      conditions={ <condition>:<conditionValue>, ... },
  *      order = "<orderFieldsList>"
@@ -475,7 +475,7 @@ function _setDataItem(params, resultCallback){
 }
 
 /**
- * params = { source,
+ * params = { uuid, source,
  *      tableColumns = [
  *          {data:<dataFieldName>, name:<tableColumnHeader>, width:<tableColumnWidth>, type:<dataType>, readOnly:true/false, visible:true/false,
  *              sourceField:<sourceFieldName>
@@ -683,7 +683,7 @@ function _getTableColumnsDataForHTable(tableColumns){
     return tableColumnsDataForHTable;
 }
 /**
- * params = { source,
+ * params = { uuid, source,
  *      tableColumns = [
  *          {data:<sourceFieldName>, name:<tableColumnHeader>, width:<tableColumnWidth>, type:<dataType>, readOnly:true/false, visible:true/false,
  *                dataSource:<sourceName>, sourceField:<sourceFieldName> },
@@ -817,7 +817,7 @@ function _setDataItemForTable(params, resultCallback){
 }
 
 /**
- * params = { tableName,
+ * params = { uuid, tableName,
  *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
  * <value> instanceof Date converted to sting by format yyyy-mm-dd HH:MM:ss !!!
@@ -864,7 +864,7 @@ function _insDataItem(params, resultCallback) {
     });
 }
 /**
- * params = { tableName, idFieldName,
+ * params = { uuid, tableName, idFieldName,
  *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
  * resultCallback = function(result = { updateCount, error, resultItem }
@@ -880,13 +880,13 @@ function _insDataItemWithNewID(params, resultCallback) {
         return;
     }
     params.insData[idFieldName]=util.getUIDNumber();
-    this.insDataItem({idFieldName:idFieldName, insData:params.insData}, function(result){
+    this.insDataItem({uuid:params.uuid, idFieldName:idFieldName, insData:params.insData}, function(result){
         if(result&&result.updateCount>0)result.resultItem=params.insData;
         resultCallback(result);
     });
 }
 /**
- * params = { tableName,
+ * params = { uuid, tableName,
  *      updData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
  *      conditions = { <tableFieldNameCondition>:<value>, ... }
  * }
@@ -941,7 +941,7 @@ function _updDataItem(params, resultCallback) {
     });
 }
 /**
- * params = { tableName, idFieldName,
+ * params = { uuid, tableName, idFieldName,
  *      storeData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
  * resultCallback = function(result = { updateCount, resultItem, error } )
@@ -976,13 +976,13 @@ function _storeDataItem(params, resultCallback) {
     var updData={};
     for(var storeItemName in params.storeData)
         if(storeItemName!=idFieldName) updData[storeItemName]= params.storeData[storeItemName];
-    this.updDataItem({idFieldName:idFieldName, updData:updData, conditions:updCondition}, function(result){
+    this.updDataItem({uuid:params.uuid, idFieldName:idFieldName, updData:updData, conditions:updCondition}, function(result){
         if(result&&result.updateCount>0)result.resultItem=params.storeData;
         resultCallback(result);
     });
 }
 /**
- * params = { tableName,
+ * params = { uuid, tableName,
  *      conditions = { <tableFieldNameCondition>:<value>, ... }
  * }
  * resultCallback = function(result = { updateCount, error })
@@ -1182,7 +1182,7 @@ function _updTableDataItem(params, resultCallback) {
 }
 
 /**
- * params = { tableName, idFieldName, tableColumns,
+ * params = { uuid, tableName, idFieldName, tableColumns,
  *      storeTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
  * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
@@ -1213,7 +1213,7 @@ function _storeTableDataItem(params, resultCallback) {
     var idValue=params.storeTableData[idFieldName];
     if (idValue===undefined||idValue===null){//insert
         params.storeTableData[idFieldName]=util.getUIDNumber();
-        this.insTableDataItem({tableName:params.tableName, idFieldName:idFieldName, tableColumns:params.tableColumns,
+        this.insTableDataItem({uuid:params.uuid, tableName:params.tableName, idFieldName:idFieldName, tableColumns:params.tableColumns,
             insTableData:params.storeTableData}, resultCallback);
         return;
     }
