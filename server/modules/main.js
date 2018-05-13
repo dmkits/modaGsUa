@@ -59,8 +59,7 @@ module.exports.init= function(app){
         //var userRole=req.mduUserRole;
         //outData.menuBar=getUserMenuByUserRole(userRole, appConfig.usersRoleMenu, appConfig.appMenu);
         outData.menuBar=appConfig.appMenu;
-
-        //outData.autorun=appConfig.usersRoleAutorun[userRole];
+        outData.autorun=appConfig.autorun;
 
         if (!appConfig||appConfig.error) {
             outData.error= "Failed load application configuration!"+(appConfig&&appConfig.error)?" Reason:"+appConfig.error:"";

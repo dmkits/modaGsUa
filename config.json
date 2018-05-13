@@ -16,21 +16,5 @@
     { "menuTitle":"Выход", "menuItemName":"menuBarItemClose", "action":"close"},
     { "menuTitle":"О программе", "menuItemName":"menuBarItemHelpAbout", "action":"help_about"}
   ],
-  "usersRoleMenu":{
-    "user":["menuBarItemMainPage",
-      "menuBarPopupMenuMain", "menuBarDirsItemUnits", "separator_dir1", "menuBarDirsItemContractors", "separator_wrh2", "menuBarDirsItemProducts",
-      "menuBarWrh", "menuBarWrhPInvoices", "menuBarWrhRetPInvoices", "separator_wrh1",
-      "menuBarWrhInvoices", "menuBarWrhRetInvoices", "separator_wrh2",
-      "menuBarWrhProdsBalance", "menuBarWrhProdsMoves",
-      "menuBarPopupMenuSales", "menuBarSalesItemCashier",
-      "menuBarItemClose","menuBarItemHelpAbout"],
-    "cashier":["menuBarItemSalesCashier",
-      "menuBarItemClose","menuBarItemHelpAbout"]
-  },
-  "usersRoleAutorun":{
-    "sysadmin":["menuBarItemMainPage","menuBarWrhPInvoice"],
-    "sysAdminDev":["menuBarItemMainPage","menuBarDirsItemUnits","menuBarDirsItemProducts","menuBarWrhPInvoices","menuBarWrhInvoices"],
-    "user":["menuBarItemMainPage"],
-    "cashier":["menuBarItemSalesCashier"]
-  }
+  "autorun":["menuBarItemRec"]
 }
