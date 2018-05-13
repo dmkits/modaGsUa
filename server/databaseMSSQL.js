@@ -51,8 +51,7 @@ function connectWithPool(userData, callback){                                   
         //    idleTimeoutMillis: 30000
         //}
     }, function(err){
-        if(err){
-            log.info("Failed to create connection for user "+userData.login+" userData.uuid="+userData.uuid+ ". Reason: "+err);
+        if(err){                                                                                        log.error("Failed to create connection for user "+userData.login+" userData.uuid="+userData.uuid+ ". Reason: "+err);
             dbConnectError=err.message;
             callback(err.message);
             return;
