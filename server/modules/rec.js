@@ -22,6 +22,8 @@ module.exports.init = function(app){
         {data: "DocDate", name: "Дата", width: 60, type: "datetime", visible:false, dataSource:"t_Rec"},
         {data: "OurName", name: "Фирма", width: 150, type: "text",
             dataSource:"r_Ours", sourceField:"OurName", linkCondition:"r_Ours.OurID=t_Rec.OurID" },
+        {data: "StockName", name: "Склад", width: 150, type: "text",
+            dataSource:"r_Stocks", sourceField:"StockName", linkCondition:"r_Stocks.StockID=t_Rec.StockID" },
         {data: "CompName", name: "Предприятие", width: 150, type: "text",
             dataSource:"r_Comps", sourceField:"CompName", linkCondition:"r_Comps.CompID=t_Rec.CompID" },
         {data: "CurrID", name: "Код валюты", width: 50, type: "text", align:"center", visible:false, dataSource:"t_Rec", sourceField:"CurrID"},
@@ -102,10 +104,10 @@ module.exports.init = function(app){
                 var ourName=(result&&result.item)?result.item["OurName"]:"";
                 r_Stocks.getDataItem({uuid:req.uuid, fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
                     var stockName=(result&&result.item)?result.item["StockName"]:"";
-                    r_Currs.getDataItem({uuid:req.uuid, fields:["CurrName"], conditions:{"CurrID=":"0"} },
+                    r_Currs.getDataItem({uuid:req.uuid, fields:["CurrName"], conditions:{"CurrID=":"1"} },
                         function(result){
                             var currName=(result&&result.item)?result.item["CurrName"]:"";
-                            r_Comps.getDataItem({uuid:req.uuid, fields:["CompName"], conditions:{"CompID=":"0"} },
+                            r_Comps.getDataItem({uuid:req.uuid, fields:["CompName"], conditions:{"CompID=":"1"} },
                                 function(result){
                                     var compName=(result&&result.item)?result.item["CompName"]:"";
                                     r_States.getDataItem({uuid:req.uuid, fields:["StateName"],conditions:{"StateCode=":"0"}}, function(result){
