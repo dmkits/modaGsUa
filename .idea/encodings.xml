@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/debug.cfg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/debug2.cfg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/debugDev.cfg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/package.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/common.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/databaseMSSQL.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/change_log.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/index.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/r_Comps.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/r_Currs.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/r_Ours.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/r_States.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/r_Stocks.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/t_Rec.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/datamodel/t_RecD.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/modules/index.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/modules/main.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/modules/mainPage.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/util.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/start_8080.cmd" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/start_8080.sh" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/start_8181_debug.cmd" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/start_8181_debug.sh" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/sysAdmins.json" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>
