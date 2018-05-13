@@ -1,4 +1,5 @@
-var dataModel=require('../datamodel'), dateFormat = require('dateformat');
+var dataModel=require('../datamodel'), database= require("../databaseMSSQL"),
+    dateFormat = require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
 var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
@@ -9,7 +10,6 @@ module.exports.validateModule = function(uuid,errs, nextValidateModuleCallback){
         function(){
             nextValidateModuleCallback();
         });
-  //  nextValidateModuleCallback();
 };
 
 module.exports.modulePageURL = "/docs/rec";
@@ -18,8 +18,8 @@ module.exports.init = function(app){
     var tRecsListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
         {data: "DocID", name: "Номер", width: 85, type: "text", align:"right", dataSource:"t_Rec"},
+        {data: "IntDocID", name: "Вн. номер", width: 85, type: "text", align:"right", dataSource:"t_Rec"},
         {data: "DocDate", name: "Дата", width: 60, type: "datetime", visible:false, dataSource:"t_Rec"},
-        {data: "sDocDate", name: "Дата", width: 60, type: "dateAsText", align:"center", dataSource:"t_Rec", sourceField:"DocDate" },
         {data: "OurName", name: "Фирма", width: 150, type: "text",
             dataSource:"r_Ours", sourceField:"OurName", linkCondition:"r_Ours.OurID=t_Rec.OurID" },
         {data: "CompName", name: "Предприятие", width: 150, type: "text",
@@ -34,7 +34,12 @@ module.exports.init = function(app){
         {data: "TSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Rec" },
         {data: "StateCode", name: "StateCode", width: 50, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
         {data: "StateName", name: "Статус", width: 250, type: "text",
-            dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" }
+            dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" },
+        {data: "CodeID1", name: "Признак 1", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "CodeID2", name: "Признак 2", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "CodeID3", name: "Признак 3", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "CodeID4", name: "Признак 4", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "CodeID5", name: "Признак 5", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"}
     ];
     app.get("/docs/rec/getDataForRecsListTable", function(req, res){
         var conditions={};
@@ -54,37 +59,71 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
+    /**
+     * params= { uuid }
+     * callback = function(chID, err)
+     */
+    var getNewChID= function(params, callback){
+        var query=
+            "SELECT ISNULL(MAX(r.ChID)+1,dbs.ChID_Start) as NewChID " +
+            "FROM r_DBIs dbs "+
+            "LEFT JOIN t_Rec r ON r.ChID between dbs.ChID_Start and dbs.ChID_End "+
+            "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
+            "GROUP BY dbs.ChID_Start, dbs.ChID_End";
+        database.selectQuery(params.uuid, query,
+            function(err, recordset){
+                var chID=null;
+                if(recordset&&recordset.length>0) chID=recordset[0]["NewChID"];
+                callback(chID,err);
+            });
+    };
+    /**
+     * params= { uuid }
+     * callback = function(docID, err)
+     */
+    var getNewDocID= function(params, callback){
+        var query=
+            "SELECT ISNULL(MAX(r.DocID)+1,dbs.DocID_Start) as NewDocID " +
+            "FROM r_DBIs dbs "+
+            "LEFT JOIN t_Rec r ON r.DocID between dbs.DocID_Start and dbs.DocID_End "+
+            "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
+            "GROUP BY dbs.DocID_Start, dbs.DocID_End";
+        database.selectQuery(params.uuid, query,
+            function(err, recordset){
+                var docID=null;
+                if(recordset&&recordset.length>0) docID=recordset[0]["NewDocID"];
+                callback(docID,err);
+            });
+    };
     app.get("/docs/rec/getNewRecData", function(req, res){
-        t_Rec.getDataItem({uuid:req.uuid, fields:["maxDocID"],fieldsFunctions:{"maxDocID":{function:"maxPlus1", sourceField:"DocID"}},
-                conditions:{"1=1":null}},
-            function(result){
-                var newDocID=(result&&result.item)?result.item["maxDocID"]:"", newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
-                r_Ours.getDataItem({uuid:req.uuid, fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
-                    var ourName=(result&&result.item)?result.item["OurName"]:"";
-                    r_Stocks.getDataItem({uuid:req.uuid, fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
-                        var stockName=(result&&result.item)?result.item["StockName"]:"";
-                        r_Currs.getDataItem({uuid:req.uuid, fields:["CurrName"], conditions:{"CurrID=":"0"} },
-                            function(result){
-                                var currName=(result&&result.item)?result.item["CurrName"]:"";
-                                r_Comps.getDataItem({uuid:req.uuid, fields:["CompName"], conditions:{"CompID=":"0"} },
-                                    function(result){
-                                        var compName=(result&&result.item)?result.item["CompName"]:"";
-                                        r_States.getDataItem({uuid:req.uuid, fields:["StateName"],conditions:{"StateCode=":"0"}}, function(result){
-                                            var stateName=(result&&result.item)?result.item["StateName"]:"";
-                                            t_Rec.setDataItem({
-                                                    fields:["DocID","DocDate","OurName","StockName","CurrName","KursCC","CompName",
-                                                        "TQty","TSumCC_wt", "StateName"],
-                                                    values:[newDocID,newDocDate,ourName,stockName,currName,1,compName,
-                                                        0,0,stateName]},
-                                                function(result){
-                                                    res.send(result);
-                                                });
-                                        });
+        getNewDocID({uuid:req.uuid}, function(newDocID){
+            var newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
+            r_Ours.getDataItem({uuid:req.uuid, fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
+                var ourName=(result&&result.item)?result.item["OurName"]:"";
+                r_Stocks.getDataItem({uuid:req.uuid, fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
+                    var stockName=(result&&result.item)?result.item["StockName"]:"";
+                    r_Currs.getDataItem({uuid:req.uuid, fields:["CurrName"], conditions:{"CurrID=":"0"} },
+                        function(result){
+                            var currName=(result&&result.item)?result.item["CurrName"]:"";
+                            r_Comps.getDataItem({uuid:req.uuid, fields:["CompName"], conditions:{"CompID=":"0"} },
+                                function(result){
+                                    var compName=(result&&result.item)?result.item["CompName"]:"";
+                                    r_States.getDataItem({uuid:req.uuid, fields:["StateName"],conditions:{"StateCode=":"0"}}, function(result){
+                                        var stateName=(result&&result.item)?result.item["StateName"]:"";
+                                        t_Rec.setDataItem({
+                                                fields:["DocID","DocDate","OurName","StockName","CurrName","KursCC","KursMC","CompName",
+                                                    "TQty","TSumCC_wt", "StateName"],
+                                                values:[newDocID,newDocDate,ourName,stockName,currName,1,1,compName,
+                                                    0,0, stateName]},
+                                            function(result){
+                                                res.send(result);
+                                            });
                                     });
-                            });
-                    });
+                                });
+                        });
                 });
             });
+        });
     });
     app.post("/docs/rec/storeRecData", function(req, res){
         var storeData=req.body;
@@ -100,23 +139,37 @@ module.exports.init = function(app){
                     return;
                 }
                 storeData["StockID"]=result.item["StockID"];
-                r_Currs.getDataItem({uuid:req.uuid, fields:["CurrID"],conditions:{"CurrName=":storeData["CurrName"]}}, function(result){
-                    if(!result.item){
-                        res.send({ error:"Cannot finded Curr by CurrName!"});
-                        return;
-                    }
-                    storeData["CurrID"]=result.item["CurrID"];
-                    r_Comps.getDataItem({uuid:req.uuid, fields:["CompID"],conditions:{"CompName=":storeData["CompName"]}}, function(result){
-                        storeData["CompID"]=result.item["CompID"];
-                        var stateCode=0;
-                        r_States.getDataItem({uuid:req.uuid, fields:["StateCode"],conditions:{"StateName=":storeData["StateName"]}}, function(result){
-                            if(result.item) stateCode=result.item["StateCode"];
-                            storeData["StateCode"]=stateCode;
-                            t_Rec.storeTableDataItem({uuid:req.uuid, tableColumns:tRecsListTableColumns, idFieldName:"ChID", storeTableData:storeData},
-                                function(result){
-                                    res.send(result);
-                                });
-                        });
+                r_Currs.getDataItem({uuid:req.uuid, fields:["CurrID","RateCC","RateMC"],
+                        fieldsFunctions:{"RateCC":"dbo.zf_GetRateCC(CurrID)","RateMC":"dbo.zf_GetRateMC(CurrID)"},
+                        conditions:{"CurrName=":storeData["CurrName"]}},
+                    function(result){
+                        if(!result.item){
+                            res.send({ error:"Cannot finded Curr by CurrName!"});
+                            return;
+                        }
+                        storeData["CurrID"]=result.item["CurrID"];  storeData["KursCC"]=result.item["RateCC"];  storeData["KursMC"]=result.item["RateMC"];
+                        r_Comps.getDataItem({uuid:req.uuid, fields:["CompID"],conditions:{"CompName=":storeData["CompName"]}}, function(result){
+                            storeData["CompID"]=result.item["CompID"];
+                            var stateCode=0;
+                            r_States.getDataItem({uuid:req.uuid, fields:["StateCode"],conditions:{"StateName=":storeData["StateName"]}}, function(result){
+                                if(result.item) stateCode=result.item["StateCode"];
+                                storeData["StateCode"]=stateCode;
+                                storeData["CodeID1"]=0;storeData["CodeID2"]=0;storeData["CodeID3"]=0;storeData["CodeID4"]=0;storeData["CodeID5"]=0;
+                                storeData["Discount"]=0;storeData["PayDelay"]=0;
+                                storeData["TSumCC_nt"]=0;storeData["TTaxSum"]=0;
+                                storeData["TSpendSumCC"]=0;storeData["TRouteSumCC"]=0;
+                                storeData["EmpID"]=0;
+                                t_Rec.storeTableDataItem({uuid:req.uuid, tableColumns:tRecsListTableColumns, idFieldName:"ChID", storeTableData:storeData,
+                                        calcNewIdValue: function(params, callback){
+                                            getNewChID({uuid:req.uuid},function(chID){
+                                                params.storeTableData[params.idFieldName]=chID;
+                                                callback(params);
+                                            });
+                                        }},
+                                    function(result){
+                                        res.send(result);
+                                    });
+                            });
                     });
                 });
             });

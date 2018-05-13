@@ -1,14 +1,13 @@
 var server= require("../server"), log= server.log;
 var dateFormat = require('dateformat'), path=require('path'), moment=require('moment');
 var util=require("../util");
+var database= require("../databaseMSSQL");
 
 var dataModelChanges= [], validatedDataModels={};
 module.exports.getModelChanges=function(){ return dataModelChanges; };
 module.exports.resetModelChanges=function(){ dataModelChanges=[]; };
 module.exports.getValidatedDataModels=function(){ return validatedDataModels; };
 module.exports.resetValidatedDataModels=function(){ validatedDataModels={}; };
-
-var database= require("../databaseMSSQL");
 
 /**
  * created for data model fields: sourceType, source, fields, idField, fieldsMetadata
@@ -1184,6 +1183,7 @@ function _updTableDataItem(params, resultCallback) {
 /**
  * params = { uuid, tableName, idFieldName, tableColumns,
  *      storeTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
+ *      calcNewIdValue = function(params, callback), callback= function(params)
  * }
  * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
  */
@@ -1212,14 +1212,23 @@ function _storeTableDataItem(params, resultCallback) {
     }
     var idValue=params.storeTableData[idFieldName];
     if (idValue===undefined||idValue===null){//insert
-        params.storeTableData[idFieldName]=util.getUIDNumber();
-        this.insTableDataItem({uuid:params.uuid, tableName:params.tableName, idFieldName:idFieldName, tableColumns:params.tableColumns,
-            insTableData:params.storeTableData}, resultCallback);
+        var calcNewIdValue=params.calcNewIdValue;
+        if(!calcNewIdValue){
+            calcNewIdValue= function(params, callback){
+                params.storeTableData[idFieldName]=util.getUIDNumber();
+                callback(params);
+            }
+        }
+        var thisInstance=this;
+        calcNewIdValue(params, function(params){
+            thisInstance.insTableDataItem({uuid:params.uuid, tableName:params.tableName, idFieldName:idFieldName,
+                tableColumns:params.tableColumns,insTableData:params.storeTableData}, resultCallback);
+        });
         return;
     }
     //update
-    this.updTableDataItem({uuid:params.uuid, tableName:params.tableName, idFieldName:idFieldName, tableColumns:params.tableColumns,
-        updTableData:params.storeTableData}, resultCallback);
+    this.updTableDataItem({uuid:params.uuid, tableName:params.tableName, idFieldName:idFieldName,
+        tableColumns:params.tableColumns,updTableData:params.storeTableData}, resultCallback);
 }
 
 /**

@@ -115,9 +115,8 @@ function getFieldsTypes(recordset){
     }
     return fieldsTypes;
 }
-function selectQuery(uuid,query, callback) {                                                            log.info("database selectQuery uuid,query:",uuid,query);
+function selectQuery(uuid,query, callback) {                                                            log.debug("database selectQuery uuid,query:",uuid,query);
     if(!uuid || !connections[uuid]){
-        console.log('selectQuery !uuid=');
         callback({message:"No user database connection is specified."});
         return;
     }
