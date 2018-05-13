@@ -131,9 +131,10 @@
 </div>
 </body>
 <script type="text/javascript">
-    require(["app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane",
-                "dijit/form/TextBox", "dijit/form/DateTextBox", "dijit/form/Button","dijit/ConfirmDialog","sysadminDialogs","dojo/keys","dojo/on","request"],
-            function (APP, BorderContainer, LayoutContainer, ContentPane, TextBox, DateTextBox, Button, ConfirmDialog,sysadminDialogs,keys,on,Request) {
+    require(["app/app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane",
+                "dijit/form/TextBox", "dijit/form/DateTextBox", "dijit/form/Button","dijit/ConfirmDialog",
+                "dojo/keys","dojo/on", "app/sysadminDialogs","app/request"],
+            function (APP, BorderContainer, LayoutContainer, ContentPane, TextBox, DateTextBox, Button, ConfirmDialog,keys,on,sysadminDialogs,Request) {
                 var sa_serverConfig_PageContent = APP.instanceForID("sa_serverConfig_PageContent", ContentPane, {});
                 sa_serverConfig_PageContent.domNode.style.display = "inline-block";
 

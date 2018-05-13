@@ -24,7 +24,7 @@ Handsontable.cellTypes['text'].editor.prototype.getValue = function() {
     return this.TEXTAREA.value;
 };
 
-define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby", "dijit/Dialog","dijit/ProgressBar", "dijit/registry", "request"],
+define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby", "dijit/Dialog","dijit/ProgressBar", "dijit/registry", "app/request"],
     function(declare, ContentPane, Standby, Dialog, ProgressBar, Registry, Request){
         return declare("HTableSimple", [ContentPane], {
             handsonTable: null,

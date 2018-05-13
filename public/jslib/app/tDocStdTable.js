@@ -3,7 +3,7 @@
  */
 define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
         "dijit/form/DateTextBox", "dijit/form/TextBox", "dijit/form/NumberTextBox", "dijit/form/Select", "dojox/layout/ContentPane",
-        "app", "tDocumentBase", "contentController", "hTableEditable", "dialogs","dojox/form/Uploader"],
+        "app/app", "app/tDocBase", "app/contentController", "app/hTableEditable", "app/dialogs","dojox/form/Uploader"],
     function(declare, BorderContainer, ContentPane, DateTextBox, TextBox, NumberTextBox, Select, XContentPane,
              APP, DocumentBase, ContentController, HTable, Dialogs, Uploader) {
         return declare("TemplateDocumentStandardTable", [BorderContainer, DocumentBase], {

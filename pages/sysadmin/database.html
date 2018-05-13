@@ -19,10 +19,10 @@
 </div>
 </body>
 <script type="text/javascript">
-    require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane", "dijit/form/ToggleButton",
-                "tDocumentSimpleTable", "request", "sysadminDialogs"],
+    require(["app/app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane", "dijit/form/ToggleButton",
+                "app/tDocSimpleTable", "app/request", "app/sysadminDialogs"],
             function (APP, domStyle, BorderContainer, StackContainer, ContentPane, ToggleButton,
-                      TDocumentSimpleTable, Request, SysadminDialogs) {
+                      TDocSimpleTable, Request, SysadminDialogs) {
                 var sysadmin_database_PageContainer =
                         APP.instanceForID("sysadmin_database_PageContainer", BorderContainer, {});
                 var sysadmin_database_ContentPaneTop =
@@ -51,7 +51,7 @@
                     }
                     btnCurrentChanges.document =
                             APP.childFor(sysadmin_database_ContentPaneDetailContainer, "sysadmin_database_TableCurrentChanges",
-                                    TDocumentSimpleTable, {titleText: "Data model current changes", dataURL: '/sysadmin/database/getCurrentChanges',
+                                    TDocSimpleTable, {titleText: "Data model current changes", dataURL: '/sysadmin/database/getCurrentChanges',
                                         buttonPrint: false, rightPane:{width:200}})
                                     .addTotalCountNumberBox("ИТОГО строк:", 140, {style: "font-weight:bold;", inputStyle: "width:40px;"})
                                     .addToolPane({title:"info"})
@@ -151,7 +151,7 @@
                     }
                     btnChangeLog.document =
                             APP.childFor(sysadmin_database_ContentPaneDetailContainer, "sysadmin_database_TableChangeLog",
-                                    TDocumentSimpleTable, {titleText: "database change log",
+                                    TDocSimpleTable, {titleText: "database change log",
                                         dataURL: '/sysadmin/database/getChangeLog', dataURLCondition:{"1~":1}, buttonPrint: false})
                                     .addTotalCountNumberBox("ИТОГО строк:", 140, {style: "font-weight:bold;", inputStyle: "width:40px;"})
                                     .startUp();
@@ -163,7 +163,7 @@
 //                    if (!btnImportDataFromDB.document){
 //                        btnImportDataFromDB.document =
 //                                APP.childFor(sysadmin_database_ContentPaneDetailContainer, "sa_database_TableOtherDBModelList",
-//                                        TDocumentSimpleTable, {titleText:"Import data from bata1 database", rightPane:{width:200},
+//                                        TDocSimpleTable, {titleText:"Import data from bata1 database", rightPane:{width:200},
 //                                            dataURL:"/sysadmin/database/getDataModelsForImportData"})
 //                                        .addTotalCountNumberBox("Total rows:", 120, {style:"font-weight:bold;",inputStyle:"width:40px"})
 //                                        .addToolPane({title:"info"})

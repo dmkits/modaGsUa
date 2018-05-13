@@ -4,8 +4,8 @@
  * params = { title, height, width, url, minSearchStrLength }
  */
 
-define([ "dijit/Dialog", "dijit/registry", "hTableSimple","dijit/form/Button","request", "dojo/domReady!"],
-    function (Dialog, registry,HTableSimple, Button, Request) {
+define([ "dijit/Dialog", "dijit/registry", "dijit/form/Button", "app/hTableSimple","app/request", "dojo/domReady!"],
+    function (Dialog, registry, Button, HTableSimple, Request) {
         return {
             showDialogProdBalance: function (params, callback) {
                 if (!params.url) {

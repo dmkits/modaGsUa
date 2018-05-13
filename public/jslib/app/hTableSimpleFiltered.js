@@ -1,7 +1,7 @@
 /**
  * Created by dmkits on 16.02.17.
  */
-define(["dojo/_base/declare", "hTableSimple"], function(declare, HTableSimple){
+define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimple){
     return declare("HTableSimpleFiltered", [HTableSimple], {
         useFilters: false,
         filtered: false,

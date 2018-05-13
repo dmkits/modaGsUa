@@ -1,7 +1,7 @@
 /**
  * Created by dmkits on 30.12.16.
  */
-define(["dojo/_base/declare", "dijit/layout/ContentPane", "request"],
+define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
     function(declare, ContentPane, Request) {
         /**
          * ContentController for loadData and store changed data this ContentController elements.

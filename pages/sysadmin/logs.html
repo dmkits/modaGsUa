@@ -20,10 +20,10 @@
 </div>
 </body>
 <script> type="text/javascript">
-    require(["app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
-                "dijit/form/Button", "dijit/form/ToggleButton", "tDocumentSimpleTable", "dojox/widget/DialogSimple", "request"],
+    require(["app/app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/ToggleButton", "app/tDocSimpleTable"],
 
-            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, ToggleButton, TDocumentSimpleTable, DialogSimple, Request) {
+            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, ToggleButton, TDocSimpleTable) {
 
                 var sysadmin_logsPageContainer =
                         APP.instanceForID("sysadmin_logsPageContainer", BorderContainer, {});
@@ -48,7 +48,7 @@
                     }
                     sysadmin_logs_getLogsBtn.document =
                             APP.childFor(sysadmin_logsContentPaneDetailContainer, "sysadmin_logs_TableErrorsLog",
-                                    TDocumentSimpleTable, {titleText: "Logs", dataURL: '/sysadmin/logs/getDataForTable', dataURLCondition: {"1~": 1}, buttonPrint: false})
+                                    TDocSimpleTable, {titleText: "Logs", dataURL: '/sysadmin/logs/getDataForTable', dataURLCondition: {"1~": 1}, buttonPrint: false})
                                     .addHeaderDateBox("",{initValueDate:"curDate", contentTableCondition:"DATE"})
                                     .addTotalCountNumberBox("ИТОГО строк:", 140, { style: "font-weight:bold;", inputStyle: "width:40px;" })
                                     .startUp();

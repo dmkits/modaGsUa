@@ -1,7 +1,7 @@
 /**
  * Created by dmkits on 16.02.17.
  */
-define(["dojo/_base/declare", "hTableSimpleFiltered", "dijit/ProgressBar","dijit/Dialog", "dijit/registry", "request"],
+define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","dijit/Dialog", "dijit/registry", "app/request"],
     function(declare, hTableSimpleFiltered,ProgressBar,Dialog,registry, Request){
         return declare("HTableEditable", [hTableSimpleFiltered], {
             allowEditRowProp:"<!$allow_edit$!>",
