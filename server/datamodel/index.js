@@ -1232,7 +1232,7 @@ function _storeTableDataItem(params, resultCallback) {
 }
 
 /**
- * params = { tableName, idFieldName
+ * params = { uuid, tableName, idFieldName
  *      delTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
  * resultCallback = function(result = { updateCount, error })

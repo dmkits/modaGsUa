@@ -179,7 +179,7 @@ module.exports.init = function(app){
     });
     app.post("/docs/rec/deleteRecData", function(req, res){
         var delData=req.body;
-        t_Rec.delTableDataItem(req.uuid,{idFieldName:"ID", delTableData:delData},
+        t_Rec.delTableDataItem({uuid:req.uuid, idFieldName:"ChID", delTableData:delData},
             function(result){
                 res.send(result);
             });
@@ -215,13 +215,13 @@ module.exports.init = function(app){
             });
     });
     app.post("/docs/rec/storeRecDTableData", function(req, res){
-        t_RecD.storeTableDataItem(req.uuid,{tableColumns:tRecDTableColumns, idFieldName:"ID"},
+        t_RecD.storeTableDataItem({uuid:req.uuid, tableColumns:tRecDTableColumns, idFieldName:"ChID"},
             function(result){
                 res.send(result);
             });
     });
     app.post("/docs/rec/deleteRecDTableData", function(req, res){
-        t_RecD.delTableDataItem(req.uuid,{idFieldName:"ID"},
+        t_RecD.delTableDataItem({uuid:req.uuid, idFieldName:"ChID"},
             function(result){
                 res.send(result);
             });

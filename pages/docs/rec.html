@@ -22,7 +22,7 @@
                         .setDetailHeaderParameters({dataIDName:"ChID",
                             getDataUrl:"/docs/rec/getRecData", getDataForNewUrl:"/docs/rec/getNewRecData",
                             postDataUrl:"/docs/rec/storeRecData", postForDeleteDataUrl:"/docs/rec/deleteRecData",
-                            dataStateName:"StateCode", activeStateValue:"0"
+                            dataStateName:"StateCode", activeStateValue:0
                         })
                         .addDetailHeaderTitle({title:"Приход товара",
                             titleForNew:"Новая приходная накладная", titleForNothing:"Приход товара не выбран", titleForFailedLoad:"Нет данных",
@@ -31,21 +31,16 @@
                         .addDetailHeaderSelect("OurName","Фирма", 330,
                             {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirOursForSelect", labelDataItem:"OurName"})
                         .addDetailHeaderTextBox("DocID", "Номер", 120, {inputStyle:"width:50px"})
+                        .addDetailHeaderTextBox("IntDocID", "Вн. номер", 120, {inputStyle:"width:50px"})
                         .addDetailHeaderDateTextBox("DocDate", "Дата", 150, "width:80px")
                         .addDetailHeaderRow(25,true)
                         .addDetailHeaderSelect("StockName","Склад", 250,
                             {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"StockName"})
                         .addDetailHeaderSelect("CompName","Предприятие", 280,
                             {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCompsForSelect", labelDataItem:"CompName"})
-//                        .addDetailHeaderTextBox("SUPPLIER_INV_NUM", "Номер накл. поставщика", 200, {inputStyle:"width:50px"})
-//                        .addDetailHeaderTextBox("SUPPLIER_ORDER_NUM", "Номер заказа. поставщика", 220, {inputStyle:"width:50px"})
-//                        .addDetailHeaderSelect("PRODUCT_COLLECTION", "Коллекция", 260,
-//                            {inputStyle:"width:120px", loadDropDownURL:"/dir/products/getDirProductsCollectionsForSelect", labelDataItem:"PRODUCT_COLLECTION"})
-//                        .addDetailHeaderRow(25,true)
                         .addDetailHeaderSelect("CurrName","Валюта", 260,
                             {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCurrsForSelect", labelDataItem:"CurrName"})
                         .addDetailHeaderNumberTextBox("KursCC", "Курс валюты", 200, {inputStyle:"width:40px", pattern:"########0.00"})
-//                        .addDetailHeaderNumberTextBox("BASE_FACTOR", "Базовый коэффициент", 200, {inputStyle:"width:40px", pattern:"####0.00"})
                         .setDetailTableParameters({conditionIDName:"ChID",
                             getDataUrl:"/docs/rec/getDataForRecDTable", storeDataUrl:"/docs/rec/storeRecDTableData", deleteDataUrl:"/docs/rec/deleteRecDTableData"})
                         .addDetailTotalRow()
@@ -53,26 +48,23 @@
                         .addDetailSubtotalNumberTextBox("ИТОГО КОЛИЧЕСТВО:", 700, "Qty", {pattern:"###,###,##0.#########", inputStyle:"width:50px;"})
                         .addDetailSubtotalNumberTextBox("ИТОГО СУММА:", 245, "SumCC_wt", {pattern:"###,###,##0.00#######", inputStyle:"width:80px;"})
                         .addDetailTotalRow(true)
-//                        .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СТРОК:", 190, "DOCCOUNT",
-//                            {pattern:"###,###,##0.#########", inputStyle:"width:40px;", style:"font-weight:bold;", printLabel:"ИТОГО СТРОК:"})
                         .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ КОЛИЧЕСТВО:", 890, "TQty",
                             {pattern:"###,###,##0.#########", inputStyle:"width:50px;", style:"font-weight:bold;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
                         .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 245, "TSumCC_wt",
                             {pattern:"###,###,##0.00#######", inputStyle:"width:80px;", style:"font-weight:bold;", printLabel:"ИТОГО СУММА:"})
                         .addDetailTotalRow(true)
                         .addDetailTotalTextBox("Статус:", 1140, "StateName", {style:"font-weight:bold;", inputStyle:"width:200px", print:false})
-                        //.addToolPane("Вид документа")
                         .addToolPane({title:"Действия"})
-                        .addToolPaneActionButton("Новая накладная", {btnStyle:"width:200px;", detailTableActionName:"loadHeaderNewValues"})
-                        .addToolPaneActionButton("Сохранить накладную", {btnStyle:"width:200px;", detailTableActionName:"storeHeaderValues"})
-                        .addToolPaneActionButton("Отменить изменения", {btnStyle:"width:200px;", detailTableActionName:"loadHeaderLastValues"})
-                        .addToolPaneActionButton("Удалить накладную", {btnStyle:"width:200px;", detailTableActionName:"deleteHeader"})
+                        .addToolPaneActionButton("Новая накладная", {btnStyle:"width:200px;", actionButtonName:"loadHeaderNewValues"})
+                        .addToolPaneActionButton("Сохранить накладную", {btnStyle:"width:200px;", actionButtonName:"storeHeaderValues"})
+                        .addToolPaneActionButton("Отменить изменения", {btnStyle:"width:200px;", actionButtonName:"loadHeaderLastValues"})
+                        .addToolPaneActionButton("Удалить накладную", {btnStyle:"width:200px;", actionButtonName:"deleteHeader"})
                         .addToolPaneBR()
-                        .addToolPaneActionButton("Добавить строку", {btnStyle:"width:200px;", detailTableActionName:"insertDetailTableRow",rowPosIndexName:"POSIND",rowPosName:"POS"})
-                        .addToolPaneActionButton("Копировать строку", {btnStyle:"width:200px;", detailTableActionName:"insertDetailTableCopySelectedRow"})
-                        .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", detailTableActionName:"allowEditDetailTableSelectedRow"})
-                        .addToolPaneActionButton("Сохранить строку", {btnStyle:"width:200px;", detailTableActionName:"storeDetailTableSelectedRow"})
-                        .addToolPaneActionButton("Удалить строку", {btnStyle:"width:200px;", detailTableActionName:"deleteDetailTableSelectedRow"})
+                        .addToolPaneActionButton("Добавить строку", {btnStyle:"width:200px;", actionButtonName:"insertDetailTableRow",rowPosIndexName:"POSIND",rowPosName:"POS"})
+                        .addToolPaneActionButton("Копировать строку", {btnStyle:"width:200px;", actionButtonName:"insertDetailTableCopySelectedRow"})
+                        .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableSelectedRow"})
+                        .addToolPaneActionButton("Сохранить строку", {btnStyle:"width:200px;", actionButtonName:"storeDetailTableSelectedRow"})
+                        .addToolPaneActionButton("Удалить строку", {btnStyle:"width:200px;", actionButtonName:"deleteDetailTableSelectedRow"})
                         .addToolPane({title:"Статус документа"})
                         .addToolPaneActionButton("Установить статус \"Закрыт\"", { btnStyle:"width:200px;",
                             actionFunction: function (params) {

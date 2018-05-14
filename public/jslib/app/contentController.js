@@ -63,7 +63,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 if(!this.data) return;
                 for(var dataItemName in this.data) this.data[dataItemName]=null;
             },
-            /*
+            /**
              * sourceparams= { source, error, result, resultItem, resultError, updateCount }
              * source= "setContent" / "setValues" / "loadContentFromUrl" / "loadValuesFromUrl" / "loadByPostContentFromUrl" / "loadByPostValuesFromUrl" / "postContentFromUrl"
              * callback's onContentUpdated(newData,sourceparams,idIsChanged)
@@ -106,7 +106,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                     thisInstance.onContentUpdated(newData,sourceparams,idIsChanged);
                 },0);
             },
-            /*
+            /**
              * params: { url, condition, method:"get"/"post", setOnlyControlElementsValues:true/false, data }
              * params.data only for post method
              * call setContentData(newData, {...}), newData= request result.item
@@ -140,7 +140,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                         if(postaction)postaction(result,resultItem,error);
                     });
             },
-            /*
+            /**
              * params: { url, condition, data }
              * call setContentData(newData, {...}), if request.updateCount>0 newData= request result.resultItem else newData = this.data
              * if postaction call postaction(success,result,resultItem,resultError,updateCount)
@@ -181,7 +181,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                         if(postaction)postaction(result,resultItem,error,updateCount);
                     });
             },
-            /*
+            /**
              * params: { url, condition, data }
              * call setContentData(newData, {...}), if request.updateCount>0 newData= request result.resultItem else newData = this.data
              * if postaction call postaction(success,result,resultItem,resultError,updateCount)
@@ -212,7 +212,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                     });
             },
 
-            /*
+            /**
              * sourceparams= { source, error, result, resultItem, resultError, updateCount }
              * source= "setContent" / "setValues" / "loadContentFromUrl" / "loadValuesFromUrl" / "loadByPostContentFromUrl" / "loadByPostValuesFromUrl"
              *  / "postContentFromUrl" / "postForDeleteContentFromUrl"
