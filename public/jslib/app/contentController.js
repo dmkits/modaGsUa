@@ -304,13 +304,8 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 //this.markElementAsChanged(elementObj, !isEquals);
             },
             isElementDataEquals: function (instance, itemName, elementObj) {                                            //console.log("ContentController.isElementDataEquals ",itemName,elementObj.value,elementObj.get("value"),elementObj.displayedValue);
-                var dataValue = undefined;
-                if (instance.data!==null) {
-                    dataValue = instance.data[itemName];
-                    //if (dataValue === undefined) dataValue = null;
-                    if (dataValue==undefined) return false;
-                }
-                //if (dataValue===undefined) return true;
+                var dataValue = instance.data[itemName];
+                if (dataValue===undefined) return false;
                 var elementObjValue = elementObj.get("value");
                 if ((elementObjValue instanceof Date) && !(dataValue instanceof Date)) {
                     dataValue = new Date(dataValue);
