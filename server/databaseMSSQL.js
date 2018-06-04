@@ -1,99 +1,101 @@
-
-var mssql = require('mssql');   console.log('module for databaseMSSQL.js mssql');
-var common=require('./common');
-var server = require('./server');
-var log =server.log;
+var mssql = require('mssql');
+var common=require('./common'), server = require('./server'), log =server.log;
 var dbConnectError=null;
 
-function getDBConfig(){
-    var serverConfig= server.getServerConfig();
-    return { host:serverConfig.host, database:serverConfig.database, user:serverConfig.user, password:serverConfig.password,
-        supportBigNumbers:true };
-}
-module.exports.getDBConfig= getDBConfig;
 module.exports.getDBConnectError= function(){ return dbConnectError; };
 /**
  *{uuid:{user:<user>, connection: <connection> }}
  */
 var connections={};
 
-
-module.exports.getConnData=function(){
-    return connections;
+module.exports.getUserConnectionData=function(uuid){
+    return connections[uuid];
 };
 module.exports.cleanConnectionPool=function(){
-  for(var i in connections){
-     if(connections[i]['connection']){
-         connections[i]['connection'].close();
-     }
-  }
+    for(var i in connections)
+        if(connections[i].connection) connections[i].connection=null;
     connections={};
 };
 /**
- * @param userData
- * @param callback (err,uuid)
+ * @param userData = { uuid, login, password }
+ * @param callback (err,result), result = { dbUC:<database user connection> }, err = { error, userErrorMsg }
  */
-function connectWithPool(userData, callback){                                                       //console.log('connectWithPool userData=', userData);
-    if (connections && connections[userData.uuid]
-        && connections[userData.uuid].connection){
-        callback(null,{uuid:userData.uuid});
+function createNewUserDBConnection(userData, callback){
+    var uuid= userData.uuid;
+    if(uuid===undefined||uuid===null){                                                              log.error("database createNewUserDBConnection: Failed create new user database connection! Reason:No UUID.");
+        dbConnectError="Failed create new user database connection! Reason:No UUID.";
+        callback({error:dbConnectError});
         return;
     }
-    var dbConfig=getDBConfig();
-    var pool = new mssql.ConnectionPool({
+    var dbConfig=server.getServerConfig();
+    if(!dbConfig){
+        callback({error:"Failed create database system connection! Reason: no server configuration!",
+            userErrorMsg: "Авторизация неудалась!<br> Не удалось загрузить параметры запуска приложения!<br> Обратитесь к системному администратору."});
+        return;
+    }
+    var dbUserConnection = new mssql.ConnectionPool({
         user: userData.login,
         password: userData.password,
         server:   dbConfig.host,
-        database: dbConfig.database
-        //,pool: {
-        //    max: 10,
-        //    min: 0,
-        //    idleTimeoutMillis: 30000
-        //}
+        database: dbConfig.database,
+        pool: {
+            max: 100,
+            min: 0,
+            idleTimeoutMillis: 30000
+        }
     }, function(err){
-        if(err){                                                                                        log.error("Failed to create connection for user "+userData.login+" userData.uuid="+userData.uuid+ ". Reason: "+err);
+        var connectionData=connections[uuid];
+        if(err){                                                                                    log.error("database createNewUserDBConnection: Failed to create connection for user "+userData.login+" userData.uuid="+userData.uuid+ ". Reason: "+err);
             dbConnectError=err.message;
-            callback(err.message);
+            if(connectionData) {
+                connectionData.connection=null;
+                connectionData.user=userData.login;
+            }
+            callback({error:err.message,userErrorMsg: "Авторизация неудалась!<br> Неправильное имя и/или пароль."});
             return;
         }
-        var uuid;
-        if(userData.uuid && userData.uuid=="systemConnection") uuid="systemConnection";
-        else uuid=common.getUIDNumber();
         dbConnectError=null;
-        connections[uuid]={};
-        connections[uuid].connection=pool;
-        connections[uuid].user=userData.login;
-        callback(null,{uuid:uuid})
+        if(!connectionData)
+            connections[uuid]={ connection:dbUserConnection, user:userData.login };
+        else {
+            connectionData.connection=dbUserConnection;
+            connectionData.user=userData.login;
+        }
+        callback(null,{dbUC:dbUserConnection});
     });
 }
-module.exports.connectWithPool=connectWithPool;
+module.exports.createNewUserDBConnection=createNewUserDBConnection;
 
 var systemConnectionErr=null;
-function setSystemConnection(callback){
-    var dbConfig=getDBConfig();
-    if(dbConfig){
-        var systemConnUser= {
-            login: dbConfig.user,
-            password: dbConfig.password,
-            uuid: "systemConnection"
-        };
-        if(connections["systemConnection"]
-            &&connections["systemConnection"].connection){
-            connections["systemConnection"].connection.close();
-            connections["systemConnection"].connection=null;
-        }
-        connectWithPool(systemConnUser,function(err){
-            if(err) {
-                systemConnectionErr = err;
-                callback(err);
-                return;
-            }
-            systemConnectionErr = null;
-            callback()
-        });
+module.exports.getDBSystemConnection=function(){
+    return connections["systemConnection"];
+};
+/**
+ * callback= function(err,result)
+ *  result = { dbUC:<database user connection> }, err = { error, userErrorMsg }
+ */
+function setDBSystemConnection(serverConfig, callback){                                          log.debug("database setDBSystemConnection serverConfig:",serverConfig);
+    if(!serverConfig){
+        callback({error:"Failed create database system connection! Reason: no server configuration!"});
+        return;
     }
+    var systemConnectionUUID="systemConnection";
+    var systemConnUser= {
+        login: serverConfig.user,
+        password: serverConfig.password,
+        uuid: systemConnectionUUID
+    };
+    createNewUserDBConnection(systemConnUser,function(err,result){
+        if(err) {                                                                                   log.error("database setDBSystemConnection err:",err);
+            systemConnectionErr = err.error;
+            callback(err);
+            return;
+        }
+        systemConnectionErr = null;
+        callback(null,result);
+    });
 }
-module.exports.setSystemConnection=setSystemConnection;
+module.exports.setDBSystemConnection=setDBSystemConnection;
 
 function getSystemConnectionErr(){
     return systemConnectionErr;
@@ -115,17 +117,16 @@ function getFieldsTypes(recordset){
     }
     return fieldsTypes;
 }
-function selectQuery(uuid,query, callback) {                                                            log.debug("database selectQuery uuid,query:",uuid,query);
-    if(!uuid || !connections[uuid]){
-        callback({message:"No user database connection is specified."});
+function selectQuery(connection,query, callback) {                                                  log.debug("database selectQuery query:",query);
+    if(!connection){
+        if(callback)callback({message:"No user database connection is specified."});
         return;
     }
-    var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     request.query(query,
         function(err, result) {
             if (err) {
-                if(err.name=="ConnectionError")dbConnectError=err.message;                              log.error('database: selectQuery error:',err.message, {});
+                if(err.name=="ConnectionError")dbConnectError=err.message;                          log.error('database: selectQuery error:',err.message, {});
                 callback(err);
                 return;
             }
@@ -138,12 +139,11 @@ module.exports.selectQuery=selectQuery;
  * query= <MS SQL queryStr>
  * callback = function(err, updateCount)
  */
-module.exports.executeQuery=function(uuid,query,callback){                                              log.debug("database executeQuery:",query);
-    if(!connections[uuid]){
+module.exports.executeQuery=function(connection,query,callback){                                    log.debug("database executeQuery:",query);
+    if(!connection){
         callback({message:"No user database connection is specified."});
         return;
     }
-    var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     request.query(query,
         function(err,result){
@@ -156,19 +156,18 @@ module.exports.executeQuery=function(uuid,query,callback){                      
             callback(null, result.rowsAffected.length);
         });
 };
-function selectParamsQuery(uuid,query, parameters, callback) {                                          log.debug("database selectParamsQuery query:",query," parameters:",parameters,{});
-    if(!connections[uuid]){
+function selectParamsQuery(connection,query, parameters, callback) {                                log.debug("database selectParamsQuery query:",query," parameters:",parameters,{});
+    if(!connection){
         callback({message:"No user database connection is specified."});
         return;
     }
-    var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     for(var i in parameters){
         request.input('p'+i,parameters[i]);
     }
     request.query(query,
         function (err, result) {
-            if (err) {                                                                                 log.error('database: selectParamsQuery error:',err.message,{});
+            if (err) {                                                                              log.error('database: selectParamsQuery error:',err.message,{});
                 if(err.name=="ConnectionError")dbConnectError=err.message;
                 callback(err);
                 return;
@@ -183,22 +182,21 @@ module.exports.selectParamsQuery=selectParamsQuery;
  * paramsValueObj = {<paramName>:<paramValue>,...}
  * callback = function(err, updateCount)
  */
-module.exports.executeParamsQuery= function(uuid, query, parameters, callback) {                        log.debug("database executeParamsQuery:",query,parameters);
-    if(!connections[uuid]){
+module.exports.executeParamsQuery= function(connection, query, parameters, callback) {              log.debug("database executeParamsQuery:",query,parameters);
+    if(!connection){
         callback({message:"No user database connection is specified."});
         return;
     }
-    var connection=connections[uuid].connection;
     var request = new mssql.Request(connection);
     for(var i in parameters){
         request.input('p'+i,parameters[i]);
     }
     request.query(query,
         function (err, result) {
-            if (err) {                                                                                  log.error('database: executeParamsQuery error:',err.message,{});//test
+            if (err) {                                                                              log.error('database: executeParamsQuery error:',err.message,{});//test
                 callback(err);
                 return;
-            }                                                                                           log.debug('database: executeParamsQuery recordset:',result.recordset,{});//test
+            }                                                                                       log.debug('database: executeParamsQuery recordset:',result.recordset,{});//test
             callback(null, result.rowsAffected.length);
         });
 };

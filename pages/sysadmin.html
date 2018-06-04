@@ -153,8 +153,9 @@
                                     modulesFailures.innerHTML = "<b style='color:red'>MODULES FAILS:" + result.modulesFailures + "</b>";
                                 else
                                     modulesFailures.setAttribute("style","display:none");
+                                var sysadmin_dbValidateState=document.getElementById("sysadmin_dbValidateState");
                                 if (result.dbValidation) {
-                                    document.getElementById("sysadmin_dbValidateState").innerHTML =
+                                    sysadmin_dbValidateState.innerHTML =
                                             "<b>DB VALIDATION STATE:<span id ='dbValidationcolor'>" + result.dbValidation + "</span></b>";
                                     var dbValidationColor = document.getElementById("dbValidationcolor");
                                     if (result.dbValidation == "success") {
@@ -164,7 +165,8 @@
                                         dbValidationColor.setAttribute("style", "color:red");
                                         sysadmin_TopContainer.set("style","height:75px; margin:0; padding:0");
                                     }
-                                }
+                                } else
+                                    sysadmin_dbValidateState.innerHTML ="UNKNOWN";
                                 sysadmin_TopContainer.resize();
                                 sysadmin_MainContainer.layout();
                             }

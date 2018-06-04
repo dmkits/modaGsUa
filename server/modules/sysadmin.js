@@ -1,128 +1,26 @@
 var path = require('path'), fs = require('fs');
 var server=require('../server'), getLoadInitModulesError=server.getLoadInitModulesError;
 var log = server.log;
-var appParams=server.getAppStartupParams(), getServerConfig=server.getServerConfig, setAppConfig=server.setAppConfig;
-var getConfig=server.getConfig;
+var appParams=server.getAppStartupParams(), getServerConfig=server.getServerConfig, setAppConfig=server.setAppConfig, getConfig=server.getConfig;
 var loadServerConfiguration=server.loadServerConfiguration;
 
-var util=require('../util'), database=require('../databaseMSSQL');//getLoadInitModulesError=database.getLoadInitModulesError;;
+var util=require('../util'), database=require('../databaseMSSQL');
 var appModules=require(appModulesPath), getValidateError=appModules.getValidateError;
-var dateFormat = require('dateformat'), cron = require('node-cron'), moment = require('moment');
+var dateFormat = require('dateformat')/*, cron = require('node-cron'), moment = require('moment')*/;
 
 var dataModel=require('../datamodel');
 var changeLog= require(appDataModelPath+"change_log");
-//var sys_currency= require(appDataModelPath+"sys_currency"),
-//sys_docstates= require(appDataModelPath+"sys_docstates");
 
-module.exports.validateModule = function(uuid, errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels(uuid,[changeLog/*, sys_docstates,sys_currency*/], errs,
+module.exports.validateModule = function(errs, nextValidateModuleCallback){
+    dataModel.initValidateDataModels([changeLog], errs,
         function(){
             nextValidateModuleCallback();
         });
-    //nextValidateModuleCallback();
 };
 
 module.exports.modulePageURL = "/sysadmin";
 module.exports.modulePagePath = "sysadmin.html";
 var thisInstance=this;
-
-/**
- *logBackUp={logDate, DBName, fileName, schedule:false/true, error, info}
- * @param logBackUp
- */
-function writeToBackUpLog(logBackUp) {
-
-    var logBackupFile=path.join(__dirname+ "/../../backups/log_backup.json");
-    createLogBackupFileIfNotExistss(logBackupFile);
-    var srt=fs.readFileSync(logBackupFile, "utf8");
-    var logData = srt ? JSON.parse(srt):[];
-    var newBackup = {};
-    if(logBackUp.invalidCrone){
-        newBackup.logDate=moment().format("DD.MM.YYYY HH:m:ss");
-        newBackup.INVALIDE_CRONE_ERROR="Invalide CRONE format";
-        logData.push(newBackup);
-        fs.writeFileSync(logBackupFile, JSON.stringify(logData),"utf8");
-        return;
-    }
-    if(logBackUp.error)newBackup.ERROR=logBackUp.error;
-    if(logBackUp.info)newBackup.info=logBackUp.info;
-    newBackup.logDate=logBackUp.logDate;
-    newBackup.DBName=logBackUp.DBName;
-    newBackup.fileName=logBackUp.fileName;
-    newBackup.schedule=logBackUp.schedule;
-    logData.push(newBackup);
-    fs.writeFileSync(logBackupFile, JSON.stringify(logData),"utf8");
-}
-function createLogBackupFileIfNotExistss(fileName){
-    try{
-        var stat=fs.existsSync(fileName);
-        if(stat==false) {
-            var backupDir=__dirname+'/../../backups/';
-            if (!fs.existsSync(backupDir)){
-                    fs.mkdirSync(backupDir);
-            }
-                fs.writeFileSync(fileName, "");
-        }
-    }catch (e){
-        log.error('Failed create log DB backup file! Reason:',e);
-    }
-}
-
-var scheduleBackup;
-function startBackupBySchedule(){                                                                           log.debug("Start to run backup process by schedule");
-    var serverConfig=getServerConfig();
-    if(!serverConfig.backupSchedule) return;
-    var valid = cron.validate(serverConfig.backupSchedule);                                                 log.debug("Backup process schedule cron: ",serverConfig.backupSchedule);
-    if(valid==false){                                                                                       log.error("CRON format for startBackupBySchedule is not valid. Backup process not run!");
-        writeToBackUpLog({invalidCrone:true});
-        return;
-    }
-    if(scheduleBackup)scheduleBackup.destroy();
-    scheduleBackup =cron.schedule(serverConfig.backupSchedule, function(){
-        makeScheduleBackup(serverConfig);
-    });
-    scheduleBackup.start();
-}
-startBackupBySchedule();
-
-function makeScheduleBackup(serverConfig) {                                                                 log.info("Start backup by schedule cron:"+serverConfig.backupSchedule," database "+serverConfig.database);
-    var now = moment().format("YYYYMMDD_HHmm");
-    var backupFileName = serverConfig.database + "_" + now + ".sql";
-    var DBName = serverConfig.database;
-    var logData={};
-    logData.logDate=moment().format("DD.MM.YYYY HH:m:ss");
-    logData.DBName=serverConfig.database;
-    logData.fileName=backupFileName;
-    logData.schedule=true;
-    var backupParam = {
-        host: serverConfig.host,
-        user: serverConfig.user,
-        password: serverConfig.password,
-        database: serverConfig.database,
-        fileName: backupFileName,
-        onlyData: true
-    };
-    database.checkIfDBExists(DBName, function (err, result) {
-        if (err) {                                                                                          log.error("Failed schedule backup database.checkIfDBExists err=", err);
-            logData.error=err;
-            writeToBackUpLog(logData);
-            return;
-        }
-        if (result.length == 0) {                                                                           log.error("Failed schedule backup impossible to back up DB! Database " + DBName + " is not exists!", err);
-            logData.error="Database not found!";
-            writeToBackUpLog(logData);
-            return;
-        }
-        database.backupDB(backupParam, function (err) {
-            if (err) {                                                                                      log.error("Failed schedule backup  database.backupDB err=", err);
-                logData.error=err;
-                writeToBackUpLog(logData);
-                return;
-            }
-            writeToBackUpLog(logData);                                                                      log.info("Schedule backup successfully to the file "+backupFileName);
-        })
-    });
-}
 
 module.exports.init = function(app){
 
@@ -143,6 +41,7 @@ module.exports.init = function(app){
         var systemConnectionErr= database.getSystemConnectionErr();
         if (systemConnectionErr) {
             outData.systemConnectionErr= systemConnectionErr;
+            outData.dbValidation = "Validation failed! Reason:No database system connection!";
             res.send(outData);
             return
         }
@@ -150,7 +49,7 @@ module.exports.init = function(app){
         var loadInitModulesError=getLoadInitModulesError();
         if(loadInitModulesError) outData.modulesFailures = loadInitModulesError;
         if (revalidateModules) {
-            appModules.validateModules(req.uuid,function(errs, errMessage){
+            appModules.validateModules(function(errs, errMessage){
                 if(errMessage) outData.dbValidation = errMessage; else outData.dbValidation = "success";
                 res.send(outData);
             });
@@ -160,15 +59,6 @@ module.exports.init = function(app){
         var validateError=getValidateError();
         if(validateError) outData.dbValidation=validateError; else outData.dbValidation = "success";
         res.send(outData);
-
-
-        //outData.config=database.selectQuery(req.uuid,'select SUSER_NAME() as dbUserNAme', function(err, recordset){
-        //    if(err)outData.error="Failed to get dbUserNAme.Reason: "+err;
-        //    else outData.dbUserName=recordset[0].dbUserNAme;
-        //    var validateError=getValidateError();
-        //    if(validateError) outData.dbValidation=validateError; else outData.dbValidation = "success";
-        //    res.send(outData);
-        //});
     });
 
     app.get("/sysadmin/serverConfig", function (req, res) {
@@ -181,47 +71,39 @@ module.exports.init = function(app){
             res.send({error:(serverConfig&&serverConfig.error)?serverConfig.error:"unknown"});
             return;
         }
-            //database.getDatabasesForUser(serverConfig.user,serverConfig.password,function(err,dbList,user){
-            //    if(err){
-            //        serverConfig.dbListError=err;
-            //        res.send(serverConfig);
-            //        return;
-            //    }
-            //    serverConfig.dbList=dbList;
-            //    serverConfig.dbListUser=user;
-            //    res.send(serverConfig);
-            // });
         res.send(serverConfig);
     });
     app.get("/sysadmin/server/getDBList", function (req, res) {
-        database.selectQuery('systemConnection',"select	name "+
-            "from	sys.databases "+
-            "where	name not in ('master','tempdb','model','msdb') "+
+        database.selectQuery(req.dbUC,
+            "select	name "+
+            "from sys.databases "+
+            "where name not in ('master','tempdb','model','msdb') "+
             "and is_distributor = 0 "+
-            "and source_database_id is null", function(err,recordset){
-            if(err){
-                res.send({error:err.message});
-                return;
-            }
-            res.send({dbList:recordset});
+            "and source_database_id is null",
+            function(err,recordset){
+                if(err){
+                    res.send({error:err.message});
+                    return;
+                }
+                res.send({dbList:recordset});
         });
     });
 
     app.get("/sysadmin/server/loadServerConfig", function (req, res) {
         loadServerConfiguration();
-        var serverConfig=getServerConfig();                         log.info("serverConfig=",serverConfig);
-        if (!serverConfig||serverConfig.error) {
-            res.send({error: (serverConfig&&serverConfig.error)?serverConfig.error:"unknown"});
+        var serverConfig=getServerConfig();                                                         log.info("serverConfig=",serverConfig);
+        if (!serverConfig) {
+            res.send({error: "Failed load server config!"});
             return;
         }
         res.send(serverConfig);
     });
 
     app.post("/sysadmin/serverConfig/storeServerConfigAndReconnect", function (req, res) {
-        var newDBConfig = req.body;
-        var currentDbName=database.getDBConfig().database;
-        var currentDbHost=database.getDBConfig().host;
-        util.saveConfig(appParams.mode+".cfg", newDBConfig,
+        var newServerConfig = req.body;
+        var currentDbName=server.getServerConfig().database;
+        var currentDbHost=server.getServerConfig().host;
+        util.saveConfig(appParams.mode+".cfg", newServerConfig,
             function (err) {
                 var outData = {};
                 if (err) {
@@ -229,58 +111,23 @@ module.exports.init = function(app){
                     res.send(outData);
                     return;
                 }
-                if(!(currentDbName==newDBConfig.database) || !(currentDbHost==newDBConfig.host)){
+                if(!(currentDbName==newServerConfig.database) || !(currentDbHost==newServerConfig.host)){
                     database.cleanConnectionPool();
                 }
-                setAppConfig(newDBConfig);
-                database.setSystemConnection(function (err) {
+                setAppConfig(newServerConfig);
+                database.setDBSystemConnection(newServerConfig, function (err,result) {
                     if (err) {
-                        outData.DBConnectError = err;
-                        outData.error="'\n Не удалось подключиться ка базе данных.\n"+err;
-                        res.send(outData);
-                        return;
+                        outData.DBConnectError = err.error;
+                        outData.error="'\n Не удалось подключиться к базе данных!\n"+(err.userErrorMsg)?err.userErrorMsg:err.error;
+                        //res.send(outData);
+                        //return;
                     }
-                    appModules.validateModules("systemConnection", function (errs, errMessage, uuid) {
+                    appModules.validateModules(function (errs, errMessage) {
                         if (errMessage) outData.dbValidation = errMessage;
                         res.send(outData);
                     });
                 });
             });
-    });
-
-    app.post("/sysadmin/getDBListForUser", function (req, res) {
-        database.getDatabasesForUser(req.body.user, req.body.pswd,function (err, dbList, user) {
-            var  outData={};
-            if (err) {
-                outData.dbListError = err;
-                res.send(outData);
-                return;
-            }
-            outData.dbList=dbList;
-            outData.dbListUser=user;
-            res.send(outData);
-        });
-    });
-
-    app.post("/sysadmin/auth_as_sysadmin", function (req, res) {
-        var host = req.body.host;
-        var adminUser=req.body.adminName;
-        var adminPassword=req.body.adminPassword;
-        var connParams = {
-            host: host,
-            user: adminUser,
-            password: adminPassword
-        };
-        var outData = {};
-        database.mySQLAdminConnection(connParams, function (err) {
-            if (err) {                                                                                      log.error("mySQLAdminConnection err=", err);
-                outData.error = err.message;
-                res.send(outData);
-                return;
-            }
-            outData.success="authorized";
-            res.send(outData);
-        });
     });
 
     app.get("/sysadmin/database", function (req, res) {

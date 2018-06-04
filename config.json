@@ -4,10 +4,10 @@
   "imageSmall":"/imgs/modaua_small.jpg",
   "imageMain":"/imgs/modaua_big.jpg",
   "modules":[
-    "sysadmin",
-    "main",
+    "sysadmin"
+    /*"main",
     "dirsForDocs",
-    "rec"
+    "rec"*/
     /*"print",*/
     /*"mainPage",*/
     /*"system",*/

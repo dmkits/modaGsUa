@@ -70,7 +70,7 @@ function loadServerConfiguration(){
         serverConfig= util.loadConfig(appStartupParams.mode + '.cfg');
     } catch (e) {
         log.error("Failed to load configuration! Reason:" + e);
-        serverConfig= {"error":"Failed to load configuration! Reason:" + e};
+        serverConfig= null;
     }
 }
 loadServerConfiguration();                                                                          log.info('load server configuration loaded on ', new Date().getTime()-startTime);//test
@@ -78,9 +78,9 @@ module.exports.loadServerConfiguration= loadServerConfiguration;                
 module.exports.getServerConfig= function(){ return serverConfig };
 module.exports.setAppConfig= function(newAppConfig){ serverConfig=newAppConfig; };
 
-var database = require('./databaseMSSQL');                                                               log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
+var database = require('./databaseMSSQL');                                                          log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
 
-var configFileName=serverConfig.configName || 'config.json';
+var configFileName=(serverConfig&&serverConfig.configName)?serverConfig.configName:'config.json';
 var config=JSON.parse(util.getJSONWithoutComments(fs.readFileSync('./'+configFileName,'utf-8')));
 module.exports.getConfig=function(){ return config; };
 module.exports.getConfigAppMenu=function(){ return (config&&config.appMenu)?config.appMenu:null; };
@@ -96,7 +96,6 @@ server.use(bodyParser.text({limit: '5mb'}));
 server.use('/', express.static('public'));
 server.set('view engine','ejs');
 
-
 global.appViewsPath= path.join(__dirname,'/../pages/','');
 global.appModulesPath= path.join(__dirname,'/modules/','');
 global.appDataModelPath= path.join(__dirname,'/datamodel/','');
@@ -107,14 +106,23 @@ module.exports.getLoadInitModulesError= function(){ return loadInitModulesErrorM
 
 require('./access')(server);
 
-database.setSystemConnection(function(err){
-    if(err){
-        log.error("FAILED to set system connection! Reason: ",err);
-    }
-    appModules.validateModules('systemConnection',function(errs, errMessage,uuid){
-        if (errMessage){                                                                                log.error("FAILED validate! Reason: ",errMessage);
+var startServer= function(){
+    server.listen(appStartupParams.port, function (err) {
+        if(err){
+            console.log("listen port err= ", err);
+            return;
         }
-        appModules.init(uuid,server,errs);
+        console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+        log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
+    });                                                                                             log.info("server inited.");
+};
+
+database.setDBSystemConnection(serverConfig, function(err,result){
+    if(err) log.error("FAILED to set system connection! Reason: ",err);
+    appModules.validateModules(function(errs, errMessage){
+        if (errMessage){                                                                            log.error("FAILED validate! Reason: ",errMessage);
+        }
+        appModules.init(server,errs);
         if(errs&&!errMessage){
             var eCount=0;
             for(var errItem in errs){
@@ -123,15 +131,8 @@ database.setSystemConnection(function(err){
                 eCount++;
                 if(eCount>3) break;
             }
-        }
-        server.listen(appStartupParams.port, function (err) {
-            if(err){
-                console.log("listen port err= ", err);
-                return;
-            }
-            console.log("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-            log.info("server runs on port " + appStartupParams.port+" on "+(new Date().getTime()-startTime));
-        });                                                                                             log.info("server inited.");
+        }   console.log("startServer");
+        startServer();
     });
 });
 

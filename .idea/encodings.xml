@@ -2,8 +2,8 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/debug.cfg" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/debug2.cfg" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/debugDev.cfg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/debugDev2.cfg" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/package.json" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/common.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/databaseMSSQL.js" charset="UTF-8" />

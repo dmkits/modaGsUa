@@ -46,7 +46,8 @@
                                     return;
                                 }
                                 if(result && result.error){
-                                    document.getElementById("loginDialogDiv").innerHTML='<div style="color:red; padding:4px; width: 240px;">'+result.error+'</div>';
+                                    var errMsg= result.userErrorMsg||result.error;
+                                    document.getElementById("loginDialogDiv").innerHTML='<div style="color:red; padding:4px; width: 240px;">'+errMsg+'</div>';
                                     loginDialog.reset();
                                     return;
                                 }

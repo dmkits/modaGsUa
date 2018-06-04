@@ -8,11 +8,10 @@ var dataModel= require("../datamodel");
 /**
  * resultCallback = function(errs, errMessage), errs - object of validate errors
  */
-module.exports.validateModules= function(uuid,resultCallback){
+module.exports.validateModules= function(resultCallback){
     var modules= server.getConfigModules();
     if (!modules) return;
-    var errs={};
-    var validateModuleCallback= function(uuid,modules, index, errs){
+    var validateModuleCallback= function(modules, index, errs){
         var moduleName= modules[index];
         if (!moduleName) {
             var errMsg;
@@ -23,7 +22,7 @@ module.exports.validateModules= function(uuid,resultCallback){
                 }
                 errMsg=errs[errItem];
             }
-            resultCallback(errs,errMsg,uuid);
+            resultCallback(errs,errMsg);
             validateError=errMsg;
             return;
         }
@@ -32,25 +31,25 @@ module.exports.validateModules= function(uuid,resultCallback){
             module=require("./"+moduleName);
         }catch(e){                                                                                          log.error('FAILED validate module:'+moduleName+"! Reason:",e.message);//test
             errs[moduleName+"_validateError"]="Failed validate module:"+moduleName+"! Reason:"+e.message;
-            validateModuleCallback(uuid,modules, index + 1, errs);
+            validateModuleCallback(modules, index + 1, errs);
             return;
         }
         var validateModule=module.validateModule;
         if(!validateModule){                                                                                log.warn('ValidateModule PASSED for Module:'+moduleName+"! Reason: no validate function.");//test
             errs[moduleName+"_validateError"]="Failed validate module:"+moduleName+"! Reason: no validate function!";
-            validateModuleCallback(uuid,modules, index + 1, errs);
+            validateModuleCallback(modules, index + 1, errs);
             return;
         }
-        module.validateModule(uuid,errs, function () {
-            validateModuleCallback(uuid,modules, index + 1, errs);
+        module.validateModule(errs, function () {
+            validateModuleCallback(modules, index + 1, errs);
         });
     };
     dataModel.resetModelChanges();
     dataModel.resetValidatedDataModels();
-    validateModuleCallback(uuid, modules, 0, errs);
+    validateModuleCallback(modules, 0, {});
 };
 
-module.exports.init = function(uuid,app,errs){
+module.exports.init = function(app,errs){
     var modules= server.getConfigModules();
     if (!modules) return;
     for(var i=0; i<modules.length; i++){

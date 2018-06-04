@@ -5,8 +5,8 @@ var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPa
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
     r_States= require(appDataModelPath+"r_States");
 
-module.exports.validateModule = function(uuid,errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels(uuid,[t_Rec,t_RecD,r_Ours,r_Stocks,r_Comps,r_Currs,r_States], errs,
+module.exports.validateModule = function(errs, nextValidateModuleCallback){
+    dataModel.initValidateDataModels([t_Rec,t_RecD,r_Ours,r_Stocks,r_Comps,r_Currs,r_States], errs,
         function(){
             nextValidateModuleCallback();
         });
