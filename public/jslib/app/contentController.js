@@ -64,14 +64,12 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 for(var dataItemName in this.data) this.data[dataItemName]=null;
             },
             /**
-             * sourceparams= { source, error, result, resultItem, resultError, updateCount }
-             * source= "setContent" / "setValues" / "loadContentFromUrl" / "loadValuesFromUrl" / "loadByPostContentFromUrl" / "loadByPostValuesFromUrl" / "postContentFromUrl"
-             * callback's onContentUpdated(newData,sourceparams,idIsChanged)
+             * params= { onlyValues, error, result, resultItem, resultError, updateCount }
+             * callback's onContentUpdated(newData,params,idIsChanged)
              */
-            setContentData: function (newData, sourceparams) {                                                   //console.log("ContentController.setContentData newData=",newData,sourceparams);
+            setContentData: function (newData, params) {                                                   //console.log("ContentController.setContentData newData=",newData,sourceparams);
                 if (newData===this.data&&!this.isContentChanged()) return;
-                if(!sourceparams)sourceparams={};
-                if(!sourceparams.source) sourceparams.source="setContent";
+                if(!params)params={};
                 var thisInstance=this;
                 if (!newData) {
                     this.data= newData;
@@ -79,19 +77,18 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                         this.setControlElementData(itemName, null, false, false);
                     }
                     setTimeout(function(){
-                        thisInstance.onContentUpdated(newData,sourceparams,true);
+                        thisInstance.onContentUpdated(newData,params,true);
                     },0);
                     return;
                 }
                 var oldDataIDValue,newDataIDValue;
                 if(this.data&&this.dataIDName) oldDataIDValue= this.data[this.dataIDName];
-                var setOnlyControlElementsValues= sourceparams.error || sourceparams.resultError || sourceparams.source.indexOf("Values")>=0;
-                if (!setOnlyControlElementsValues) {
-                    if (newData && this.dataIDName) newDataIDValue = newData[this.dataIDName];
-                    this.data = newData;
-                } else {
+                if (params.onlyValues) {
                     newDataIDValue= null;
                     this.data = [];
+                } else {
+                    if (newData && this.dataIDName) newDataIDValue = newData[this.dataIDName];
+                    this.data = newData;
                 }
                 var enable = true;
                 if(newData[this.dataStateName] && newData[this.dataStateName] != this.activeStateValue)enable = false;
@@ -99,19 +96,19 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                     var newDataItem= {value:newData[itemName]};
                     var elementObj = this.elements[itemName];
                     if (elementObj.labelDataItem) newDataItem[elementObj.labelDataItem]= newData[elementObj.labelDataItem];
-                    this.setControlElementData(itemName, newDataItem, enable, setOnlyControlElementsValues);
+                    this.setControlElementData(itemName, newDataItem, enable, params.onlyValues);
                 }
                 var idIsChanged= (!this.data)?true:oldDataIDValue!==newDataIDValue;
                 setTimeout(function(){
-                    thisInstance.onContentUpdated(newData,sourceparams,idIsChanged);
+                    thisInstance.onContentUpdated(newData,params,idIsChanged);
                 },0);
             },
             /**
-             * params: { url, condition, method:"get"/"post", setOnlyControlElementsValues:true/false, data }
+             * params: { url, condition, method:"get"/"post", onlyValues:true/false, data }
              * params.data only for post method
              * call setContentData(newData, {...}), newData= request result.item
              * if postaction call postaction(success,result,resultItem,resultError)
-             * call setContentData do callback onContentUpdated(newData,sourceparams,idIsChanged)
+             * call setContentData do callback onContentUpdated(newData,params,idIsChanged)
              */
             loadDataFromUrl: function (params, postaction) {                                                            //console.log("ContentController.loadDataFromUrl url=",this.url," condition=",condition);
                 if (!params) return;
@@ -121,101 +118,56 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 if (params.method!="post") {
                     Request.getJSONData({url: params.url, condition: params.condition},
                         function (result,error) {
-                            var resultItem=null, source=(!params.setOnlyControlElementsValues)?"loadContentFromUrl":"loadValuesFromUrl";
-                            if(result) {                                                                           //console.log("ContentController.loadDataFromUrl Request.getJSONData data=",data," data.item=",data["item"]);
-                                resultItem = result["item"];
-                            }
-                            thisInstance.setContentData(resultItem, {source:source, error:error, result:result, resultItem:resultItem, resultError:error});
+                            var resultItem=(result)?result["item"]:null;
+                            thisInstance.setContentData(resultItem,
+                                {onlyValues:params.onlyValues, error:error, result:result, resultItem:resultItem, resultError:error});
                             if(postaction)postaction(result,resultItem,error);
                         });
                     return;
                 }
                 Request.postJSONData({url: params.url, condition: params.condition, data:params.data, consoleLog: true},
                     function (result,error) {
-                        var resultItem=null, source=(!params.setOnlyControlElementsValues)?"loadByPostContentFromUrl":"loadByPostValuesFromUrl";
-                        if(result) {                                                                               //console.log("ContentController.loadDataFromUrl Request.getJSONData data=",data," data.item=",data["item"]);
-                            resultItem = result["item"];
-                        }
-                        thisInstance.setContentData(resultItem, {source:source, error:error, result:result, resultItem:resultItem, resultError:error});
+                        var resultItem=(result)?result["item"]:null;
+                        thisInstance.setContentData(resultItem,
+                            {onlyValues:params.onlyValues, error:error, result:result, resultItem:resultItem, resultError:error});
                         if(postaction)postaction(result,resultItem,error);
                     });
             },
             /**
-             * params: { url, condition, data }
+             * params: { url, condition, data, onlyIDValue, onlyValues:true/false }
              * call setContentData(newData, {...}), if request.updateCount>0 newData= request result.resultItem else newData = this.data
              * if postaction call postaction(success,result,resultItem,resultError,updateCount)
-             * call setContentData do callback onContentUpdated(newData,sourceparams,idIsChanged)
+             * call setContentData do callback onContentUpdated(newData,params,idIsChanged)
              */
             postDataToUrl: function (params, postaction) {
                 if(!params) return;
                 var dataToPost = params.data;
                 if(!dataToPost) dataToPost={};
                 if(this.data&&this.dataIDName) dataToPost[this.dataIDName]= this.data[this.dataIDName];
-                for (var item in this.elements) {
-                    var value, elementObj = this.elements[item];
-                    if (elementObj) {
-                        value = this.elements[item].value;
-                        if (elementObj.declaredClass.indexOf("CheckBox") >= 0) {
-                            if(elementObj.checked==true) value=1; else value=0;
+                if(params.onlyIDValue!==true)
+                    for (var item in this.elements) {
+                        var value, elementObj = this.elements[item];
+                        if (elementObj) {
+                            value = this.elements[item].value;
+                            if (elementObj.declaredClass.indexOf("CheckBox") >= 0) {
+                                if(elementObj.checked==true) value=1; else value=0;
+                            }
+                            if (value!=undefined && value instanceof Date) value = moment(value).format("YYYY-MM-DD");
                         }
-                        if (value!=undefined && value instanceof Date) value = moment(value).format("YYYY-MM-DD");
+                        dataToPost[item] = value;
                     }
-                    dataToPost[item] = value;
-                }
                 var thisInstance = this;
                 Request.postJSONData({url: params.url, condition: params.condition, data: dataToPost},
                     function (result,error) {                                                                         //console.log("ContentController.postDataToUrl postJSONData dataToPost=",dataToPost," data=",result);
-                        var resultItem=null, source="postContentFromUrl", updateCount=undefined;
-                        if (!result) {
-                             resultItem= thisInstance.data;
-                        } else if(result) {
-                            resultItem = result["resultItem"]; updateCount = result["updateCount"];
-                            if(!(updateCount>0))resultItem=thisInstance.data;
-                        }
-                        if(updateCount>0)
-                            thisInstance.setContentData(resultItem,
-                                {source:source, error:error, result:result, resultItem:resultItem, resultError:error, updateCount:updateCount});
-                        else
-                            thisInstance.onPostDataFail(resultItem,
-                                {source:source, error:error, result:result, resultItem:resultItem, resultError:error, updateCount:updateCount});
-                        if(postaction)postaction(result,resultItem,error,updateCount);
-                    });
-            },
-            /**
-             * params: { url, condition, data }
-             * call setContentData(newData, {...}), if request.updateCount>0 newData= request result.resultItem else newData = this.data
-             * if postaction call postaction(success,result,resultItem,resultError,updateCount)
-             * call setContentData do callback onContentUpdated(newData,sourceparams,idIsChanged)
-             */
-            postForDeleteDataToUrl: function (params, postaction) {
-                if(!params) return;
-                var dataToPost = params.data;
-                if(!dataToPost) dataToPost={};
-                if(this.data&&this.dataIDName) dataToPost[this.dataIDName]= this.data[this.dataIDName];
-                var thisInstance = this;
-                Request.postJSONData({url: params.url, condition: params.condition, data: dataToPost},
-                    function (result,error) {                                                                         //console.log("ContentController.postForDeleteDataToUrl postJSONData dataToPost=",dataToPost," data=",result);
-                        var resultItem=null,  source="postForDeleteContentFromUrl", updateCount=undefined;
-                        if (!result) {
-                           resultItem= thisInstance.data;
-                        } else if(result) {
-                            updateCount = result["updateCount"];
-                            if(!(updateCount>0))resultItem=thisInstance.data;
-                        }
-                        if(updateCount>0)
-                            thisInstance.setContentData(resultItem,
-                                {source:source, error:error, result:result, resultItem:resultItem, resultError:error, updateCount:updateCount});
-                        else
-                            thisInstance.onPostDataFail(resultItem,
-                                {source:source, error:error, result:result, resultItem:resultItem, resultError:error, updateCount:updateCount});
+                        var resultItem=(result)?result["resultItem"]:null, updateCount=(result)?result["updateCount"]:null;
+                        thisInstance.setContentData(resultItem,
+                            {onlyValues:params.onlyValues, error:error, result:result, resultItem:resultItem, resultError:error, updateCount:updateCount});
                         if(postaction)postaction(result,resultItem,error,updateCount);
                     });
             },
 
             /**
-             * sourceparams= { source, error, result, resultItem, resultError, updateCount }
-             * source= "setContent" / "setValues" / "loadContentFromUrl" / "loadValuesFromUrl" / "loadByPostContentFromUrl" / "loadByPostValuesFromUrl"
-             *  / "postContentFromUrl" / "postForDeleteContentFromUrl"
+             * params= { onlyValues, error, result, resultItem, resultError, updateCount }
              */
             onContentUpdated: function (contentData, sourceparams, idIsChanged) {
                 // TODO actions on content data has been updated by call setContentData() or loadDataFromUrl()
@@ -223,13 +175,6 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
             },
             onContentChanged: function (isContentChanged) {
                 // TODO actions on content has been changed by user or element value has been changed
-            },
-            /*
-             * sourceparams= { source, error, result, resultItem, resultError, updateCount }
-             * source= "postContentFromUrl"
-             */
-            onPostDataFail: function (contentData, sourceparams) {
-                // TODO actions on postDataToUrl() fail
             },
 
             postCreate : function(){

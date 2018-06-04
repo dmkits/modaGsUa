@@ -455,13 +455,13 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     this.rowChangeCallbacks=[];
                     var thisInstance=this;
                     var rowChangeCallbackProcess= function(i, changedRowData, thisInstance, params, callUpdateContent, nextCallback){
-                        /**/                                                                //console.log("TemplateDocumentStandardTable this.detailTable.onChangeRowsData rowCallback",i,changedRowData/*,nextCallback*/);
+                        /**/
                         var rowChangeCallback=thisInstance.rowChangeCallbacks[i];
                         if(rowChangeCallback) {
                             rowChangeCallback(changedRowData, thisInstance, params,
                                 function(callUpdateContentNext){
                                     callUpdateContentNext= (callUpdateContentNext===undefined)? false : callUpdateContentNext;
-                                    /**/                            //console.log("TemplateDocumentStandardTable this.detailTable.onChangeRowData callback NEXT",changedRowData,callUpdateContentNext,callUpdateContent);
+                                    /**/
                                     rowChangeCallbackProcess(i+1, changedRowData, thisInstance, params, callUpdateContent||callUpdateContentNext, nextCallback);
                                 });
                             return;
