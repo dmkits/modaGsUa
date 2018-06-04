@@ -64,7 +64,6 @@ module.exports.init = function(app,errs){
             (function(){
                 var modulePagePath=module.modulePagePath;
                 app.get(module.modulePageURL, function (req, res) {
-
                     res.sendFile(appViewsPath+modulePagePath);
                 });
             })();

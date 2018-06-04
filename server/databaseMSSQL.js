@@ -40,8 +40,8 @@ function createNewUserDBConnection(userData, callback){
         database: dbConfig.database,
         pool: {
             max: 100,
-            min: 0,
-            idleTimeoutMillis: 30000
+            min: 0/*,
+            idleTimeoutMillis: 30000*/
         }
     }, function(err){
         var connectionData=connections[uuid];
@@ -68,7 +68,8 @@ module.exports.createNewUserDBConnection=createNewUserDBConnection;
 
 var systemConnectionErr=null;
 module.exports.getDBSystemConnection=function(){
-    return connections["systemConnection"];
+    var systemConnectionData=connections["systemConnection"];
+    return (systemConnectionData)?systemConnectionData.connection:null;
 };
 /**
  * callback= function(err,result)

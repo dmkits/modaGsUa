@@ -128,24 +128,6 @@ module.exports= function(app) {
             req.dbUserName=dbUserName;                                                              log.info('ACCESS CONTROLLER DB user: ', req.dbUserName);
             next();
         });
-
-        database.selectQuery(userConnectionData.connection,"select SUSER_NAME() as dbUserName;",function(err, recordset){
-            if(err){
-                var msg="Не удалось получить данные пользователя из базы даных! Обратитесь к системному администратору.";
-                if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
-                    res.send({
-                        error: "Failed to get data! Reason: failed get database SUSER_NAME!",
-                        userErrorMsg: msg
-                    });
-                    return;
-                }
-                renderToDbFailed(res,msg);
-                return;
-            }
-            req.dbUC = userConnectionData.connection;
-            req.dbUserName=recordset[0].dbUserName;                                                 log.info('ACCESS CONTROLLER DB user: ', req.dbUserName);
-            next();
-        });
     });
 
     app.get("/login", function (req, res) {                                                                 log.info("app.get /login");
