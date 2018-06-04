@@ -46,7 +46,7 @@ module.exports.init = function(app){
     app.get("/docs/rec/getDataForRecsListTable", function(req, res){
         var conditions={};
         for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
-        t_Rec.getDataForTable({uuid:req.uuid,tableColumns:tRecsListTableColumns, identifier:tRecsListTableColumns[0].data,
+        t_Rec.getDataForTable(req.dbUC,{tableColumns:tRecsListTableColumns, identifier:tRecsListTableColumns[0].data,
                 conditions:conditions, order:"DocDate, DocID"},
             function(result){
                 res.send(result);
@@ -55,24 +55,23 @@ module.exports.init = function(app){
     app.get("/docs/rec/getRecData", function(req, res){
         var conditions={};
         for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
-        t_Rec.getDataItemForTable({uuid:req.uuid,tableColumns:tRecsListTableColumns,
+        t_Rec.getDataItemForTable(req.dbUC,{tableColumns:tRecsListTableColumns,
                 conditions:conditions},
             function(result){
                 res.send(result);
             });
     });
     /**
-     * params= { uuid }
      * callback = function(chID, err)
      */
-    var getNewChID= function(params, callback){
+    var getNewChID= function(dbUC, callback){
         var query=
             "SELECT ISNULL(MAX(r.ChID)+1,dbs.ChID_Start) as NewChID " +
             "FROM r_DBIs dbs "+
             "LEFT JOIN t_Rec r ON r.ChID between dbs.ChID_Start and dbs.ChID_End "+
             "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
             "GROUP BY dbs.ChID_Start, dbs.ChID_End";
-        database.selectQuery(params.uuid, query,
+        database.selectQuery(dbUC,query,
             function(err, recordset){
                 var chID=null;
                 if(recordset&&recordset.length>0) chID=recordset[0]["NewChID"];
@@ -80,17 +79,16 @@ module.exports.init = function(app){
             });
     };
     /**
-     * params= { uuid }
      * callback = function(docID, err)
      */
-    var getNewDocID= function(params, callback){
+    var getNewDocID= function(dbUC,callback){
         var query=
             "SELECT ISNULL(MAX(r.DocID)+1,dbs.DocID_Start) as NewDocID " +
             "FROM r_DBIs dbs "+
             "LEFT JOIN t_Rec r ON r.DocID between dbs.DocID_Start and dbs.DocID_End "+
             "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
             "GROUP BY dbs.DocID_Start, dbs.DocID_End";
-        database.selectQuery(params.uuid, query,
+        database.selectQuery(dbUC,query,
             function(err, recordset){
                 var docID=null;
                 if(recordset&&recordset.length>0) docID=recordset[0]["NewDocID"];
@@ -98,19 +96,19 @@ module.exports.init = function(app){
             });
     };
     app.get("/docs/rec/getNewRecData", function(req, res){
-        getNewDocID({uuid:req.uuid}, function(newDocID){
+        getNewDocID(req.dbUC,function(newDocID){
             var newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
-            r_Ours.getDataItem({uuid:req.uuid, fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
+            r_Ours.getDataItem(req.dbUC,{fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
                 var ourName=(result&&result.item)?result.item["OurName"]:"";
-                r_Stocks.getDataItem({uuid:req.uuid, fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
+                r_Stocks.getDataItem(req.dbUC,{fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
                     var stockName=(result&&result.item)?result.item["StockName"]:"";
-                    r_Currs.getDataItem({uuid:req.uuid, fields:["CurrName"], conditions:{"CurrID=":"1"} },
+                    r_Currs.getDataItem(req.dbUC,{fields:["CurrName"], conditions:{"CurrID=":"1"} },
                         function(result){
                             var currName=(result&&result.item)?result.item["CurrName"]:"";
-                            r_Comps.getDataItem({uuid:req.uuid, fields:["CompName"], conditions:{"CompID=":"1"} },
+                            r_Comps.getDataItem(req.dbUC,{fields:["CompName"], conditions:{"CompID=":"1"} },
                                 function(result){
                                     var compName=(result&&result.item)?result.item["CompName"]:"";
-                                    r_States.getDataItem({uuid:req.uuid, fields:["StateName"],conditions:{"StateCode=":"0"}}, function(result){
+                                    r_States.getDataItem(req.dbUC,{fields:["StateName"],conditions:{"StateCode=":"0"}}, function(result){
                                         var stateName=(result&&result.item)?result.item["StateName"]:"";
                                         t_Rec.setDataItem({
                                                 fields:["DocID","DocDate","OurName","StockName","CurrName","KursCC","KursMC","CompName",
@@ -129,19 +127,19 @@ module.exports.init = function(app){
     });
     app.post("/docs/rec/storeRecData", function(req, res){
         var storeData=req.body;
-        r_Ours.getDataItem({uuid:req.uuid, fields:["OurID"],conditions:{"OurName=":storeData["OurName"]}}, function(result){
+        r_Ours.getDataItem(req.dbUC,{fields:["OurID"],conditions:{"OurName=":storeData["OurName"]}}, function(result){
             if(!result.item){
                 res.send({ error:"Cannot finded Our by OurName!"});
                 return;
             }
             storeData["OurID"]=result.item["OurID"];
-            r_Stocks.getDataItem({uuid:req.uuid, fields:["StockID"],conditions:{"StockName=":storeData["StockName"]}}, function(result){
+            r_Stocks.getDataItem(req.dbUC,{fields:["StockID"],conditions:{"StockName=":storeData["StockName"]}}, function(result){
                 if(!result.item){
                     res.send({ error:"Cannot finded Stock by StockName!"});
                     return;
                 }
                 storeData["StockID"]=result.item["StockID"];
-                r_Currs.getDataItem({uuid:req.uuid, fields:["CurrID","RateCC","RateMC"],
+                r_Currs.getDataItem(req.dbUC,{fields:["CurrID","RateCC","RateMC"],
                         fieldsFunctions:{"RateCC":"dbo.zf_GetRateCC(CurrID)","RateMC":"dbo.zf_GetRateMC(CurrID)"},
                         conditions:{"CurrName=":storeData["CurrName"]}},
                     function(result){
@@ -150,10 +148,10 @@ module.exports.init = function(app){
                             return;
                         }
                         storeData["CurrID"]=result.item["CurrID"];  storeData["KursCC"]=result.item["RateCC"];  storeData["KursMC"]=result.item["RateMC"];
-                        r_Comps.getDataItem({uuid:req.uuid, fields:["CompID"],conditions:{"CompName=":storeData["CompName"]}}, function(result){
+                        r_Comps.getDataItem(req.dbUC,{fields:["CompID"],conditions:{"CompName=":storeData["CompName"]}}, function(result){
                             storeData["CompID"]=result.item["CompID"];
                             var stateCode=0;
-                            r_States.getDataItem({uuid:req.uuid, fields:["StateCode"],conditions:{"StateName=":storeData["StateName"]}}, function(result){
+                            r_States.getDataItem(req.dbUC,{fields:["StateCode"],conditions:{"StateName=":storeData["StateName"]}}, function(result){
                                 if(result.item) stateCode=result.item["StateCode"];
                                 storeData["StateCode"]=stateCode;
                                 storeData["CodeID1"]=0;storeData["CodeID2"]=0;storeData["CodeID3"]=0;storeData["CodeID4"]=0;storeData["CodeID5"]=0;
@@ -161,9 +159,9 @@ module.exports.init = function(app){
                                 storeData["TSumCC_nt"]=0;storeData["TTaxSum"]=0;
                                 storeData["TSpendSumCC"]=0;storeData["TRouteSumCC"]=0;
                                 storeData["EmpID"]=0;
-                                t_Rec.storeTableDataItem({uuid:req.uuid, tableColumns:tRecsListTableColumns, idFieldName:"ChID", storeTableData:storeData,
+                                t_Rec.storeTableDataItem(req.dbUC,{tableColumns:tRecsListTableColumns, idFieldName:"ChID", storeTableData:storeData,
                                         calcNewIdValue: function(params, callback){
-                                            getNewChID({uuid:req.uuid},function(chID){
+                                            getNewChID(req.dbUC,function(chID){
                                                 params.storeTableData[params.idFieldName]=chID;
                                                 callback(params);
                                             });
@@ -179,7 +177,7 @@ module.exports.init = function(app){
     });
     app.post("/docs/rec/deleteRecData", function(req, res){
         var delData=req.body;
-        t_Rec.delTableDataItem({uuid:req.uuid, idFieldName:"ChID", delTableData:delData},
+        t_Rec.delTableDataItem(req.dbUC,{idFieldName:"ChID", delTableData:delData},
             function(result){
                 res.send(result);
             });
@@ -208,20 +206,20 @@ module.exports.init = function(app){
     app.get("/docs/rec/getDataForRecDTable", function(req, res){
         var conditions={};
         for(var condItem in req.query) conditions["t_RecD."+condItem]=req.query[condItem];
-        t_RecD.getDataForTable({uuid:req.uuid,tableColumns:tRecDTableColumns, identifier:tRecDTableColumns[0].data,
+        t_RecD.getDataForTable(req.dbUC,{tableColumns:tRecDTableColumns, identifier:tRecDTableColumns[0].data,
                 conditions:conditions, order:"SrcPosID"},
             function(result){
                 res.send(result);
             });
     });
     app.post("/docs/rec/storeRecDTableData", function(req, res){
-        t_RecD.storeTableDataItem({uuid:req.uuid, tableColumns:tRecDTableColumns, idFieldName:"ChID"},
+        t_RecD.storeTableDataItem(req.dbUC,{tableColumns:tRecDTableColumns, idFieldName:"ChID"},
             function(result){
                 res.send(result);
             });
     });
     app.post("/docs/rec/deleteRecDTableData", function(req, res){
-        t_RecD.delTableDataItem({uuid:req.uuid, idFieldName:"ChID"},
+        t_RecD.delTableDataItem(req.dbUC,{idFieldName:"ChID"},
             function(result){
                 res.send(result);
             });
