@@ -5,10 +5,11 @@
   "imageMain":"/imgs/modaua_big.jpg",
   "modules":[
     "sysadmin",
+    "print",
     "main",
     "dirsForDocs",
+    "dirsForProds",
     "rec"
-    /*"print",*/
     /*"mainPage",*/
     /*"system",*/
   ],

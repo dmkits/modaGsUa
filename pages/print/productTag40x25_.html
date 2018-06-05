@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<body><div style="display:none" id="prodTagFirstChild"></div>
+    <div style="border:none; margin-left:0cm;margin-top:0.1cm; width:3.6cm;height:0.7cm; font-size:11px;  text-align:center" id="prodName"></div>
+    <div style="border:none; margin-left:0cm;margin-top:0cm; width:3.6cm;height:0.4cm; font-size:11px; text-align:center" id="prodPrice"></div>
+    <svg style="margin-left:0.1cm;border:none;padding:0;" id="prodbarcode"></svg>
+    <span style="margin:0cm;margin-top:0.1cm; width:0.5cm;height:0.35cm; font-size:9px; text-align:left" id="pageNum" class="pageNum"></span>
+</body>
+<script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
+<script type="text/javascript">
+    var printBarcode = function(barcodeElementID, barcodeValue){
+        if(!barcodeValue) return;
+        JsBarcode("#"+barcodeElementID, barcodeValue,{format:"EAN13", width:1, height:16, valueIsValid:true, margin:0,
+            valid:function(valid){
+                if(!valid) this.valueIsValid = false;
+                if(!this.valueIsValid){
+                    //this.background= "#ccffff";
+                    this.lineColor= "#990000"
+                }
+            }
+        });
+    };
+    require(["dijit/registry"],
+            function(registry){
+                var firstHTML = document.getElementById("prodTagFirstChild");
+                var parentID=firstHTML.parentNode.id;
+                var parent= registry.byId(parentID);
+                if(!parent) return;
+                var parentHTML= parent.domNode;
+                parentHTML.style.width="3.6cm";parentHTML.style.height="2.1cm";
+                var prodTagContentData= parent["prodTagContentData"];                                                   console.log("productTag40x25 PAGE prodTagContentData= ",prodTagContentData);
+                if (!prodTagContentData) prodTagContentData={};
+                parentHTML.children[1].innerHTML = prodTagContentData["PRODUCT_NAME"];
+                parentHTML.children[2].innerHTML = "<b>ціна: "+prodTagContentData["SALE_PRICE"]+" грн./"+prodTagContentData["PRODUCT_UM"]+"</b>";//
+                var barcodeHTML = parentHTML.children[3];
+                var barcodeID = parentID+"_prodbarcode";
+                barcodeHTML.setAttribute("id",barcodeID);
+                var barcode=prodTagContentData["BARCODE"];
+                if(!barcode) barcode=prodTagContentData["PRODUCT_PBARCODE"];
+                if(barcode==undefined || barcode==null || barcode.toString().trim().length==0) barcode='0000000000000';
+                if(prodTagContentData) printBarcode(barcodeID, barcode);
+                var pageNum = parent["printPageNumber"];
+                if(!pageNum) pageNum="";
+                parentHTML.children[4].innerHTML = pageNum;
+            });
+</script>
+</html>

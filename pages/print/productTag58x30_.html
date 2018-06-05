@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<body>
+<body><div style="display:none" id="prodTagFirstChild"></div>
     <div style="border:none; margin-left:0cm;margin-top:0cm; width:5.4cm;height:0.35cm; font-size:10px;  text-align:center"></div>
     <div style="border:none; margin-left:0cm; width:5.4cm;height:0.35cm; font-size:12px; text-align:center" id="">
         <div style="border:none; display:inline-block;float:left; margin-left:0.4cm;margin-right:0.1cm; width:2.2cm;height:0.35cm; font-size:12px; text-align:right" id="prodSupplier"></div>
@@ -15,11 +15,11 @@
     <svg style="margin-left:1cm;border:none;padding:0;" id="prodbarcode"></svg>
     <div style="float:right; margin:0cm;margin-top:0.3cm; width:0.5cm;height:0.35cm; font-size:9px; text-align:left" id="pageNum" class="pageNum"></div>
 </body>
-<!--<script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>-->
+<script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
 <script type="text/javascript">
-    var printProdTag = function(barcodeElementID, barcodeValue){
-        if(barcodeValue===undefined||barcodeValue===null) barcodeValue="";
-        JsBarcode("#"+barcodeElementID, barcodeValue,{format:"EAN13", width:1, height:17, valueIsValid:true, margin:3,        //EAN13
+    var printBarcode = function(barcodeElementID, barcodeValue){
+        if(!barcodeValue) return;
+        JsBarcode("#"+barcodeElementID, barcodeValue,{format:"EAN13", width:1, height:16, valueIsValid:true, margin:0,
             valid:function(valid){
                 if(!valid) this.valueIsValid = false;
                 if(!this.valueIsValid){
@@ -29,45 +29,39 @@
             }
         });
     };
-    var setEmpty= function(data, itemName){
-        if (data[itemName]===undefined||data[itemName]===null) data[itemName]="";
-    };
     require(["dijit/registry"],
             function(registry){
-                var barcodeHTML = document.getElementById("prodbarcode");
-                var parentHTML= barcodeHTML.parentNode;
-                if(!parentHTML) return;
-                var parentID= parentHTML.id;
+                var firstHTML = document.getElementById("prodTagFirstChild");
+                var parentID=firstHTML.parentNode.id;
                 var parent= registry.byId(parentID);
                 if(!parent) return;
-                var prodTagContentData= parent["prodTagContentData"];                                                   //console.log("product_tag PAGE prodTagContentData= ",prodTagContentData);
-                setEmpty(prodTagContentData,"PRODUCT_ARTICLE");
-                setEmpty(prodTagContentData,"PRODUCT_COLLECTION_CODE");
-                setEmpty(prodTagContentData,"PRODUCT_CODE");
-                setEmpty(prodTagContentData,"COUNTRY");
-                setEmpty(prodTagContentData,"PRODUCT_KIND");
-                setEmpty(prodTagContentData,"PRODUCT_COMPOSITION");
-                setEmpty(prodTagContentData,"PRODUCT_SIZE");
-                if(!prodTagContentData["SALE_PRICE"]) prodTagContentData["SALE_PRICE"]= prodTagContentData["PRICELIST_PRICE"];
-                setEmpty(prodTagContentData,"SALE_PRICE");
-                if(!prodTagContentData["BARCODE"]) prodTagContentData["BARCODE"]= prodTagContentData["PRODUCT_PBARCODE"];
-                setEmpty(prodTagContentData,"BARCODE");
-                parentHTML.children[0].innerHTML = "Товарный ярлык № "
+                var parentHTML= parent.domNode;
+                parentHTML.style.width="5.4cm";parentHTML.style.height="2.6cm";
+                var prodTagContentData= parent["prodTagContentData"];                                                   console.log("productTag58x30 PAGE prodTagContentData= ",prodTagContentData);
+                if (!prodTagContentData) prodTagContentData={};
+                parentHTML.children[1].innerHTML = "Товарный ярлык № "
                         +prodTagContentData["PRODUCT_ARTICLE"]
                         +"*"+prodTagContentData["PRODUCT_COLLECTION_CODE"]
                         +"/"+prodTagContentData["PRODUCT_CODE"];
-                parentHTML.children[1].children[0].innerHTML = "Bata";
-                parentHTML.children[1].children[1].innerHTML = prodTagContentData["COUNTRY"];
-                parentHTML.children[2].children[0].innerHTML = prodTagContentData["PRODUCT_KIND"];
-                parentHTML.children[2].children[1].innerHTML = prodTagContentData["PRODUCT_COMPOSITION"];
-                parentHTML.children[2].children[2].innerHTML = "<b>р."+prodTagContentData["PRODUCT_SIZE"]+"</b>";
-                parentHTML.children[3].innerHTML = "<b>"+prodTagContentData["SALE_PRICE"]+" Грн.</b>";
+                parentHTML.children[2].children[0].innerHTML = "Bata";
+                parentHTML.children[2].children[1].innerHTML = prodTagContentData["SUPPLIER_COUNTRY"];
+                parentHTML.children[3].children[0].innerHTML = prodTagContentData["PRODUCT_KIND"];
+                parentHTML.children[3].children[1].innerHTML = prodTagContentData["PRODUCT_COMPOSITION"];
+                parentHTML.children[3].children[2].innerHTML = "<b>р."+prodTagContentData["PRODUCT_SIZE"]+"</b>";
+                var priceItemName=parent.prodTagsContentPriceItemName;
+                if(!priceItemName) priceItemName="SALE_PRICE";
+                parentHTML.children[4].innerHTML =
+                        (prodTagContentData[priceItemName])?"<b>"+prodTagContentData[priceItemName]+" Грн.</b>":"";
                 var pageNum = parent["printPageNumber"];
                 if(!pageNum) pageNum="";
-                parentHTML.children[5].innerHTML = pageNum;
+                parentHTML.children[6].innerHTML = pageNum;
                 var barcodeID = parentID+"_prodbarcode";
+                var barcodeHTML = parentHTML.children[5];
                 barcodeHTML.setAttribute("id",barcodeID);
-                if(prodTagContentData) printProdTag(barcodeID, prodTagContentData["BARCODE"]);
+                var barcode=prodTagContentData["BARCODE"];
+                if(!barcode) barcode=prodTagContentData["PRODUCT_PBARCODE"];
+                if(barcode==undefined || barcode==null || barcode.toString().trim().length==0) barcode='0000000000000';
+                if(barcode) printBarcode(barcodeID, barcode);
             });
 </script>
 </html>

@@ -397,7 +397,9 @@
                                 var detailTableContentData=this.detailTable.getContentData();
                                 for(var row=0;row<detailTableContentData.length;row++) detailTableContentData[row]["QTY"]=1;
                                 printWindow["prodTagsContentData"]= detailTableContentData;
-                                printWindow["pageProdTagType"]= "tag40x25price";}
+                                printWindow["pageProdTagType"]= "productTag40x25";
+//                                printWindow["pageProdTagType"]= "tag58x30price";
+                            }
                         })
 //                        .addToolPane("Доп")
 //                        .addToolPaneActionButton("Сохранить в прайс-лист", {}, "width:200px;")
@@ -423,7 +425,7 @@
                                 var prodTagContentData = {};
                                 for(var rowItemName in detailTableSelectedRow) prodTagContentData[rowItemName]= detailTableSelectedRow[rowItemName];
                                 toolPane.set("prodTagContentData", prodTagContentData);
-                                toolPane.set("href","/print/productTag58x30");
+                                toolPane.set("href","/print/productTag40x25");
                             }
                         })
                         .startUp();
