@@ -7,7 +7,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
     function(declare, BorderContainer, ContentPane, DateTextBox, TextBox, NumberTextBox, Select, XContentPane,
              APP, DocumentBase, ContentController, HTable, Dialogs, Uploader) {
         return declare("TDocStdTable", [BorderContainer, DocumentBase], {
-            /*
+            /**
              * args: {titleText, dataURL, condition:{...}, buttonUpdate, buttonPrint, printFormats={ ... } }
              * default:
              * buttonUpdate=true, buttonPrint=true,
@@ -59,7 +59,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 }
             },
 
-            /*
+            /**
              * params: { getDataUrl:"/...", getDataCondition: {param:paramValue, ...},
              *              header, bdateCondition,bdatelabelText, edateCondition,edatelabelText} }
              */
@@ -126,7 +126,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 thisListTable.selectedRowDataIDForSet=params.selectedRowDataID;
                 this.listTable.setContentFromUrl({url:this.listTable.getDataUrl,condition:condition, callUpdateContent:params.callUpdateContent});
             },
-            /*
+            /**
              * params: {header, bdateCondition,bdatelabelText, edateCondition,edatelabelText}
              */
             setListDatesContent: function(params){
@@ -158,7 +158,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 return this;
             },
 
-            /*
+            /**
              * parameters= { dataIDName, getDataUrl, dataStateName,activeStateValue }
              */
             setDetailHeaderParameters: function(parameters){
@@ -170,7 +170,6 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 if (parameters.dataStateName) this.detailHeader.dataStateName=parameters.dataStateName;
                 if (parameters.activeStateValue!==undefined) this.detailHeader.activeStateValue=parameters.activeStateValue;
                 var thisInstance=this;
-
 
                 this.detailHeader.onContentUpdated= function(contentData, params, idIsChanged){             console.log("TDocStdTable.detailHeader.onContentUpdated ",contentData," ",params,idIsChanged);
                     if(params.onlyValues) this.lastContentData=contentData;
@@ -184,8 +183,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                         if (!contentData||contentData.length==0) thisInstance.setDetailSubtotalContent({disabled:true, clearValue:true});
                         thisInstance.setToolPanesActions();
                     } else
-                        thisInstance.loadDetailTableContentDataFromServer();
-                                                                                                            console.log("this.detailHeader.onContentUpdated end",contentData, params, idIsChanged,this.lastContentData);
+                        thisInstance.loadDetailTableContentDataFromServer();                                console.log("this.detailHeader.onContentUpdated end",contentData, params, idIsChanged,this.lastContentData);
                     var detailHeaderContentData=thisInstance.detailHeader.getContentData();
                     if(detailHeaderContentData && detailHeaderContentData[thisInstance.detailHeader.dataStateName]!==undefined
                         && detailHeaderContentData[thisInstance.detailHeader.dataStateName]==thisInstance.detailHeader.activeStateValue){
@@ -254,7 +252,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.addDetailHeaderElement(true);
                 return this;
             },
-            /*
+            /**
              * params: {title, titleForNew, titleForNothing, titleForFailedLoad, numberDataItemName, dateDataItemName, titleDatePrefix}
              */
             addDetailHeaderTitle: function(detailHeaderTitleParams,height){
@@ -311,7 +309,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 };
                 return this;
             },
-            /*
+            /**
              * params={ style, inputStyle }
              */
             addDetailHeaderTextBox: function(itemName, label, cellWidth, params){
@@ -320,23 +318,11 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 if (!params.style) params.style="";
                 var textBox= this.addTableCellTextBoxTo(this.detailHeaderTable.lastChild,
                     {cellWidth:cellWidth, labelText:label, labelStyle:params.style, inputStyle:params.style+params.inputStyle});
-
-
-                //var totalNumberTextBox= this.addTableCellNumberTextBoxTo(this.totalTableRow,
-                //    {cellWidth:width, cellStyle:"text-align:right;",
-                //        labelText:labelText, labelStyle:style, inputStyle:"text-align:right;"+style+inputStyle,
-                //        inputParams:{constraints:{pattern:pattern}, readOnly:true,
-                //            /*it's for print*/cellWidth:width, labelText:labelText, printStyle:style, inputStyle:inputStyle, typeFormat:pattern } });
-
-
                 this.detailHeader.addControlElementObject(textBox, itemName);
                 this.addDetailHeaderElement(false,textBox);
                 return this;
-
-                //this.addPrintDataSubItemTo(printData, "header", {width:detHElem.cellWidth+5, style:detHElem.printStyle,
-                //    contentStyle:"margin-top:3px;", label:detHElem.labelText, value:detHElem.value, type:"text", valueStyle:"text-align:right;"+detHElem.inputStyle});
             },
-            /*
+            /**
              * params={ style, inputStyle }
              */
             addDetailHeaderDateTextBox: function(itemName, label, cellWidth, params){
@@ -350,7 +336,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.addDetailHeaderElement(false,dateBox);
                 return this;
             },
-            /*
+            /**
              * params={ style, inputStyle, pattern }
              */
             addDetailHeaderNumberTextBox: function(itemName, label, cellWidth, params){
@@ -365,7 +351,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.addDetailHeaderElement(false,numberTextBox);
                 return this;
             },
-            /*
+            /**
              * params={ style, inputStyle, labelDataItem, loadDropDownURL }
              */
             addDetailHeaderSelect: function(itemName, label, cellWidth, params){
@@ -381,7 +367,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.addDetailHeaderElement(false,select);
                 return this;
             },
-            /*
+            /**
              * parameters: { conditionIDName, getDataUrl, getCondition, storeDataUrl, deleteDataUrl }
              */
             setDetailTableParameters: function(parameters){
@@ -393,8 +379,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 var thisInstance= this;
                 this.detailTable.onUpdateContent = function(params){                                                console.log("TDocStdTable.detailTable.onUpdateContent ",params);
                     if(params&&(params.updatedRows||params.deletedRows)) {
-                        thisInstance.setDetailHeaderContentByListSelectedRow(thisInstance.detailHeader.lastContentData, {reloadData:false});
                         thisInstance.loadListTableContentFromServer({callUpdateContent:false});
+                        thisInstance.setDetailHeaderContentByListSelectedRow(thisInstance.detailHeader.lastContentData, {reloadData:false});
                     }
                     var selectedRowData = this.getSelectedRow();
                     if ( !selectedRowData && this.getContent().length>0) {
@@ -444,7 +430,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
             deleteDetailTableSelectedRowFromServer: function(){
                 this.detailTable.deleteSelectedRowDataByURL({url:this.detailTable.deleteDataUrl, condition:null});
             },
-            /*
+            /**
              * callback(changedRowData, thisInstance.detailTable, thisInstance)
              */
             addDetailTableRowChangeCallback: function(callback){
@@ -453,7 +439,6 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                     var thisInstance=this, thisInstanceDetailTable=this.detailTable;
 
                     this.detailTable.onChangeRowsData= function(changedRowsData) {                                      //console.log("TDocStdTable this.detailTable.onChangeRowData",changedRowData);
-
                         var rowCallback= function(i, changedRowData, callUpdateContent, nextCallback){                  //console.log("TDocStdTable this.detailTable.onChangeRowsData rowCallback",i,changedRowData/*,nextCallback*/);
                             var rowNextCallback=thisInstance.detailTable.rowChangeCallbacks[i];
                             if(rowNextCallback) {
@@ -467,7 +452,6 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                             //if (callUpdateContent===true) thisInstanceDetailTable.handsonTable.render();//render after end row callbacks
                             nextCallback();
                         };
-
                         var rowsCallback= function(i, changedRowsData, callUpdateContent) {                             //console.log("TDocStdTable this.detailTable.onChangeRowData callback",changedRowData);
                             var changedRowData=changedRowsData[i];
                             if (changedRowData) {
@@ -513,7 +497,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.addLeftCellToTableRow(this.detailTotalTable.lastChild, cellWidth);
                 return this;
             },
-            /*
+            /**
              * params { inputStyle, style, print:true/false }
              * default print!=false
              */
@@ -530,7 +514,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.addDetailTotalElement(false,textBox);
                 return this;
             },
-            /*
+            /**
              * params { style, inputStyle, pattern, print:true/false, printLabel }
              * default pattern="########0.#########"
              * default print!=false
@@ -550,7 +534,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.addDetailTotalElement(false,numberTextBox);
                 return this;
             },
-            /*
+            /**
              * params { style, inputStyle }
              */
             addDetailSubTotalCountNumberTextBox: function(label, cellWidth, params){
@@ -582,7 +566,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
             getDetailTableItemSum: function(tableItemName){
                 return this.detailTable.getContentItemSum(tableItemName);
             },
-            /*
+            /**
              * params { style, inputStyle, pattern }
              * default pattern="###,###,##0.#########"
              */
@@ -613,7 +597,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.subTotals[this.subTotals.length]=numberTextBox;
                 return this;
             },
-            /*
+            /**
              * params { disabled:true/false, clearValue:true/false }
              */
             setDetailSubtotalContent: function(params){                                                             //console.log("TDocStdTable setDetailSubtotalContent ",params);
@@ -847,7 +831,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.setToolPanesActionButtonsState();
             },
 
-            /*
+            /**
              * actionParams: {action, rowPosName, rowPosIndexName}
              */
             addDetailTableMenuItemAction: function(itemName, actionParams, menuItemAction){
@@ -963,11 +947,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                     });
                 return this;
             },
-            startUp: function(){
-                if(this.detailContainer)this.detailContainer.startup();
-                if (this.listTable) this.loadListTableContentFromServer();
-                return this;
-            },
+
             doPrint: function(){                                                                                        //console.log("TDocStdTable.doPrint ",this);
                 var printData = {};
                 var headerTextStyle="font-size:14px;";
@@ -1036,6 +1016,11 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
             },
             exportTableContentToExcel:function(){
                 this.requestForExcelFile({tableData:this.detailTable.getContent(), visibleColumns:this.detailTable.getVisibleColumns()});
+            },
+            startUp: function(){
+                if(this.detailContainer)this.detailContainer.startup();
+                if (this.listTable) this.loadListTableContentFromServer();
+                return this;
             }
         })
     });

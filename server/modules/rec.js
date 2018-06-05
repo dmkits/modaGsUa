@@ -190,22 +190,24 @@ module.exports.init = function(app){
         {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_RecD" },
         {data: "ProdArticle1", name: "Артикул1 товара", width: 200, type: "text",
             dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
-        {data: "ProdID", name: "ProdID", width: 50, type: "text", dataSource:"t_RecD", visible:false},
+        {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"t_RecD", visible:true},
         {data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_RecD", visible:false},
-        {data: "ProdName", name: "Товар", width: 350, type: "text",
+        {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
         {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"t_RecD", sourceField:"UM"},
         {data: "Qty", name: "Кол-во", width: 50, type: "numeric", dataSource:"t_RecD"},
         {data: "PPID", name: "Партия", width: 60, type: "numeric", visible:false},
         {data: "PriceCC_wt", name: "Цена", width: 65, type: "numeric2", dataSource:"t_RecD"},
         {data: "SumCC_wt", name: "Сумма", width: 75, type: "numeric2", dataSource:"t_RecD"},
-        {data: "Extra", name: "% наценки", width: 55, type: "numeric", dataSource:"t_RecD"},
+        {data: "Extra", name: "% наценки", width: 55, type: "numeric", format:"#,###,###,##0.00", dataSource:"t_RecD"},
         {data: "PriceCC", name: "Цена продажи", width: 65, type: "numeric2", dataSource:"t_RecD"}
         //{data: "PRICELIST_PRICE", name: "Цена по прайс-листу", width: 75, type: "numeric2"},
     ];
     app.get("/docs/rec/getDataForRecDTable", function(req, res){
         var conditions={};
-        for(var condItem in req.query) conditions["t_RecD."+condItem]=req.query[condItem];
+        for(var condItem in req.query)
+            if(condItem.indexOf("ParentChID")==0) conditions["t_RecD.ChID="]=req.query[condItem];
+            else conditions["t_RecD."+condItem]=req.query[condItem];
         t_RecD.getDataForTable(req.dbUC,{tableColumns:tRecDTableColumns, identifier:tRecDTableColumns[0].data,
                 conditions:conditions, order:"SrcPosID"},
             function(result){
@@ -213,13 +215,17 @@ module.exports.init = function(app){
             });
     });
     app.post("/docs/rec/storeRecDTableData", function(req, res){
-        t_RecD.storeTableDataItem(req.dbUC,{tableColumns:tRecDTableColumns, idFieldName:"ChID"},
+        t_RecD.storeTableDataItem(req.dbUC,{tableColumns:tRecDTableColumns, idFieldName:"ChID",storeTableData:req.body,
+                calcNewIdValue: function(params, callback){
+                    params.storeTableData[params.idFieldName]=params.storeTableData["ParentChID"];
+                    callback(params);
+                }},
             function(result){
                 res.send(result);
             });
     });
     app.post("/docs/rec/deleteRecDTableData", function(req, res){
-        t_RecD.delTableDataItem(req.dbUC,{idFieldName:"ChID"},
+        t_RecD.delTableDataItem(req.dbUC,{idFieldName:"ChID",delTableData:req.body},
             function(result){
                 res.send(result);
             });

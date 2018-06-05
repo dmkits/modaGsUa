@@ -536,29 +536,26 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         if(error) errors["<!$error$!>"] = error;
                         if(!updateCount>0) errors["<!$error_updateCount$!>"]= "Данные не были сохранены на сервере!";
                         if(!resultItem)resultItem=storingData;
-                        thisInstance.updateRowAllDataItems(rowData, resultItem,
-                            {editPropValue:true, addData:errors, callUpdateContent:params.callUpdateContent} );//console.log("HTableEditable.storeRowDataByURL resultItem=",resultItem);
+                        thisInstance.updateRowAllDataItems(rowData, resultItem,{editPropValue:true, addData:errors, callUpdateContent:false});//console.log("HTableEditable.storeRowDataByURL resultItem=",resultItem);
                         //instance.setErrorsCommentsForRow(storeRow,storeRowData);
                         if (postCallback) postCallback(result,error,rowData);
                     })
             },
             /**
-             * params: {url, condition}
+             * params: {url, condition, callUpdateContent}
              */
             storeSelectedRowDataByURL: function(params){
                 if (!params || !this.getSelectedRow()) return;
                 params.rowData= this.getSelectedRow();
                 if (!this.isRowEditable(params.rowData)) return;
-                params.callUpdateContent= true;
                 var thisInstance=this;
                 thisInstance.loadingGif.show();
-                this.storeRowDataByURL(params,
-                    /*postCallback*/function(){
-                        thisInstance.loadingGif.hide();
-                    });
+                this.storeRowDataByURL(params,/*postCallback*/function(){
+                    thisInstance.loadingGif.hide();
+                });
             },
             /**
-             * params: {url, condition, rowsData}
+             * params: {url, condition, rowsData, callUpdateContent}
              */
             storeRowsDataByURL: function(params){                                                       //console.log("HTableEditable storeRowsDataByURL rowsData=",params.rowsData);
                 if (!params || !params.rowsData) return;
@@ -567,6 +564,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     var rowData=params.rowsData[rowInd];
                     if (this.isRowEditable(rowData)) storingRowData.push(rowData);
                 }
+                var finalCallUpdateContent=params.callUpdateContent;
                 params.callUpdateContent=false;
                 var thisInstance= this;
                 var storeRowDataCallback= function(rowInd){
@@ -576,7 +574,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     if (!params.rowData) {
                         storeTableRowsDialog.hide();
                         thisInstance.setSelection();
-                        thisInstance.onUpdateContent({updatedRows:storingRowData});
+                        if(finalCallUpdateContent!==false)thisInstance.onUpdateContent({updatedRows:storingRowData});
                         return;
                     }
                     if(rowInd===0){
@@ -593,10 +591,9 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         storeTableRowsDialog.show();
                     }
                     storeTableRowsDialogProgressBar.set({value: rowInd});
-                    thisInstance.storeRowDataByURL(params,
-                        /*postCallback*/function(){
-                            storeRowDataCallback(rowInd+1);
-                        });
+                    thisInstance.storeRowDataByURL(params,/*postCallback*/function(){
+                        storeRowDataCallback(rowInd+1);
+                    });
                 };
                 storeRowDataCallback(0);
             },

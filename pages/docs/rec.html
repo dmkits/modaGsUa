@@ -41,8 +41,9 @@
                         .addDetailHeaderSelect("CurrName","Валюта", 260,
                             {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCurrsForSelect", labelDataItem:"CurrName"})
                         .addDetailHeaderNumberTextBox("KursCC", "Курс валюты", 200, {inputStyle:"width:40px", pattern:"########0.00"})
-                        .setDetailTableParameters({conditionIDName:"ChID",
-                            getDataUrl:"/docs/rec/getDataForRecDTable", storeDataUrl:"/docs/rec/storeRecDTableData", deleteDataUrl:"/docs/rec/deleteRecDTableData"})
+                        .setDetailTableParameters({conditionIDName:"ParentChID",
+                            getDataUrl:"/docs/rec/getDataForRecDTable",
+                            storeDataUrl:"/docs/rec/storeRecDTableData", deleteDataUrl:"/docs/rec/deleteRecDTableData"})
                         .addDetailTotalRow()
                         .addDetailSubTotalCountNumberTextBox("ИТОГО СТРОК:", 190, {inputStyle:"width:40px;"})
                         .addDetailSubtotalNumberTextBox("ИТОГО КОЛИЧЕСТВО:", 700, "Qty", {pattern:"###,###,##0.#########", inputStyle:"width:50px;"})
@@ -79,255 +80,252 @@
                         .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
                         .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
                         .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
-                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
-                            var supplierOrderNum= thisInstance.detailHeader.getContentDataItem("SUPPLIER_ORDER_NUM");
-                            if (!supplierOrderNum || supplierOrderNum.trim().length==0){
-                                if(crd.item("PRODUCT_GENDER_CODE").isChanged()&&!crd.item("PRODUCT_GENDER_CODE").isUNDEFNULL()){
-                                    var genderValueForGenderCode=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_GENDER_CODE",crd.item("PRODUCT_GENDER_CODE").getValue(),"PRODUCT_GENDER");
-                                    if(genderValueForGenderCode==undefined) genderValueForGenderCode=null;
-                                    crd.item("PRODUCT_GENDER").setValue(genderValueForGenderCode);
-                                } else if(crd.item("PRODUCT_GENDER").isChanged()&&!crd.item("PRODUCT_GENDER").isUNDEFNULL()){
-                                    var genderCodeValueForGender=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_GENDER",crd.item("PRODUCT_GENDER").getValue(),"PRODUCT_GENDER_CODE");
-                                    if(genderCodeValueForGender==undefined) genderCodeValueForGender=null;
-                                    crd.item("PRODUCT_GENDER_CODE").setValue(genderCodeValueForGender);
-                                }
-                                var genderValue,genderCode;
-                                if(crd.item("PRODUCT_CATEGORY_CODE").isChanged()&&!crd.item("PRODUCT_CATEGORY_CODE").isUNDEFNULL()){
-                                    var categoryValueForCategoryCode=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_CATEGORY");
-                                    if(categoryValueForCategoryCode==undefined) categoryValueForCategoryCode=null;
-                                    crd.item("PRODUCT_CATEGORY").setValue(categoryValueForCategoryCode);
-                                    genderValue=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_GENDER");
-                                    genderCode=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_GENDER_CODE");
-
-                                } else if(crd.item("PRODUCT_CATEGORY").isChanged()&&!crd.item("PRODUCT_CATEGORY").isUNDEFNULL()){
-                                    var categoryCodeValueForCategory=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_CATEGORY_CODE");
-                                    if(categoryCodeValueForCategory==undefined) categoryCodeValueForCategory=null;
-                                    crd.item("PRODUCT_CATEGORY_CODE").setValue(categoryCodeValueForCategory);
-                                    genderValue=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_GENDER");
-                                    genderCode=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_GENDER_CODE");
-                                }
-                                if(genderValue!==undefined&&crd.item("PRODUCT_GENDER").isEMPTY())
-                                    crd.item("PRODUCT_GENDER").setValue(genderValue);
-                                if(genderCode!==undefined&&crd.item("PRODUCT_GENDER_CODE").isEMPTY())
-                                    crd.item("PRODUCT_GENDER_CODE").setValue(genderCode);
-
-                                if(crd.item("PRODUCT_SUBCATEGORY_CODE").isChanged()&&!crd.item("PRODUCT_SUBCATEGORY_CODE").isUNDEFNULL()){
-                                    var subcategoryValueForSubcategoryCode=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_SUBCATEGORY_CODE",crd.item("PRODUCT_SUBCATEGORY_CODE").getValue(),"PRODUCT_SUBCATEGORY");
-                                    if(subcategoryValueForSubcategoryCode==undefined) subcategoryValueForSubcategoryCode=null;
-                                    crd.item("PRODUCT_SUBCATEGORY").setValue(subcategoryValueForSubcategoryCode);
-                                } else if(crd.item("PRODUCT_SUBCATEGORY").isChanged()&&!crd.item("PRODUCT_SUBCATEGORY").isUNDEFNULL()){
-                                    var subcategoryCodeValueForSubcategory=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_SUBCATEGORY",crd.item("PRODUCT_SUBCATEGORY").getValue(),"PRODUCT_SUBCATEGORY_CODE");
-                                    if(subcategoryCodeValueForSubcategory==undefined) subcategoryCodeValueForSubcategory=null;
-                                    crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(subcategoryCodeValueForSubcategory);
-                                }
-                                if(crd.item("PRODUCT_COLLECTION").isEMPTY())
-                                    crd.item("PRODUCT_COLLECTION").setValue(thisInstance.detailHeader.getContentDataItem("PRODUCT_COLLECTION"));
-                                if(crd.item("PRODUCT_COLLECTION_CODE").isChanged()&&!crd.item("PRODUCT_COLLECTION_CODE").isUNDEFNULL()){
-                                    var collectionValueForCollectionCode=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_COLLECTION_CODE",crd.item("PRODUCT_COLLECTION_CODE").getValue(),"PRODUCT_COLLECTION");
-                                    if(collectionValueForCollectionCode==undefined) collectionValueForCollectionCode=null;
-                                    crd.item("PRODUCT_COLLECTION").setValue(collectionValueForCollectionCode);
-                                } else if(crd.item("PRODUCT_COLLECTION").isChanged()&&!crd.item("PRODUCT_COLLECTION").isUNDEFNULL()){
-                                    var collectionCodeValueForCollection=
-                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_COLLECTION",crd.item("PRODUCT_COLLECTION").getValue(),"PRODUCT_COLLECTION_CODE");
-                                    if(collectionCodeValueForCollection==undefined) collectionCodeValueForCollection=null;
-                                    crd.item("PRODUCT_COLLECTION_CODE").setValue(collectionCodeValueForCollection);
-                                }
-//                                //docs_rec_pinvproductslisthst.setProdDataByArticleFromPInv(changedRow,newProdData);
-                            } else
-                            if (supplierOrderNum && supplierOrderNum.trim().length>0
-                                    && crd.item("PRODUCT_ARTICLE").isChanged() && !crd.item("PRODUCT_ARTICLE").isEMPTY()){              console.log("PINV detailTableRowChangeCallback1 prod article from order bata ");
-//                                var condition={};
-//                                condition["SUPPLIER_ORDER_NUM"]= supplierOrderNum;
-//                                condition["PRODUCT_ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
-//                                Request.getJSONData({url:"/wrh/order_bata/get_order_bata_details_by_article", condition:condition, consoleLog:true},
-//                                        function(success,result){
-//                                            if (success&&result.item) {                                                 //console.log("PINV detailTableRowChangeCallback2 getJSONData success ",result);
-//                                                var prodDataFromOrderBata = result.item;
-//                                                crd.item("PRODUCT_GENDER_CODE").setValue(prodDataFromOrderBata["PRODUCT_GENDER_CODE"]);
-//                                                crd.item("PRODUCT_GENDER").setValue(prodDataFromOrderBata["PRODUCT_GENDER"]);
-//                                                crd.item("PRODUCT_CATEGORY_CODE").setValue(prodDataFromOrderBata["PRODUCT_CATEGORY_CODE"]);
-//                                                crd.item("PRODUCT_CATEGORY").setValue(prodDataFromOrderBata["PRODUCT_CATEGORY"]);
-//                                                crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(prodDataFromOrderBata["PRODUCT_SUBCATEGORY_CODE"]);
-//                                                crd.item("PRODUCT_SUBCATEGORY").setValue(prodDataFromOrderBata["PRODUCT_SUBCATEGORY"]);
-//                                                crd.item("PRICE").setValue(prodDataFromOrderBata["PRICE"]);
-//                                                if (crd.item("QTY").isEMPTYZERO()) crd.item("QTY").setValue(prodDataFromOrderBata["QTY"]);
-//                                                crd.item("PRODUCT_CODE").setValue(null);
-//                                                crd.item("PRODUCT_NAME").setValue(null);
-//                                                crd.item("PRODUCT_UM").setValue(null);
-//                                                crd.item("PRODUCT_PBARCODE").setValue(null);
-//                                                crd.item("BARCODE").setValue(null);
-//                                            }
-//                                            nextCallback();
-//                                        });
-//                                return;
-                            }
-                            nextCallback();
-                        })
                         .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
-                            if (!crd.item("PRODUCT_ARTICLE").isEMPTY()
-                            &&  (!crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_NAME").isChanged())){
-                                var condition={};
-                                condition["PRODUCT_ARTICLE"]=crd.item("PRODUCT_ARTICLE").getValue();
-                                condition["ID"]=crd.item("ID").getValue();
-                                Request.getJSONData({url:"/dir/products/getProdAttributesFromROperationsByArticle", condition:condition},
-                                        function(result){
-                                            if (!result || !result.item) {
-                                                nextCallback();
-                                                return;
-                                            }
-                                            var resData=result.item;
-                                            crd.item("PRODUCT_GENDER").setValue(resData["PRODUCT_GENDER"]);
-                                            crd.item("PRODUCT_GENDER_CODE").setValue(resData["PRODUCT_GENDER_CODE"]);
-                                            crd.item("PRODUCT_CATEGORY").setValue(resData["PRODUCT_CATEGORY"]);
-                                            crd.item("PRODUCT_CATEGORY_CODE").setValue(resData["PRODUCT_CATEGORY_CODE"]);
-                                            crd.item("PRODUCT_SUBCATEGORY").setValue(resData["PRODUCT_SUBCATEGORY"]);
-                                            crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(resData["PRODUCT_SUBCATEGORY_CODE"]);
-                                            crd.item("PRODUCT_COLLECTION").setValue(resData["PRODUCT_COLLECTION"]);
-                                            crd.item("PRODUCT_COLLECTION_CODE").setValue(resData["PRODUCT_COLLECTION_CODE"]);
-                                            crd.item("PRODUCT_TYPE").setValue(resData["PRODUCT_TYPE"]);
-                                            crd.item("PRODUCT_KIND").setValue(resData["PRODUCT_KIND"]);
-                                            crd.item("PRODUCT_COMPOSITION").setValue(resData["PRODUCT_COMPOSITION"]);
-                                            nextCallback(true);
-                                        });
-                                return;
-                            }
-                            nextCallback();
-                        })
-                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
-                            if( !crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_NAME").isChanged()
-                                    &&  (crd.item("PRODUCT_ARTICLE").isChanged() || crd.item("PRODUCT_KIND").isChanged()
-                                        || crd.item("PRODUCT_COMPOSITION").isChanged() || crd.item("PRODUCT_SIZE").isChanged()
-                                        || crd.item("PRODUCT_COLLECTION").isChanged() || crd.item("PRODUCT_COLLECTION_CODE").isChanged()) ){
+                            if ( (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
+                                    || (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY()) ) {
                                 var condition = {};
-                                if (!crd.item("PRODUCT_ARTICLE").isEMPTY())
-                                    condition["PRODUCT_ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
-                                if (!crd.item("PRODUCT_COLLECTION").isEMPTY())
-                                    condition["PRODUCT_COLLECTION"]= crd.item("PRODUCT_COLLECTION").getValue();
-                                if (!crd.item("PRODUCT_COLLECTION_CODE").isEMPTY())
-                                    condition["PRODUCT_COLLECTION_CODE"]= crd.item("PRODUCT_COLLECTION_CODE").getValue();
-                                if (!crd.item("PRODUCT_KIND").isEMPTY())
-                                    condition["PRODUCT_KIND"]= crd.item("PRODUCT_KIND").getValue();
-                                if (!crd.item("PRODUCT_COMPOSITION").isEMPTY())
-                                    condition["PRODUCT_COMPOSITION"]= encodeURIComponent(crd.item("PRODUCT_COMPOSITION").getValue());
-                                if (!crd.item("PRODUCT_SIZE").isEMPTY())
-                                    condition["PRODUCT_SIZE"]= crd.item("PRODUCT_SIZE").getValue();
-                                if (!crd.item("PRODUCT_UM").isEMPTY())
-                                    condition["PRODUCT_UM"]= crd.item("PRODUCT_UM").getValue();
-                                Request.getJSONData({url:"/dir/products/getProdNameByProdAttributes", condition:condition, resultItemName:"item"},
-                                        function(resData){
-                                            if (!resData) {
-                                                nextCallback();
-                                                return;
-                                            }
-                                            crd.item("PRODUCT_NAME").setValue(resData["PRODUCT_NAME"]);
-                                            crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
-                                            crd.item("PRODUCT_UM").setValue(resData["PRODUCT_UM"]);
-//                                            crd.item("PRODUCT_PBARCODE").setValue("");
-//                                            crd.item("BARCODE").setValue("");
-//                                            crd.item("PRODUCT_CODE").setValue("");
-                                            nextCallback(true);
-                                        });
-                                return;
-                            }
-                            nextCallback();
-                        })
-                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
-                            if ( (crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_CODE").isEMPTY())
-                                    || (crd.item("PRODUCT_NAME").isChanged()&&!crd.item("PRODUCT_NAME").isEMPTY()) ) {
-                                var condition = {};
-                                if (crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_CODE").isEMPTY())
-                                    condition["PRODUCT_CODE"]= crd.item("PRODUCT_CODE").getValue();
-                                if (crd.item("PRODUCT_NAME").isChanged()&&!crd.item("PRODUCT_NAME").isEMPTY())
-                                    condition["PRODUCT_NAME"]= encodeURIComponent(crd.item("PRODUCT_NAME").getValue());
-                                Request.getJSONData({url:"/dir/products/get_product_by_code_name", condition:condition},
+                                if (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
+                                    condition["ProdID"]= crd.item("ProdID").getValue();
+                                if (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY())
+                                    condition["ProdName"]= encodeURIComponent(crd.item("ProdName").getValue());
+                                Request.getJSONData({url:"/dirsProds/getProdByID", condition:condition},
                                         function(result){
                                             if (!result || !result.item ) {
                                                 nextCallback();
                                                 return;
                                             }
                                             var resData=result.item;
-                                            crd.item("PRODUCT_CODE").setValue(resData["PRODUCT_CODE"]);
-                                            crd.item("PRODUCT_NAME").setValue(resData["PRODUCT_NAME"]);
-                                            crd.item("PRODUCT_UM").setValue(resData["PRODUCT_UM"]);
-                                            crd.item("PRODUCT_ARTICLE").setValue(resData["PRODUCT_ARTICLE"]);
-                                            crd.item("PRODUCT_PBARCODE").setValue(resData["PRODUCT_PBARCODE"]);
-                                            crd.item("PRODUCT_GENDER").setValue(resData["PRODUCT_GENDER"]);
-                                            crd.item("PRODUCT_GENDER_CODE").setValue(resData["PRODUCT_GENDER_CODE"]);
-                                            crd.item("PRODUCT_CATEGORY").setValue(resData["PRODUCT_CATEGORY"]);
-                                            crd.item("PRODUCT_CATEGORY_CODE").setValue(resData["PRODUCT_CATEGORY_CODE"]);
-                                            crd.item("PRODUCT_SUBCATEGORY").setValue(resData["PRODUCT_SUBCATEGORY"]);
-                                            crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(resData["PRODUCT_SUBCATEGORY_CODE"]);
-                                            crd.item("PRODUCT_COLLECTION").setValue(resData["PRODUCT_COLLECTION"]);
-                                            crd.item("PRODUCT_COLLECTION_CODE").setValue(resData["PRODUCT_COLLECTION_CODE"]);
-                                            crd.item("PRODUCT_KIND").setValue(resData["PRODUCT_KIND"]);
-                                            crd.item("PRODUCT_COMPOSITION").setValue(resData["PRODUCT_COMPOSITION"]);
-                                            crd.item("PRODUCT_SIZE").setValue(resData["PRODUCT_SIZE"]);  //PRODUCT_PRINT_NAME
-                                            crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
-                                            crd.item("PRODUCT_TYPE").setValue(resData["PRODUCT_TYPE"]);
-                                            crd.item("BARCODE").setValue(resData["BARCODE"]);
+                                            crd.item("ProdID").setValue(resData["ProdID"]);
+                                            crd.item("ProdName").setValue(resData["ProdName"]);
+                                            crd.item("UM").setValue(resData["UM"]);
+                                            crd.item("ProdArticle1").setValue(resData["ProdArticle1"]);
+//                                            crd.item("PRODUCT_PBARCODE").setValue(resData["PRODUCT_PBARCODE"]);
+//                                            crd.item("PRODUCT_GENDER").setValue(resData["PRODUCT_GENDER"]);
+//                                            crd.item("PRODUCT_GENDER_CODE").setValue(resData["PRODUCT_GENDER_CODE"]);
+//                                            crd.item("PRODUCT_CATEGORY").setValue(resData["PRODUCT_CATEGORY"]);
+//                                            crd.item("PRODUCT_CATEGORY_CODE").setValue(resData["PRODUCT_CATEGORY_CODE"]);
+//                                            crd.item("PRODUCT_SUBCATEGORY").setValue(resData["PRODUCT_SUBCATEGORY"]);
+//                                            crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(resData["PRODUCT_SUBCATEGORY_CODE"]);
+//                                            crd.item("PRODUCT_COLLECTION").setValue(resData["PRODUCT_COLLECTION"]);
+//                                            crd.item("PRODUCT_COLLECTION_CODE").setValue(resData["PRODUCT_COLLECTION_CODE"]);
+//                                            crd.item("PRODUCT_KIND").setValue(resData["PRODUCT_KIND"]);
+//                                            crd.item("PRODUCT_COMPOSITION").setValue(resData["PRODUCT_COMPOSITION"]);
+//                                            crd.item("PRODUCT_SIZE").setValue(resData["PRODUCT_SIZE"]);  //PRODUCT_PRINT_NAME
+//                                            crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
+//                                            crd.item("PRODUCT_TYPE").setValue(resData["PRODUCT_TYPE"]);
+                                            crd.item("Barcode").setValue(resData["Barcode"]);
                                             nextCallback(true);
                                         });
                                 return;
                             }
                             nextCallback();
                         })
+//                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
+//                            var supplierOrderNum= thisInstance.detailHeader.getContentDataItem("SUPPLIER_ORDER_NUM");
+//
+//
+//                            if (!supplierOrderNum || supplierOrderNum.trim().length==0){
+//                                if(crd.item("PRODUCT_GENDER_CODE").isChanged()&&!crd.item("PRODUCT_GENDER_CODE").isUNDEFNULL()){
+//                                    var genderValueForGenderCode=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_GENDER_CODE",crd.item("PRODUCT_GENDER_CODE").getValue(),"PRODUCT_GENDER");
+//                                    if(genderValueForGenderCode==undefined) genderValueForGenderCode=null;
+//                                    crd.item("PRODUCT_GENDER").setValue(genderValueForGenderCode);
+//                                } else if(crd.item("PRODUCT_GENDER").isChanged()&&!crd.item("PRODUCT_GENDER").isUNDEFNULL()){
+//                                    var genderCodeValueForGender=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_GENDER",crd.item("PRODUCT_GENDER").getValue(),"PRODUCT_GENDER_CODE");
+//                                    if(genderCodeValueForGender==undefined) genderCodeValueForGender=null;
+//                                    crd.item("PRODUCT_GENDER_CODE").setValue(genderCodeValueForGender);
+//                                }
+//                                var genderValue,genderCode;
+//                                if(crd.item("PRODUCT_CATEGORY_CODE").isChanged()&&!crd.item("PRODUCT_CATEGORY_CODE").isUNDEFNULL()){
+//                                    var categoryValueForCategoryCode=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_CATEGORY");
+//                                    if(categoryValueForCategoryCode==undefined) categoryValueForCategoryCode=null;
+//                                    crd.item("PRODUCT_CATEGORY").setValue(categoryValueForCategoryCode);
+//                                    genderValue=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_GENDER");
+//                                    genderCode=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_GENDER_CODE");
+//
+//                                } else if(crd.item("PRODUCT_CATEGORY").isChanged()&&!crd.item("PRODUCT_CATEGORY").isUNDEFNULL()){
+//                                    var categoryCodeValueForCategory=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_CATEGORY_CODE");
+//                                    if(categoryCodeValueForCategory==undefined) categoryCodeValueForCategory=null;
+//                                    crd.item("PRODUCT_CATEGORY_CODE").setValue(categoryCodeValueForCategory);
+//                                    genderValue=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_GENDER");
+//                                    genderCode=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_GENDER_CODE");
+//                                }
+//                                if(genderValue!==undefined&&crd.item("PRODUCT_GENDER").isEMPTY())
+//                                    crd.item("PRODUCT_GENDER").setValue(genderValue);
+//                                if(genderCode!==undefined&&crd.item("PRODUCT_GENDER_CODE").isEMPTY())
+//                                    crd.item("PRODUCT_GENDER_CODE").setValue(genderCode);
+//
+//                                if(crd.item("PRODUCT_SUBCATEGORY_CODE").isChanged()&&!crd.item("PRODUCT_SUBCATEGORY_CODE").isUNDEFNULL()){
+//                                    var subcategoryValueForSubcategoryCode=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_SUBCATEGORY_CODE",crd.item("PRODUCT_SUBCATEGORY_CODE").getValue(),"PRODUCT_SUBCATEGORY");
+//                                    if(subcategoryValueForSubcategoryCode==undefined) subcategoryValueForSubcategoryCode=null;
+//                                    crd.item("PRODUCT_SUBCATEGORY").setValue(subcategoryValueForSubcategoryCode);
+//                                } else if(crd.item("PRODUCT_SUBCATEGORY").isChanged()&&!crd.item("PRODUCT_SUBCATEGORY").isUNDEFNULL()){
+//                                    var subcategoryCodeValueForSubcategory=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_SUBCATEGORY",crd.item("PRODUCT_SUBCATEGORY").getValue(),"PRODUCT_SUBCATEGORY_CODE");
+//                                    if(subcategoryCodeValueForSubcategory==undefined) subcategoryCodeValueForSubcategory=null;
+//                                    crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(subcategoryCodeValueForSubcategory);
+//                                }
+//                                if(crd.item("PRODUCT_COLLECTION").isEMPTY())
+//                                    crd.item("PRODUCT_COLLECTION").setValue(thisInstance.detailHeader.getContentDataItem("PRODUCT_COLLECTION"));
+//                                if(crd.item("PRODUCT_COLLECTION_CODE").isChanged()&&!crd.item("PRODUCT_COLLECTION_CODE").isUNDEFNULL()){
+//                                    var collectionValueForCollectionCode=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_COLLECTION_CODE",crd.item("PRODUCT_COLLECTION_CODE").getValue(),"PRODUCT_COLLECTION");
+//                                    if(collectionValueForCollectionCode==undefined) collectionValueForCollectionCode=null;
+//                                    crd.item("PRODUCT_COLLECTION").setValue(collectionValueForCollectionCode);
+//                                } else if(crd.item("PRODUCT_COLLECTION").isChanged()&&!crd.item("PRODUCT_COLLECTION").isUNDEFNULL()){
+//                                    var collectionCodeValueForCollection=
+//                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_COLLECTION",crd.item("PRODUCT_COLLECTION").getValue(),"PRODUCT_COLLECTION_CODE");
+//                                    if(collectionCodeValueForCollection==undefined) collectionCodeValueForCollection=null;
+//                                    crd.item("PRODUCT_COLLECTION_CODE").setValue(collectionCodeValueForCollection);
+//                                }
+////                                //docs_rec_pinvproductslisthst.setProdDataByArticleFromPInv(changedRow,newProdData);
+//                            } else
+//                            if (supplierOrderNum && supplierOrderNum.trim().length>0
+//                                    && crd.item("PRODUCT_ARTICLE").isChanged() && !crd.item("PRODUCT_ARTICLE").isEMPTY()){              console.log("PINV detailTableRowChangeCallback1 prod article from order bata ");
+////                                var condition={};
+////                                condition["SUPPLIER_ORDER_NUM"]= supplierOrderNum;
+////                                condition["PRODUCT_ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
+////                                Request.getJSONData({url:"/wrh/order_bata/get_order_bata_details_by_article", condition:condition, consoleLog:true},
+////                                        function(success,result){
+////                                            if (success&&result.item) {                                                 //console.log("PINV detailTableRowChangeCallback2 getJSONData success ",result);
+////                                                var prodDataFromOrderBata = result.item;
+////                                                crd.item("PRODUCT_GENDER_CODE").setValue(prodDataFromOrderBata["PRODUCT_GENDER_CODE"]);
+////                                                crd.item("PRODUCT_GENDER").setValue(prodDataFromOrderBata["PRODUCT_GENDER"]);
+////                                                crd.item("PRODUCT_CATEGORY_CODE").setValue(prodDataFromOrderBata["PRODUCT_CATEGORY_CODE"]);
+////                                                crd.item("PRODUCT_CATEGORY").setValue(prodDataFromOrderBata["PRODUCT_CATEGORY"]);
+////                                                crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(prodDataFromOrderBata["PRODUCT_SUBCATEGORY_CODE"]);
+////                                                crd.item("PRODUCT_SUBCATEGORY").setValue(prodDataFromOrderBata["PRODUCT_SUBCATEGORY"]);
+////                                                crd.item("PRICE").setValue(prodDataFromOrderBata["PRICE"]);
+////                                                if (crd.item("QTY").isEMPTYZERO()) crd.item("QTY").setValue(prodDataFromOrderBata["QTY"]);
+////                                                crd.item("PRODUCT_CODE").setValue(null);
+////                                                crd.item("PRODUCT_NAME").setValue(null);
+////                                                crd.item("PRODUCT_UM").setValue(null);
+////                                                crd.item("PRODUCT_PBARCODE").setValue(null);
+////                                                crd.item("BARCODE").setValue(null);
+////                                            }
+////                                            nextCallback();
+////                                        });
+////                                return;
+//                            }
+//                            nextCallback();
+//                        })
+//                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+//                            if (!crd.item("PRODUCT_ARTICLE").isEMPTY()
+//                            &&  (!crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_NAME").isChanged())){
+//                                var condition={};
+//                                condition["PRODUCT_ARTICLE"]=crd.item("PRODUCT_ARTICLE").getValue();
+//                                condition["ID"]=crd.item("ID").getValue();
+//                                Request.getJSONData({url:"/dir/products/getProdAttributesFromROperationsByArticle", condition:condition},
+//                                        function(result){
+//                                            if (!result || !result.item) {
+//                                                nextCallback();
+//                                                return;
+//                                            }
+//                                            var resData=result.item;
+//                                            crd.item("PRODUCT_GENDER").setValue(resData["PRODUCT_GENDER"]);
+//                                            crd.item("PRODUCT_GENDER_CODE").setValue(resData["PRODUCT_GENDER_CODE"]);
+//                                            crd.item("PRODUCT_CATEGORY").setValue(resData["PRODUCT_CATEGORY"]);
+//                                            crd.item("PRODUCT_CATEGORY_CODE").setValue(resData["PRODUCT_CATEGORY_CODE"]);
+//                                            crd.item("PRODUCT_SUBCATEGORY").setValue(resData["PRODUCT_SUBCATEGORY"]);
+//                                            crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(resData["PRODUCT_SUBCATEGORY_CODE"]);
+//                                            crd.item("PRODUCT_COLLECTION").setValue(resData["PRODUCT_COLLECTION"]);
+//                                            crd.item("PRODUCT_COLLECTION_CODE").setValue(resData["PRODUCT_COLLECTION_CODE"]);
+//                                            crd.item("PRODUCT_TYPE").setValue(resData["PRODUCT_TYPE"]);
+//                                            crd.item("PRODUCT_KIND").setValue(resData["PRODUCT_KIND"]);
+//                                            crd.item("PRODUCT_COMPOSITION").setValue(resData["PRODUCT_COMPOSITION"]);
+//                                            nextCallback(true);
+//                                        });
+//                                return;
+//                            }
+//                            nextCallback();
+//                        })
+//                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+//                            if( !crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_NAME").isChanged()
+//                                    &&  (crd.item("PRODUCT_ARTICLE").isChanged() || crd.item("PRODUCT_KIND").isChanged()
+//                                        || crd.item("PRODUCT_COMPOSITION").isChanged() || crd.item("PRODUCT_SIZE").isChanged()
+//                                        || crd.item("PRODUCT_COLLECTION").isChanged() || crd.item("PRODUCT_COLLECTION_CODE").isChanged()) ){
+//                                var condition = {};
+//                                if (!crd.item("PRODUCT_ARTICLE").isEMPTY())
+//                                    condition["PRODUCT_ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
+//                                if (!crd.item("PRODUCT_COLLECTION").isEMPTY())
+//                                    condition["PRODUCT_COLLECTION"]= crd.item("PRODUCT_COLLECTION").getValue();
+//                                if (!crd.item("PRODUCT_COLLECTION_CODE").isEMPTY())
+//                                    condition["PRODUCT_COLLECTION_CODE"]= crd.item("PRODUCT_COLLECTION_CODE").getValue();
+//                                if (!crd.item("PRODUCT_KIND").isEMPTY())
+//                                    condition["PRODUCT_KIND"]= crd.item("PRODUCT_KIND").getValue();
+//                                if (!crd.item("PRODUCT_COMPOSITION").isEMPTY())
+//                                    condition["PRODUCT_COMPOSITION"]= encodeURIComponent(crd.item("PRODUCT_COMPOSITION").getValue());
+//                                if (!crd.item("PRODUCT_SIZE").isEMPTY())
+//                                    condition["PRODUCT_SIZE"]= crd.item("PRODUCT_SIZE").getValue();
+//                                if (!crd.item("PRODUCT_UM").isEMPTY())
+//                                    condition["PRODUCT_UM"]= crd.item("PRODUCT_UM").getValue();
+//                                Request.getJSONData({url:"/dir/products/getProdNameByProdAttributes", condition:condition, resultItemName:"item"},
+//                                        function(resData){
+//                                            if (!resData) {
+//                                                nextCallback();
+//                                                return;
+//                                            }
+//                                            crd.item("PRODUCT_NAME").setValue(resData["PRODUCT_NAME"]);
+//                                            crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
+//                                            crd.item("PRODUCT_UM").setValue(resData["PRODUCT_UM"]);
+////                                            crd.item("PRODUCT_PBARCODE").setValue("");
+////                                            crd.item("BARCODE").setValue("");
+////                                            crd.item("PRODUCT_CODE").setValue("");
+//                                            nextCallback(true);
+//                                        });
+//                                return;
+//                            }
+//                            nextCallback();
+//                        })
                         .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){          //console.log("INV detailTableRowChangeCallback1 ",crd.data());
-                            var prevPOS=detailTable.getPrevRowDataItemValue(crd.data(),"POS");
-                            if(prevPOS===undefined||prevPOS===null||isNaN(prevPOS/1)) prevPOS=0;
-                            if (crd.item("POS").isUNDEFNULL()) crd.item("POS").setValue(prevPOS+1);
-                            else if (crd.item("POS").getValue()===prevPOS) crd.item("POS").setValue(prevPOS+1);
-                            if(crd.item("POS").isChanged()) crd.item("POSIND").setValue(crd.item("POS").getValue());
-                            if (crd.item("POSIND").isUNDEFNULL()&&!crd.item("POS").isUNDEFNULLZERO()) crd.item("POSIND").setValue(crd.item("POS").getValue());
-
-                            if (crd.item("QTY").isUNDEFNULL()) crd.item("QTY").setValue(1);
-                            if (crd.item("PRICE").isUNDEFNULL()) crd.item("PRICE").setValue(0);
-                            if (crd.item("POSSUM").isUNDEFNULL()) crd.item("POSSUM").setValue(0);
-                            if (crd.item("POSSUM").isChanged()&&!crd.item("POSSUM").isUNDEFNULL()){                                         //console.log("detailTableRowChangeCallback POSSUM changed",crd);
-                                if (crd.item("QTY").isEMPTY()&&!crd.item("PRICE").isEMPTYZERO())
-                                    crd.item("QTY").setValue( crd.item("POSSUM").getValue()/crd.item("PRICE").getValue() );
-                                else if (crd.item("QTY").isEMPTYZERO()) crd.item("PRICE").setValue( 0 );
-                                else crd.item("PRICE").setValue( crd.item("POSSUM").getValue()/crd.item("QTY").getValue() )
-                            } else if (crd.item("PRICE").isChanged()||crd.item("QTY").isChanged()){                                         //console.log("detailTableRowChangeCallback PRICE QTY changed",crd);
-                                if (crd.item("QTY").isUNDEFNULLZERO()||crd.item("PRICE").isUNDEFNULLZERO()) crd.item("POSSUM").setValue(0);
-                                else crd.item("POSSUM").setValue( crd.item("PRICE").getValue()*crd.item("QTY").getValue() )
-                            } else if (!crd.item("POSSUM").isEMPTY()) {
-                                if (crd.item("QTY").isEMPTYZERO()) crd.item("PRICE").setValue(0);
-                                else crd.item("PRICE").setValue( crd.item("POSSUM").getValue()/crd.item("QTY").getValue() )
+                            var prevSrcPosID=detailTable.getPrevRowDataItemValue(crd.data(),"SrcPosID");
+                            if(prevSrcPosID===undefined||prevSrcPosID===null||isNaN(prevSrcPosID/1)) prevSrcPosID=0;
+                            if (crd.item("SrcPosID").isUNDEFNULL()) crd.item("SrcPosID").setValue(prevSrcPosID+1);
+                            else if (crd.item("SrcPosID").getValue()===prevSrcPosID) crd.item("SrcPosID").setValue(prevSrcPosID+1);
+//
+                            if (crd.item("Qty").isUNDEFNULL()) crd.item("Qty").setValue(1);
+                            if (crd.item("PriceCC_wt").isUNDEFNULL()) crd.item("PriceCC_wt").setValue(0);
+                            if (crd.item("SumCC_wt").isUNDEFNULL()) crd.item("SumCC_wt").setValue(0);
+                            if (crd.item("SumCC_wt").isChanged()&&!crd.item("SumCC_wt").isUNDEFNULL()){                     //console.log("detailTableRowChangeCallback SumCC_wt changed",crd,crd.item("Qty").isEMPTYZERO());
+                                if (crd.item("Qty").isEMPTY()&&!crd.item("PriceCC_wt").isEMPTYZERO())
+                                    crd.item("Qty").setValue( crd.item("SumCC_wt").getValue()/crd.item("PriceCC_wt").getValue() );
+                                else if (crd.item("Qty").isEMPTYZERO()) crd.item("PriceCC_wt").setValue(0);
+                                else crd.item("PriceCC_wt").setValue( crd.item("SumCC_wt").getValue()/crd.item("Qty").getValue() )
+                            } else if (crd.item("PriceCC_wt").isChanged()||crd.item("Qty").isChanged()){                    //console.log("detailTableRowChangeCallback PRICE QTY changed",crd);
+                                if (crd.item("Qty").isUNDEFNULLZERO()||crd.item("PriceCC_wt").isUNDEFNULLZERO()) crd.item("SumCC_wt").setValue(0);
+                                else crd.item("SumCC_wt").setValue( crd.item("PriceCC_wt").getValue()*crd.item("Qty").getValue() )
+                            } else if (!crd.item("PriceCC_wt").isEMPTY()) {
+                                if (crd.item("Qty").isEMPTYZERO()) crd.item("PriceCC_wt").setValue(0);
+                                else crd.item("PriceCC_wt").setValue( crd.item("SumCC_wt").getValue()/crd.item("Qty").getValue() )
                             }
-                            if(crd.item("FACTOR").isEMPTYZERO()) crd.item("FACTOR").setValue(thisInstance.detailHeader.getContentDataItem("BASE_FACTOR"));
-                            var posrate = thisInstance.detailHeader.getContentDataItem("RATE");
-                            if (crd.item("SALE_PRICE").isChanged()) {                                                   console.log("PINV detailTableRowChangeCallback1 SALE_PRICE isChanged");
-                                if (!crd.item("QTY").isEMPTY()
-                                        && !crd.item("PRICE").isEMPTYZERO()
-                                        && posrate!==0) {
-                                    crd.item("FACTOR").setValue( crd.item("SALE_PRICE").getValue() / posrate / crd.item("PRICE").getValue() );
+                            if(crd.item("Extra").isEMPTYZERO()) crd.item("Extra").setValue(0);
+                            if (crd.item("PriceCC_wt").isChanged() || crd.item("Extra").isChanged()) {                      //console.log("PINV detailTableRowChangeCallback1 PRICE or FACTOR isChanged");
+                                if (!crd.item("PriceCC_wt").isEMPTY() && !crd.item("Extra").isEMPTY()) {
+                                    crd.item("PriceCC").setValue( crd.item("PriceCC_wt").getValue()*(1+crd.item("Extra").getValue()/100) );
                                 } else
-                                    crd.item("FACTOR").setValue("");
-                            } else if (crd.item("PRICE").isChanged() || crd.item("FACTOR").isChanged()) {               console.log("PINV detailTableRowChangeCallback1 PRICE or FACTOR isChanged");
-                                if (!crd.item("PRICE").isEMPTY() && !crd.item("FACTOR").isEMPTY()) {
-                                    crd.item("SALE_PRICE").setValue( crd.item("PRICE").getValue() * posrate * crd.item("FACTOR").getValue() );
+                                    crd.item("PriceCC").setValue("");
+                            } else if (crd.item("PriceCC").isChanged()) {                                                   //console.log("PINV detailTableRowChangeCallback1 SALE_PRICE isChanged");
+                                if (!crd.item("Qty").isEMPTY() && !crd.item("PriceCC_wt").isEMPTYZERO()) {
+                                    crd.item("Extra").setValue( (crd.item("PriceCC").getValue()/crd.item("PriceCC_wt").getValue()-1)*100 );
                                 } else
-                                    crd.item("SALE_PRICE").setValue("");
+                                    crd.item("Extra").setValue("");
                             }
-                            if (crd.item("SALE_PRICE").isChanged() && !crd.item("SALE_PRICE").isEMPTYZERO()){
-                                var posSelPrice = crd.item("SALE_PRICE").getValue();                                    console.log("PINV detailTableRowChangeCallback1 SALE_PRICE correct 0.49 ",posSelPrice);
-                                posSelPrice = Math.round(posSelPrice+0.49);
-                                crd.item("SALE_PRICE").setValue(posSelPrice);
-                                var price = crd.item("PRICE").getValue();
-                                if (price!==0)
-                                    crd.item("FACTOR").setValue( posSelPrice / posrate / price );
-                            }
+//                            if (crd.item("SALE_PRICE").isChanged() && !crd.item("SALE_PRICE").isEMPTYZERO()){
+//                                var posSelPrice = crd.item("SALE_PRICE").getValue();                                    console.log("PINV detailTableRowChangeCallback1 SALE_PRICE correct 0.49 ",posSelPrice);
+//                                posSelPrice = Math.round(posSelPrice+0.49);
+//                                crd.item("SALE_PRICE").setValue(posSelPrice);
+//                                var price = crd.item("PRICE").getValue();
+//                                if (price!==0)
+//                                    crd.item("FACTOR").setValue( posSelPrice / posrate / price );
+//                            }
                             nextCallback();
                         })
 
@@ -419,7 +417,7 @@
                             }
                         })
                         .addToolXPane("Ценник товара", function(toolPane, detailHeader,detailTable,thisInstance){
-                            toolPane.set("content","");
+//                            toolPane.set("content","");
                             var detailTableSelectedRow= detailTable.getSelectedRow();
                             if(detailTableSelectedRow) {
                                 var prodTagContentData = {};

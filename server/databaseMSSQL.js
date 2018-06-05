@@ -173,7 +173,7 @@ function selectParamsQuery(connection,query, parameters, callback) {            
                 callback(err);
                 return;
             }
-            callback(null, result.recordset ,result.rowsAffected.length, getFieldsTypes(result.recordset));
+            callback(null, result.recordset ,result.rowsAffected[result.rowsAffected.length-1], getFieldsTypes(result.recordset));
         });
 }
 module.exports.selectParamsQuery=selectParamsQuery;
@@ -197,7 +197,7 @@ module.exports.executeParamsQuery= function(connection, query, parameters, callb
             if (err) {                                                                              log.error('database: executeParamsQuery error:',err.message,{});//test
                 callback(err);
                 return;
-            }                                                                                       log.debug('database: executeParamsQuery recordset:',result.recordset,{});//test
-            callback(null, result.rowsAffected.length);
+            }                                                                                       log.debug('database: executeParamsQuery result:',result,result.rowsAffected[result.rowsAffected.length-1],{});//test
+            callback(null, result.rowsAffected[result.rowsAffected.length-1]);
         });
 };
