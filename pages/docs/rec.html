@@ -99,6 +99,7 @@
                                             crd.item("ProdName").setValue(resData["ProdName"]);
                                             crd.item("UM").setValue(resData["UM"]);
                                             crd.item("ProdArticle1").setValue(resData["ProdArticle1"]);
+                                            crd.item("Barcode").setValue(resData["Barcode"]);
 //                                            crd.item("PRODUCT_PBARCODE").setValue(resData["PRODUCT_PBARCODE"]);
 //                                            crd.item("PRODUCT_GENDER").setValue(resData["PRODUCT_GENDER"]);
 //                                            crd.item("PRODUCT_GENDER_CODE").setValue(resData["PRODUCT_GENDER_CODE"]);
@@ -404,16 +405,19 @@
                         .addToolPane({title:"Информация о товаре",
                             detailTableAction:function(toolPane, detailHeader,detailTable,thisInstance){
                                 var detailTableSelectedRow= detailTable.getSelectedRow();
-                                if(detailTableSelectedRow) {
-                                    var htCols = detailTable.getColumns(); var prodInfoHtml = "";
-                                    for(var c=0;c<htCols.length;c++){
-                                        var colItem = htCols[c]; var colData = colItem["data"];
-                                        var colValue = detailTableSelectedRow[colData];
-                                        if(colData.indexOf('PRODUCT')>=0 || colData.indexOf('BARCODE')>=0 || colData.indexOf('BATCH_NUMBER')==0)
-                                            prodInfoHtml = prodInfoHtml + "<tr><td>"+"<b>"+colItem["name"]+":</b> "+((!colValue)?'':colValue)+"</td></tr>";
-                                    }
-                                    toolPane.set("content","<table style=\"margin:0;padding:0;\">"+prodInfoHtml+"</table>");
-                                } else toolPane.set("content","");
+                                if(!detailTableSelectedRow){
+                                    toolPane.set("content","");
+                                    return;
+                                }
+                                var htCols = detailTable.getColumns(); var prodInfoHtml = "";
+
+                                for(var c=0;c<htCols.length;c++){
+                                    var colItem = htCols[c]; var colData = colItem["data"];
+                                    var colValue = detailTableSelectedRow[colData];
+                                    if(colData.indexOf('Prod')==0 || colData=='UM' || colData.indexOf('Barcode')==0)
+                                        prodInfoHtml = prodInfoHtml + "<tr><td>"+"<b>"+colItem["name"]+":</b> "+((!colValue)?'':colValue)+"</td></tr>";
+                                }
+                                toolPane.set("content","<table style=\"margin:0;padding:0;\">"+prodInfoHtml+"</table>");
                             }
                         })
                         .addToolXPane("Ценник товара", function(toolPane, detailHeader,detailTable,thisInstance){

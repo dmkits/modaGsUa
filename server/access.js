@@ -42,16 +42,23 @@ module.exports= function(app) {
             if (saUUID==uuid) return sysadminsList[saUUID];
     };
     /**
-     * callback = function(<error message>,<database user name>)
+     * callback = function(<error message>,{<database user parameters>})
      */
-    var getDBUserName= function(connection,callback){
-        database.selectQuery(connection,"select SUSER_NAME() as dbUserName;",function(err, recordset){
-            if(err){
-                callback("Не удалось получить данные пользователя из базы даных! Обратитесь к системному администратору.");
-                return;
-            }
-            callback(null,recordset[0].dbUserName);
-        });
+    var getDBUserData= function(connection,callback){
+        database.selectQuery(connection,
+            "select SUSER_NAME() as dbUserName,"+
+            "GMS_DBVersion=dbo.zf_Var('GMS_DBVersion'),OT_DBiID=dbo.zf_Var('OT_DBiID'),"+
+            "t_OurID=dbo.zf_Var('t_OurID'),t_OneOur=dbo.zf_Var('t_OneOur'),OT_MainOurID=dbo.zf_Var('OT_MainOurID'),"+
+            "z_CurrMC=dbo.zf_Var('z_CurrMC'),z_CurrCC=dbo.zf_Var('z_CurrCC'),"+
+            "t_StockID=dbo.zf_Var('t_StockID'),t_OneStock=dbo.zf_Var('t_OneStock'),it_MainStockID=dbo.zf_Var('it_MainStockID'),"+
+            "t_SecID=dbo.zf_Var('t_SecID'),DefaultUM=dbo.zf_Var('DefaultUM')",
+            function(err, recordset){
+                if(err||(recordset&&recordset.length==0)){
+                    callback("Не удалось получить данные пользователя из базы даных! Обратитесь к системному администратору.");
+                    return;
+                }
+                callback(null,recordset[0]);
+            });
     };
     app.use(function (req, res, next) {                                                             log.info("ACCESS CONTROLLER  req.path=", req.path, " params:",req.query,{});
         if (req.originalUrl.indexOf("/login") == 0) {
@@ -76,8 +83,8 @@ module.exports= function(app) {
         var sysadminName=getSysadminNameByUUID(uuid);
         if(sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
             req.dbUC = (userConnectionData)?userConnectionData.connection:null;
-            getDBUserName(req.dbUC, function(errMsg,dbUserName){
-                if(errMsg) req.dbUserName=sysadminName; else req.dbUserName=dbUserName;             log.info('ACCESS CONTROLLER DB user: ', req.dbUserName);
+            getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
+                if(errMsg) req.dbUserName=sysadminName; else req.dbUserName=dbUserParameters.dbUserName;        log.info('ACCESS CONTROLLER DB user: ', req.dbUserName);
                 next();
             });
             return;
@@ -113,7 +120,7 @@ module.exports= function(app) {
             return;
         }
         req.dbUC = userConnectionData.connection;
-        getDBUserName(userConnectionData.connection, function(errMsg,dbUserName){
+        getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
             if(errMsg){
                 if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
                     res.send({
@@ -125,7 +132,8 @@ module.exports= function(app) {
                 renderToDbFailed(res,errMsg);
                 return;
             }
-            req.dbUserName=dbUserName;                                                              log.info('ACCESS CONTROLLER DB user: ', req.dbUserName);
+            req.dbUserParams=dbUserParameters;
+            req.dbUserName=dbUserParameters.dbUserName;                                             log.info('ACCESS CONTROLLER DB user:', req.dbUserName,' DB user params:', req.dbUserParams);
             next();
         });
     });

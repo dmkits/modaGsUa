@@ -1,12 +1,13 @@
-var dataModel=require('../datamodel'), database= require("../databaseMSSQL"),
+var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
 var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
-    r_States= require(appDataModelPath+"r_States");
+    r_States= require(appDataModelPath+"r_States"),
+    r_Prods=require(appDataModelPath+"r_Prods"),t_PInP=require(appDataModelPath+"t_PInP");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([t_Rec,t_RecD,r_Ours,r_Stocks,r_Comps,r_Currs,r_States], errs,
+    dataModel.initValidateDataModels([t_Rec,t_RecD,r_Ours,r_Stocks,r_Comps,r_Currs,r_States,r_Prods,t_PInP], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -214,14 +215,92 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
+    /**
+     * callback = function(ppID, err)
+     */
+    t_RecD.getNewPPID= function(dbUC,prodID,callback){
+        var query=
+            "SELECT ISNULL(MAX(pip.PPID)+1,dbs.DocID_Start) as NewPPID " +
+            "FROM r_DBIs dbs "+
+            "LEFT JOIN t_PInP pip ON pip.PPID between dbs.PPID_Start and dbs.PPID_End "+
+            "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') AND pip.ProdID=@p0 "+
+            "GROUP BY dbs.DocID_Start, dbs.DocID_End";
+        database.selectParamsQuery(dbUC,query,[prodID],
+            function(err, recordset){
+                var ppID=null;
+                if(recordset&&recordset.length>0) ppID=recordset[0]["NewPPID"];
+                callback(ppID,err);
+            });
+    };
+    t_RecD.setRecDTaxPriceCCnt=function(connection,prodID,recChID,recDData,callback){
+        database.selectParamsQuery(connection,
+            "select tax=dbo.zf_GetProdRecTax(@p0,OurID,CompID,DocDate) from t_Rec where ChID=@p1",[prodID,recChID],
+            function (result) {/* Возвращает ставку НДС для товара в зависимости от поставщика */
+                var tax=(result&&result.length>0)?result[0]["tax"]:0;
+                recDData["Tax"]=tax; recDData["PriceCC_nt"]=recDData["PriceCC_wt"]-tax;
+                var qty=recDData["Qty"];
+                recDData["TaxSum"]=tax*qty; recDData["SumCC_nt"]=recDData["SumCC_wt"]-tax*qty;
+                callback(recDData);
+            });
+    };
+    t_RecD.createStoreProdPP=function(connection,prodID,recChID,recDData,callback){
+        var priceCC_wt=recDData["PriceCC_wt"];
+        t_RecD.getNewPPID(connection,prodID,function(ppID,err){
+            if(err){
+                callback({error:"Failed calc new PPID!"},recDData);
+                return;
+            }
+            recDData["PPID"]=ppID;
+            t_Rec.getDataItem(connection,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
+                function(result){
+                    if(result.error||!result.item){
+                        callback({error:"Failed get rec data for create prod PP!"},recDData);
+                        return;
+                    }
+                    var recData=result.item;
+                    t_PInP.insDataItem(connection,{insData:{"PPID":ppID,"ProdID":prodID,"PPDesc":"","Priority":0,
+                            "ProdDate":recData["DocDate"],"ProdPPDate":null,"CompID":recData["CompID"],"Article":"","PPWeight":0,"PPDelay":0,"IsCommission":0,
+                            "PriceCC_In":priceCC_wt,"CostCC":priceCC_wt,"PriceMC":priceCC_wt,
+                            "CurrID":recData["CurrID"], "PriceMC_In":priceCC_wt,"CostAC":priceCC_wt,
+                            "File1":null,"File2":null,"File3":null, "CstProdCode":"","CstDocCode":"", "ParentDocCode":0,"ParentChID":0}},
+                        function(insResult){
+                            if(insResult.error||insResult.updateCount!=1){
+                                callback({error:"Failed create prod PP!"},recDData);
+                                return;
+                            }
+                            callback(null,recDData);
+                        });
+                });
+        });
+    };
     app.post("/docs/rec/storeRecDTableData", function(req, res){
-        t_RecD.storeTableDataItem(req.dbUC,{tableColumns:tRecDTableColumns, idFieldName:"ChID",storeTableData:req.body,
-                calcNewIdValue: function(params, callback){
-                    params.storeTableData[params.idFieldName]=params.storeTableData["ParentChID"];
-                    callback(params);
-                }},
-            function(result){
-                res.send(result);
+        var storeData=req.body;
+        var prodID=storeData["ProdID"];
+        var iProdID=parseInt(prodID);
+        if(isNaN(iProdID)){
+            res.send({error:"Non correct ProdID!"});
+            return;
+        }
+        if(storeData["Barcode"]===undefined||storeData["Barcode"]===null)
+            storeData["Barcode"]=common.getEAN13Barcode(iProdID,23);                                    console.log("storeRecDTableData storeData",storeData);
+        t_RecD.createStoreProdPP(req.dbUC,prodID,storeData["ParentChID"],storeData,
+            function(err,storeData){
+                if(err){
+                    res.send({error:err.error});
+                    return;
+                }
+                storeData["SecID"]=req.dbUserParams["t_SecID"];
+                t_RecD.setRecDTaxPriceCCnt(req.dbUC,prodID,storeData["ParentChID"],storeData,function(storeData){
+                    storeData["CostCC"]=storeData["PriceCC_wt"]; storeData["CostSum"]=storeData["SumCC_wt"];
+                    t_RecD.storeTableDataItem(req.dbUC,{tableColumns:tRecDTableColumns, idFieldName:"ChID",storeTableData:storeData,
+                            calcNewIdValue: function(params, callback){
+                                params.storeTableData[params.idFieldName]=params.storeTableData["ParentChID"];
+                                callback(params);
+                            }},
+                        function(result){
+                            res.send(result);
+                        });
+                });
             });
     });
     app.post("/docs/rec/deleteRecDTableData", function(req, res){

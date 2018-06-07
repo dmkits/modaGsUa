@@ -1,6 +1,6 @@
 var server= require("../server"), log= server.log;
 var dateFormat = require('dateformat'), path=require('path'), moment=require('moment');
-var util=require("../util");
+var common=require("../common");
 var database= require("../databaseMSSQL");
 
 var dataModelChanges= [], validatedDataModels={};
@@ -346,7 +346,7 @@ function _getDataItem(connection, params, resultCallback){
     _getDataItems(connection, params, function(result){                                             log.debug('_getDataItem: _getDataItems: result:',result,{});//test
         var getDataItemResult={};
         if(result.error) getDataItemResult.error=result.error;
-        if(result.errorCode!=undefined) getDataItemResult.errorCode=result.errorCode;
+        if(result.errorCode!==undefined) getDataItemResult.errorCode=result.errorCode;
         if(result.items) getDataItemResult.item=result.items[0];
         resultCallback(getDataItemResult);
     });
@@ -878,7 +878,7 @@ function _insDataItemWithNewID(connection, params, resultCallback) {
         resultCallback({ error:"Failed insert data item with new ID! Reason:no id field name!"});
         return;
     }
-    params.insData[idFieldName]=util.getUIDNumber();
+    params.insData[idFieldName]=common.getUIDNumber();
     this.insDataItem(connection, {idFieldName:idFieldName, insData:params.insData}, function(result){
         if(result&&result.updateCount>0)result.resultItem=params.insData;
         resultCallback(result);
@@ -1215,7 +1215,7 @@ function _storeTableDataItem(connection, params, resultCallback) {
         var calcNewIdValue=params.calcNewIdValue;
         if(!calcNewIdValue){
             calcNewIdValue= function(params, callback){
-                params.storeTableData[idFieldName]=util.getUIDNumber();
+                params.storeTableData[idFieldName]=common.getUIDNumber();
                 callback(params);
             }
         }

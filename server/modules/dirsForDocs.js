@@ -15,31 +15,33 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 
 module.exports.init= function(app){
     app.get("/dirsDocs/getDirOursForSelect", function(req, res){
-        r_Ours.getDataItemsForSelect({uuid:req.uuid,
-                valueField:"OurName",labelField:"OurName", conditions:{"OurID>":0}, order: "OurName" },
+        r_Ours.getDataItemsForSelect(req.dbUC,{valueField:"OurName",labelField:"OurName", conditions:{"OurID>":0}, order: "OurName" },
             function (result) {
                 res.send(result);
             });
     });
     app.get("/dirsDocs/getDirStocksForSelect", function(req, res){
-        r_Stocks.getDataItemsForSelect({uuid:req.uuid,
-                valueField:"StockName",labelField:"StockName", conditions:{"StockID>":0}, order: "StockName" },
+        r_Stocks.getDataItemsForSelect(req.dbUC,{valueField:"StockName",labelField:"StockName", conditions:{"StockID>":0}, order: "StockName" },
             function (result) {
                 res.send(result);
             });
     });
     app.get("/dirsDocs/getDirCompsForSelect", function(req, res){
-        r_Comps.getDataItemsForSelect({uuid:req.uuid,
-                valueField:"CompName",labelField:"CompName", conditions:{"1=":1}, order: "CompName" },
+        r_Comps.getDataItemsForSelect(req.dbUC,{valueField:"CompName",labelField:"CompName", conditions:{"1=":1}, order: "CompName" },
             function (result) {
                 res.send(result);
             });
     });
     app.get("/dirsDocs/getDirCurrsForSelect", function(req, res){
-        r_Currs.getDataItemsForSelect({uuid:req.uuid,
-                valueField:"CurrName",labelField:"CurrName", conditions:{"1=":1}, order: "CurrName" },
+        r_Currs.getDataItemsForSelect(req.dbUC,{valueField:"CurrName",labelField:"CurrName", conditions:{"1=":1}, order: "CurrName" },
             function (result) {
                 res.send(result);
             });
     });
+    //module.exports.getOurData=function(connection,ourID,callback){
+    //    r_Ours.getDataItem(connection,{fields:["TaxPayer","SysTaxType","FixTaxPercent"], conditions:{"OurID=":ourID}},
+    //        function (result) {
+    //            callback((result)?result.item:null);
+    //        });
+    //};
 };

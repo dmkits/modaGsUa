@@ -1,7 +1,7 @@
 var startDateTime=new Date(), startTime=startDateTime.getTime();                                    console.log('STARTING at ',startDateTime );//test
 try{
     var ENV=process.env.NODE_ENV;                                                                   if(ENV=="development") console.log("START IN DEVELOPMENT MODE");
-    var util=require('./util'), appStartupParams = util.getStartupParams();                         console.log('Started with startup params:',appStartupParams);//test
+    var common=require('./common'), appStartupParams = common.getStartupParams();                         console.log('Started with startup params:',appStartupParams);//test
     var logDebug = (ENV=='development' || (appStartupParams && appStartupParams.logDebug));         if(logDebug) console.log("DEBUG LOG ON");
     module.exports.logDebug = logDebug;
     var path = require('path'), fs = require('fs'), dateformat =require('dateformat'),
@@ -67,7 +67,7 @@ var serverConfig=null;
 global.serverConfigPath= path.join(__dirname,'/../','');
 function loadServerConfiguration(){
     try {
-        serverConfig= util.loadConfig(appStartupParams.mode + '.cfg');
+        serverConfig= common.loadConfig(appStartupParams.mode + '.cfg');
     } catch (e) {
         log.error("Failed to load configuration! Reason:" + e);
         serverConfig= null;
@@ -81,7 +81,7 @@ module.exports.setAppConfig= function(newAppConfig){ serverConfig=newAppConfig; 
 var database = require('./databaseMSSQL');                                                          log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
 
 var configFileName=(serverConfig&&serverConfig.configName)?serverConfig.configName:'config.json';
-var config=JSON.parse(util.getJSONWithoutComments(fs.readFileSync('./'+configFileName,'utf-8')));
+var config=JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+configFileName,'utf-8')));
 module.exports.getConfig=function(){ return config; };
 module.exports.getConfigAppMenu=function(){ return (config&&config.appMenu)?config.appMenu:null; };
 module.exports.getConfigModules=function(){ return (config&&config.modules)?config.modules:null; };

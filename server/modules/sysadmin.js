@@ -4,7 +4,7 @@ var log = server.log;
 var appParams=server.getAppStartupParams(), getServerConfig=server.getServerConfig, setAppConfig=server.setAppConfig, getConfig=server.getConfig;
 var loadServerConfiguration=server.loadServerConfiguration;
 
-var util=require('../util'), database=require('../databaseMSSQL');
+var common=require('../common'), database=require('../databaseMSSQL');
 var appModules=require(appModulesPath), getValidateError=appModules.getValidateError;
 var moment=require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron'), moment = require('moment')*/;
 
@@ -103,7 +103,7 @@ module.exports.init = function(app){
         var newServerConfig = req.body;
         var currentDbName=server.getServerConfig().database;
         var currentDbHost=server.getServerConfig().host;
-        util.saveConfig(appParams.mode+".cfg", newServerConfig,
+        common.saveConfig(appParams.mode+".cfg", newServerConfig,
             function (err) {
                 var outData = {};
                 if (err) {
@@ -195,7 +195,7 @@ module.exports.init = function(app){
             if (tableData.error&&  tableData.error.indexOf("Invalid object name")>=0) {  log.info("668   checkIfChangeLogExists resultCallback tableData.error:",tableData.error,tableData);
                 outData.noTable = true;
                 var arr=dataModel.getModelChanges();
-                var items=util.sortArray(arr);
+                var items=common.sortArray(arr);
                 for(var i in items){
                     var item=items[i];
                     item.type="new";
@@ -211,7 +211,7 @@ module.exports.init = function(app){
                 return;
             }
             var arr=dataModel.getModelChanges();
-            var logsData= util.sortArray(arr);
+            var logsData= common.sortArray(arr);
             matchLogData(logsData, outData, 0, function(outData){
                 res.send(outData);
             });

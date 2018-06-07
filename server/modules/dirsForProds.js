@@ -1,7 +1,7 @@
 /**
  * Created by Dmitrk on 13.05.2018.
  */
-var dataModel=require('../datamodel');
+var dataModel=require('../datamodel'),database= require("../databaseMSSQL");
 var r_Prods= require(appDataModelPath+"r_Prods"), r_ProdC= require(appDataModelPath+"r_ProdC"),
     r_ProdG1= require(appDataModelPath+"r_ProdG1"), r_ProdG2= require(appDataModelPath+"r_ProdG2"),
     r_ProdG3= require(appDataModelPath+"r_ProdG3");
@@ -18,7 +18,10 @@ module.exports.init= function(app){
         {data: "ProdID", name: "ProdID", width: 80, type: "text", readOnly:true, visible:false},
         {data: "ProdName", name: "Наименование товара", width: 350, type: "text" },
         {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center" },
-        {data: "ProdArticle1", name: "Артикул1 товара", width: 200, type: "text", sourceField:"Article1" }
+        {data: "ProdArticle1", name: "Артикул1 товара", width: 200, type: "text", sourceField:"Article1" },
+        {data: "Barcode", name: "Штрихкод", width: 50, type: "text",
+            dataSource:"r_ProdMQ", sourceField:"barcode", linkCondition:"r_Prods.ProdID=r_ProdMQ.ProdID and r_Prods.UM=r_ProdMQ.UM" }
+
         //{data: "GENDER_CODE", name: "Код группы", width: 50,
         //    type: "combobox", "sourceURL":"/dir/products/getDataForProductsGendersCombobox/genderCode",
         //    dataSource:"dir_products_genders", sourceField:"CODE"},
@@ -78,34 +81,4 @@ module.exports.init= function(app){
                 res.send(result);
             });
     });
-
-    //app.get("/dirsProds/getDirOursForSelect", function(req, res){
-    //    r_Ours.getDataItemsForSelect({uuid:req.uuid,
-    //            valueField:"OurName",labelField:"OurName", conditions:{"OurID>":0}, order: "OurName" },
-    //        function (result) {
-    //            res.send(result);
-    //        });
-    //});
-    //app.get("/dirsProds/getDirStocksForSelect", function(req, res){
-    //    r_Stocks.getDataItemsForSelect({uuid:req.uuid,
-    //            valueField:"StockName",labelField:"StockName", conditions:{"StockID>":0}, order: "StockName" },
-    //        function (result) {
-    //            res.send(result);
-    //        });
-    //});
-    //app.get("/dirsProds/getDirCompsForSelect", function(req, res){
-    //    r_Comps.getDataItemsForSelect({uuid:req.uuid,
-    //            valueField:"CompName",labelField:"CompName", conditions:{"1=":1}, order: "CompName" },
-    //        function (result) {
-    //            res.send(result);
-    //        });
-    //});
-    //app.get("/dirsProds/getDirCurrsForSelect", function(req, res){
-    //    r_Currs.getDataItemsForSelect({uuid:req.uuid,
-    //            valueField:"CurrName",labelField:"CurrName", conditions:{"1=":1}, order: "CurrName" },
-    //        function (result) {
-    //            res.send(result);
-    //        });
-    //});
-
 };
