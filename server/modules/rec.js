@@ -283,18 +283,19 @@ module.exports.init = function(app){
         }
         //if(storeData["Barcode"]===undefined||storeData["Barcode"]===null)
         //    storeData["Barcode"]=common.getEAN13Barcode(iProdID,23);                                    console.log("storeRecDTableData storeData",storeData);
-        t_RecD.createStoreProdPP(req.dbUC,prodID,storeData["ParentChID"],storeData,
+        var parentChID=storeData["ParentChID"]||storeData["ChID"];
+        t_RecD.createStoreProdPP(req.dbUC,prodID,parentChID,storeData,
             function(err,storeData){
                 if(err){
                     res.send({error:err.error});
                     return;
                 }
                 storeData["SecID"]=req.dbUserParams["t_SecID"];
-                t_RecD.setRecDTaxPriceCCnt(req.dbUC,prodID,storeData["ParentChID"],storeData,function(storeData){
+                t_RecD.setRecDTaxPriceCCnt(req.dbUC,prodID,parentChID,storeData,function(storeData){
                     storeData["CostCC"]=storeData["PriceCC_wt"]; storeData["CostSum"]=storeData["SumCC_wt"];
-                    t_RecD.storeTableDataItem(req.dbUC,{tableColumns:tRecDTableColumns, idFieldName:"ChID",storeTableData:storeData,
+                    t_RecD.storeTableDataItem(req.dbUC,{tableColumns:tRecDTableColumns, idFields:["ChID","SrcPosID"],storeTableData:storeData,
                             calcNewIdValue: function(params, callback){
-                                params.storeTableData[params.idFieldName]=params.storeTableData["ParentChID"];
+                                params.storeTableData["ChID"]=params.storeTableData["ParentChID"];
                                 callback(params);
                             }},
                         function(result){
@@ -304,7 +305,7 @@ module.exports.init = function(app){
             });
     });
     app.post("/docs/rec/deleteRecDTableData", function(req, res){
-        t_RecD.delTableDataItem(req.dbUC,{idFieldName:"ChID",delTableData:req.body},
+        t_RecD.delTableDataItem(req.dbUC,{idFields:["ChID","SrcPosID"],delTableData:req.body},
             function(result){
                 res.send(result);
             });
