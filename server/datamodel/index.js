@@ -846,7 +846,6 @@ function _insDataItem(connection, params, resultCallback) {
         if(insDataItemValue&&(insDataItemValue instanceof Date)) {
             insDataItemValue=dateFormat(insDataItemValue,"yyyy-mm-dd HH:MM:ss");
         }
-        //  queryInputParamsObj[fieldName]=insDataItemValue;
         queryInputParams.push(insDataItemValue);
     }
     var insQuery="insert into "+params.tableName+"("+queryFields+") values("+queryFieldsValues+")";

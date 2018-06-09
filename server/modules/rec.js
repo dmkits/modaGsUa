@@ -281,8 +281,8 @@ module.exports.init = function(app){
             res.send({error:"Non correct ProdID!"});
             return;
         }
-        if(storeData["Barcode"]===undefined||storeData["Barcode"]===null)
-            storeData["Barcode"]=common.getEAN13Barcode(iProdID,23);                                    console.log("storeRecDTableData storeData",storeData);
+        //if(storeData["Barcode"]===undefined||storeData["Barcode"]===null)
+        //    storeData["Barcode"]=common.getEAN13Barcode(iProdID,23);                                    console.log("storeRecDTableData storeData",storeData);
         t_RecD.createStoreProdPP(req.dbUC,prodID,storeData["ParentChID"],storeData,
             function(err,storeData){
                 if(err){
