@@ -633,6 +633,7 @@ function _getTableColumnsDataForHTable(tableColumns){
         var tableColData=tableColumns[col];
         if(!tableColData||!tableColData.data||!tableColData.name) continue;
         var tableColumnsDataItemForHTable= { data:tableColData.data };
+        if(tableColData.identifier!==undefined) tableColumnsDataItemForHTable.identifier=tableColData.identifier;
         if(tableColData.name!==undefined) tableColumnsDataItemForHTable.name=tableColData.name;
         if(tableColData.width!==undefined) tableColumnsDataItemForHTable.width=tableColData.width;
         if(tableColData.type!==undefined) tableColumnsDataItemForHTable.type=tableColData.type;

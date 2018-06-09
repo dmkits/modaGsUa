@@ -64,7 +64,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 for(var dataItemName in this.data) this.data[dataItemName]=null;
             },
             /**
-             * params= { onlyValues, error, result, resultItem, resultError, updateCount }
+             * params= { onlyValues, callContentUpdated, error, result, resultItem, resultError, updateCount }
              * callback's onContentUpdated(newData,params,idIsChanged)
              */
             setContentData: function (newData, params) {                                                   //console.log("ContentController.setContentData newData=",newData,sourceparams);
@@ -76,6 +76,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                     for(var itemName in this.elements){
                         this.setControlElementData(itemName, null, false, false);
                     }
+                    if(params.callContentUpdated===false) return;
                     setTimeout(function(){
                         thisInstance.onContentUpdated(newData,params,true);
                     },0);
@@ -98,6 +99,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                     if (elementObj.labelDataItem) newDataItem[elementObj.labelDataItem]= newData[elementObj.labelDataItem];
                     this.setControlElementData(itemName, newDataItem, enable, params.onlyValues);
                 }
+                if(params.callContentUpdated===false) return;
                 var idIsChanged= (!this.data)?true:oldDataIDValue!==newDataIDValue;
                 setTimeout(function(){
                     thisInstance.onContentUpdated(newData,params,idIsChanged);

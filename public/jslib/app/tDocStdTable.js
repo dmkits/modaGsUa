@@ -219,8 +219,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 if(clearBeforeLoad===true) this.detailHeader.clearData();
                 var detailHeaderGetDataCondition={};
                 detailHeaderGetDataCondition[(this.detailHeader.dataIDName+"=").replace("=","~")]=newID;                //console.log("TDocStdTable.setDetailHeaderContentByListSelectedRow this.detailHeader.loadDataFromUrl");
-                if(this.detailTable.getContent().length>0)
-                    this.detailTable.clearContent({callOnUpdateContent:false,resetSelection:false});
+                if(this.detailHeader.getContentDataIDValue()!==newID&&this.detailTable.getContent().length>0)
+                    this.detailTable.clearContent({callUpdateContent:false,resetSelection:false});
                 this.detailHeader.loadDataFromUrl({ url:this.detailHeader.getDataUrl, condition:detailHeaderGetDataCondition });
             },
             loadDetailHeaderContentValuesFromServer: function(){
@@ -376,8 +376,17 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 var thisInstance= this;
                 this.detailTable.onUpdateContent = function(params){                                                console.log("TDocStdTable.detailTable.onUpdateContent ",params);
                     if(params&&(params.updatedRows||params.deletedRows)) {
-                        thisInstance.loadListTableContentFromServer({callUpdateContent:false});
-                        thisInstance.setDetailHeaderContentByListSelectedRow(thisInstance.detailHeader.lastContentData, {reloadData:false});
+                        var reloadData=false;
+                        if(params.deletedRows) reloadData=true;
+                        if(!reloadData&&params.updatedRows)
+                            for(var r in params.updatedRows)
+                                if (!this.isRowEditable(params.updatedRows[r])) {
+                                    reloadData=true; break;
+                                }
+                        if(reloadData){
+                            thisInstance.loadListTableContentFromServer({callUpdateContent:false});
+                            thisInstance.setDetailHeaderContentByListSelectedRow(thisInstance.detailHeader.lastContentData, {reloadData:reloadData});
+                        }
                     }
                     var selectedRowData = this.getSelectedRow();
                     if ( !selectedRowData && this.getContent().length>0) {

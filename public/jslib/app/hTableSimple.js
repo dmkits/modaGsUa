@@ -87,7 +87,17 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
             setData: function(data) {
                 if (!data) { data={ identifier:null, columns:[], items:[], error:null }; }
                 if(data.error) { this.htDataError=data.error; } else this.htDataError=null;
-                if(data.identifier) { this.handsonTable.rowIDName=data.identifier; }
+                this.handsonTable.rowIDNames={};
+                if(data.identifier) {
+                    this.handsonTable.rowIDName=data.identifier;
+                    this.handsonTable.rowIDNames[data.identifier]=0;
+                }
+                if(data.columns){
+                    for(var c in data.columns){
+                        var colData=data.columns[c];
+                        if(colData.identifier) this.handsonTable.rowIDNames[colData.data]=c;
+                    }
+                }
                 this.setDataColumns(data.columns);
                 if(!data.items) {
                     this.htData = [];
@@ -100,6 +110,9 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
             },
             getRowIDName: function(){
                 return this.handsonTable.rowIDName;
+            },
+            getRowIDNames: function(){
+                return this.handsonTable.rowIDNames;
             },
             getColumns: function(){                                                                         //console.log("HTableSimple getColumns ",this.htColumns);
                 return this.htColumns;
@@ -251,17 +264,17 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
             //    this.set("disabled",disabled);
             //    if (disabled) this.handsonTable
             //},
-            /*
+            /**
              * newdata = { identifier:"...", columns:[...], items:[...] }
              * if newdata.items=null table data content cleared (columns not clreared)
              * calls on load/set/reset data to table or on change data after store
-             * params= { callOnUpdateContent=true/false, resetSelection=true/false }
+             * params= { callUpdateContent=true/false, resetSelection=true/false }
              * default params.resetSelection!=false
              * if params.resetSelection==false not call resetSelection
-             * default params.callOnUpdateContent!=false
-             * if params.callOnUpdateContent==false not call onUpdateContent
+             * default params.callUpdateContent!=false
+             * if params.callUpdateContent==false not call onUpdateContent
              */
-            updateContent: function(newdata,params) {                                                       //console.log("HTableSimple updateContent newdata=",newdata," params=", params);
+            updateContent: function(newdata,params) {                                                      console.log("HTableSimple updateContent newdata=",newdata," params=", params);
                 if(newdata!==undefined) this.setData(newdata);
                 if(this.htData!==null) {//loadTableContent
                     this.handsonTable.updateSettings(
@@ -270,24 +283,25 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                     if(params&&params.resetSelection!==false) this.resetSelection();
                 } else {//clearTableDataContent
                     this.clearContent(params);
+                    return;
                 }
-                if (params&&params.callOnUpdateContent===false) return;
+                if (params&&params.callUpdateContent===false) return;
                 this.onUpdateContent();
             },
             setContent: function(newdata) {                                                                 //console.log("HTableSimple setContent newdata=", newdata);
                 this.updateContent(newdata);
             },
-            /*
-             * params= { callOnUpdateContent=true/false, resetSelection=true/false }
+            /**
+             * params= { callUpdateContent=true/false, resetSelection=true/false }
              * default params.resetSelection!=false
              * if params.resetSelection==false not call resetSelection
-             * default params.callOnUpdateContent!=false
-             * if params.callOnUpdateContent==false not call onUpdateContent
+             * default params.callUpdateContent!=false
+             * if params.callUpdateContent==false not call onUpdateContent
              */
             clearContent: function(params) {                                                                //console.log("HTableSimple clearContent");
                 if(params&&params.resetSelection!==false) this.setSelection(null,null);
                 this.handsonTable.updateSettings({columns:this.htVisibleColumns, data:[], comments:false, readOnly:true});
-                if (params&&params.callOnUpdateContent===false) return;
+                if (params&&params.callUpdateContent===false) return;
                 this.onUpdateContent();
             },
             resetSelection: function(){                                                                     //console.log("HTableSimple resetSelection ",this.getSelectedRows()," rowIDName=", this.handsonTable.rowIDName);

@@ -220,7 +220,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 if(!prevRowData) return undefined;
                 return prevRowData[itemName];
             },
-            /*
+            /**
              * params { editPropValue, addData, callUpdateContent }
              * do render table content
              */
@@ -519,26 +519,29 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 var thisInstance = this;
                 Request.postJSONData({url:params.url,condition:params.condition,data:storingData}
                     ,function(result,error){
+                        var errors={};
+                        if(error) errors["<!$error$!>"] = error;
                         if(!result){
-                            rowData["<!$error$!>"]= "Не удалось получить результат операции с сервера!";
-//                        instance.setErrorsCommentsForRow(storeRow,resultItem);
+                            error["<!$error$!>"]= "Не удалось получить результат операции с сервера!";
+                            thisInstance.updateRowAllDataItems(rowData, rowData,
+                                {editPropValue:true, addData:errors, callUpdateContent:params.callUpdateContent} );
+                            //instance.setErrorsCommentsForRow(storeRow,resultItem);
                             if(postCallback) postCallback(result,error,rowData);
                             return;
                         }
                         var resultItem = result["resultItem"], updateCount = result["updateCount"], errors={};
-                        if(!resultItem) errors['<!$error_resultItem$!>']="Не удалось получить данные результата операции с сервера!";
-                        if(!error&&resultItem&&updateCount>0){
-                            thisInstance.updateRowAllDataItems(rowData, resultItem,
-                                {editPropValue:false, addData:errors, callUpdateContent:params.callUpdateContent} );
-                            if(postCallback) postCallback(result,error,rowData);
+                        if(error||!resultItem||!updateCount>0){
+                            if(!resultItem) errors['<!$error_resultItem$!>']="Не удалось получить данные результата операции с сервера!";
+                            if(!updateCount>0) errors["<!$error_updateCount$!>"]= "Данные не были сохранены на сервере!";
+                            thisInstance.updateRowAllDataItems(rowData, resultItem||storingData,
+                                {editPropValue:true, addData:errors, callUpdateContent:false});             //console.log("HTableEditable.storeRowDataByURL resultItem=",resultItem);
+                            //instance.setErrorsCommentsForRow(storeRow,storeRowData);
+                            if (postCallback) postCallback(result,error,rowData);
                             return;
                         }
-                        if(error) errors["<!$error$!>"] = error;
-                        if(!updateCount>0) errors["<!$error_updateCount$!>"]= "Данные не были сохранены на сервере!";
-                        if(!resultItem)resultItem=storingData;
-                        thisInstance.updateRowAllDataItems(rowData, resultItem,{editPropValue:true, addData:errors, callUpdateContent:false});//console.log("HTableEditable.storeRowDataByURL resultItem=",resultItem);
-                        //instance.setErrorsCommentsForRow(storeRow,storeRowData);
-                        if (postCallback) postCallback(result,error,rowData);
+                        thisInstance.updateRowAllDataItems(rowData, resultItem,
+                            {editPropValue:false, addData:errors, callUpdateContent:params.callUpdateContent} );
+                        if(postCallback) postCallback(result,error,rowData);
                     })
             },
             /**
@@ -579,11 +582,14 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     }
                     if(rowInd===0){
                         if (!storeTableRowsDialog) {
-                            storeTableRowsDialog = new Dialog({id: thisInstance.id + "_storeTableRowsDialog", closable: false, title: "Подождите, пожалуйста, операция выполняется"});
+                            storeTableRowsDialog =
+                                new Dialog({id: thisInstance.id + "_storeTableRowsDialog", closable: false,
+                                    title: "Подождите, пожалуйста, операция выполняется"});
                             document.body.appendChild(storeTableRowsDialog.domNode);
                         }
                         if (!storeTableRowsDialogProgressBar) {
-                            storeTableRowsDialogProgressBar = new ProgressBar({id: thisInstance.id +"_storeTableRowsDialogProgressBar", style: "width: 300px"});
+                            storeTableRowsDialogProgressBar =
+                                new ProgressBar({id: thisInstance.id +"_storeTableRowsDialogProgressBar", style: "width: 300px"});
                             storeTableRowsDialog.addChild(storeTableRowsDialogProgressBar);
                         }else storeTableRowsDialogProgressBar.set("value",0);
 
@@ -606,40 +612,53 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     return;
                 }
                 if (!params.rowData || !this.getRowIDName()) return;
-                var rowData=params.rowData, rowIDName=this.getRowIDName(), deletingRowIDValue=rowData[rowIDName];
-                if (deletingRowIDValue===undefined||deletingRowIDValue===null) {
-                    console.log("HTableEditable.deleteRowDataByURL ERROR! NO ROW ID VALUE!");/*!!!TEST LOG!!!*/
+                var rowData=params.rowData, rowIDNames=this.getRowIDNames(), deletingData= null;
+                for(var rowIDNameItem in rowIDNames){
+                    var rowIDValueItem=rowData[rowIDNameItem];
+                    if (rowIDValueItem!==undefined&&rowIDValueItem!==null) {
+                        if (!deletingData) deletingData = {};
+                        deletingData[rowIDNameItem] = rowIDValueItem;
+                    }
+                }
+                if (!deletingData) {
+                    console.log("HTableEditable.deleteRowDataByURL ERROR! NO ROW ID VALUES!");/*!!!TEST LOG!!!*/
                     return;
                 }
-                var deletingData = {};
-                deletingData[rowIDName]=deletingRowIDValue;
-                var thisInstance = this;                                                                //console.log("HTableEditable deleteRowDataByURL ",params.data);
+                var thisInstance = this;                                                                    //console.log("HTableEditable deleteRowDataByURL deletingData",deletingData);
                 Request.postJSONData({url:params.url,condition:params.condition,data:deletingData},
-                    function(result,error){
+                    function(result,error){                                                                 //console.log("HTableEditable deleteRowDataByURL result",result);
+                        var errors={};
+                        if(error) errors["<!$error$!>"] = error;
                         if(!result){
-                            rowData["<!$error$!>"]= "Не удалось получить результат операции с сервера!";
-//                        instance.setErrorsCommentsForRow(storeRow,resultItem);
+                            errors["<!$error$!>"]= "Не удалось получить результат операции с сервера!";
+                            thisInstance.updateRowAllDataItems(rowData, rowData,
+                                {editPropValue:false, addData:errors, callUpdateContent:params.callUpdateContent});
+                            //instance.setErrorsCommentsForRow(storeRow,resultItem);
                             if(postCallback) postCallback(result,error,rowData);
                             return;
                         }
-                        var resultItem = result["resultItem"], updateCount = result["updateCount"], errors={};
-                        if(!resultItem) errors['<!$error_resultItem$!>']="Не удалось получить данные результата операции с сервера!";
-                        if(!error&&updateCount>0&&resultItem){
-                            var deletedRowIDValue=resultItem[rowIDName];
-                            if(deletingRowIDValue==deletedRowIDValue) {
+                        var resultItem = result["resultItem"], updateCount = result["updateCount"];
+                        if(error||!updateCount>0||!resultItem){
+                            if(!resultItem) errors['<!$error_resultItem$!>']="Не удалось получить данные результата операции с сервера!";
+                            if(!updateCount>0) errors["<!$error_updateCount$!>"]= "Данные не были удалены на сервере!";
+                            thisInstance.updateRowAllDataItems(rowData, rowData,
+                                {editPropValue:false, addData:errors, callUpdateContent:params.callUpdateContent} );
+                            //instance.setErrorsCommentsForRow(storeRow,storeRowData);
+                            if(postCallback) postCallback(result,error,rowData);
+                            return;
+                        }
+                        for(var delRowIDNameItem in rowIDNames){
+                            var deletingRowIDValue=deletingData[delRowIDNameItem], deletedRowIDValue=resultItem[delRowIDNameItem];
+                            if(deletingRowIDValue!=deletedRowIDValue) {
+                                errors['<!$error_resultItemID$!>']="Не удалось получить корректный результат операции с сервера!";
+                                thisInstance.updateRowAllDataItems(rowData, rowData,
+                                    {editPropValue:false, addData:errors, callUpdateContent:params.callUpdateContent} );
+                                //instance.setErrorsCommentsForRow(storeRow,storeRowData);
                                 if(postCallback) postCallback(result,error,rowData);
-                                thisInstance.deleteRow(rowData,{callUpdateContent:params.callUpdateContent});//this call onUpdateContent
                                 return;
                             }
-                            errors['<!$error_resultItemID$!>']="Не удалось получить корректный результат операции с сервера!";
-                            if(postCallback) postCallback(result,error,rowData);
-                            return;
                         }
-                        if(error) errors["<!$error$!>"] = error;
-                        if(!updateCount>0) errors["<!$error_updateCount$!>"]= "Данные не были удалены на сервере!";
-                        thisInstance.updateRowAllDataItems(rowData, rowData,
-                            {editPropValue:false, addData:errors, callUpdateContent:params.callUpdateContent} );
-                        //instance.setErrorsCommentsForRow(storeRow,storeRowData);
+                        thisInstance.deleteRow(rowData,{callUpdateContent:params.callUpdateContent});//this call onUpdateContent
                         if (postCallback) postCallback(result,error,rowData);
                     })
             },
@@ -653,10 +672,13 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
                 if (!params || !this.getRowIDName() || !this.getSelectedRow()) return;
                 params.rowData= this.getSelectedRow();
-                var rowIDValue=params.rowData[this.getRowIDName()];
-                if (rowIDValue===null||rowIDValue===undefined) {                                        //console.log("HTableEditable.deleteSelectedRowDataByURL params=",params);
-                    this.deleteRow(params.rowData);//this call onUpdateContent
-                    return;
+                var rowData=params.rowData, rowIDNames=this.getRowIDNames();                            //console.log("HTableEditable.deleteSelectedRowDataByURL params=",params,"rowIDNames",rowIDNames);
+                for(var rowIDNameItem in rowIDNames){
+                    var rowIDValueItem=rowData[rowIDNameItem];
+                    if (rowIDValueItem===null||rowIDValueItem===undefined) {
+                        this.deleteRow(params.rowData);//this call onUpdateContent
+                        return;
+                    }
                 }
                 params.callUpdateContent= true;
                 var thisInstance=this;

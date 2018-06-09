@@ -185,10 +185,10 @@ module.exports.init = function(app){
     });
 
     var tRecDTableColumns=[
-        {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_RecD", readOnly:true, visible:false},
+        {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_RecD", identifier:true, readOnly:true, visible:false},
         //{data: "PINV_ID", name: "PINV_ID", width: 50, type: "text", readOnly:true, visible:false},
         //{data: "POSIND", name: "POSIND", width: 45, type: "numeric", visible:false},
-        {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_RecD" },
+        {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_RecD", identifier:true },
         {data: "ProdArticle1", name: "Артикул1 товара", width: 200, type: "text",
             dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
         {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"t_RecD", visible:true},
