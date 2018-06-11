@@ -175,7 +175,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 var thisInstance=this;
                 this.detailHeader.onContentUpdated= function(contentData, params, idIsChanged){             console.log("TDocStdTable.detailHeader.onContentUpdated ",contentData," ",params,idIsChanged);
                     if (this.setTitleContent) this.setTitleContent();
-                    if(!params||params.onlyValues!==true) this.lastContentData=contentData;
+                    if(idIsChanged&&(!params||(params.onlyValues!==true&&!params.error))) this.lastContentData=contentData;
                     if(idIsChanged){
                         if (!contentData||contentData.length==0) {
                             thisInstance.detailTable.clearContent();
