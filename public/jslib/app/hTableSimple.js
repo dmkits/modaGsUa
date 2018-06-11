@@ -274,7 +274,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
              * default params.callUpdateContent!=false
              * if params.callUpdateContent==false not call onUpdateContent
              */
-            updateContent: function(newdata,params) {                                                      console.log("HTableSimple updateContent newdata=",newdata," params=", params);
+            updateContent: function(newdata,params) {                                               console.log("HTableSimple updateContent newdata=",newdata," params=", params);
                 if(newdata!==undefined) this.setData(newdata);
                 if(this.htData!==null) {//loadTableContent
                     this.handsonTable.updateSettings(
@@ -288,8 +288,8 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 if (params&&params.callUpdateContent===false) return;
                 this.onUpdateContent();
             },
-            setContent: function(newdata) {                                                                 //console.log("HTableSimple setContent newdata=", newdata);
-                this.updateContent(newdata);
+            setContent: function(newdata,params) {                                                  //console.log("HTableSimple setContent newdata=", newdata);
+                this.updateContent(newdata,params);
             },
             /**
              * params= { callUpdateContent=true/false, resetSelection=true/false }
@@ -298,13 +298,13 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
              * default params.callUpdateContent!=false
              * if params.callUpdateContent==false not call onUpdateContent
              */
-            clearContent: function(params) {                                                                //console.log("HTableSimple clearContent");
+            clearContent: function(params) {                                                        //console.log("HTableSimple clearContent");
                 if(params&&params.resetSelection!==false) this.setSelection(null,null);
                 this.handsonTable.updateSettings({columns:this.htVisibleColumns, data:[], comments:false, readOnly:true});
                 if (params&&params.callUpdateContent===false) return;
                 this.onUpdateContent();
             },
-            resetSelection: function(){                                                                     //console.log("HTableSimple resetSelection ",this.getSelectedRows()," rowIDName=", this.handsonTable.rowIDName);
+            resetSelection: function(){                                                             //console.log("HTableSimple resetSelection ",this.getSelectedRows()," rowIDName=", this.handsonTable.rowIDName);
                 var newData= this.getContent();
                 var newSelection= null, newSelectionFirstRowIndex, oldSelection= this.getSelectedRows();
                 if (oldSelection){
@@ -365,7 +365,9 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 //TODO actions and after call updateRowData({rowData,newRowData})
             },
             /**
-             * params: {method=get/post , url, condition:string or object, duplexRequest:true/false, dontClearContent:true/false, data, callUpdateContent:true/false}
+             * params: { method=get/post , url, condition:string or object, data,
+             *      duplexRequest:true/false,
+             *      dontClearContent:true/false, resetSelection:true/false, callUpdateContent:true/false }
              * if (duplexRequest=true) or (duplexRequest=undefined and no htColumns data),
              *     sends two requests: first request without parameters to get columns data without table data
              *     and second request with parameters from params.condition to get table data;
@@ -380,7 +382,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 }
                 if (!params.method) params.method="get";
                 var duplexRequest= (params.duplexRequest===true)||( (!this.htColumns||this.htColumns.length==0)&&(params.duplexRequest!==false) );
-                if (params.method!="post") {
+                if (params.method=="get") {
                     if (duplexRequest){
                         instance.loadingGif.show();
                         Request.getJSONData({url:params.url, condition:null}
@@ -395,14 +397,19 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                                 instance.loadingGif.hide();
                                 instance.updateContent(result, {callUpdateContent:params.callUpdateContent, resetSelection:false});
                                 var sCondition= JSON.stringify(params.condition);
-                                if(sCondition.length==0||sCondition==="{}"){ instance.loadingGif.hide(); return; }  //if condition is Empty
+                                if(sCondition.length==0||sCondition==="{}"){  //if condition is Empty
+                                    instance.loadingGif.hide();
+                                    if(params.resetSelection)instance.resetSelection();
+                                    return;
+                                }
                                 Request.getJSONData({url:params.url, condition:params.condition}
                                     ,/*postaction*/function(result){
                                         if(!result) result={};
                                         if(!result.columns) result.columns=instance.htColumns;
                                         if(!result.items) result.items=[];
                                         instance.loadingGif.hide();
-                                        instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
+                                        instance.updateContent(result,
+                                            {callUpdateContent:params.callUpdateContent, resetSelection:params.resetSelection});
                                     });
                             });
                         return;
@@ -416,35 +423,41 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                             if(!result.columns) result.columns=instance.htColumns;
                             if(!result.items) result.items=[];
                             instance.loadingGif.hide();
-                            instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
+                            instance.updateContent(result,
+                                {callUpdateContent:params.callUpdateContent, resetSelection:params.resetSelection});
                         });
                     return;
                 }
+                if (params.method!="post") return;
                 if (duplexRequest){
                     instance.loadingGif.show();
                     Request.postJSONData({url:params.url, condition:null},
                         /*postaction*/function(result){
                             if(!result) {
                                 instance.loadingGif.hide();
-                                instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
+                                instance.updateContent({columns:instance.htColumns, items:[]},
+                                    {callUpdateContent:params.callUpdateContent});
                                 return;
                             }
                             instance.updateContent(result, {callUpdateContent:params.callUpdateContent, resetSelection:false});
                             var sCondition= JSON.stringify(params.condition);
-                            if(sCondition.length==0||sCondition==="{}") {
+                            if(sCondition.length==0||sCondition==="{}") {//if condition is Empty
                                 instance.loadingGif.hide();
+                                if(params.resetSelection)instance.resetSelection();
                                 return;
-                            }//if condition is Empty
+                            }
                             Request.postJSONData({url:params.url, condition:params.condition, data:params.data},
                                 /*postaction*/function(result){
                                     if(!result) {
                                         instance.loadingGif.hide();
-                                        instance.updateContent({ columns:instance.htColumns, items:[] }, {callUpdateContent:params.callUpdateContent});
+                                        instance.updateContent({ columns:instance.htColumns, items:[] },
+                                            {callUpdateContent:params.callUpdateContent,resetSelection:params.resetSelection});
                                         return;
                                     }
                                     if (result.items && result.items.length>0)
                                         instance.loadingGif.hide();
-                                    instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
+                                    instance.updateContent(result,
+                                        {callUpdateContent:params.callUpdateContent,resetSelection:params.resetSelection});
                                 });
                         });
                     return;
@@ -455,12 +468,14 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 Request.postJSONData({url:params.url, condition:params.condition, data:params.data},
                     /*postaction*/function(result){
                         if(!result) {
-                            instance.updateContent({ columns:instance.htColumns, items:[] }, {callUpdateContent:params.callUpdateContent});
                             instance.loadingGif.hide();
+                            instance.updateContent({columns:instance.htColumns, items:[]},
+                                {callUpdateContent:params.callUpdateContent,resetSelection:params.resetSelection});
                             return;
                         }
                         instance.loadingGif.hide();
-                        instance.updateContent(result, {callUpdateContent:params.callUpdateContent});
+                        instance.updateContent(result,
+                            {callUpdateContent:params.callUpdateContent,resetSelection:params.resetSelection});
                     });
             },
             /**
@@ -520,10 +535,18 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                         tableInstance.updateRowsActionCallback(tableInstance, rowsData, rowsData.length, actionParams, actionFunction, finishedAction);
                     })
             },
-            setSelectedRow: function(rowIndex){
-                this.handsonTable.selectCell(rowIndex,0,rowIndex,0);
+            setSelection:function(firstSelectedRowData, selection){//callback onSelect
+                if (firstSelectedRowData===undefined){
+                    this.handsonTable.getSettings().setDataSelectedProp(this.getSelectedRow());
+                    this.handsonTable.render();
+                    return;
+                }
+                var oldSelRow= this.getSelectedRow();                                                       //console.log("HTableSimple setSelection",selection);
+                this.handsonTable.getSettings().setDataSelectedProp(firstSelectedRowData, oldSelRow);
+                this.htSelection= selection;
+                this.handsonTable.render();
             },
-            setSelectedRowByItemValue:function(itemName, value){
+            setSelectionByItemValue:function(itemName, value){
                 var oldSelectedRow=this.getSelectedRow(), instance=this;
                 this.getContent().some(function(item,rowIndex){
                     if (item[itemName]==value) {
@@ -533,7 +556,9 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 var newSelectedRow=this.getSelectedRow();
                 this.handsonTable.getSettings().setDataSelectedProp(newSelectedRow, oldSelectedRow);
                 this.handsonTable.render();
-                this.onSelect(newSelectedRow,this.htSelection);
+            },
+            setSelectedRow: function(rowIndex){
+                this.handsonTable.selectCell(rowIndex,0,rowIndex,0);
             },
             getSelectedRowIndex:function(){
                 if(!this.htSelection) return null;
@@ -562,17 +587,6 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
             onSelect: function (firstSelectedRowData, selection){
                 //TODO actions on/after row select by user or after call setSelectedRow/setSelectedRowByID
                 this.setSelection(firstSelectedRowData, selection);
-            },
-            setSelection:function(firstSelectedRowData, selection){//callback onSelect
-                if (firstSelectedRowData===undefined){
-                    this.handsonTable.getSettings().setDataSelectedProp(this.getSelectedRow());
-                    this.handsonTable.render();
-                    return;
-                }
-                var oldSelRow= this.getSelectedRow();                                                       //console.log("HTableSimple setSelection",selection);
-                this.handsonTable.getSettings().setDataSelectedProp(firstSelectedRowData, oldSelRow);
-                this.htSelection= selection;
-                this.handsonTable.render();
             },
             /**
              * menuAction= function(selRowsData, actionParams, thisInstance)

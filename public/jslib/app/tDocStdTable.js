@@ -71,10 +71,10 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 this.listTable.getDataUrl= (params)?params.getDataUrl:null; this.listTable.getDataCondition= (params)?params.getDataCondition:null;
                 this.listContainer.addChild(this.listTable);
                 var thisInstance= this;
-                this.listTable.onUpdateContent= function() {                                    console.log("TDocStdTable.listTable.onUpdateContent ",this.getSelectedRow()," selectedRowDataIDForSet=",this.selectedRowDataIDForSet);
-                    if(this.selectedRowDataIDForSet!==undefined) {
-                        this.setSelectedRowByItemValue(this.getRowIDName(), this.selectedRowDataIDForSet);
-                        return
+                this.listTable.onUpdateContent= function() {                                            console.log("TDocStdTable.listTable.onUpdateContent ",this.getSelectedRow()," rowDataIDForSelect",this.rowDataIDForSelect);
+                    if(this.rowDataIDForSelect!==undefined){
+                        this.setSelectionByItemValue(this.getRowIDName(), this.rowDataIDForSelect);
+                        return;
                     }
                     var selectedRowData = this.getSelectedRow();
                     if (!selectedRowData && this.getContent().length > 0) {
@@ -83,7 +83,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                     }
                     thisInstance.setDetailHeaderContentByListSelectedRow(selectedRowData);
                 };
-                this.listTable.onSelect = function (firstSelectedRowData, selection) {                                  console.log("TDocStdTable.listTable.onSelect ",firstSelectedRowData);
+                this.listTable.onSelect = function (firstSelectedRowData, selection) {                  console.log("TDocStdTable.listTable.onSelect ",firstSelectedRowData);
                     if ( (thisInstance.detailHeader&&thisInstance.detailHeader.isContentChanged())
                             || (thisInstance.detailTable&&thisInstance.detailTable.isExistsEditableRows()) ){
                         var listTableSelRowDataID= firstSelectedRowData[thisInstance.detailHeader.dataIDName];
@@ -111,7 +111,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 return this;
             },
             /**
-             * params: { selectedRowDataID, callUpdateContent:true/false}
+             * params: { callUpdateContent:true/false, selectedRowDataID }
              * default callUpdateContent=true
              */
             loadListTableContentFromServer: function(params){
@@ -121,10 +121,13 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                     this.listBDate.format(this.listBDate.get("value"),{selector:"date",datePattern:"yyyy-MM-dd"});
                 if (this.listEDate) condition[this.listEDate.conditionName.replace("=","~")] =
                     this.listEDate.format(this.listEDate.get("value"),{selector:"date",datePattern:"yyyy-MM-dd"});
-                var thisListTable=this.listTable;
                 if(!params) params={};
-                thisListTable.selectedRowDataIDForSet=params.selectedRowDataID;
-                this.listTable.setContentFromUrl({url:this.listTable.getDataUrl,condition:condition, callUpdateContent:params.callUpdateContent});
+                var callUpdateContent=params.callUpdateContent;
+                if(params.selectedRowDataID!==undefined) {
+                    callUpdateContent=true;
+                    this.listTable.rowDataIDForSelect=params.selectedRowDataID;
+                }
+                this.listTable.setContentFromUrl({url:this.listTable.getDataUrl,condition:condition,callUpdateContent:callUpdateContent});
             },
             /**
              * params: {header, bdateCondition,bdatelabelText, edateCondition,edatelabelText}
@@ -171,24 +174,29 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 if (parameters.activeStateValue!==undefined) this.detailHeader.activeStateValue=parameters.activeStateValue;
                 var thisInstance=this;
                 this.detailHeader.onContentUpdated= function(contentData, params, idIsChanged){             console.log("TDocStdTable.detailHeader.onContentUpdated ",contentData," ",params,idIsChanged);
-                    if(idIsChanged&&(!params||params.onlyValues!==true)) {
-                        this.lastContentData=contentData;
-                        thisInstance.loadListTableContentFromServer({
-                            selectedRowDataID:thisInstance.detailHeader.getContentDataIDValue(),callUpdateContent:false});
-                    }
                     if (this.setTitleContent) this.setTitleContent();
-                    if (idIsChanged!==true) {
-                        if (!contentData||contentData.length==0) thisInstance.setDetailSubtotalContent({disabled:true, clearValue:true});
+                    if(!params||params.onlyValues!==true) this.lastContentData=contentData;
+                    if(idIsChanged){
+                        if (!contentData||contentData.length==0) {
+                            thisInstance.detailTable.clearContent();
+                        } else
+                            thisInstance.loadDetailTableContentDataFromServer();
+                    } else {
+                        var detailSubtotalContent=!contentData||contentData.length==0;
+                        thisInstance.setDetailSubtotalContent({disabled:detailSubtotalContent, clearValue:detailSubtotalContent});
                         thisInstance.setToolPanesActions();
-                    } else
-                        thisInstance.loadDetailTableContentDataFromServer();                                console.log("this.detailHeader.onContentUpdated end",contentData, params, idIsChanged,this.lastContentData);
+                    }
+                    if(params&&params.onlyValues!==true
+                            &&(params.updatedResultItem!==undefined||params.deletedResultItem!==undefined))
+                        thisInstance.loadListTableContentFromServer({
+                            selectedRowDataID:thisInstance.detailHeader.getContentDataIDValue(), callUpdateContent:false});
                     var detailHeaderContentData=thisInstance.detailHeader.getContentData();
                     if(detailHeaderContentData && detailHeaderContentData[thisInstance.detailHeader.dataStateName]!==undefined
                         && detailHeaderContentData[thisInstance.detailHeader.dataStateName]==thisInstance.detailHeader.activeStateValue){
                          thisInstance.detailTable.setReadOnly(false);
-                    }else thisInstance.detailTable.setReadOnly();
+                    }else thisInstance.detailTable.setReadOnly();                                           console.log("TDocStdTable.detailHeader.onContentUpdated END",contentData, params, idIsChanged,this.lastContentData);
                 };
-                this.detailHeader.onContentChanged= function(isContentChanged){                                     //console.log("TDocStdTable.detailHeader.onContentChanged ",isContentChanged,this.getContentData());
+                this.detailHeader.onContentChanged= function(isContentChanged){                             //console.log("TDocStdTable.detailHeader.onContentChanged ",isContentChanged,this.getContentData());
                     //thisInstance.detailTableSetDisabled(isContentChanged);
                     thisInstance.setToolPanesActions();
                 };
@@ -197,20 +205,18 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
             /**
              * param { reloadData, clearBeforeLoad }
              */
-            setDetailHeaderContentByListSelectedRow: function(listSelectedFirstRowData, params){   console.log("TDocStdTable.setDetailHeaderContentByListSelectedRow ",listSelectedFirstRowData, params);
+            setDetailHeaderContentByListSelectedRow: function(listSelectedFirstRowData, params){            console.log("TDocStdTable.setDetailHeaderContentByListSelectedRow ",listSelectedFirstRowData, params);
                 if (!this.detailHeader) {
                     this.setToolPanesActions();
                     return;
                 }
                 if (!this.detailHeader.getDataUrl||!listSelectedFirstRowData){
                     this.detailHeader.setContentData(null);
-                    this.detailHeader.lastContentData=this.detailHeader.getContentData();
                     return;
                 }
                 var newID= listSelectedFirstRowData[this.detailHeader.dataIDName];                          //console.log("TDocStdTable.setDetailHeaderContentByListSelectedRow newID=",newID);
                 if (newID===null||newID===undefined) {
                     this.detailHeader.setContentData(null);
-                    this.detailHeader.lastContentData=this.detailHeader.getContentData();
                     return;
                 }
                 var reloadData=(params&&params.reloadData==true)?true:false;
@@ -221,20 +227,20 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 detailHeaderGetDataCondition[(this.detailHeader.dataIDName+"=").replace("=","~")]=newID;                //console.log("TDocStdTable.setDetailHeaderContentByListSelectedRow this.detailHeader.loadDataFromUrl");
                 if(this.detailHeader.getContentDataIDValue()!==newID&&this.detailTable.getContent().length>0)
                     this.detailTable.clearContent({callUpdateContent:false,resetSelection:false});
-                this.detailHeader.loadDataFromUrl({ url:this.detailHeader.getDataUrl, condition:detailHeaderGetDataCondition });
+                this.detailHeader.loadDataFromUrl({url:this.detailHeader.getDataUrl, condition:detailHeaderGetDataCondition});
             },
             loadDetailHeaderContentValuesFromServer: function(){
                 if (!this.detailHeader.getDataForNewUrl) return;
                 this.detailHeader.lastContentData=this.detailHeader.getContentData();
-                this.detailHeader.loadDataFromUrl({ url:this.detailHeader.getDataForNewUrl, condition:null, onlyValues:true});
+                this.detailHeader.loadDataFromUrl({url:this.detailHeader.getDataForNewUrl, condition:null, onlyValues:true});
             },
             storeDetailHeaderContentValues: function(){
                 if (!this.detailHeader.postDataUrl) return;
-                this.detailHeader.postDataToUrl({url:this.detailHeader.postDataUrl, condition:null});
+                this.detailHeader.storeDataByUrl({url:this.detailHeader.postDataUrl, condition:null});
             },
             deleteDetailHeaderContent: function(){
                 if (!this.detailHeader.postForDeleteDataUrl) return;
-                this.detailHeader.postDataToUrl({url:this.detailHeader.postForDeleteDataUrl, onlyIDValue:true});
+                this.detailHeader.deleteDataByUrl({url:this.detailHeader.postForDeleteDataUrl, onlyIDValue:true});
             },
             addDetailHeaderElement: function(newRow,obj){
                 if(!this.detailHeaderElements) this.detailHeaderElements=[];
@@ -749,9 +755,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                     return function(){
                         var detailHeader=thisInstance.detailHeader,detailTable=thisInstance.detailTable,
                             detailHeaderContentData=detailHeader.getContentData();
-                        if ( detailHeaderContentData && !detailTable.getData() && detailTable.getData().length>0
-                                && detailHeaderContentData[thisInstance.detailHeader.dataStateName]!==undefined
-                                && detailHeaderContentData[thisInstance.detailHeader.dataStateName]==thisInstance.detailHeader.activeStateValue)
+                        if ( detailHeaderContentData && detailTable.getData() && detailTable.getData().length==0
+                                && detailHeaderContentData[thisInstance.detailHeader.dataStateName]===thisInstance.detailHeader.activeStateValue)
                             this.setDisabled(false);
                         else
                             this.setDisabled(true);

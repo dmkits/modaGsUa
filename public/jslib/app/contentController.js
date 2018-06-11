@@ -10,8 +10,8 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
          * use addControlElementObject for add element to controller
          * use setContentData for set controller elements values
          * use loadDataFromUrl for set controller elements values from url
-         * use postDataToUrl for post controller elements values to url
-         * use postForDeleteDataToUrl for post to detete controller content data by ID to url
+         * use storeDataByUrl for store controller elements values to url
+         * use deleteDataByUrl for delete controller elements values to url
          * set onContentUpdated for do action after controller's content has updated/reloaded
          * set onContentChanged for do action after user changed value of controller element
          */
@@ -64,10 +64,11 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 for(var dataItemName in this.data) this.data[dataItemName]=null;
             },
             /**
-             * params= { onlyValues, callContentUpdated, error, result, resultItem, resultError, updateCount }
+             * params= { onlyValues, callContentUpdated, result, error,
+             *      loadedResultItem, updatedResultItem, deletedResultItem, updateCount, resultError }
              * callback's onContentUpdated(newData,params,idIsChanged)
              */
-            setContentData: function (newData, params) {                                                   //console.log("ContentController.setContentData newData=",newData,sourceparams);
+            setContentData: function (newData, params) {                                                   //console.log("ContentController.setContentData newData=",newData,params);
                 if (newData===this.data&&!this.isContentChanged()) return;
                 if(!params)params={};
                 var thisInstance=this;
@@ -117,63 +118,104 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 if (!params.method) params.method="get";
                 if (params.setOnlyControlElementsValues==undefined) params.setOnlyControlElementsValues=false;
                 var thisInstance = this;
-                if (params.method!="post") {
+                if (params.method=="get") {
                     Request.getJSONData({url: params.url, condition: params.condition},
                         function (result,error) {
-                            var resultItem=(result)?result["item"]:null;
+                            var resultItem=(result)?result["item"]:null,resultError=(result)?result["error"]:null;
                             thisInstance.setContentData(resultItem,
-                                {onlyValues:params.onlyValues, error:error, result:result, resultItem:resultItem, resultError:error});
+                                {onlyValues:params.onlyValues, error:error, result:result, loadedResultItem:resultItem, resultError:resultError});
                             if(postaction)postaction(result,resultItem,error);
                         });
                     return;
                 }
+                if (params.method!="post") return;
                 Request.postJSONData({url: params.url, condition: params.condition, data:params.data, consoleLog: true},
                     function (result,error) {
-                        var resultItem=(result)?result["item"]:null;
+                        var resultItem=(result)?result["item"]:null,resultError=(result)?result["error"]:null;
                         thisInstance.setContentData(resultItem,
-                            {onlyValues:params.onlyValues, error:error, result:result, resultItem:resultItem, resultError:error});
+                            {onlyValues:params.onlyValues, error:error, result:result, loadedResultItem:resultItem, resultError:resultError});
                         if(postaction)postaction(result,resultItem,error);
                     });
             },
             /**
-             * params: { url, condition, data, onlyIDValue, onlyValues:true/false }
+             * params: { url, condition, data, onlyValues:true/false }
              * call setContentData(newData, {...}), if request.updateCount>0 newData= request result.resultItem else newData = this.data
              * if postaction call postaction(success,result,resultItem,resultError,updateCount)
              * call setContentData do callback onContentUpdated(newData,params,idIsChanged)
              */
-            postDataToUrl: function (params, postaction) {
+            storeDataByUrl: function (params, postaction) {
                 if(!params) return;
                 var dataToPost = params.data;
                 if(!dataToPost) dataToPost={};
                 if(this.data&&this.dataIDName) dataToPost[this.dataIDName]= this.data[this.dataIDName];
-                if(params.onlyIDValue!==true)
-                    for (var item in this.elements) {
-                        var value, elementObj = this.elements[item];
-                        if (elementObj) {
-                            value = this.elements[item].value;
-                            if (elementObj.declaredClass.indexOf("CheckBox") >= 0) {
-                                if(elementObj.checked==true) value=1; else value=0;
-                            }
-                            if (value!=undefined && value instanceof Date) value = moment(value).format("YYYY-MM-DD");
+                for (var item in this.elements) {
+                    var value, elementObj = this.elements[item];
+                    if (elementObj) {
+                        value = this.elements[item].value;
+                        if (elementObj.declaredClass.indexOf("CheckBox") >= 0) {
+                            if(elementObj.checked==true) value=1; else value=0;
                         }
-                        dataToPost[item] = value;
+                        if (value!=undefined && value instanceof Date) value = moment(value).format("YYYY-MM-DD");
                     }
+                    dataToPost[item] = value;
+                }
                 var thisInstance = this;
                 Request.postJSONData({url: params.url, condition: params.condition, data: dataToPost},
-                    function (result,error) {                                                                         //console.log("ContentController.postDataToUrl postJSONData dataToPost=",dataToPost," data=",result);
-                        var resultItem=(result)?result["resultItem"]:null, updateCount=(result)?result["updateCount"]:null;
+                    function (result,error) {                                                                         //console.log("ContentController.storeDataByUrl postJSONData dataToPost=",dataToPost," data=",result);
+                        var resultItem=(result)?result["resultItem"]:null, updateCount=(result)?result["updateCount"]:null,
+                            resultError=(result)?result["error"]:null;
+                        if(error||resultError||updateCount!=1){
+                            thisInstance.onContentUpdated(thisInstance.data,
+                                {onlyValues:params.onlyValues, error:error, result:result,
+                                    updatedResultItem:resultItem, updateCount:updateCount, resultError:resultError},
+                                false);
+                            if(postaction)postaction(result,resultItem,error);
+                            return;
+                        }
                         thisInstance.setContentData(resultItem,
-                            {onlyValues:params.onlyValues, error:error, result:result, resultItem:resultItem, resultError:error, updateCount:updateCount});
+                            {onlyValues:params.onlyValues, error:error, result:result,
+                                updatedResultItem:resultItem, updateCount:updateCount, resultError:resultError});
+                        if(postaction)postaction(result,resultItem,error,updateCount);
+                    });
+            },
+            /**
+             * params: { url, condition, data, onlyValues:true/false }
+             * call setContentData(newData, {...}), if request.updateCount>0 newData= request result.resultItem else newData = this.data
+             * if postaction call postaction(success,result,resultItem,resultError,updateCount)
+             * call setContentData do callback onContentUpdated(newData,params,idIsChanged)
+             */
+            deleteDataByUrl: function (params, postaction) {
+                if(!params) return;
+                var dataToPost = params.data;
+                if(!dataToPost) dataToPost={};
+                if(this.data&&this.dataIDName) dataToPost[this.dataIDName]= this.data[this.dataIDName];
+                var thisInstance = this;
+                Request.postJSONData({url: params.url, condition: params.condition, data: dataToPost},
+                    function (result,error) {                                                                         //console.log("ContentController.deleteDataByUrl postJSONData dataToPost=",dataToPost," data=",result);
+                        var resultItem=(result)?result["resultItem"]:null, updateCount=(result)?result["updateCount"]:null,
+                            resultError=(result)?result["error"]:null;
+                        if(error||resultError||updateCount!=1){
+                            thisInstance.onContentUpdated(thisInstance.data,
+                                {onlyValues:params.onlyValues, error:error, result:result,
+                                    deletedResultItem:resultItem, updateCount:updateCount, resultError:resultError},
+                                false);
+                            if(postaction)postaction(result,resultItem,error);
+                            return;
+                        }
+                        thisInstance.setContentData(null,
+                            {onlyValues:params.onlyValues, error:error, result:result,
+                                deletedResultItem:resultItem, updateCount:updateCount, resultError:error});
                         if(postaction)postaction(result,resultItem,error,updateCount);
                     });
             },
 
             /**
-             * params= { onlyValues, error, result, resultItem, resultError, updateCount }
+             * params= { onlyValues, callContentUpdated, result, error,
+             *      loadedResultItem, updatedResultItem, deletedResultItem, updateCount, resultError }
              */
-            onContentUpdated: function (contentData, sourceparams, idIsChanged) {
+            onContentUpdated: function (contentData, params, idIsChanged) {
                 // TODO actions on content data has been updated by call setContentData() or loadDataFromUrl()
-                // TODO or postDataToUrl() not fail
+                // TODO or storeDataByUrl() or deleteDataByUrl
             },
             onContentChanged: function (isContentChanged) {
                 // TODO actions on content has been changed by user or element value has been changed

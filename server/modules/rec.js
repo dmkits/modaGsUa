@@ -20,7 +20,7 @@ module.exports.init = function(app){
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
         {data: "DocID", name: "Номер", width: 85, type: "text", align:"right", dataSource:"t_Rec"},
         {data: "IntDocID", name: "Вн. номер", width: 85, type: "text", align:"right", dataSource:"t_Rec"},
-        {data: "DocDate", name: "Дата", width: 60, type: "datetime", visible:false, dataSource:"t_Rec"},
+        {data: "DocDate", name: "Дата", width: 60, type: "dateAsText",align:"center", dataSource:"t_Rec"},
         {data: "OurName", name: "Фирма", width: 150, type: "text",
             dataSource:"r_Ours", sourceField:"OurName", linkCondition:"r_Ours.OurID=t_Rec.OurID" },
         {data: "StockName", name: "Склад", width: 150, type: "text",
