@@ -105,7 +105,7 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                         if (filterValues[filterValueItem]==false){ filterItemsMap[filterValueItem]=false; }
                 }
                 var filterItems = [];
-                for(var item in filterItemsMap){ filterItems[filterItems.length]=item; }
+                for(var item in filterItemsMap) filterItems.push(item);
                 if(colType=="text"&&filterItems.length==0) return;
 
                 if(!filterMenu) {
@@ -203,9 +203,10 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                 filterMenu.style.left = (position.left) + 'px';
                 filterMenu.colProp = colProp; filterMenu.colType = colType; filterMenu.colProps = colProps;
                 while(filterMenu.firstChild) filterMenu.removeChild(filterMenu.firstChild);
-                filterMenu.valueType = colType; filterMenu.valueEdit = null; filterMenu.valueItems = [];
+                filterMenu.valueType = (colType="autocomplete")?"text":colType;
+                filterMenu.valueEdit = null; filterMenu.valueItems = [];
 
-                filterItems = filterItems.sort();
+                filterItems = filterItems.sort();                                                                       console.log("HTableSimpleFiltered.handsonTable.showFilterMenu filterItems",filterItems);
                 var createMenuItem = function(filterMenu,idPostfix,itemType, filterMenuItemData){
                     var filterMenuItem = document.createElement("LI");
                     filterMenuItem["id"]= "filter_menu_item_"+idPostfix; filterMenuItem["filterMenu"] = filterMenu;
@@ -248,10 +249,10 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                     return filterMenuItem;
                 };
                 createMenuItem(filterMenu,colProp+"_buttonCancel","button", {label:"Снять фильтр"});
-                if(colType=="text"){
+                if(colType=="text"||colType=="autocomplete"){
                     createMenuItem(filterMenu,colProp+"_buttonClear","button",{label:"Очистить значение"});
                     if(!filterValue)filterValue="";
-                    createMenuItem(filterMenu,colProp+"edit","edit",{label:"Значение: ",value:filterValue});
+                    createMenuItem(filterMenu,colProp+"_edit","edit",{label:"Значение: ",value:filterValue});
                     createMenuItem(filterMenu,colProp+"_buttonClearAll","button",{label:"Снять все отметки"});
                     createMenuItem(filterMenu,colProp+"_checkboxlist","checkboxlist",{values:filterItems,isValueChecked:filterValues});
                 } else if(colType=="numeric"){
@@ -329,15 +330,16 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                 if(!rowData) continue;
                 var rowVisible=true, rowVisibleByGlobalFilter=(globalFilterValue!==null)?false:true;
                 for(var colIndex in htVisColumns){
-                    var colProps = htVisColumns[colIndex], colPropName = colProps["data"], dataItemVal = rowData[colPropName], itemVisible=true;
+                    var colProps = htVisColumns[colIndex], colPropName = colProps["data"], colType = colProps["type"],
+                        dataItemVal = rowData[colPropName], itemVisible=true;                                   //console.log("HTableSimpleFiltered filterContentData colType",colType);
                     var colFiltered= colProps["filtered"];
                     if(colFiltered==true){
                         itemVisible= false;
                         if(dataItemVal==null) dataItemVal="";
-                        if(colProps["type"]=="text"&&dataItemVal!==undefined){
+                        if((colType=="text"||colType=="autocomplete")&&dataItemVal!==undefined){                //console.log("HTableSimpleFiltered filterContentData colType==text",dataItemVal);
                             if(colProps["filterValue"]&&dataItemVal.toString().indexOf(colProps["filterValue"])>=0) itemVisible=true;
                             if(colProps["filterValues"]&&colProps["filterValues"][dataItemVal.toString()]===true) itemVisible=true;
-                        } else if(colProps["type"]=="numeric"&&dataItemVal!==undefined&&colProps["filterValues"]) {
+                        } else if(colType=="numeric"&&dataItemVal!==undefined&&colProps["filterValues"]) {
                             var numericFilterValues = colProps["filterValues"];
                             for(var numericFilterValuesItem in numericFilterValues){
                                 var numericFilterValue = numericFilterValues[numericFilterValuesItem];

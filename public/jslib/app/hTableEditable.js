@@ -342,12 +342,13 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         return value;
                     };
                     this.setValue= function(newValue) {                                                 console.log("ChangedData setValue ",this.itemName,newValue);
-                        if (typeof(newValue)=="number"&&isNaN(newValue)) this.values[this.itemName]=""; else this.values[this.itemName] = newValue;
+                        if(newValue===undefined) newValue=null;
+                        if (typeof(newValue)=="number"&&isNaN(newValue+0)) this.values[this.itemName]=""; else this.values[this.itemName] = newValue;
                         return this;
                     };
                     this.setValues= function(newValue, oldValue) {
-                        if (typeof(newValue)=="number"&&isNaN(newValue)) this.values[this.itemName]=""; else this.values[this.itemName] = newValue;
-                        if (typeof(oldValue)=="number"&&isNaN(oldValue)) this.oldValues[this.itemName]=""; else this.oldValues[this.itemName] = oldValue;
+                        if (typeof(newValue)=="number"&&isNaN(newValue+0)) this.values[this.itemName]=""; else this.values[this.itemName] = newValue;
+                        if (typeof(oldValue)=="number"&&isNaN(oldValue+0)) this.oldValues[this.itemName]=""; else this.oldValues[this.itemName] = oldValue;
                         return this;
                     };
                     this.isUNDEFNULL= function(){
