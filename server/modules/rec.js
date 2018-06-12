@@ -186,11 +186,29 @@ module.exports.init = function(app){
 
     var tRecDTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_RecD", identifier:true, readOnly:true, visible:false},
-        //{data: "PINV_ID", name: "PINV_ID", width: 50, type: "text", readOnly:true, visible:false},
-        //{data: "POSIND", name: "POSIND", width: 45, type: "numeric", visible:false},
         {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_RecD", identifier:true },
-        {data: "ProdArticle1", name: "Артикул1 товара", width: 200, type: "text",
-            dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
+        {data: "ProdArticle1", name: "Артикул1 товара", width: 200,
+            type: "comboboxWN", sourceURL:"/dirsProds/getDataForRecProdArticle1",
+            dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID"},
+        {data: "PCatName", name: "Бренд товара", width: 140,
+            type: "comboboxWN", sourceURL:"/dirsProds/getDataForRecPCatName",
+            dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
+        {data: "PGrName", name: "Коллекция товара", width: 95,
+            type: "comboboxWN", sourceURL:"/dirsProds/getDataForRecPGrName",
+            dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"},
+        {data: "PGrName2", name: "Тип товара", width: 140,
+            type: "comboboxWN", sourceURL:"/dirsProds/getDataForRecPGrName2",
+            dataSource:"r_ProdG2", sourceField:"PGrName2", linkCondition:"r_ProdG2.PGrID2=r_Prods.PGrID2"},
+        {data: "PGrName3", name: "Вид товара", width: 150,
+            type: "comboboxWN", sourceURL:"/dirsProds/getDataForRecPGrName3",
+            dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"},
+        {data: "PGrName1", name: "Линия товара", width: 90,
+            type: "comboboxWN", sourceURL:"/dirsProds/getDataForRecPGrName1",
+            dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
+        {data: "ProdSize", name: "Размер товара", width: 70,
+            type: "comboboxWN", sourceURL:"/dirsProds/getDataForRecProdSize",
+            dataSource:"ir_ProdSizes", dataFunction:"CASE When ir_ProdSizes.ChID>100000001 Then ir_ProdSizes.SizeName Else '-' END",
+            linkCondition:"ir_ProdSizes.SizeName=r_Prods.SizeName"},
         {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"t_RecD", visible:true},
         {data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_RecD", visible:false},
         {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
@@ -209,7 +227,7 @@ module.exports.init = function(app){
         for(var condItem in req.query)
             if(condItem.indexOf("ParentChID")==0) conditions["t_RecD.ChID="]=req.query[condItem];
             else conditions["t_RecD."+condItem]=req.query[condItem];
-        t_RecD.getDataForTable(req.dbUC,{tableColumns:tRecDTableColumns, identifier:tRecDTableColumns[0].data,
+        t_RecD.getDataForDocTable(req.dbUC,{tableColumns:tRecDTableColumns, identifier:tRecDTableColumns[0].data,
                 conditions:conditions, order:"SrcPosID"},
             function(result){
                 res.send(result);

@@ -410,7 +410,7 @@ function _getDataItemsForTableCombobox(connection, params, resultCallback){
     }
     if(!params.source) params.source=this.source;
     if(!params.conditions) params.conditions={"1=1":null};
-    params.fields=[];
+    params.fields=[]; params.groupedFields=[];
     var joinedSources;
     for(var cFieldName in params.comboboxFields){
         var cFieldData=params.comboboxFields[cFieldName];
@@ -418,11 +418,10 @@ function _getDataItemsForTableCombobox(connection, params, resultCallback){
             if (!joinedSources) joinedSources={};
             if(!joinedSources[cFieldData.source]) joinedSources[cFieldData.source]=true;
         }
-
     }
     for(var cFieldName in params.comboboxFields){
         var cFieldData=params.comboboxFields[cFieldName];
-        params.fields.push(cFieldName);
+        params.fields.push(cFieldName); params.groupedFields.push(cFieldName);
         if(typeof(cFieldData)=="string") {
             var mainSourceName=(params.source)?params.source:this.source;
             if(!params.fieldsSources) params.fieldsSources={};
@@ -478,7 +477,8 @@ function _setDataItem(params, resultCallback){
  * params = { source,
  *      tableColumns = [
  *          {data:<dataFieldName>, name:<tableColumnHeader>, width:<tableColumnWidth>, type:<dataType>, readOnly:true/false, visible:true/false,
- *              sourceField:<sourceFieldName>
+ *              sourceField:<sourceFieldName>,
+ *              dataFunction:<sql function or sql expression>
  *             OR dataSource:<sourceName>, sourceField:<sourceFieldName>
  *             OR dataSource:<sourceName>, sourceField:<sourceFieldName>, linkCondition:<dataSource join link condition>
  *             OR childDataSource:<childSourceName>, childLinkField:<childSourceLinkFieldName>, parentDataSource, parentLinkField:<parentSourceLinkFieldName> },
@@ -687,7 +687,9 @@ function _getTableColumnsDataForHTable(tableColumns){
  * params = { source,
  *      tableColumns = [
  *          {data:<sourceFieldName>, name:<tableColumnHeader>, width:<tableColumnWidth>, type:<dataType>, readOnly:true/false, visible:true/false,
- *                dataSource:<sourceName>, sourceField:<sourceFieldName> },
+ *                dataSource:<sourceName>, sourceField:<sourceFieldName>,
+ *              dataFunction:<sql function or sql expression>
+ *                },
  *          ...
  *      ],
  *      identifier= <sourceIDFieldName>,
