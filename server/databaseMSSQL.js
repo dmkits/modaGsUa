@@ -118,6 +118,11 @@ function getFieldsTypes(recordset){
     }
     return fieldsTypes;
 }
+/**
+ * for MS SQL database select query
+ * query= <MS SQL select query string>
+ * callback = function(err, recordset, rowsCount, fieldsTypes)
+ */
 function selectQuery(connection,query, callback) {                                                  log.debug("database selectQuery query:",query);
     if(!connection){
         if(callback)callback({message:"No user database connection is specified."});
@@ -137,7 +142,7 @@ function selectQuery(connection,query, callback) {                              
 module.exports.selectQuery=selectQuery;
 /**
  * for MS SQL database query insert/update/delete
- * query= <MS SQL queryStr>
+ * query= <MS SQL insert/update/delete query string>
  * callback = function(err, updateCount)
  */
 module.exports.executeQuery=function(connection,query,callback){                                    log.debug("database executeQuery:",query);
@@ -154,9 +159,14 @@ module.exports.executeQuery=function(connection,query,callback){                
                 callback(err);
                 return;
             }
-            callback(null, result.rowsAffected.length);
+            callback(null, result.rowsAffected[result.rowsAffected.length-1]);
         });
 };
+/**
+ * for MS SQL database select query
+ * query= <MS SQL select query string>
+ * callback = function(err, recordset, rowsCount, fieldsTypes)
+ */
 function selectParamsQuery(connection,query, parameters, callback) {                                log.debug("database selectParamsQuery query:",query," parameters:",parameters,{});
     if(!connection){
         callback({message:"No user database connection is specified."});
@@ -173,13 +183,13 @@ function selectParamsQuery(connection,query, parameters, callback) {            
                 callback(err);
                 return;
             }
-            callback(null, result.recordset ,result.rowsAffected[result.rowsAffected.length-1], getFieldsTypes(result.recordset));
+            callback(null, result.recordset, result.rowsAffected.length, getFieldsTypes(result.recordset));
         });
 }
 module.exports.selectParamsQuery=selectParamsQuery;
 /**
  * for MS SQL database query insert/update/delete
- * query= <MS SQL queryStr>
+ * query= <MS SQL insert/update/delete query string>
  * paramsValueObj = {<paramName>:<paramValue>,...}
  * callback = function(err, updateCount)
  */
