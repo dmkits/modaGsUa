@@ -88,7 +88,6 @@
                                     crd.item("ProdID").setValue(prodData["ProdID"]);
                                     crd.item("ProdName").setValue(prodData["ProdName"]);
                                     crd.item("UM").setValue(prodData["UM"]);
-//                                  crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
                                     crd.item("Barcode").setValue(prodData["Barcode"]);
                                 };
                             if(!thisInstance.setDetailTableProdAttrs)
@@ -100,6 +99,7 @@
                                     crd.item("PGrName1").setValue(prodData["PGrName1"]);
                                     crd.item("PGrName2").setValue(prodData["PGrName2"]);
                                     crd.item("PGrName3").setValue(prodData["PGrName3"]);
+                                    crd.item("ProdColor").setValue(prodData["ProdColor"]);
                                     crd.item("ProdSize").setValue(prodData["ProdSize"]);
                                 };
                             if (!crd.item("ProdArticle1").isEMPTY() && (!crd.item("ProdID").isChanged()&&!crd.item("ProdName").isChanged())){
