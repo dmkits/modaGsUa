@@ -80,6 +80,53 @@
                         .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
                         .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
                         .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
+
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+                            if(!thisInstance.setDetailTableProdData)
+                                thisInstance.setDetailTableProdData= function(crd/*changedRowData*/,prodData){
+                                    if(!prodData)prodData={};
+                                    crd.item("ProdID").setValue(prodData["ProdID"]);
+                                    crd.item("ProdName").setValue(prodData["ProdName"]);
+                                    crd.item("UM").setValue(prodData["UM"]);
+//                                  crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
+                                    crd.item("Barcode").setValue(prodData["Barcode"]);
+                                };
+                            if(!thisInstance.setDetailTableProdAttrs)
+                                thisInstance.setDetailTableProdAttrs= function(crd/*changedRowData*/,prodData){
+                                    crd.item("ProdArticle1").setValue(prodData["ProdArticle1"]);
+                                    crd.item("Barcode").setValue(prodData["Barcode"]);
+                                    crd.item("PCatName").setValue(prodData["PCatName"]);
+                                    crd.item("PGrName").setValue(prodData["PGrName"]);
+                                    crd.item("PGrName1").setValue(prodData["PGrName1"]);
+                                    crd.item("PGrName2").setValue(prodData["PGrName2"]);
+                                    crd.item("PGrName3").setValue(prodData["PGrName3"]);
+                                    crd.item("ProdSize").setValue(prodData["ProdSize"]);
+                                };
+                            if (!crd.item("ProdArticle1").isEMPTY() && (!crd.item("ProdID").isChanged()&&!crd.item("ProdName").isChanged())){
+                                var condition={};
+                                condition["ProdArticle1"]=crd.item("ProdArticle1").getValue();
+                                condition["PCatName"]=crd.item("PCatName").getValue();
+                                condition["PGrName"]=crd.item("PGrName").getValue();
+                                condition["PGrName1"]=crd.item("PGrName1").getValue();
+                                condition["PGrName2"]=crd.item("PGrName2").getValue();
+                                condition["PGrName3"]=crd.item("PGrName3").getValue();
+                                condition["ProdColor"]=crd.item("ProdColor").getValue();
+                                condition["ProdSize"]=crd.item("ProdSize").getValue();
+                                Request.getJSONData({url:"/dirsProds/getProdByArticle1", condition:condition},
+                                        function(result){
+                                            if (!result || !result.item) {
+                                                thisInstance.setDetailTableProdData(crd);
+                                                nextCallback(true);
+                                                return;
+                                            }
+                                            thisInstance.setDetailTableProdData(crd,result.item);
+                                            thisInstance.setDetailTableProdAttrs(crd,result.item);
+                                            nextCallback(true);
+                                        });
+                                return;
+                            }
+                            nextCallback();
+                        })
                         .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
                             if ( (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
                                     || (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY()) ) {
@@ -94,20 +141,8 @@
                                                 nextCallback();
                                                 return;
                                             }
-                                            var resData=result.item;
-                                            crd.item("ProdID").setValue(resData["ProdID"]);
-                                            crd.item("ProdName").setValue(resData["ProdName"]);
-                                            crd.item("UM").setValue(resData["UM"]);
-                                            crd.item("ProdArticle1").setValue(resData["ProdArticle1"]);
-                                            crd.item("Barcode").setValue(resData["Barcode"]);
-                                            crd.item("PCatName").setValue(resData["PCatName"]);
-                                            crd.item("PGrName").setValue(resData["PGrName"]);
-                                            crd.item("PGrName1").setValue(resData["PGrName1"]);
-                                            crd.item("PGrName2").setValue(resData["PGrName2"]);
-                                            crd.item("PGrName3").setValue(resData["PGrName3"]);
-                                            crd.item("ProdSize").setValue(resData["ProdSize"]);
-//                                            crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
-                                            crd.item("Barcode").setValue(resData["Barcode"]);
+                                            thisInstance.setDetailTableProdData(crd,result.item);
+                                            thisInstance.setDetailTableProdAttrs(crd,result.item);
                                             nextCallback(true);
                                         });
                                 return;
@@ -208,36 +243,6 @@
 ////                                            nextCallback();
 ////                                        });
 ////                                return;
-//                            }
-//                            nextCallback();
-//                        })
-//                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
-//                            if (!crd.item("PRODUCT_ARTICLE").isEMPTY()
-//                            &&  (!crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_NAME").isChanged())){
-//                                var condition={};
-//                                condition["PRODUCT_ARTICLE"]=crd.item("PRODUCT_ARTICLE").getValue();
-//                                condition["ID"]=crd.item("ID").getValue();
-//                                Request.getJSONData({url:"/dir/products/getProdAttributesFromROperationsByArticle", condition:condition},
-//                                        function(result){
-//                                            if (!result || !result.item) {
-//                                                nextCallback();
-//                                                return;
-//                                            }
-//                                            var resData=result.item;
-//                                            crd.item("PRODUCT_GENDER").setValue(resData["PRODUCT_GENDER"]);
-//                                            crd.item("PRODUCT_GENDER_CODE").setValue(resData["PRODUCT_GENDER_CODE"]);
-//                                            crd.item("PRODUCT_CATEGORY").setValue(resData["PRODUCT_CATEGORY"]);
-//                                            crd.item("PRODUCT_CATEGORY_CODE").setValue(resData["PRODUCT_CATEGORY_CODE"]);
-//                                            crd.item("PRODUCT_SUBCATEGORY").setValue(resData["PRODUCT_SUBCATEGORY"]);
-//                                            crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(resData["PRODUCT_SUBCATEGORY_CODE"]);
-//                                            crd.item("PRODUCT_COLLECTION").setValue(resData["PRODUCT_COLLECTION"]);
-//                                            crd.item("PRODUCT_COLLECTION_CODE").setValue(resData["PRODUCT_COLLECTION_CODE"]);
-//                                            crd.item("PRODUCT_TYPE").setValue(resData["PRODUCT_TYPE"]);
-//                                            crd.item("PRODUCT_KIND").setValue(resData["PRODUCT_KIND"]);
-//                                            crd.item("PRODUCT_COMPOSITION").setValue(resData["PRODUCT_COMPOSITION"]);
-//                                            nextCallback(true);
-//                                        });
-//                                return;
 //                            }
 //                            nextCallback();
 //                        })

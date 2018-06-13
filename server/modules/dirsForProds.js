@@ -5,10 +5,11 @@ var dataModel=require('../datamodel'),database= require("../databaseMSSQL");
 var r_Prods= require(appDataModelPath+"r_Prods"),
     r_ProdC= require(appDataModelPath+"r_ProdC"),r_ProdG= require(appDataModelPath+"r_ProdG"),
     r_ProdG1= require(appDataModelPath+"r_ProdG1"), r_ProdG2= require(appDataModelPath+"r_ProdG2"),
-    r_ProdG3= require(appDataModelPath+"r_ProdG3"), ir_ProdSizes= require(appDataModelPath+"ir_ProdSizes");
+    r_ProdG3= require(appDataModelPath+"r_ProdG3"),
+    ir_ProdColors= require(appDataModelPath+"ir_ProdColors"),ir_ProdSizes= require(appDataModelPath+"ir_ProdSizes");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([r_Prods,r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdSizes], errs,
+    dataModel.initValidateDataModels([r_Prods,r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdColors,ir_ProdSizes], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -49,15 +50,6 @@ module.exports.init= function(app){
     //dirProductsTableColumns=
     //    dir_products_bata.addProductAttrsColumnsTo(dirProductsTableColumns,8);
 
-    app.get("/dirsProds/getProdByID", function (req, res) {
-        var conditions={};
-        if(req.query["ProdID"])conditions["r_Prods.ProdID="]=req.query["ProdID"];
-        if(req.query["ProdName"])conditions["r_Prods.ProdName="]=req.query["ProdName"];
-        r_Prods.getDataItemForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
-            function(result){
-                res.send(result);
-            });
-    });
     app.get("/dirsProds/getDataForRecProdArticle1", function(req, res){
         r_Prods.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"ProdArticle1":"Article1"}, order:"Article1"},
             function(result){
@@ -99,11 +91,73 @@ module.exports.init= function(app){
                 res.send(result);
             });
     });
+    app.get("/dirsProds/getDataForRecProdColor", function(req, res){
+        ir_ProdColors.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"ProdColor":"ColorName"},
+                conditions:{"ChID>0":null}, order:"ColorName"},
+            function(result){
+                res.send(result);
+            });
+    });
     app.get("/dirsProds/getDataForRecProdSize", function(req, res){
         ir_ProdSizes.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"ProdSize":"SizeName"},
                 conditions:{"ChID>0":null}, order:"SizeName"},
             function(result){
                 res.send(result);
+            });
+    });
+    app.get("/dirsProds/getProdByID", function (req, res) {
+        var conditions={};
+        if(req.query["ProdID"])conditions["r_Prods.ProdID="]=req.query["ProdID"];
+        if(req.query["ProdName"])conditions["r_Prods.ProdName="]=req.query["ProdName"];
+        r_Prods.getDataItemForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
+            function(result){
+                res.send(result);
+            });
+    });
+    r_Prods.getNewProdNameByAttrs= function(dbUC,prodData,callback){
+        //if_GetProdNameByMaskValues(ProdID, PCatName,PGrName1,PGrName3,PGrSName3,Article1,Article2,Article3, ColorName,ColorSName, Size,Sizes, Growth)
+        database.selectParamsQuery(dbUC,
+            "select ProdName="+
+            "LTRIM(RTRIM("+
+            "dbo.if_GetProdNameByMaskValues(@p0, @p1,@p2,@p3,@p4, @p5,@p6,@p7, @p8,@p9, @p10,@p11, @p12)))",
+            [prodData.ProdID, prodData.PCatName,prodData.PGrName1,prodData.PGrName3,prodData.PGrSName3,
+                prodData.Article1,prodData.Article2,prodData.Article3,
+                prodData.ColorName,prodData.ColorSName, prodData.Size,prodData.Sizes, prodData.Growth],
+            function(err, recordset, rowsCount, fieldsTypes){
+                if(err){
+                    callback({error:err.message});
+                    return;
+                }
+                if(recordset&&recordset.length>0)prodData["ProdName"]=recordset[0]["ProdName"];
+                callback(null,prodData);
+            });
+    };
+    app.get("/dirsProds/getProdByArticle1", function (req, res) {
+        var conditions={}, prodData=req.query;
+        if(prodData["ProdArticle1"])conditions["r_Prods.Article1="]=prodData["ProdArticle1"];
+        r_Prods.getDataItemsForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
+            function(result){
+                if(!result.items) {
+                    res.send({error:result.error,item:null});
+                    return;
+                }
+                if(result.items.length==0) {
+                    r_Prods.getNewProdNameByAttrs(req.dbUC,
+                        {"Article1":prodData["ProdArticle1"],
+                            "PCatName":prodData["PCatName"],"PGrName":prodData["PGrName"],
+                            "PGrName1":prodData["PGrName1"],"PGrName2":prodData["PGrName2"],"PGrName3":prodData["PGrName3"],
+                            "ColorName":prodData["ProdColor"],"Size":prodData["ProdSize"]},
+                        function(err,prodNameData){         console.log("getProdByArticle1",err,prodData,prodNameData);
+                            if(err){
+                                res.send({error:err});
+                                return
+                            }
+                            if(prodNameData)prodData["ProdName"]=prodNameData["ProdName"];
+                            res.send({item:prodData});
+                        });
+                    return;
+                }
+                res.send({item:result.items[0]});
             });
     });
 };
