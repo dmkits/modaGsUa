@@ -128,7 +128,7 @@ module.exports.init = function(app){
                                 storeData["TSpendSumCC"]=0;storeData["TRouteSumCC"]=0;
                                 storeData["EmpID"]=0;
                                 t_Rec.storeTableDataItem(req.dbUC,{tableColumns:tRecsListTableColumns, idFieldName:"ChID", storeTableData:storeData,
-                                        calcNewIdValue: function(params, callback){
+                                        calcNewIDValue: function(params, callback){
                                             r_DBIs.getNewChID(req.dbUC,"t_Rec",function(chID){
                                                 params.storeTableData[params.idFieldName]=chID;
                                                 callback(params);
@@ -251,7 +251,7 @@ module.exports.init = function(app){
             t_RecD.setRecDTaxPriceCCnt(connection,prodID,parentChID,storeData,function(storeData){
                 storeData["CostCC"]=storeData["PriceCC_wt"]; storeData["CostSum"]=storeData["SumCC_wt"];
                 t_RecD.storeTableDataItem(connection,{tableColumns:tRecDTableColumns, idFields:["ChID","SrcPosID"],storeTableData:storeData,
-                        calcNewIdValue: function(params, callback){
+                        calcNewIDValue: function(params, callback){
                             params.storeTableData["ChID"]=params.storeTableData["ParentChID"];
                             callback(params);
                         }},

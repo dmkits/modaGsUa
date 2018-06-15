@@ -88,7 +88,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.getDataForDocTable= _getDataForDocTable;
     dataModel.setDataItemForTable= _setDataItemForTable;
     dataModel.insDataItem= _insDataItem;
-    dataModel.calcNewIdValueOnInsDataItemWithNewID= _calcNewIdValueOnInsDataItemWithNewID;
+    dataModel.calcNewIDValueOnInsDataItemWithNewID= _calcNewIDValueOnInsDataItemWithNewID;
     dataModel.insDataItemWithNewID= _insDataItemWithNewID;
     dataModel.updDataItem= _updDataItem;
     dataModel.storeDataItem= _storeDataItem;
@@ -96,7 +96,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.findDataItemByOrCreateNew= _findDataItemByOrCreateNew;
     dataModel.insTableDataItem= _insTableDataItem;
     dataModel.updTableDataItem= _updTableDataItem;
-    dataModel.calcNewIdValueOnStoreTableDataItem= _calcNewIdValueOnStoreTableDataItem;
+    dataModel.calcNewIDValueOnStoreTableDataItem= _calcNewIDValueOnStoreTableDataItem;
     dataModel.storeTableDataItem= _storeTableDataItem;
     dataModel.delTableDataItem= _delTableDataItem;
     if(!tableName&&!viewName) {
@@ -895,7 +895,7 @@ function _insDataItem(connection, params, resultCallback) {
 /**
  * callback = function(params)
  */
-function _calcNewIdValueOnInsDataItemWithNewID(params, callback){
+function _calcNewIDValueOnInsDataItemWithNewID(params, callback){
     if(params.insData&&params.idFieldName)
         params.insData[params.idFieldName]=common.getUIDNumber();
     callback(params);
@@ -903,7 +903,7 @@ function _calcNewIdValueOnInsDataItemWithNewID(params, callback){
 /**
  * params = { tableName, idFieldName,
  *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
- *      calcNewIdValue = function(params, callback), callback= function(params)
+ *      calcNewIDValue = function(params, callback), callback= function(params)
  * }
  * resultCallback = function(result), result = { updateCount, error }
  */
@@ -917,9 +917,9 @@ function _insDataItemWithNewID(connection, params, resultCallback) {
         resultCallback({ error:"Failed insert data item with new ID! Reason:no id field name!"});
         return;
     }
-    if(!params.calcNewIdValue) params.calcNewIdValue=this.calcNewIdValueOnInsDataItemWithNewID;
+    if(!params.calcNewIDValue) params.calcNewIDValue=this.calcNewIDValueOnInsDataItemWithNewID;
     var thisInstance=this;
-    params.calcNewIdValue(params, function(params){
+    params.calcNewIDValue(params, function(params){
         thisInstance.insDataItem(connection, {tableName:params.tableName, insData:params.insData}, function(result){
             if(result&&result.updateCount>0)result.resultItem=params.insData;
             resultCallback(result);
@@ -1067,7 +1067,8 @@ function _delDataItem(connection, params, resultCallback) {
 
 /**
  * params = { tableName, resultFields, findByFields, idFieldName,
- *      fieldsValues = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
+ *      fieldsValues = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
+ *      calcNewIDValue = function(params, callback), callback= function(params)
  * }
  * resultCallback = function(result), result = { resultItem, error } )
  */
@@ -1105,7 +1106,9 @@ function _findDataItemByOrCreateNew(connection, params, resultCallback) {
                 return;
             }
             if (!result.item) {
-                thisInstance.insDataItemWithNewID(connection, {idFieldName:params.idFieldName,insData:params.fieldsValues}, resultCallback);
+                thisInstance.insDataItemWithNewID(connection,
+                    {idFieldName:params.idFieldName,insData:params.fieldsValues,calcNewIDValue:params.calcNewIDValue},
+                    resultCallback);
                 return;
             }
             resultCallback({resultItem:result.item});
@@ -1238,7 +1241,7 @@ function _updTableDataItem(connection, params, resultCallback) {
 /**
  * callback = function(params)
  */
-function _calcNewIdValueOnStoreTableDataItem(params, callback){
+function _calcNewIDValueOnStoreTableDataItem(params, callback){
     if(params.storeTableData&&params.idFieldName)
         params.storeTableData[params.idFieldName]=common.getUIDNumber();
     callback(params);
@@ -1246,7 +1249,7 @@ function _calcNewIdValueOnStoreTableDataItem(params, callback){
 /**
  * params = { tableName, idFieldName, idFields, tableColumns,
  *      storeTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
- *      calcNewIdValue = function(params, callback), callback= function(params)
+ *      calcNewIDValue = function(params, callback), callback= function(params)
  * }
  * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
  */
@@ -1285,9 +1288,9 @@ function _storeTableDataItem(connection, params, resultCallback) {
         }
     }
     if (isInsert){//insert
-        if(!params.calcNewIdValue) params.calcNewIdValue=this.calcNewIdValueOnStoreTableDataItem;
+        if(!params.calcNewIDValue) params.calcNewIDValue=this.calcNewIDValueOnStoreTableDataItem;
         var thisInstance=this;
-        params.calcNewIdValue(params, function(params){
+        params.calcNewIDValue(params, function(params){
             thisInstance.insTableDataItem(connection, {tableName:params.tableName, idFieldName:idFieldName,idFields:idFields,
                 tableColumns:params.tableColumns,insTableData:params.storeTableData}, resultCallback);
         });

@@ -196,7 +196,16 @@ module.exports.init= function(app){
             return;
         }
         r_ProdC.findDataItemByOrCreateNew(dbUC,
-            {resultFields:["PCatID"],findByFields:["PCatName"],idFieldName:"PCatID",fieldsValues:{"PCatName":pCatName}},
+            {resultFields:["PCatID"],findByFields:["PCatName"],idFieldName:"PCatID",fieldsValues:{"PCatName":pCatName},
+                calcNewIDValue:function(params,callback){
+                    r_DBIs.getNewChID(dbUC,"r_ProdC",function(chID,err){
+                        if(!err) params.insData["ChID"]=chID;
+                        r_DBIs.getNewRefID(dbUC,"r_ProdC","PCatID",function(refID,err){
+                            if(!err) params.insData["PCatID"]=refID;
+                            callback(params);
+                        })
+                    })
+                }},
             function(result) {
                 if (result.error) {
                     callback(prodData,result.error,"Не удалось найти и/или создать новый бренд товара:"+pCatName+"!");
@@ -209,22 +218,38 @@ module.exports.init= function(app){
                     return;
                 }
                 r_ProdG.findDataItemByOrCreateNew(dbUC,
-                    {resultFields:["PGrID"],findByFields:["PGrName"],idFieldName:"PGrID",fieldsValues:{"PGrName":pGrName}},
+                    {resultFields:["PGrID"],findByFields:["PGrName"],idFieldName:"PGrID",fieldsValues:{"PGrName":pGrName},
+                        calcNewIDValue:function(params,callback){
+                            r_DBIs.getNewChID(dbUC,"r_ProdG",function(chID,err){
+                                if(!err) params.insData["ChID"]=chID;
+                                r_DBIs.getNewRefID(dbUC,"r_ProdG","PGrID",function(refID,err){
+                                    if(!err) params.insData["PGrID"]=refID;
+                                    callback(params);
+                                })
+                            })
+                        }},
                     function(result) {
                         if (result.error) {
                             callback(prodData,result.error,"Не удалось найти и/или создать новую коллекцию товара:"+pGrName+"!");
                             return;
                         }
                         prodData["PGrID"]=result.resultItem["PGrID"];
-
                         var pGrID2=prodData["PGrID2"],pGrName2=prodData["PGrName2"];
                         if((pGrID2===undefined||pGrID2===null)&&(pGrName2===undefined||pGrName2===null||pGrName2.trim()==="")){
                             callback(prodData,"No PGrID2 on PGrName2!","Не указан тип для создания нового товара!");
                             return;
                         }
                         r_ProdG2.findDataItemByOrCreateNew(dbUC,
-                            {resultFields:["PGrID2"],findByFields:["PGrName2"],idFieldName:"PGrID2",
-                                fieldsValues:{"PGrName2":pGrName2}},
+                            {resultFields:["PGrID2"],findByFields:["PGrName2"],idFieldName:"PGrID2",fieldsValues:{"PGrName2":pGrName2},
+                                calcNewIDValue:function(params,callback){
+                                    r_DBIs.getNewChID(dbUC,"r_ProdG2",function(chID,err){
+                                        if(!err) params.insData["ChID"]=chID;
+                                        r_DBIs.getNewRefID(dbUC,"r_ProdG2","PGrID2",function(refID,err){
+                                            if(!err) params.insData["PGrID2"]=refID;
+                                            callback(params);
+                                        })
+                                    })
+                                }},
                             function(result) {
                                 if (result.error) {
                                     callback(prodData,result.error,"Не удалось найти и/или создать новый тип товара:"+pGrName2+"!");
@@ -237,7 +262,16 @@ module.exports.init= function(app){
                                     return;
                                 }
                                 r_ProdG3.findDataItemByOrCreateNew(dbUC,
-                                    {resultFields:["PGrID3"],findByFields:["PGrName3"],idFieldName:"PGrID3",fieldsValues:{"PGrName3":pGrName3}},
+                                    {resultFields:["PGrID3"],findByFields:["PGrName3"],idFieldName:"PGrID3",fieldsValues:{"PGrName3":pGrName3},
+                                        calcNewIDValue:function(params,callback){
+                                            r_DBIs.getNewChID(dbUC,"r_ProdG3",function(chID,err){
+                                                if(!err) params.insData["ChID"]=chID;
+                                                r_DBIs.getNewRefID(dbUC,"r_ProdG3","PGrID3",function(refID,err){
+                                                    if(!err) params.insData["PGrID3"]=refID;
+                                                    callback(params);
+                                                })
+                                            })
+                                        }},
                                     function(result) {
                                         if (result.error) {
                                             callback(prodData,result.error,"Не удалось найти и/или создать новый вид товара:"+pGrName3+"!");
@@ -250,7 +284,16 @@ module.exports.init= function(app){
                                             return;
                                         }
                                         r_ProdG1.findDataItemByOrCreateNew(dbUC,
-                                            {resultFields:["PGrID1"],findByFields:["PGrName1"],idFieldName:"PGrID1",fieldsValues:{"PGrName1":pGrName1}},
+                                            {resultFields:["PGrID1"],findByFields:["PGrName1"],idFieldName:"PGrID1",fieldsValues:{"PGrName1":pGrName1},
+                                                calcNewIDValue:function(params,callback){
+                                                    r_DBIs.getNewChID(dbUC,"r_ProdG1",function(chID,err){
+                                                        if(!err) params.insData["ChID"]=chID;
+                                                        r_DBIs.getNewRefID(dbUC,"r_ProdG1","PGrID1",function(refID,err){
+                                                            if(!err) params.insData["PGrID1"]=refID;
+                                                            callback(params);
+                                                        })
+                                                    })
+                                                }},
                                             function(result) {
                                                 if (result.error) {
                                                     callback(prodData,result.error,"Не удалось найти и/или создать новую линию товара:"+pGrName1+"!");
@@ -287,7 +330,16 @@ module.exports.init= function(app){
             return;
         }
         ir_ProdColors.findDataItemByOrCreateNew(dbUC,
-            {resultFields:["ColorID"],findByFields:["ColorName"],idFieldName:"ColorID",fieldsValues:{"ColorName":colorName}},
+            {resultFields:["ColorID"],findByFields:["ColorName"],idFieldName:"ColorID",fieldsValues:{"ColorName":colorName},
+                calcNewIDValue:function(params,callback){
+                    r_DBIs.getNewChID(dbUC,"ir_ProdColors",function(chID,err){
+                        if(!err) params.insData["ChID"]=chID;
+                        r_DBIs.getNewRefID(dbUC,"ir_ProdColors","ColorID",function(refID,err){
+                            if(!err) params.insData["ColorID"]=refID;
+                            callback(params);
+                        })
+                    })
+                }},
             function(result) {
                 if (result.error) {
                     callback(prodData,result.error,"Не удалось найти и/или создать новый цвет товара:"+colorName+"!");
@@ -308,7 +360,13 @@ module.exports.init= function(app){
             return;
         }
         ir_ProdSizes.findDataItemByOrCreateNew(dbUC,
-            {resultFields:["SizeName"],findByFields:["SizeName"],idFieldName:"SizeName",fieldsValues:{"SizeName":sizeName}},
+            {resultFields:["SizeName"],findByFields:["SizeName"],idFieldName:"SizeName",fieldsValues:{"SizeName":sizeName},
+                calcNewIDValue:function(params,callback){
+                    r_DBIs.getNewChID(dbUC,"ir_ProdSizes",function(chID,err){
+                        if(!err) params.insData["ChID"]=chID;
+                        callback(params);
+                    })
+                }},
             function(result) {
                 if (result.error) {
                     callback(prodData,result.error,"Не удалось найти и/или создать новый размер товара:"+sizeName+"!");
