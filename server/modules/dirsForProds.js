@@ -319,23 +319,6 @@ module.exports.init= function(app){
             })
     };
     /**
-     * callback = function(prodID, err)
-     */
-    r_Prods.getNewProdID= function(dbUC,callback){
-        var query=
-            "SELECT ISNULL(MAX(p.ProdID)+1,dbs.RefID_Start) as NewProdID " +
-            "FROM r_DBIs dbs "+
-            "LEFT JOIN r_Prods p ON p.ProdID between dbs.RefID_Start and dbs.RefID_End "+
-            "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
-            "GROUP BY dbs.RefID_Start, dbs.RefID_End";
-        database.selectQuery(dbUC,query,
-            function(err, recordset){
-                var prodID=null;
-                if(recordset&&recordset.length>0) prodID=recordset[0]["NewProdID"];
-                callback(prodID,err);
-            });
-    };
-    /**
      * callback = function(result), result= { resultItem, error, userErrorMsg }
      */
     r_Prods.storeNewProd= function(dbUC,prodData,dbUserParams,callback){
@@ -347,12 +330,12 @@ module.exports.init= function(app){
             r_DBIs.getNewChID(dbUC,"r_Prods",function(chID,err){
                 if(err) {
                     callback({error:err.message,userErrorMsg:"Не удалось получить новый ключ для создания нового товара!"});
-                    return
+                    return;
                 }
-                r_Prods.getNewProdID(dbUC,function(prodID,err){
+                r_DBIs.getNewRefID(dbUC,"r_Prods","ProdID",function(prodID,err){
                     if(err) {
                         callback({error:err.message,userErrorMsg:"Не удалось получить новый код для создания нового товара!"});
-                        return
+                        return;
                     }
                     var prodUM=prodData["UM"];
                     if(!prodUM||prodUM.trim()==="")prodUM=dbUserParams["DefaultUM"];
@@ -411,23 +394,6 @@ module.exports.init= function(app){
         });
     };
     /**
-     * callback = function(ppID, err)
-     */
-    r_Prods.getNewPPID= function(dbUC,prodID,callback){
-        var query=
-            "SELECT ISNULL(MAX(pip.PPID)+1,dbs.PPID_Start) as NewPPID " +
-            "FROM r_DBIs dbs "+
-            "LEFT JOIN t_PInP pip ON pip.PPID between dbs.PPID_Start and dbs.PPID_End AND pip.ProdID=@p0 "+
-            "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
-            "GROUP BY dbs.PPID_Start, dbs.PPID_End";
-        database.selectParamsQuery(dbUC,query,[prodID],
-            function(err, recordset){
-                var ppID=0;
-                if(recordset&&recordset.length>0) ppID=recordset[0]["NewPPID"];
-                callback(ppID,err);
-            });
-    };
-    /**
      * callback = function(result), result= { resultItem, error, userErrorMsg }
      */
     r_Prods.storeProdPP=function(connection,prodPPData,callback){
@@ -449,7 +415,7 @@ module.exports.init= function(app){
             });
             return;
         }
-        r_Prods.getNewPPID(connection,prodID,function(newPPID,err){
+        r_DBIs.getNewPPID(connection,prodID,function(newPPID,err){
             if(err){
                 callback({error:"Failed calc new PPID!"});
                 return;

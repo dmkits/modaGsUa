@@ -1,13 +1,14 @@
 var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
-var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
+var r_DBIs= require(appDataModelPath+"r_DBIs"),
+    r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
     r_States= require(appDataModelPath+"r_States"),
     r_Prods=require(appDataModelPath+"r_Prods");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([t_Rec,t_RecD,r_Ours,r_Stocks,r_Comps,r_Currs,r_States,r_Prods], errs,
+    dataModel.initValidateDataModels([t_Rec,t_RecD,r_DBIs,r_Ours,r_Stocks,r_Comps,r_Currs,r_States,r_Prods], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -62,42 +63,8 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-    /**
-     * callback = function(chID, err)
-     */
-    var getNewRecChID= function(dbUC, callback){
-        var query=
-            "SELECT ISNULL(MAX(r.ChID)+1,dbs.ChID_Start) as NewChID " +
-            "FROM r_DBIs dbs "+
-            "LEFT JOIN t_Rec r ON r.ChID between dbs.ChID_Start and dbs.ChID_End "+
-            "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
-            "GROUP BY dbs.ChID_Start, dbs.ChID_End";
-        database.selectQuery(dbUC,query,
-            function(err, recordset){
-                var chID=null;
-                if(recordset&&recordset.length>0) chID=recordset[0]["NewChID"];
-                callback(chID,err);
-            });
-    };
-    /**
-     * callback = function(docID, err)
-     */
-    var getNewRecDocID= function(dbUC,callback){
-        var query=
-            "SELECT ISNULL(MAX(r.DocID)+1,dbs.DocID_Start) as NewDocID " +
-            "FROM r_DBIs dbs "+
-            "LEFT JOIN t_Rec r ON r.DocID between dbs.DocID_Start and dbs.DocID_End "+
-            "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
-            "GROUP BY dbs.DocID_Start, dbs.DocID_End";
-        database.selectQuery(dbUC,query,
-            function(err, recordset){
-                var docID=null;
-                if(recordset&&recordset.length>0) docID=recordset[0]["NewDocID"];
-                callback(docID,err);
-            });
-    };
     app.get("/docs/rec/getNewRecData", function(req, res){
-        getNewRecDocID(req.dbUC,function(newDocID){
+        r_DBIs.getNewDocID(req.dbUC,"t_Rec",function(newDocID){
             var newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
             r_Ours.getDataItem(req.dbUC,{fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
                 var ourName=(result&&result.item)?result.item["OurName"]:"";
@@ -162,7 +129,7 @@ module.exports.init = function(app){
                                 storeData["EmpID"]=0;
                                 t_Rec.storeTableDataItem(req.dbUC,{tableColumns:tRecsListTableColumns, idFieldName:"ChID", storeTableData:storeData,
                                         calcNewIdValue: function(params, callback){
-                                            getNewRecChID(req.dbUC,function(chID){
+                                            r_DBIs.getNewChID(req.dbUC,"t_Rec",function(chID){
                                                 params.storeTableData[params.idFieldName]=chID;
                                                 callback(params);
                                             });
