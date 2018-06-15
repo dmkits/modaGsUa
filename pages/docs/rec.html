@@ -66,17 +66,17 @@
                         .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableSelectedRow"})
                         .addToolPaneActionButton("Сохранить строку", {btnStyle:"width:200px;", actionButtonName:"storeDetailTableSelectedRow"})
                         .addToolPaneActionButton("Удалить строку", {btnStyle:"width:200px;", actionButtonName:"deleteDetailTableSelectedRow"})
-                        .addToolPane({title:"Статус документа"})
-                        .addToolPaneActionButton("Установить статус \"Закрыт\"", { btnStyle:"width:200px;",
-                            actionFunction: function (params) {
-                                var pinvId =  params.thisInstance.detailHeader.data.ID;    console.log("pinvId=",pinvId);
-                                Request.postJSONData({url: "/wrh/pInvoices/closePInv", data: {"PINV_ID": pinvId}},
-                                    function(result){
-                                        params.thisInstance.setDetailHeaderContentByListSelectedRow(wrh_pinv.detailHeader.lastContentData, {reloadData:true, clearBeforeLoad:true});
-                                });
-                            }
-                        })
-                        .addToolPaneActionButton("Установить статус \"В работе\"", {btnStyle:"width:200px;"})
+//                        .addToolPane({title:"Статус документа"})
+//                        .addToolPaneActionButton("Установить статус \"Закрыт\"", { btnStyle:"width:200px;",
+//                            actionFunction: function (params) {
+//                                var pinvId =  params.thisInstance.detailHeader.data.ID;    console.log("pinvId=",pinvId);
+//                                Request.postJSONData({url: "/wrh/pInvoices/closePInv", data: {"PINV_ID": pinvId}},
+//                                    function(result){
+//                                        params.thisInstance.setDetailHeaderContentByListSelectedRow(wrh_pinv.detailHeader.lastContentData, {reloadData:true, clearBeforeLoad:true});
+//                                });
+//                            }
+//                        })
+//                        .addToolPaneActionButton("Установить статус \"В работе\"", {btnStyle:"width:200px;"})
                         .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
                         .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
                         .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
@@ -384,58 +384,8 @@
 //                            }
                             nextCallback();
                         })
-
-
-//                        .addDetailTableRowAction("storeDetailTableSelectedRowsPrice",{},
-//                            function(detailTableRowData, actionParams, detailTableUpdatedRowData, startNextAction, finishedAction){
-//                                detailTableUpdatedRowData["PRICELIST_PRICE"]=123.45;
-//                                startNextAction();
-//                            })
-//                        .addDetailTableRowsAction("storeDetailTableSelectedRowsPrice",{
-//                            startAction:function(detailTableRowsData, actionParams, startDetailTableRowsAction) {
-//                                actionParams["finishedCounterByNoConnection"] = 0;
-//                                actionParams["finishedCounterByFailed"] = 0;
-//                                if (actionParams.toolPanes && actionParams.toolPanes[0]) actionParams.toolPanes[0].set("content", "");
-//                                startDetailTableRowsAction();
-//                            },
-//                            tableRowAction: function(contentTableRowData, actionParams, contentTableUpdatedRowData, startNextAction, finishedAction){
-//                                contentTableUpdatedRowData["PRICELIST_PRICE"]=123.45;
-//                                startNextAction();
-//                                    Request.postJSONData({url:"/dir/products_prices/store_product_price", data:contentTableRowData},
-//                                            function(result){                           console.log("tableRowAction result=",result);
-//                                                if (result && result.item) {
-//                                                    //var prodDataFromOrderBata = result.item;
-//                                                    contentTableUpdatedRowData["PRICELIST_PRICE"]= result.item["PRICELIST_PRICE"];}
-//                                                if(actionParams["finishedCounterByFailed"]>0) {
-//                                                    finishedAction();
-//                                                    return;
-//                                                }
-//                                                startNextAction();
-//                                            });
-//                                }
-//                        })
-//                        .addDetailTablePopupMenuAction("Применить цены продажи",{detailTableActionName:"storeDetailTableSelectedRowsPrice"})
-//                        .addDetailTableMenuItemAction("Применить цены продажи",{action:"storeDetailTableSelectedRowsPrice"}, function(selRowsData){
-//                            if(!selRowsData) return;
-//                            for(var selRowInd in selRowsData){
-//                                var selRowData= selRowsData[selRowInd], data={};
-//                                data["PRICELIST_ID"]= 0;
-//                                data["PRODUCT_CODE"]= selRowData["PRODUCT_CODE"];
-//                                data["PRICE"]= selRowData["SALE_PRICE"];
-//                                data["DISCOUNT_PECENT"]= 0;
-//                                data["PRICE_WITH_DISCOUNT"]= selRowData["SALE_PRICE"];
-//                                data["CHANGE_DATETIME"]= moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-//                                Request.postJSONData({url:"/dir/products_prices/store_product_price", data:data},
-//                                        function(result){                                                       console.log("PINV detailTableMenuItemAction postJSONData ", success,result);
-//                                            if (result && result.item) {
-//                                                //var prodDataFromOrderBata = result.item;
-//                                            }
-//                                        });
-//                            }
-//                        })
-
-                        .addToolPane({title:"экспорт"})
-                        .addToolPaneActionButton("таблица в эксель", {btnStyle: "width:200px;",detailTableActionName:"exportTableContentToExcel"})
+//                        .addToolPane({title:"экспорт"})
+//                        .addToolPaneActionButton("таблица в эксель", {btnStyle: "width:200px;",detailTableActionName:"exportTableContentToExcel"})
                         .addToolPane({title:"Печать"})
                         .addToolPaneActionButton("Печать ценников", {btnStyle: "width:200px;",detailTableActionName:"printProdTags",
                             actionFunction:  function(){
@@ -455,8 +405,6 @@
 //                                printWindow["pageProdTagType"]= "tag58x30price";
                             }
                         })
-//                        .addToolPane("Доп")
-//                        .addToolPaneActionButton("Сохранить в прайс-лист", {}, "width:200px;")
                         .addToolPane({title:"Информация о товаре",
                             detailTableAction:function(toolPane, detailHeader,detailTable,thisInstance){
                                 var detailTableSelectedRow= detailTable.getSelectedRow();

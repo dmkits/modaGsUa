@@ -65,7 +65,7 @@ define(["app/app", "dijit/ConfirmDialog","dojox/widget/DialogSimple", "dijit/for
             },
             mainAboutDialog: function (){
                 this.doDialogMsg({title:"О программе",
-                    content:"Система учета <b>MODA.UA</b>. <br>Разработчики: dmkits, ianagez 2017",
+                    content:"Система учета <b>MODA.GS.UA</b>. <br>Разработчики: dmkits, ianagez<br> 2017-2018",
                     btnOkLabel:"OK", btnCancelLabel:"Закрыть"});
             },
             printTagsDialog: function(callback) {
