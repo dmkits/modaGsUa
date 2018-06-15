@@ -48,18 +48,17 @@ module.exports.init= function(app){
     app.get("/main/getMainData", function (req, res) {
         var outData= {};
         outData.mode= appParams.mode;
-        outData.mode_str= appParams.mode;
+        outData.modeStr= appParams.mode;
         outData.title=appConfig.title;
         outData.icon32x32=appConfig.icon32x32;
         outData.imageSmall=appConfig.imageSmall;
         outData.imageMain=appConfig.imageMain;
         outData.dbUserName=(req.dbUserName)?req.dbUserName:"unknown";
-
+        outData.EmpName=(req.dbUserParams&&req.dbUserParams.EmpName)?req.dbUserParams.EmpName:"unknown";
         //var userRole=req.mduUserRole;
         //outData.menuBar=getUserMenuByUserRole(userRole, appConfig.usersRoleMenu, appConfig.appMenu);
         outData.menuBar=appConfig.appMenu;
         outData.autorun=appConfig.autorun;
-
         if (!appConfig||appConfig.error) {
             outData.error= "Failed load application configuration!"+(appConfig&&appConfig.error)?" Reason:"+appConfig.error:"";
             res.send(outData);

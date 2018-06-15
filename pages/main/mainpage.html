@@ -24,7 +24,7 @@
 
                 var main_ContentContainer = mainpage_MainContainer.getParent().getParent();
 
-                var mainData = main_ContentContainer.getMainContentData();
+                var mainData = main_ContentContainer.mainData;
                 if(mainData&& mainData["imageMain"]){
                     var imageMain = mainData["imageMain"];
                     document.getElementById("mainpage_MainContent_table").style.background ='url(\''+imageMain+'\')';

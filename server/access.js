@@ -51,7 +51,9 @@ module.exports= function(app) {
             "t_OurID=dbo.zf_Var('t_OurID'),t_OneOur=dbo.zf_Var('t_OneOur'),OT_MainOurID=dbo.zf_Var('OT_MainOurID'),"+
             "z_CurrMC=dbo.zf_Var('z_CurrMC'),z_CurrCC=dbo.zf_Var('z_CurrCC'),"+
             "t_StockID=dbo.zf_Var('t_StockID'),t_OneStock=dbo.zf_Var('t_OneStock'),it_MainStockID=dbo.zf_Var('it_MainStockID'),"+
-            "t_SecID=dbo.zf_Var('t_SecID'),DefaultUM=dbo.zf_Var('DefaultUM')",
+            "t_SecID=dbo.zf_Var('t_SecID'),DefaultUM=dbo.zf_Var('DefaultUM'), "+
+            "EmpID=(select EmpID from r_Users where UserName=SUSER_NAME()), "+
+            "EmpName=(select EmpName from r_Users u, r_Emps e where e.EmpID=u.EmpID and u.UserName=SUSER_NAME())",
             function(err, recordset){
                 if(err||(recordset&&recordset.length==0)){
                     callback("Не удалось получить данные пользователя из базы даных! Обратитесь к системному администратору.");
@@ -138,7 +140,7 @@ module.exports= function(app) {
         });
     });
 
-    app.get("/login", function (req, res) {                                                                 log.info("app.get /login");
+    app.get("/login", function (req, res) {                                                         log.info("app.get /login");
         res.render(path.join(__dirname, '../pages/login.ejs'), {
             loginMsg: ""
         });
@@ -149,12 +151,12 @@ module.exports= function(app) {
     var storeSysadminUUID= function(sysadminData, callback){
         sysadminsList[sysadminData.uuid]=sysadminData.userName;
         fs.writeFile(path.join(__dirname,"../sysAdmins.json"), JSON.stringify(sysadminsList),{flag:"w"}, function(err){
-            if(err){                                                                                        log.error("storeSysadminUUID: Failed store sysadmins data! Reason:",err);
+            if(err){                                                                                log.error("storeSysadminUUID: Failed store sysadmins data! Reason:",err);
             }
             if(callback)callback();
         });
     };
-    app.post("/login", function (req, res) {                                                                log.info("app.post /login",req.body.user, 'userPswrd=',req.body.pswrd);
+    app.post("/login", function (req, res) {                                                        log.info("app.post /login",req.body.user, 'userPswrd=',req.body.pswrd);
         var userName=req.body.user, userPswrd=req.body.pswrd;
         if(!userName ||!userPswrd ){
             res.send({error:"Authorisation failed! No login or password!", userErrorMsg:"Пожалуйста введите имя и пароль."});

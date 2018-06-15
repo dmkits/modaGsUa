@@ -41,8 +41,9 @@
             <div id="main_TopImg"></div>
             <div id="main_MainMenu"></div>
             <div id="main_TopInfoPane">
-                <div id="main_db_username" style="display:inline;margin-left:10px;"></div>
-                <div id="main_app_mode"  style="display:inline;margin-left:10px;"></div>
+                <div id="main_configName"  style="display:inline;margin-left:10px;"></div>
+                <div id="main_dbUsername" style="display:inline;margin-left:10px;"></div>
+                <div id="main_dbEmpName" style="display:inline;margin-left:10px;"></div>
             </div>
         </div>
         <div id="main_ContentContainer"></div>
@@ -65,31 +66,24 @@
                 var main_ContentContainer = APP.instanceForID("main_ContentContainer", TabContainer, {region: "center", tabPosition: "top", class: "mainContent"});
                 main_MainContainer.startup();
 
-                main_MainContainer.getMainData = function(postaction){                                //getting main json data from server and run action parameter function
+                main_MainContainer.getMainData = function(postaction){//getting main json data from server and run action parameter function
                     Request.getJSONData({url:"/main/getMainData", consoleLog:true},
-                            function(result){                                        console.log("main_MainContainer.getMainData result=",result); //title,icon32x32,imageSmall,imageMain
-                                    if(result===undefined||result==null) result = [];
-                                    main_MainContainer.mainContentData = result;
-                                    main_ContentContainer.getMainContentData=function(){
-                                        return result;
-                                    };
-                                    var eAppMode = document.getElementById("main_app_mode");
-                                    if (result.mode && result.mode.indexOf("production")<0) {
-                                        var mode_str = result.mode_str;
-                                        if (!mode_str) mode_str= result.mode;
-                                        if (mode_str.toLocaleLowerCase().indexOf("test")>=0)
-                                            eAppMode.innerHTML = "<b style='color:red'>" + mode_str + "</b>";
-                                        else
-                                            eAppMode.innerHTML = "<b>" + mode_str + "</b>";
-                                    } else if (!result.mode)
-                                        eAppMode.innerHTML =  eAppMode.innerHTML+"<b>UNKNOWN MODE!!!</b>";
-
-                                    if(result.dbUserName) document.getElementById("main_db_username").innerHTML =  "<b>"+result.dbUserName+"</b>";
-
-                                    if(result.title)document.title=result.title;
-
-                                    if(result.icon32x32) changeFavicon(result.icon32x32);
-                                    if(result.imageSmall)main_TopImg.set("style","background-image: url(\""+result.imageSmall+"\")");
+                            function(result){                                                       console.log("main_MainContainer.getMainData result=",result); //title,icon32x32,imageSmall,imageMain
+                                if(result===undefined||result==null) result = [];
+                                main_MainContainer.mainContentData = result;
+                                main_ContentContainer.mainData=result;
+                                var eConfigName = document.getElementById("main_configName");
+                                if(result.title)document.title=result.title;
+                                if(result.icon32x32) changeFavicon(result.icon32x32);
+                                if(result.imageSmall)main_TopImg.set("style","background-image: url(\""+result.imageSmall+"\")");
+                                if(result.mode && result.mode.indexOf("production")<0) {
+                                    var mode_str = result.mode_str;
+                                    if (!mode_str) mode_str= result.mode;
+                                    if (mode_str.toLocaleLowerCase().indexOf("test")>=0) eConfigName.innerHTML="<b style='color:red'>"+mode_str+"</b>";
+                                    else eConfigName.innerHTML="<b>"+mode_str+"</b>";
+                                } else if (!result.mode) eConfigName.innerHTML= eConfigName.innerHTML+"<b>UNKNOWN MODE!!!</b>";
+                                if(result.dbUserName) document.getElementById("main_dbUsername").innerHTML =  "<b>"+result.dbUserName+"</b>";
+                                if(result.EmpName) document.getElementById("main_dbEmpName").innerHTML =  "<b>"+result.EmpName+"</b>";
                                 if(postaction)postaction();
                             });
                 };
