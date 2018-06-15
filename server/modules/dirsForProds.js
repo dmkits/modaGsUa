@@ -187,48 +187,6 @@ module.exports.init= function(app){
     //        });
     //});
     /**
-     * callback = function(prodData, error, userErrorMsg)
-     */
-    r_Prods.getColorOrCreateNew= function(dbUC,prodData,callback){
-        var colorID=prodData["ColorID"],colorName=prodData["ColorName"];
-        if((colorID===undefined||colorID===null)&&(colorName===undefined||colorName===null||colorName.trim()==="")){
-            prodData["ColorID"]=0;
-            callback(prodData);
-            return;
-        }
-        ir_ProdColors.findDataItemByOrCreateNew(dbUC,
-            {resultFields:["ColorID"],findByFields:["ColorName"],idFieldName:"ColorID",fieldsValues:{"ColorName":colorName}},
-            function(result) {
-                if (result.error) {
-                    callback(prodData,result.error,"Не удалось найти и/или создать новый цвет товара:"+colorName+"!");
-                    return;
-                }
-                prodData["ColorID"]=result.resultItem["ColorID"];
-                callback(prodData);
-            })
-    };
-    /**
-     * callback = function(prodData, error, userErrorMsg)
-     */
-    r_Prods.setSizeOrCreateNew= function(dbUC,prodData,callback){
-        var sizeName=prodData["SizeName"];
-        if(sizeName===undefined||sizeName===null||sizeName.trim()===""){
-            prodData["SizeName"]="Размер не указан";
-            callback(prodData);
-            return;
-        }
-        ir_ProdSizes.findDataItemByOrCreateNew(dbUC,
-            {resultFields:["SizeName"],findByFields:["SizeName"],idFieldName:"SizeName",fieldsValues:{"SizeName":sizeName}},
-            function(result) {
-                if (result.error) {
-                    callback(prodData,result.error,"Не удалось найти и/или создать новый размер товара:"+sizeName+"!");
-                    return;
-                }
-                prodData["SizeName"]=result.resultItem["SizeName"];
-                callback(prodData);
-            })
-    };
-    /**
      * callback = function(result), result= { prodData, error, userErrorMsg }
      */
     r_Prods.getAttrIDorCreateNewByName= function(dbUC,prodData,callback){
@@ -316,6 +274,48 @@ module.exports.init= function(app){
                                     })
                             })
                     })
+            })
+    };
+    /**
+     * callback = function(prodData, error, userErrorMsg)
+     */
+    r_Prods.getColorOrCreateNew= function(dbUC,prodData,callback){
+        var colorID=prodData["ColorID"],colorName=prodData["ColorName"];
+        if((colorID===undefined||colorID===null)&&(colorName===undefined||colorName===null||colorName.trim()==="")){
+            prodData["ColorID"]=0;
+            callback(prodData);
+            return;
+        }
+        ir_ProdColors.findDataItemByOrCreateNew(dbUC,
+            {resultFields:["ColorID"],findByFields:["ColorName"],idFieldName:"ColorID",fieldsValues:{"ColorName":colorName}},
+            function(result) {
+                if (result.error) {
+                    callback(prodData,result.error,"Не удалось найти и/или создать новый цвет товара:"+colorName+"!");
+                    return;
+                }
+                prodData["ColorID"]=result.resultItem["ColorID"];
+                callback(prodData);
+            })
+    };
+    /**
+     * callback = function(prodData, error, userErrorMsg)
+     */
+    r_Prods.setSizeOrCreateNew= function(dbUC,prodData,callback){
+        var sizeName=prodData["SizeName"];
+        if(sizeName===undefined||sizeName===null||sizeName.trim()===""){
+            prodData["SizeName"]="Размер не указан";
+            callback(prodData);
+            return;
+        }
+        ir_ProdSizes.findDataItemByOrCreateNew(dbUC,
+            {resultFields:["SizeName"],findByFields:["SizeName"],idFieldName:"SizeName",fieldsValues:{"SizeName":sizeName}},
+            function(result) {
+                if (result.error) {
+                    callback(prodData,result.error,"Не удалось найти и/или создать новый размер товара:"+sizeName+"!");
+                    return;
+                }
+                prodData["SizeName"]=result.resultItem["SizeName"];
+                callback(prodData);
             })
     };
     /**
