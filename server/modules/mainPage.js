@@ -1,4 +1,3 @@
-
 module.exports.modulePageURL = "/main/mainpage";
 module.exports.modulePagePath = "main/mainpage.html";
 

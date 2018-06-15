@@ -1,6 +1,3 @@
-/**
- * Created by Dmitrk on 13.05.2018.
- */
 var dataModel=require('../datamodel');
 var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),

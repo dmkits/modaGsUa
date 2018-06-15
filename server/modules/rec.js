@@ -249,7 +249,7 @@ module.exports.init = function(app){
             });
     };
     /**
-     * callback = function(result), result= { item, error, userErrorMsg }
+     * callback = function(result), result= { resultItem, error, userErrorMsg }
      */
     t_RecD.storeNewProdPP=function(connection,prodID,recChID,recDData,callback){
         t_Rec.getDataItem(connection,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
@@ -268,6 +268,9 @@ module.exports.init = function(app){
                     });
             });
     };
+    /**
+     * callback = function(result), result = { resultItem, error, userErrorMsg }
+     */
     t_RecD.storeRecD=function(connection,prodID,storeData,dbUserParams,callback){
         var parentChID=storeData["ParentChID"]||storeData["ChID"];
         t_RecD.storeNewProdPP(connection,prodID,parentChID,storeData,function(resultStorePP){
@@ -286,7 +289,11 @@ module.exports.init = function(app){
                             callback(params);
                         }},
                     function(result){
-                        if(result.error) r_Prods.delete(connection,prodID);
+                        if(result.error) {
+                            r_Prods.delete(connection,prodID);
+                            if(result.error.indexOf("Violation of PRIMARY KEY constraint '_pk_t_RecD'"))
+                            result.userErrorMsg="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером."
+                        }
                         callback(result);
                     });
             });

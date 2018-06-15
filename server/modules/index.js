@@ -1,4 +1,3 @@
-
 var server= require("../server"), log= server.log, database= require("../databaseMSSQL");
 var loadedModules= {};
 var validateError= null;

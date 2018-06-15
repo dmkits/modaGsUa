@@ -1,16 +1,15 @@
-/**
- * Created by Dmitrk on 13.05.2018.
- */
 var dataModel=require('../datamodel'),database= require("../databaseMSSQL"), common= require("../common");
 var r_Prods= require(appDataModelPath+"r_Prods"),r_ProdMQ= require(appDataModelPath+"r_ProdMQ"),
     r_ProdC= require(appDataModelPath+"r_ProdC"),r_ProdG= require(appDataModelPath+"r_ProdG"),
     r_ProdG1= require(appDataModelPath+"r_ProdG1"), r_ProdG2= require(appDataModelPath+"r_ProdG2"),
     r_ProdG3= require(appDataModelPath+"r_ProdG3"),
     ir_ProdColors= require(appDataModelPath+"ir_ProdColors"),ir_ProdSizes= require(appDataModelPath+"ir_ProdSizes"),
-    t_PInP=require(appDataModelPath+"t_PInP");
+    t_PInP=require(appDataModelPath+"t_PInP"),
+    r_DBIs=require(appDataModelPath+"r_DBIs");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([r_Prods,r_ProdMQ,r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdColors,ir_ProdSizes,t_PInP], errs,
+    dataModel.initValidateDataModels([r_Prods,r_ProdMQ,t_PInP,r_DBIs,
+            r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdColors,ir_ProdSizes], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -119,12 +118,16 @@ module.exports.init= function(app){
                 res.send(result);
             });
     });
+    /**
+     *
+     * callback = function(error, prodData), error = {error,userErrorMsg}
+     */
     r_Prods.getNewProdNameByAttrs= function(dbUC,prodData,callback){
         //if_GetProdNameByMaskValues(ProdID, PCatName,PGrName1,PGrName3,PGrSName3,Article1,Article2,Article3, ColorName,ColorSName, SizeName,ValidSizes, Growth)
         database.selectParamsQuery(dbUC,
             "select ProdName="+
-            //"LTRIM(RTRIM("+
-            "dbo.if_GetProdNameByMaskValues(@p0, @p1,@p2,@p3,@p4, @p5,@p6,@p7, @p8,@p9, @p10,@p11, @p12)", //+"))",
+            "LTRIM(RTRIM("+
+            "dbo.if_GetProdNameByMaskValues(@p0, @p1,@p2,@p3,@p4, @p5,@p6,@p7, @p8,@p9, @p10,@p11, @p12) ))",
             [prodData["ProdID"], prodData["PCatName"],prodData["PGrName1"],prodData["PGrName3"],prodData["PGrSName3"],
                 prodData["Article1"],prodData["Article2"],prodData["Article3"],
                 prodData["ColorName"],prodData["ColorSName"], prodData["SizeName"],prodData["ValidSizes"], prodData["Growth"]],
@@ -316,23 +319,6 @@ module.exports.init= function(app){
             })
     };
     /**
-     * callback = function(chID, err)
-     */
-    r_Prods.getNewProdChID= function(dbUC, callback){
-        var query=
-            "SELECT ISNULL(MAX(p.ChID)+1,dbs.ChID_Start) as NewChID " +
-            "FROM r_DBIs dbs "+
-            "LEFT JOIN r_Prods p ON p.ChID between dbs.ChID_Start and dbs.ChID_End "+
-            "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
-            "GROUP BY dbs.ChID_Start, dbs.ChID_End";
-        database.selectQuery(dbUC,query,
-            function(err, recordset){
-                var chID=null;
-                if(recordset&&recordset.length>0) chID=recordset[0]["NewChID"];
-                callback(chID,err);
-            });
-    };
-    /**
      * callback = function(prodID, err)
      */
     r_Prods.getNewProdID= function(dbUC,callback){
@@ -358,14 +344,14 @@ module.exports.init= function(app){
                 callback({error:"Failed get product attribute ID! Reason: "+error,userErrorMsg:userErrorMsg});
                 return;
             }
-            r_Prods.getNewProdChID(dbUC,function(chID,err){
+            r_DBIs.getNewChID(dbUC,"r_Prods",function(chID,err){
                 if(err) {
                     callback({error:err.message,userErrorMsg:"Не удалось получить новый ключ для создания нового товара!"});
                     return
                 }
                 r_Prods.getNewProdID(dbUC,function(prodID,err){
                     if(err) {
-                        callback({error:err.message,userErrorMsg:"",userErrorMsg:"Не удалось получить новый код для создания нового товара!"});
+                        callback({error:err.message,userErrorMsg:"Не удалось получить новый код для создания нового товара!"});
                         return
                     }
                     var prodUM=prodData["UM"];
