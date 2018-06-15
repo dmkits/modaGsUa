@@ -14,8 +14,9 @@
     <!--link rel="stylesheet" type="text/css" href="/css/main_nie.css"--!>
     <!--<![endif]-->
     <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
-    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:true"></script>
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:false"></script>
     <link rel="stylesheet" type="text/css" href="/css/main.css" media="screen">
+    <script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
     <title>MODA.GS.UA Print tags</title>
     <style>
         html, body {
@@ -78,10 +79,10 @@
     <div id="print_PrintContent" style="margin:0;padding:0;width:100%;height:100%"></div>
 </body>
 <script type="text/javascript">
-    require(["app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane","dojox/layout/ContentPane", "dojo/domReady!"],
+    require(["app/app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane","dojox/layout/ContentPane", "dojo/domReady!"],
             function (APP, BorderContainer, LayoutContainer, ContentPane, XContentPane) {
                 var prodTagsContentData = window["prodTagsContentData"];
-                var pageProdTagType = window["pageProdTagType"];                                                console.log("!!! PRINT PAGE pageProdTagType=",pageProdTagType," prodTagsContentData=",prodTagsContentData," ",pageProdTagType);//!!!IT'S FOR TESTING!!!
+                var pageProdTagType = window["pageProdTagType"];                                    console.log("!!! PRINT PAGE printProductsTags pageProdTagType=",pageProdTagType," prodTagsContentData=",prodTagsContentData);//!!!IT'S FOR TESTING!!!
                 if(!pageProdTagType || !prodTagsContentData) return;
                 var printContent= document.getElementById("print_PrintContent");
                 APP.instanceForID("print_PrintContent", ContentPane, {class:"",style:"width:100%;height:100%;"});
@@ -95,8 +96,8 @@
                 tagPagePaneT.onLoad= function(){
                     var tagsData= prodTagsContentData, pageNum=0;
                     for(var i=0; i<tagsData.length; i++){
-                        var tagData = tagsData[i];
-                        var qty = tagData["QTY"];
+                        var tagData = tagsData[i];                                                  //console.log("PRINT PAGE printProductsTags tagData=",tagData);
+                        var qty = tagData["Qty"];
                         for(var num=1; num<=qty; num++){
                             var tagPageID="print_TagContentPage_"+i+"_"+num;
                             var tagPage = document.createElement("DIV");

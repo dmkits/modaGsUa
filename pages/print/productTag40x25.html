@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<body>
-    <div style="border:none; margin-left:0cm;margin-top:0.1cm; width:3.6cm;height:1.1cm; font-size:10px;  text-align:center" id="prodName"></div>
-    <div style="border:none; margin-left:0cm;margin-top:0cm; width:3.6cm;height:0.4cm; font-size:10px; text-align:center" id="prodPrice"></div>
-    <!--<div style="border:none;margin-left:0cm;margin-top:0cm; padding:0;width:3.6cm;height:0.45cm;">-->
-        <!--<div style="display:inline-block;float:left;border:none; margin-left:0.6cm;margin-top:0cm; width:2.4cm;height:0.6cm; font-size:10px; text-align:center" id="prodPrice"></div>-->
-        <!--<div style="display:inline-block;float:right; margin:0cm;margin-top:0.3cm; width:0.5cm;height:0.35cm; font-size:9px; text-align:left" id="pageNum" class="pageNum"></div>-->
-    <!--</div>-->
-    <svg style="margin-left:0.3cm;border:none;padding:0;" id="prodbarcode"></svg>
-    <!--<div style="float:right; margin:0cm;margin-top:0.1cm; width:0.5cm;height:0.35cm; font-size:9px; text-align:left" id="pageNum" class="pageNum"></div>-->
+<body><div style="display:none" id="prodTagFirstChild"></div>
+    <div style="border:none; margin-left:0cm;margin-top:0.1cm; width:3.6cm;height:0.7cm; font-size:11px;  text-align:center" id="prodName"></div>
+    <div style="border:none; margin-left:0cm;margin-top:0cm; width:3.6cm;height:0.4cm; font-size:11px; text-align:center" id="prodPrice"></div>
+    <svg style="margin-left:0.1cm;border:none;padding:0;" id="prodbarcode"></svg>
     <span style="margin:0cm;margin-top:0.1cm; width:0.5cm;height:0.35cm; font-size:9px; text-align:left" id="pageNum" class="pageNum"></span>
 </body>
 <!--<script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>-->
 <script type="text/javascript">
-    var printProdTag = function(barcodeElementID, barcodeValue){
+    var printBarcode = function(barcodeElementID, barcodeValue){
         if(!barcodeValue) return;
-        JsBarcode("#"+barcodeElementID, barcodeValue,{format:"EAN13", width:1, height:16, valueIsValid:true, margin:3,
+        JsBarcode("#"+barcodeElementID, barcodeValue,{format:"EAN13", width:1, height:16, valueIsValid:true, margin:0,
             valid:function(valid){
                 if(!valid) this.valueIsValid = false;
                 if(!this.valueIsValid){
@@ -25,35 +20,28 @@
             }
         });
     };
-    var setEmpty= function(data, itemName, value){
-        if (value===undefined) value="";
-        if (data[itemName]===undefined||data[itemName]===null) data[itemName]=value;
-    };
-
     require(["dijit/registry"],
             function(registry){
-                var barcodeHTML = document.getElementById("prodbarcode");
-                var parentHTML= barcodeHTML.parentNode;
-                if(!parentHTML) return;
-                var parentID= parentHTML.id;
+                var firstHTML = document.getElementById("prodTagFirstChild");
+                var parentID=firstHTML.parentNode.id;
                 var parent= registry.byId(parentID);
                 if(!parent) return;
-
-                var prodTagContentData= parent["prodTagContentData"];                                       //console.log("product_tag PAGE prodTagContentData= ",prodTagContentData);
-//                parentHTML.children[0].innerHTML = "Товарный ярлык № "
-//                        +prodTagContentData["DIR_PRODUCT_DIR_PRODUCTS_ARTICLE_VALUE"]
-//                        +"*"+prodTagContentData["DIR_PRODUCT_DIR_PRODUCTS_COLLECTION_CODE"]
-//                        +"/"+prodTagContentData["DIR_PRODUCT_CODE"];
-                parentHTML.children[0].innerHTML = prodTagContentData["ProdName"];
-//                parentHTML.children[1].innerHTML = "<b>"+prodTagContentData["PriceCC"]+"</b>";
-                parentHTML.children[1].innerHTML = "<b>"+prodTagContentData["PriceCC"]+" грн.</b>";//
-                var pageNum = parent["printPageNumber"];
-                if(!pageNum) pageNum="";
-                setEmpty(prodTagContentData,"Barcode", "0");
+                var parentHTML= parent.domNode;
+                parentHTML.style.width="3.6cm";parentHTML.style.height="2.1cm";
+                var prodTagContentData= parent["prodTagContentData"];                               console.log("productTag40x25 PAGE prodTagContentData= ",prodTagContentData);
+                if (!prodTagContentData) prodTagContentData={};
+                parentHTML.children[1].innerHTML = prodTagContentData["ProdName"];
+                parentHTML.children[2].innerHTML = "<b>ціна: "+prodTagContentData["PriceCC"]+" грн./"+prodTagContentData["UM"]+"</b>";//
+                var barcodeHTML = parentHTML.children[3];
                 var barcodeID = parentID+"_prodbarcode";
                 barcodeHTML.setAttribute("id",barcodeID);
-                if(prodTagContentData) printProdTag(barcodeID, prodTagContentData["Barcode"]);
-                parentHTML.children[3].innerHTML = pageNum;
+                var barcode=prodTagContentData["Barcode"];
+//                if(!barcode) barcode=prodTagContentData["Barcode"];
+                if(barcode==undefined || barcode==null || barcode.toString().trim().length==0) barcode='0000000000000';
+                if(prodTagContentData) printBarcode(barcodeID, barcode);
+                var pageNum = parent["printPageNumber"];
+                if(!pageNum) pageNum="";
+                parentHTML.children[4].innerHTML = pageNum;
             });
 </script>
 </html>

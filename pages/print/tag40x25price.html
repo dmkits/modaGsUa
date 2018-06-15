@@ -16,10 +16,10 @@
                 if(!parent) return;
                 var parentHTML= parent.domNode;
                 parentHTML.style.width="3.6cm";parentHTML.style.height="2.1cm";
-                var prodTagContentData= parent["prodTagContentData"];                                                   console.log("tag40x25price PAGE prodTagContentData= ",prodTagContentData);
+                var prodTagContentData= parent["prodTagContentData"];                               console.log("tag40x25price PAGE prodTagContentData= ",prodTagContentData);
                 if (!prodTagContentData) prodTagContentData={};
                 var prodTagContentData= parent["prodTagContentData"];
-                parentHTML.children[1].innerHTML = "<b>"+prodTagContentData["SALE_PRICE"]+"</b>";
+                parentHTML.children[1].innerHTML = "<b>"+prodTagContentData["PriceCC"]+"</b>";
                 parentHTML.children[2].children[0].innerHTML = "<b>грн.</b>";
                 var pageNum = parent["printPageNumber"];
                 if(!pageNum) pageNum="";

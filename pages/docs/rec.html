@@ -388,21 +388,20 @@
 //                        .addToolPaneActionButton("таблица в эксель", {btnStyle: "width:200px;",detailTableActionName:"exportTableContentToExcel"})
                         .addToolPane({title:"Печать"})
                         .addToolPaneActionButton("Печать ценников", {btnStyle: "width:200px;",detailTableActionName:"printProdTags",
-                            actionFunction:  function(){
-                                var printWindow= window.open("/print/printTags");                                           //console.log("printProdTags.onClick printWindow=",printWindow);
+                            actionFunction:  function(actionFunctionParams){                                        console.log("printProdTags.onClick actionFunctionParams=",actionFunctionParams);
+                                var printWindow= window.open("/print/printProductsTags");                           //console.log("printProdTags.onClick printWindow=",printWindow);
                                 //window.open("/print?pinvid="+docs_rec_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
-                                printWindow["prodTagsContentData"]= this.detailTable.getContent();
-                                printWindow["pageProdTagType"]= "productTag58x30";}
+                                printWindow["prodTagsContentData"]= actionFunctionParams.detailTable.getContent();
+                                printWindow["pageProdTagType"]= "productTag40x25";}
                             })
                         .addToolPaneActionButton("Печать цен", {btnStyle: "width:200px;", detailTableActionName:"printProdPricesTags",
-                            actionFunction:function(){
-                                var printWindow= window.open("/print/printTags");                                           //console.log("printProdPricesTags.onClick printWindow=",printWindow);
+                            actionFunction:function(actionFunctionParams){
+                                var printWindow= window.open("/print/printProductsTags");
                                 //window.open("/print?pinvid="+docs_rec_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
-                                var detailTableContentData=this.detailTable.getContentData();
+                                var detailTableContentData=actionFunctionParams.detailTable.getContent();
                                 for(var row=0;row<detailTableContentData.length;row++) detailTableContentData[row]["QTY"]=1;
                                 printWindow["prodTagsContentData"]= detailTableContentData;
-                                printWindow["pageProdTagType"]= "productTag40x25";
-//                                printWindow["pageProdTagType"]= "tag58x30price";
+                                printWindow["pageProdTagType"]= "tag40x25price";
                             }
                         })
                         .addToolPane({title:"Информация о товаре",

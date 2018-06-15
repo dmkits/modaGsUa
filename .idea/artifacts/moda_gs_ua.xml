@@ -1,0 +1,28 @@
+<component name="ArtifactManager">
+  <artifact name="moda.gs.ua">
+    <output-path>$PROJECT_DIR$/out/artifacts/moda_gs_ua</output-path>
+    <root id="root">
+      <element id="directory" name="pages">
+        <element id="dir-copy" path="$PROJECT_DIR$/pages" />
+      </element>
+      <element id="directory" name="public">
+        <element id="dir-copy" path="$PROJECT_DIR$/public" />
+      </element>
+      <element id="directory" name="node_modules">
+        <element id="dir-copy" path="$PROJECT_DIR$/node_modules" />
+      </element>
+      <element id="directory" name="server">
+        <element id="dir-copy" path="$PROJECT_DIR$/server" />
+      </element>
+      <element id="directory" name="scripts">
+        <element id="dir-copy" path="$PROJECT_DIR$/scripts" />
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/config.json" />
+      <element id="file-copy" path="$PROJECT_DIR$/debug.cfg" />
+      <element id="file-copy" path="$PROJECT_DIR$/package.json" />
+      <element id="file-copy" path="$PROJECT_DIR$/start_8080.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/start_8181_debug.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/sysAdmins.json" />
+    </root>
+  </artifact>
+</component>

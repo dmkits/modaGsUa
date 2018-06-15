@@ -674,12 +674,10 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                 var actionButton= this.addTableCellButtonTo(actionsTableRow, {labelText:label, cellWidth:0, btnStyle:actionParams.btnStyle, btnParameters:actionParams.btnParams});
                 if (!this.toolPanesActionButtons) this.toolPanesActionButtons={};
                 this.toolPanesActionButtons[actionParams.actionButtonName]= actionButton;
-                var actionFunctionParams={detailTableInstance:this.detailTable, toolPanes:this.toolPanes, thisInstance:this,
-                    detailTableRowsData:this.detailTable.getContent()};
+                var actionFunctionParams={detailTable:this.detailTable, toolPanes:this.toolPanes, thisInstance:this};
                 if(actionParams.actionFunction) {
                     actionButton.onClick=function(){
                         actionParams.actionFunction(actionFunctionParams);
-                        actionButton.detailTable= this.detailTable;
                     };
                     return this;
                 } else {
