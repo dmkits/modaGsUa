@@ -115,7 +115,7 @@ module.exports.init= function(app){
         if(req.query["ProdID"])conditions["r_Prods.ProdID="]=req.query["ProdID"];
         if(req.query["ProdName"])conditions["r_Prods.ProdName="]=req.query["ProdName"];
         r_Prods.getDataItemForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
-            function(result){                                                                       console.log("getProdDataByIDName result=",result);
+            function(result){
                 res.send(result);
             });
     });
@@ -142,7 +142,7 @@ module.exports.init= function(app){
         if(prodArticle1===undefined||prodArticle1===null||prodArticle1.trim()===""){
             r_Prods.getNewProdNameByAttrs(req.dbUC,prodData,function(err,prodNameData){
                 if(prodNameData) sendResult.itemProdName={"ProdName":prodNameData["ProdName"],"UM":req.dbUserParams["DefaultUM"]};
-                if(err)sendResult.errorProdName=err;                                                     console.log("getProdAttrsAndProdNameByArticle1 resultProdName1",prodNameData);
+                if(err)sendResult.errorProdName=err;
                 res.send(sendResult);
             });
             return;
@@ -158,10 +158,10 @@ module.exports.init= function(app){
                     for(var fieldName in resultProdAttrs) prodData[fieldName]=resultProdAttrs[fieldName];
                 }
                 if(resultProdAttrs) sendResult.item=resultProdAttrs;
-                if(result.error)sendResult.error=result.error;                                          console.log("getProdAttrsAndProdNameByArticle1 resultProdAttrs",resultProdAttrs);
+                if(result.error)sendResult.error=result.error;
                 r_Prods.getNewProdNameByAttrs(req.dbUC,prodData,function(err,prodNameData){
                     if(prodNameData) sendResult.itemProdName={"ProdName":prodNameData["ProdName"],"UM":req.dbUserParams["DefaultUM"]};
-                    if(err)sendResult.errorProdName=err;                                                 console.log("getProdAttrsAndProdNameByArticle1 resultProdName2",prodNameData);
+                    if(err)sendResult.errorProdName=err;
                     res.send(sendResult);
                 });
             });
