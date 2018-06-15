@@ -151,7 +151,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                     manualColumnResize: true, manualRowResize: false,
                     persistentState: parent.persistentState,
                     readOnly: parent.readOnly,
-                    wordWrap: parent.wordWrap,
+                    wordWrap: parent.wordWrap, trimWhitespace:false,
                     enterMoves:{row:0,col:1}, tabMoves:{row:0,col:1},
                     multiSelect: true,
                     beforeOnCellMouseDown: function(event, coords, element) {
