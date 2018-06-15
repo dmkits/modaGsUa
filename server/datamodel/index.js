@@ -297,7 +297,7 @@ module.exports.getSelectItems=_getSelectItems;
  *      conditions={ <condition>:<conditionValue>, ... },
  *      order = "<orderFieldsList>"
  * }
- * resultCallback = function(result = { items:[ {<tableFieldName>:<value>,...}, ... ], error, errorCode } )
+ * resultCallback = function(result), result = { items:[ {<tableFieldName>:<value>,...}, ... ], error, errorCode } )
  */
 function _getDataItems(connection, params, resultCallback){                                                          //log.debug('_getDataItems: params:',params,{});//test
     if(!params) params={};
@@ -340,7 +340,7 @@ function _getDataItems(connection, params, resultCallback){                     
  *      conditions={ <condition>:<conditionValue>, ... },
  * }
  *      <function>: "maxPlus1"
- * resultCallback = function(result = { item:{<tableFieldName>:<value>,...}, error, errorCode } )
+ * resultCallback = function(result), result = { item:{<tableFieldName>:<value>,...}, error, errorCode } )
  */
 function _getDataItem(connection, params, resultCallback){
     if(!params) params={};
@@ -355,7 +355,6 @@ function _getDataItem(connection, params, resultCallback){
     });
 }
 /**
- *
  * params = { idFieldName, findFieldName }
  * data
  * callback = function(data,err)
@@ -385,7 +384,8 @@ function _getIDByFiledValue(connection, params, data, callback){
   *     order = "<orderFieldsList>"
  * }
  * if !params.conditions returns all items
- * resultCallback = function(result = { items:[ {value:<valueOfValueField>,label:<valueOfLabelField>}, ... ], error, errorCode } )
+ * resultCallback = function(result)
+ *      result = { items:[ {value:<valueOfValueField>,label:<valueOfLabelField>}, ... ], error, errorCode } )
  *      if no labelField label=<valueOfValueField>
  */
 function _getDataItemsForSelect(connection, params, resultCallback){
@@ -423,7 +423,7 @@ function _getDataItemsForSelect(connection, params, resultCallback){
  *      order = "<orderFieldsList>"
  * }
  * if !params.conditions returns all items
- * resultCallback = function(result = { items:[ {<tableComboboxFieldName>:<value>, ... }, ... ], error, errorCode } )
+ * resultCallback = function(result), result = { items:[ {<tableComboboxFieldName>:<value>, ... }, ... ], error, errorCode } )
  */
 function _getDataItemsForTableCombobox(connection, params, resultCallback){
     if(!params) {                                                                                   log.error("FAILED _getDataItemsForTableCombobox! Reason: no function parameters!");//test
@@ -488,7 +488,7 @@ function _getDataItemsForTableCombobox(connection, params, resultCallback){
  * params = (
  *      fields = [<tableField1Name>,...],
  *      values=[ <valueField1>,<valueField2>,<valueField3>,...]
- * resultCallback = function( itemData = { item:{<tableFieldName>:<value>,...} } )
+ * resultCallback = function(itemData), itemData = { item:{<tableFieldName>:<value>,...} } )
  */
 function _setDataItem(params, resultCallback){
     var itemData={};
@@ -520,8 +520,8 @@ function _setDataItem(params, resultCallback){
  *              checkbox checkedTemplate:1 uncheckedTemplate:0 /
  *              autocomplete strict allowInvalid sourceURL
  * tableColumns: -readOnly default false, visible default true
- * resultCallback = function( tableData = { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...],
- *      error:errorMessage } )
+ * resultCallback = function(tableData)
+ *      tableData = { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...], error:errorMessage } )
  */
 function _getDataItemsForTable(connection, params, resultCallback){
     var tableData={};
@@ -729,8 +729,8 @@ function _getTableColumnsDataForHTable(tableColumns){
  *              checkbox checkedTemplate:1 uncheckedTemplate:0 /
  *              autocomplete strict allowInvalid sourceURL
  * tableColumns: -readOnly default false, visible default true
- * resultCallback = function( tableData = { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...],
- *      error:errorMessage } )
+ * resultCallback = function(tableData)
+ *      tableData= { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...], error:errorMessage } )
  */
 function _getDataForTable(connection, params, resultCallback){
     var tableData={};
@@ -835,7 +835,7 @@ function _getDataForDocTable(connection, params, resultCallback){
  *      tableColumns = [{data:<tableField1Name>},{data:<tableField2Name>},{data:<tableField3Name>},...],
  *      values=[ <valueField1>,<valueField2>,<valueField3>,...]
  * }
- * resultCallback = function( itemData = { item:{<tableFieldName>:<value>,...} } )
+ * resultCallback = function(itemData), itemData = { item:{<tableFieldName>:<value>,...} } )
  */
 function _setDataItemForTable(params, resultCallback){
     var itemData={};
@@ -851,7 +851,7 @@ function _setDataItemForTable(params, resultCallback){
  *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
  * <value> instanceof Date converted to sting by format yyyy-mm-dd HH:MM:ss !!!
- * resultCallback = function(result = { updateCount, error }
+ * resultCallback = function(result), result = { updateCount, error }
  */
 function _insDataItem(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _insDataItem! Reason: no parameters!");//test
@@ -892,6 +892,9 @@ function _insDataItem(connection, params, resultCallback) {
         resultCallback(insResult);
     });
 }
+/**
+ * callback = function(params)
+ */
 function _calcNewIdValueOnInsDataItemWithNewID(params, callback){
     if(params.insData&&params.idFieldName)
         params.insData[params.idFieldName]=common.getUIDNumber();
@@ -902,7 +905,7 @@ function _calcNewIdValueOnInsDataItemWithNewID(params, callback){
  *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
  *      calcNewIdValue = function(params, callback), callback= function(params)
  * }
- * resultCallback = function(result = { updateCount, error }
+ * resultCallback = function(result), result = { updateCount, error }
  */
 function _insDataItemWithNewID(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _insDataItemWithNewID! Reason: no parameters!");//test
@@ -928,7 +931,7 @@ function _insDataItemWithNewID(connection, params, resultCallback) {
  *      updData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
  *      conditions = { <tableFieldNameCondition>:<value>, ... }
  * }
- * resultCallback = function(result = { updateCount, error })
+ * resultCallback = function(result), result = { updateCount, error })
  */
 function _updDataItem(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _updDataItem! Reason: no parameters!");//test
@@ -982,7 +985,7 @@ function _updDataItem(connection, params, resultCallback) {
  * params = { tableName, idFieldName,
  *      storeData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
- * resultCallback = function(result = { updateCount, resultItem, error } )
+ * resultCallback = function(result), result = { updateCount, resultItem, error } )
  */
 function _storeDataItem(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _storeDataItem! Reason: no parameters!");//test
@@ -1023,7 +1026,7 @@ function _storeDataItem(connection, params, resultCallback) {
  * params = { tableName,
  *      conditions = { <tableFieldNameCondition>:<value>, ... }
  * }
- * resultCallback = function(result = { updateCount, error })
+ * resultCallback = function(result), result = { updateCount, error })
  */
 function _delDataItem(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _delDataItem! Reason: no parameters!");//test
@@ -1063,12 +1066,10 @@ function _delDataItem(connection, params, resultCallback) {
 }
 
 /**
- * params = { tableName, resultFields,
- *      findByFields,
- *      idFieldName, fieldsValues = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
- *
+ * params = { tableName, resultFields, findByFields, idFieldName,
+ *      fieldsValues = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
- * resultCallback = function(result = { resultItem, error } )
+ * resultCallback = function(result), result = { resultItem, error } )
  */
 function _findDataItemByOrCreateNew(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _findDataItemByOrCreateNew! Reason: no parameters!");//test
@@ -1115,7 +1116,7 @@ function _findDataItemByOrCreateNew(connection, params, resultCallback) {
  * params = { tableName, idFieldName, idFields, tableColumns
  *      insTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
- * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
+ * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
  */
 function _insTableDataItem(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _insTableDataItem! Reason: no parameters!");//test
@@ -1177,7 +1178,7 @@ function _insTableDataItem(connection, params, resultCallback) {
  *      tableColumns=[ {<tableColumnData>},... ],
  *      updTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
- * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
+ * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
  */
 function _updTableDataItem(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _updTableDataItem! Reason: no parameters!");//test
@@ -1234,6 +1235,9 @@ function _updTableDataItem(connection, params, resultCallback) {
             });
     });
 }
+/**
+ * callback = function(params)
+ */
 function _calcNewIdValueOnStoreTableDataItem(params, callback){
     if(params.storeTableData&&params.idFieldName)
         params.storeTableData[params.idFieldName]=common.getUIDNumber();
@@ -1244,7 +1248,7 @@ function _calcNewIdValueOnStoreTableDataItem(params, callback){
  *      storeTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  *      calcNewIdValue = function(params, callback), callback= function(params)
  * }
- * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
+ * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
  */
 function _storeTableDataItem(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _storeTableDataItem! Reason: no parameters!");//test
@@ -1298,7 +1302,7 @@ function _storeTableDataItem(connection, params, resultCallback) {
  * params = { tableName, idFieldName, idFields,
  *      delTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
- * resultCallback = function(result = { updateCount, error })
+ * resultCallback = function(result), result = { updateCount, error })
  */
 function _delTableDataItem(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _delTableDataItem! Reason: no parameters!");//test
