@@ -80,7 +80,6 @@
                         .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
                         .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
                         .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
-
                         .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
                             if(!thisInstance.setDetailTableProdData)
                                 thisInstance.setDetailTableProdData= function(crd/*changedRowData*/,prodData){
@@ -90,43 +89,101 @@
                                     crd.item("UM").setValue(prodData["UM"]);
                                     crd.item("Barcode").setValue(prodData["Barcode"]);
                                 };
-                            if(!thisInstance.setDetailTableProdAttrs)
-                                thisInstance.setDetailTableProdAttrs= function(crd/*changedRowData*/,prodData){
-                                    crd.item("ProdArticle1").setValue(prodData["ProdArticle1"]);
-                                    crd.item("Barcode").setValue(prodData["Barcode"]);
+                            if(!thisInstance.setDetailTableProdArticle1Attrs)
+                                thisInstance.setDetailTableProdArticle1Attrs= function(crd/*changedRowData*/,prodData){
+                                    if(!prodData)prodData={};
                                     crd.item("PCatName").setValue(prodData["PCatName"]);
                                     crd.item("PGrName").setValue(prodData["PGrName"]);
                                     crd.item("PGrName1").setValue(prodData["PGrName1"]);
                                     crd.item("PGrName2").setValue(prodData["PGrName2"]);
                                     crd.item("PGrName3").setValue(prodData["PGrName3"]);
-                                    crd.item("ProdColor").setValue(prodData["ProdColor"]);
-                                    crd.item("ProdSize").setValue(prodData["ProdSize"]);
                                 };
-                            if (!crd.item("ProdArticle1").isEMPTY() && (!crd.item("ProdID").isChanged()&&!crd.item("ProdName").isChanged())){
+                            if(!thisInstance.setDetailTableProdAttrs)
+                                thisInstance.setDetailTableProdAttrs= function(crd/*changedRowData*/,prodData){
+                                    if(!prodData)prodData={};
+                                    crd.item("Article1").setValue(prodData["Article1"]);
+                                    this.setDetailTableProdArticle1Attrs(crd,prodData);
+                                    crd.item("ColorName").setValue(prodData["ColorName"]);
+                                    crd.item("SizeName").setValue(prodData["SizeName"]);
+                                };
+                            nextCallback();
+                        })
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+                            var isChangedProdAttrs=crd.item("Article1").isChanged()
+                                    ||crd.item("PCatName").isChanged()||crd.item("PGrName").isChanged()
+                                    ||crd.item("PGrName1").isChanged()||crd.item("PGrName2").isChanged()||crd.item("PGrName3").isChanged()
+                                    ||crd.item("ColorName").isChanged()||crd.item("SizeName").isChanged();
+                            if (isChangedProdAttrs){
                                 var condition={};
-                                condition["ProdArticle1"]=crd.item("ProdArticle1").getValue();
+                                condition["Article1"]=crd.item("Article1").getValue();
                                 condition["PCatName"]=crd.item("PCatName").getValue();
                                 condition["PGrName"]=crd.item("PGrName").getValue();
                                 condition["PGrName1"]=crd.item("PGrName1").getValue();
                                 condition["PGrName2"]=crd.item("PGrName2").getValue();
                                 condition["PGrName3"]=crd.item("PGrName3").getValue();
-                                condition["ProdColor"]=crd.item("ProdColor").getValue();
-                                condition["ProdSize"]=crd.item("ProdSize").getValue();
-                                Request.getJSONData({url:"/dirsProds/getProdByArticle1", condition:condition},
+                                condition["ColorName"]=crd.item("ColorName").getValue();
+                                condition["SizeName"]=crd.item("SizeName").getValue();
+                                Request.getJSONData({url:"/dirsProds/getProdProdAttrsAndNameByArticle1", condition:condition},
                                         function(result){
-                                            if (!result || !result.item) {
-                                                thisInstance.setDetailTableProdData(crd);
-                                                nextCallback(true);
-                                                return;
-                                            }
-                                            thisInstance.setDetailTableProdData(crd,result.item);
-                                            thisInstance.setDetailTableProdAttrs(crd,result.item);
+                                            if (result.item) thisInstance.setDetailTableProdArticle1Attrs(crd,result.item);
+                                            else if(result.error) thisInstance.setDetailTableProdArticle1Attrs(crd);
+                                            if (result.itemProdName) thisInstance.setDetailTableProdData(crd,result.itemProdName);
+                                            else thisInstance.setDetailTableProdData(crd);
                                             nextCallback(true);
                                         });
                                 return;
+//                            } else if (crd.item("ProdArticle1").isChanged()&&crd.item("ProdArticle1").isEMPTY()){
+//                                var condition={};
+//                                condition["ProdArticle1"]=crd.item("ProdArticle1").getValue();
+//                                condition["PCatName"]=crd.item("PCatName").getValue();
+//                                condition["PGrName"]=crd.item("PGrName").getValue();
+//                                condition["PGrName1"]=crd.item("PGrName1").getValue();
+//                                condition["PGrName2"]=crd.item("PGrName2").getValue();
+//                                condition["PGrName3"]=crd.item("PGrName3").getValue();
+//                                condition["ProdColor"]=crd.item("ProdColor").getValue();
+//                                condition["ProdSize"]=crd.item("ProdSize").getValue();
+//                                Request.getJSONData({url:"/dirsProds/getProdNameByAttrs", condition:condition},
+//                                        function(result){
+//                                            if (!result || !result.item) {
+//                                                thisInstance.setDetailTableProdData(crd);
+//                                                nextCallback(true);
+//                                                return;
+//                                            }
+//                                            thisInstance.setDetailTableProdData(crd,result.item);
+//                                            nextCallback(true);
+//                                        });
+//                                return;
                             }
                             nextCallback();
                         })
+//                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+//                            if ((crd.item("PCatName").isChanged()||crd.item("PGrName").isChanged()
+//                                    ||crd.item("PGrName1").isChanged()||crd.item("PGrName2").isChanged()||crd.item("PGrName3").isChanged()
+//                                    ||crd.item("ProdColor").isChanged()||crd.item("ProdSize").isChanged())
+//                                            && !crd.item("ProdID").isChanged() && !crd.item("ProdName").isChanged()){
+//                                var condition={};
+//                                condition["ProdArticle1"]=crd.item("ProdArticle1").getValue();
+//                                condition["PCatName"]=crd.item("PCatName").getValue();
+//                                condition["PGrName"]=crd.item("PGrName").getValue();
+//                                condition["PGrName1"]=crd.item("PGrName1").getValue();
+//                                condition["PGrName2"]=crd.item("PGrName2").getValue();
+//                                condition["PGrName3"]=crd.item("PGrName3").getValue();
+//                                condition["ProdColor"]=crd.item("ProdColor").getValue();
+//                                condition["ProdSize"]=crd.item("ProdSize").getValue();
+//                                Request.getJSONData({url:"/dirsProds/getProdNameByAttrs", condition:condition},
+//                                        function(result){
+//                                            if (!result || !result.item) {
+//                                                thisInstance.setDetailTableProdData(crd);
+//                                                nextCallback(true);
+//                                                return;
+//                                            }
+//                                            thisInstance.setDetailTableProdData(crd,result.item);
+//                                            nextCallback(true);
+//                                        });
+//                                return;
+//                            }
+//                            nextCallback();
+//                        })
                         .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
                             if ( (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
                                     || (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY()) ) {
@@ -135,7 +192,7 @@
                                     condition["ProdID"]= crd.item("ProdID").getValue();
                                 if (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY())
                                     condition["ProdName"]= encodeURIComponent(crd.item("ProdName").getValue());
-                                Request.getJSONData({url:"/dirsProds/getProdByID", condition:condition},
+                                Request.getJSONData({url:"/dirsProds/getProdDataByIDName", condition:condition},
                                         function(result){
                                             if (!result || !result.item ) {
                                                 nextCallback();
@@ -412,7 +469,9 @@
                                 for(var c=0;c<htCols.length;c++){
                                     var colItem = htCols[c]; var colData = colItem["data"];
                                     var colValue = detailTableSelectedRow[colData];
-                                    if(colData.indexOf('Prod')==0 || colData=='UM' || colData.indexOf('Barcode')==0)
+                                    if(colData.indexOf('Prod')==0||colData=='UM'||colData.indexOf('Barcode')==0
+                                            ||colData.indexOf('Article')==0||colData.indexOf('PCat')==0||colData.indexOf('PGr')==0
+                                            ||colData.indexOf('Color')==0||colData.indexOf('Size')==0)
                                         prodInfoHtml = prodInfoHtml + "<tr><td>"+"<b>"+colItem["name"]+":</b> "+((!colValue)?'':colValue)+"</td></tr>";
                                 }
                                 toolPane.set("content","<table style=\"margin:0;padding:0;\">"+prodInfoHtml+"</table>");

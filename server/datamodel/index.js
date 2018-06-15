@@ -80,6 +80,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.getDataItemsForSelect= _getDataItemsForSelect;
     dataModel.getDataItemsForTableCombobox= _getDataItemsForTableCombobox;
     dataModel.getDataItem= _getDataItem;
+    dataModel.getIDByFiledValue= _getIDByFiledValue;
     dataModel.setDataItem= _setDataItem;
     dataModel.getDataItemsForTable= _getDataItemsForTable;
     dataModel.getDataItemForTable= _getDataItemForTable;
@@ -87,6 +88,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.getDataForDocTable= _getDataForDocTable;
     dataModel.setDataItemForTable= _setDataItemForTable;
     dataModel.insDataItem= _insDataItem;
+    dataModel.calcNewIdValueOnInsDataItemWithNewID= _calcNewIdValueOnInsDataItemWithNewID;
     dataModel.insDataItemWithNewID= _insDataItemWithNewID;
     dataModel.updDataItem= _updDataItem;
     dataModel.storeDataItem= _storeDataItem;
@@ -94,7 +96,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.findDataItemByOrCreateNew= _findDataItemByOrCreateNew;
     dataModel.insTableDataItem= _insTableDataItem;
     dataModel.updTableDataItem= _updTableDataItem;
-    dataModel.calcNewIdValue= _calcNewIdValue;
+    dataModel.calcNewIdValueOnStoreTableDataItem= _calcNewIdValueOnStoreTableDataItem;
     dataModel.storeTableDataItem= _storeTableDataItem;
     dataModel.delTableDataItem= _delTableDataItem;
     if(!tableName&&!viewName) {
@@ -352,6 +354,30 @@ function _getDataItem(connection, params, resultCallback){
         resultCallback(getDataItemResult);
     });
 }
+/**
+ *
+ * params = { idFieldName, findFieldName }
+ * data
+ * callback = function(data,err)
+ */
+function _getIDByFiledValue(connection, params, data, callback){
+    var idValue=data[params.idFieldName];
+    if(idValue!==undefined&&idValue!==null) {
+        callback(data);
+        return;
+    }
+    var condition={};
+    condition[params.findFieldName+"="]=data[params.findFieldName];
+    this.getDataItem(connection,{fields:[params.idFieldName],conditions:condition}, function(result) {
+        if (!result.item) {
+            callback(data,"Failed finded "+params.idFieldName+" by "+params.findFieldName+"!");
+            return;
+        }
+        data[params.idFieldName]=result.item[params.idFieldName];
+        callback(data);
+    })
+
+}
 
 /**
  * params = { source, valueField, labelField,
@@ -523,8 +549,7 @@ function _getDataItemsForTable(connection, params, resultCallback){
     var fieldsList=[], fieldsSources={}, fieldsFunctions, groupedFieldsList=[], addJoinedSources;
     for(var i in params.tableColumns) {
         var tableColumnData=params.tableColumns[i], fieldName=tableColumnData.data;
-
-        if(this.fieldsMetadata&&this.fieldsMetadata[fieldName]) {
+        if(this.fieldsMetadata&&this.fieldsMetadata[fieldName]&&!tableColumnData.dataFunction) {
             if(tableColumnData.name) fieldsList.push(fieldName);
             if(tableColumnData.name&&hasAFunctions)groupedFieldsList.push(fieldName);
             if(tableColumnData.dataSource&&tableColumnData.sourceField)
@@ -628,60 +653,62 @@ function _getDataItemForTable(connection, params, resultCallback){
  */
 function _getTableColumnsDataForHTable(tableColumns){
     if (!tableColumns) return tableColumns;
-    var tableColumnsDataForHTable=[];
+    var htTableColumns=[];
     for(var col=0;col<tableColumns.length;col++){
         var tableColData=tableColumns[col];
         if(!tableColData||!tableColData.data||!tableColData.name) continue;
-        var tableColumnsDataItemForHTable= { data:tableColData.data };
-        if(tableColData.identifier!==undefined) tableColumnsDataItemForHTable.identifier=tableColData.identifier;
-        if(tableColData.name!==undefined) tableColumnsDataItemForHTable.name=tableColData.name;
-        if(tableColData.width!==undefined) tableColumnsDataItemForHTable.width=tableColData.width;
-        if(tableColData.type!==undefined) tableColumnsDataItemForHTable.type=tableColData.type;
-        if(tableColData.align!==undefined) tableColumnsDataItemForHTable.align=tableColData.align;
-        if(tableColData.useFilter!==undefined) tableColumnsDataItemForHTable.useFilter=tableColData.useFilter;
-        if(tableColData.readOnly!==undefined) tableColumnsDataItemForHTable.readOnly=tableColData.readOnly;
-        if(tableColData.visible!==undefined) tableColumnsDataItemForHTable.visible=tableColData.visible;
-        if(tableColData.format!==undefined) tableColumnsDataItemForHTable.format=tableColData.format;
-        if(tableColData.dateFormat!==undefined) tableColumnsDataItemForHTable.dateFormat=tableColData.dateFormat;
-        if(tableColData.datetimeFormat!==undefined) tableColumnsDataItemForHTable.datetimeFormat=tableColData.datetimeFormat;
-        if(tableColData.format!==undefined) tableColumnsDataItemForHTable.format=tableColData.format;
-        if(tableColData.language!==undefined) tableColumnsDataItemForHTable.language=tableColData.language;
-        if(tableColData.checkedTemplate!==undefined) tableColumnsDataItemForHTable.checkedTemplate=tableColData.checkedTemplate;
-        if(tableColData.uncheckedTemplate!==undefined) tableColumnsDataItemForHTable.uncheckedTemplate=tableColData.uncheckedTemplate;
-        if(tableColData.strict!==undefined) tableColumnsDataItemForHTable.strict=tableColData.strict;
-        if(tableColData.allowInvalid!==undefined) tableColumnsDataItemForHTable.allowInvalid=tableColData.allowInvalid;
-        if(tableColData.sourceURL!==undefined) tableColumnsDataItemForHTable.sourceURL=tableColData.sourceURL;
-        tableColumnsDataForHTable.push(tableColumnsDataItemForHTable);
-        if (tableColumnsDataItemForHTable.type=="dateAsText"){
-            tableColumnsDataItemForHTable.type="text";
+        var thTableColumnsItem= { data:tableColData.data };
+        if(tableColData.identifier!==undefined) thTableColumnsItem.identifier=tableColData.identifier;
+        if(tableColData.name!==undefined) thTableColumnsItem.name=tableColData.name;
+        if(tableColData.width!==undefined) thTableColumnsItem.width=tableColData.width;
+        if(tableColData.type!==undefined) thTableColumnsItem.type=tableColData.type;
+        if(tableColData.align!==undefined) thTableColumnsItem.align=tableColData.align;
+        if(tableColData.useFilter!==undefined) thTableColumnsItem.useFilter=tableColData.useFilter;
+        if(tableColData.readOnly!==undefined) thTableColumnsItem.readOnly=tableColData.readOnly;
+        if(tableColData.visible!==undefined) thTableColumnsItem.visible=tableColData.visible;
+        if(tableColData.format!==undefined) thTableColumnsItem.format=tableColData.format;
+        //if(tableColData.trimWhitespace!==undefined) thTableColumnsItem.trimWhitespace=tableColData.trimWhitespace;
+        //else thTableColumnsItem.trimWhitespace=false;
+        if(tableColData.dateFormat!==undefined) thTableColumnsItem.dateFormat=tableColData.dateFormat;
+        if(tableColData.datetimeFormat!==undefined) thTableColumnsItem.datetimeFormat=tableColData.datetimeFormat;
+        if(tableColData.format!==undefined) thTableColumnsItem.format=tableColData.format;
+        if(tableColData.language!==undefined) thTableColumnsItem.language=tableColData.language;
+        if(tableColData.checkedTemplate!==undefined) thTableColumnsItem.checkedTemplate=tableColData.checkedTemplate;
+        if(tableColData.uncheckedTemplate!==undefined) thTableColumnsItem.uncheckedTemplate=tableColData.uncheckedTemplate;
+        if(tableColData.strict!==undefined) thTableColumnsItem.strict=tableColData.strict;
+        if(tableColData.allowInvalid!==undefined) thTableColumnsItem.allowInvalid=tableColData.allowInvalid;
+        if(tableColData.sourceURL!==undefined) thTableColumnsItem.sourceURL=tableColData.sourceURL;
+        htTableColumns.push(thTableColumnsItem);
+        if (thTableColumnsItem.type=="dateAsText"){
+            thTableColumnsItem.type="text";
             //if(!tableColumnsDataItemForHTable.dateFormat) tableColumnsDataItemForHTable.dateFormat="DD.MM.YY";
-            if(!tableColumnsDataItemForHTable.datetimeFormat) tableColumnsDataItemForHTable.datetimeFormat="DD.MM.YY";
-        } else if (tableColumnsDataItemForHTable.type=="datetimeAsText"){
-            tableColumnsDataItemForHTable.type="text";
+            if(!thTableColumnsItem.datetimeFormat) thTableColumnsItem.datetimeFormat="DD.MM.YY";
+        } else if (thTableColumnsItem.type=="datetimeAsText"){
+            thTableColumnsItem.type="text";
             //if(!tableColumnsDataItemForHTable.dateFormat) tableColumnsDataItemForHTable.dateFormat="DD.MM.YY HH:mm:ss";
-            if(!tableColumnsDataItemForHTable.datetimeFormat) tableColumnsDataItemForHTable.datetimeFormat="DD.MM.YY HH:mm:ss";
-        } else if(tableColumnsDataItemForHTable.type=="numeric"){
-            if(!tableColumnsDataItemForHTable.format) tableColumnsDataItemForHTable.format="#,###,###,##0.[#########]";
-            if(!tableColumnsDataItemForHTable.language) tableColumnsDataItemForHTable.language="ru-RU";
-        } else if(tableColumnsDataItemForHTable.type=="numeric2"){
-            tableColumnsDataItemForHTable.type="numeric";
-            if(!tableColumnsDataItemForHTable.format) tableColumnsDataItemForHTable.format="#,###,###,##0.00[#######]";
-            if(!tableColumnsDataItemForHTable.language) tableColumnsDataItemForHTable.language="ru-RU";
-        } else if(tableColumnsDataItemForHTable.type=="checkbox"){
-            if(!tableColumnsDataItemForHTable.checkedTemplate) tableColumnsDataItemForHTable.checkedTemplate="1";
-            if(!tableColumnsDataItemForHTable.uncheckedTemplate) tableColumnsDataItemForHTable.uncheckedTemplate="0";
-        } else if(tableColumnsDataItemForHTable.type=="checkboxMSSQL"){
-            tableColumnsDataItemForHTable.type="checkbox";
-            if(!tableColumnsDataItemForHTable.checkedTemplate) tableColumnsDataItemForHTable.checkedTemplate="true";
-            if(!tableColumnsDataItemForHTable.uncheckedTemplate) tableColumnsDataItemForHTable.uncheckedTemplate="false";
-        } else if(tableColumnsDataItemForHTable.type=="combobox"||tableColumnsDataItemForHTable.type=="comboboxWN") {
-            tableColumnsDataItemForHTable.strict= true;
-            if(tableColumnsDataItemForHTable.type=="combobox") tableColumnsDataItemForHTable.allowInvalid=false; else tableColumnsDataItemForHTable.allowInvalid=true;
-            tableColumnsDataItemForHTable.filter= false;
-            tableColumnsDataItemForHTable.type="autocomplete";
-        } else if(!tableColumnsDataItemForHTable.type) tableColumnsDataItemForHTable.type="text";
+            if(!thTableColumnsItem.datetimeFormat) thTableColumnsItem.datetimeFormat="DD.MM.YY HH:mm:ss";
+        } else if(thTableColumnsItem.type=="numeric"){
+            if(!thTableColumnsItem.format) thTableColumnsItem.format="#,###,###,##0.[#########]";
+            if(!thTableColumnsItem.language) thTableColumnsItem.language="ru-RU";
+        } else if(thTableColumnsItem.type=="numeric2"){
+            thTableColumnsItem.type="numeric";
+            if(!thTableColumnsItem.format) thTableColumnsItem.format="#,###,###,##0.00[#######]";
+            if(!thTableColumnsItem.language) thTableColumnsItem.language="ru-RU";
+        } else if(thTableColumnsItem.type=="checkbox"){
+            if(!thTableColumnsItem.checkedTemplate) thTableColumnsItem.checkedTemplate="1";
+            if(!thTableColumnsItem.uncheckedTemplate) thTableColumnsItem.uncheckedTemplate="0";
+        } else if(thTableColumnsItem.type=="checkboxMSSQL"){
+            thTableColumnsItem.type="checkbox";
+            if(!thTableColumnsItem.checkedTemplate) thTableColumnsItem.checkedTemplate="true";
+            if(!thTableColumnsItem.uncheckedTemplate) thTableColumnsItem.uncheckedTemplate="false";
+        } else if(thTableColumnsItem.type=="combobox"||thTableColumnsItem.type=="comboboxWN") {
+            thTableColumnsItem.strict= true;
+            if(thTableColumnsItem.type=="combobox") thTableColumnsItem.allowInvalid=false; else thTableColumnsItem.allowInvalid=true;
+            thTableColumnsItem.filter= false;
+            thTableColumnsItem.type="autocomplete";
+        } else if(!thTableColumnsItem.type) thTableColumnsItem.type="text";
     }
-    return tableColumnsDataForHTable;
+    return htTableColumns;
 }
 /**
  * params = { source,
@@ -865,11 +892,17 @@ function _insDataItem(connection, params, resultCallback) {
         resultCallback(insResult);
     });
 }
+function _calcNewIdValueOnInsDataItemWithNewID(params, callback){
+    if(params.insData&&params.idFieldName)
+        params.insData[params.idFieldName]=common.getUIDNumber();
+    callback(params);
+}
 /**
  * params = { tableName, idFieldName,
- *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
+ *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
+ *      calcNewIdValue = function(params, callback), callback= function(params)
  * }
- * resultCallback = function(result = { updateCount, error, resultItem }
+ * resultCallback = function(result = { updateCount, error }
  */
 function _insDataItemWithNewID(connection, params, resultCallback) {
     if (!params) {                                                                                  log.error("FAILED _insDataItemWithNewID! Reason: no parameters!");//test
@@ -881,10 +914,13 @@ function _insDataItemWithNewID(connection, params, resultCallback) {
         resultCallback({ error:"Failed insert data item with new ID! Reason:no id field name!"});
         return;
     }
-    params.insData[idFieldName]=common.getUIDNumber();
-    this.insDataItem(connection, {idFieldName:idFieldName, insData:params.insData}, function(result){
-        if(result&&result.updateCount>0)result.resultItem=params.insData;
-        resultCallback(result);
+    if(!params.calcNewIdValue) params.calcNewIdValue=this.calcNewIdValueOnInsDataItemWithNewID;
+    var thisInstance=this;
+    params.calcNewIdValue(params, function(params){
+        thisInstance.insDataItem(connection, {tableName:params.tableName, insData:params.insData}, function(result){
+            if(result&&result.updateCount>0)result.resultItem=params.insData;
+            resultCallback(result);
+        });
     });
 }
 /**
@@ -1029,7 +1065,8 @@ function _delDataItem(connection, params, resultCallback) {
 /**
  * params = { tableName, resultFields,
  *      findByFields,
- *      idFieldName, fieldsValues = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
+ *      idFieldName, fieldsValues = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
+ *
  * }
  * resultCallback = function(result = { resultItem, error } )
  */
@@ -1197,8 +1234,7 @@ function _updTableDataItem(connection, params, resultCallback) {
             });
     });
 }
-
-function _calcNewIdValue(params, callback){
+function _calcNewIdValueOnStoreTableDataItem(params, callback){
     if(params.storeTableData&&params.idFieldName)
         params.storeTableData[params.idFieldName]=common.getUIDNumber();
     callback(params);
@@ -1245,7 +1281,7 @@ function _storeTableDataItem(connection, params, resultCallback) {
         }
     }
     if (isInsert){//insert
-        if(!params.calcNewIdValue) params.calcNewIdValue=this.calcNewIdValue;
+        if(!params.calcNewIdValue) params.calcNewIdValue=this.calcNewIdValueOnStoreTableDataItem;
         var thisInstance=this;
         params.calcNewIdValue(params, function(params){
             thisInstance.insTableDataItem(connection, {tableName:params.tableName, idFieldName:idFieldName,idFields:idFields,

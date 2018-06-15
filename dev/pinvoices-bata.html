@@ -1,0 +1,438 @@
+<body>
+<div id="wrh_pinv_PageContainer" style="width:100%;height:100%;">
+    <div id="wrh_pinv_ListContainer" style="width:310px;height:100%; margin:0;padding:0;"></div>
+    <div id="wrh_pinv_DetailContainer" style="width:100%;height:100%; margin:0;padding:0;">
+        <div id="wrh_pinv_DetailHeader" style="width:100%;height:auto; margin:0;padding:0;"></div>
+        <div id="wrh_pinv_ProductsTable" style="width:100%;height:100%; margin:0;padding:0;"></div>
+        <div id="wrh_pinv_DetailTotal" style="width:100%;height:auto;; margin:0;padding:0;"></div>
+    </div>
+    <div id="wrh_pinv_RightContainer" style="width:250px;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app","tDocumentStandardTable","dojo/request/iframe", /*"dojox/form/FileInput ",*/ "dojo/request/handlers", "request"],
+            function (APP, TDocumentStandardTable,iframe/*,FileInput*/,handlers, Request) {
+                var wrh_pinv= APP.instanceForID("wrh_pinv_PageContainer", TDocumentStandardTable,
+                            { idListContainer:"wrh_pinv_ListContainer",idDetailContainer:"wrh_pinv_DetailContainer",
+                                idDetailHeader:"wrh_pinv_DetailHeader",idDetailTable:"wrh_pinv_ProductsTable",idDetailTotal:"wrh_pinv_DetailTotal",
+                                idRightContainer:"wrh_pinv_RightContainer" })
+                        .addListTable({getDataUrl:"/wrh/pInvoices/getDataForPInvsListTable",
+                            header:"Список накладных", bdatelabelText:"c",bdateCondition:"DOCDATE>=", edatelabelText:"по",edateCondition:"DOCDATE<="
+                        })
+                        .setDetailHeaderParameters({dataIDName:"ID",
+                            getDataUrl:"/wrh/pInvoices/getPInvData", getDataForNewUrl:"/wrh/pInvoices/getNewPInvData",
+                            postDataUrl:"/wrh/pInvoices/storePInvData", postForDeleteDataUrl:"/wrh/pInvoices/deletePInvData",
+                            dataStateName:"DOCSTATE_ALIAS", activeStateValue:"active"
+                        })
+                        .addDetailHeaderTitle({title:"Приходная накладная",
+                            titleForNew:"Новая приходная накладная", titleForNothing:"Приходная накладная не выбрана", titleForFailedLoad:"Нет данных",
+                            numberDataItemName:"NUMBER", dateDataItemName:"DOCDATE", titleDatePrefix:"от"},25)
+                        .addDetailHeaderRow(25,true)
+                        .addDetailHeaderSelect("UNIT_NAME","Подразделение", 330,
+                            {inputStyle:"width:200px", loadDropDownURL:"/dir/units/getDirUnitsForSelect", labelDataItem:"UNIT_NAME"})
+                        .addDetailHeaderTextBox("NUMBER", "Номер", 120, {inputStyle:"width:50px"})
+                        .addDetailHeaderDateTextBox("DOCDATE", "Дата", 150, "width:80px")
+                        .addDetailHeaderRow(25,true)
+                        .addDetailHeaderSelect("SUPPLIER_NAME","Поставщик", 280,
+                            {inputStyle:"width:200px", loadDropDownURL:"/dir/contractors/getDirContractorsForSelect", labelDataItem:"SUPPLIER_NAME"})
+                        .addDetailHeaderTextBox("SUPPLIER_INV_NUM", "Номер накл. поставщика", 200, {inputStyle:"width:50px"})
+                        .addDetailHeaderTextBox("SUPPLIER_ORDER_NUM", "Номер заказа. поставщика", 220, {inputStyle:"width:50px"})
+                        .addDetailHeaderSelect("PRODUCT_COLLECTION", "Коллекция", 260,
+                            {inputStyle:"width:120px", loadDropDownURL:"/dir/products/getDirProductsCollectionsForSelect", labelDataItem:"PRODUCT_COLLECTION"})
+                        .addDetailHeaderRow(25,true)
+                        .addDetailHeaderSelect("CURRENCY_CODE","Валюта", 260,
+                            {inputStyle:"width:200px", loadDropDownURL:"/sys/currency/getCurrencyForSelect", labelDataItem:"CURRENCY_CODENAME"})
+                        .addDetailHeaderNumberTextBox("RATE", "Курс валюты", 200, {inputStyle:"width:40px", pattern:"########0.00"})
+                        .addDetailHeaderNumberTextBox("BASE_FACTOR", "Базовый коэффициент", 200, {inputStyle:"width:40px", pattern:"####0.00"})
+                        .setDetailTableParameters({conditionIDName:"PINV_ID",
+                            getDataUrl:"/wrh/pInvoices/getDataForPInvProductsTable",
+                            storeDataUrl:"/wrh/pInvoices/storePInvProductsTableData", deleteDataUrl:"/wrh/pInvoices/deletePInvProductsTableData"})
+                        .addDetailTotalRow()
+                        .addDetailSubTotalCountNumberTextBox("ИТОГО СТРОК:", 190, {inputStyle:"width:40px;"})
+                        .addDetailSubtotalNumberTextBox("ИТОГО КОЛИЧЕСТВО:", 700, "QTY", {pattern:"###,###,##0.#########", inputStyle:"width:50px;"})
+                        .addDetailSubtotalNumberTextBox("ИТОГО СУММА:", 245, "POSSUM", {pattern:"###,###,##0.00#######", inputStyle:"width:80px;"})
+                        .addDetailTotalRow(true)
+                        .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СТРОК:", 190, "DOCCOUNT",
+                            {pattern:"###,###,##0.#########", inputStyle:"width:40px;", style:"font-weight:bold;", printLabel:"ИТОГО СТРОК:"})
+                        .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ КОЛИЧЕСТВО:", 1400, "DOCQTYSUM",
+                            {pattern:"###,###,##0.#########", inputStyle:"width:50px;", style:"font-weight:bold;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
+                        .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 245, "DOCSUM",
+                            {pattern:"###,###,##0.00#######", inputStyle:"width:80px;", style:"font-weight:bold;", printLabel:"ИТОГО СУММА:"})
+                        .addDetailTotalRow(true)
+                        .addDetailTotalTextBox("Статус:", 1140, "DOCSTATE_NAME", {style:"font-weight:bold;", inputStyle:"width:200px", print:false})
+                        //.addToolPane("Вид документа")
+                        .addToolPane({title:"Действия"})
+                        .addToolPaneActionButton("Новая накладная", {btnStyle:"width:200px;", detailTableActionName:"loadHeaderNewValues"})
+                        .addToolPaneActionButton("Сохранить накладную", {btnStyle:"width:200px;", detailTableActionName:"storeHeaderValues"})
+                        .addToolPaneActionButton("Отменить изменения", {btnStyle:"width:200px;", detailTableActionName:"loadHeaderLastValues"})
+                        .addToolPaneActionButton("Удалить накладную", {btnStyle:"width:200px;", detailTableActionName:"deleteHeader"})
+                        .addToolPaneBR()
+                        .addToolPaneActionButton("Добавить строку", {btnStyle:"width:200px;", detailTableActionName:"insertDetailTableRow",rowPosIndexName:"POSIND",rowPosName:"POS"})
+                        .addToolPaneActionButton("Копировать строку", {btnStyle:"width:200px;", detailTableActionName:"insertDetailTableCopySelectedRow"})
+                        .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", detailTableActionName:"allowEditDetailTableSelectedRow"})
+                        .addToolPaneActionButton("Сохранить строку", {btnStyle:"width:200px;", detailTableActionName:"storeDetailTableSelectedRow"})
+                        .addToolPaneActionButton("Удалить строку", {btnStyle:"width:200px;", detailTableActionName:"deleteDetailTableSelectedRow"})
+                        .addToolPane({title:"Статус документа"})
+                        .addToolPaneActionButton("Установить статус \"Закрыт\"", { btnStyle:"width:200px;",
+                            actionFunction: function (params) {
+                                var pinvId =  params.thisInstance.detailHeader.data.ID;    console.log("pinvId=",pinvId);
+                                Request.postJSONData({url: "/wrh/pInvoices/closePInv", data: {"PINV_ID": pinvId}},
+                                    function(result){
+                                        params.thisInstance.setDetailHeaderContentByListSelectedRow(wrh_pinv.detailHeader.lastContentData, {reloadData:true, clearBeforeLoad:true});
+                                });
+                            }
+                        })
+                        .addToolPaneActionButton("Установить статус \"В работе\"", {btnStyle:"width:200px;"})
+                        .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
+                        .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
+                        .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
+                            var supplierOrderNum= thisInstance.detailHeader.getContentDataItem("SUPPLIER_ORDER_NUM");
+                            if (!supplierOrderNum || supplierOrderNum.trim().length==0){
+                                if(crd.item("PRODUCT_GENDER_CODE").isChanged()&&!crd.item("PRODUCT_GENDER_CODE").isUNDEFNULL()){
+                                    var genderValueForGenderCode=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_GENDER_CODE",crd.item("PRODUCT_GENDER_CODE").getValue(),"PRODUCT_GENDER");
+                                    if(genderValueForGenderCode==undefined) genderValueForGenderCode=null;
+                                    crd.item("PRODUCT_GENDER").setValue(genderValueForGenderCode);
+                                } else if(crd.item("PRODUCT_GENDER").isChanged()&&!crd.item("PRODUCT_GENDER").isUNDEFNULL()){
+                                    var genderCodeValueForGender=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_GENDER",crd.item("PRODUCT_GENDER").getValue(),"PRODUCT_GENDER_CODE");
+                                    if(genderCodeValueForGender==undefined) genderCodeValueForGender=null;
+                                    crd.item("PRODUCT_GENDER_CODE").setValue(genderCodeValueForGender);
+                                }
+                                var genderValue,genderCode;
+                                if(crd.item("PRODUCT_CATEGORY_CODE").isChanged()&&!crd.item("PRODUCT_CATEGORY_CODE").isUNDEFNULL()){
+                                    var categoryValueForCategoryCode=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_CATEGORY");
+                                    if(categoryValueForCategoryCode==undefined) categoryValueForCategoryCode=null;
+                                    crd.item("PRODUCT_CATEGORY").setValue(categoryValueForCategoryCode);
+                                    genderValue=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_GENDER");
+                                    genderCode=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY_CODE",crd.item("PRODUCT_CATEGORY_CODE").getValue(),"PRODUCT_GENDER_CODE");
+
+                                } else if(crd.item("PRODUCT_CATEGORY").isChanged()&&!crd.item("PRODUCT_CATEGORY").isUNDEFNULL()){
+                                    var categoryCodeValueForCategory=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_CATEGORY_CODE");
+                                    if(categoryCodeValueForCategory==undefined) categoryCodeValueForCategory=null;
+                                    crd.item("PRODUCT_CATEGORY_CODE").setValue(categoryCodeValueForCategory);
+                                    genderValue=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_GENDER");
+                                    genderCode=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_CATEGORY",crd.item("PRODUCT_CATEGORY").getValue(),"PRODUCT_GENDER_CODE");
+                                }
+                                if(genderValue!==undefined&&crd.item("PRODUCT_GENDER").isEMPTY())
+                                    crd.item("PRODUCT_GENDER").setValue(genderValue);
+                                if(genderCode!==undefined&&crd.item("PRODUCT_GENDER_CODE").isEMPTY())
+                                    crd.item("PRODUCT_GENDER_CODE").setValue(genderCode);
+
+                                if(crd.item("PRODUCT_SUBCATEGORY_CODE").isChanged()&&!crd.item("PRODUCT_SUBCATEGORY_CODE").isUNDEFNULL()){
+                                    var subcategoryValueForSubcategoryCode=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_SUBCATEGORY_CODE",crd.item("PRODUCT_SUBCATEGORY_CODE").getValue(),"PRODUCT_SUBCATEGORY");
+                                    if(subcategoryValueForSubcategoryCode==undefined) subcategoryValueForSubcategoryCode=null;
+                                    crd.item("PRODUCT_SUBCATEGORY").setValue(subcategoryValueForSubcategoryCode);
+                                } else if(crd.item("PRODUCT_SUBCATEGORY").isChanged()&&!crd.item("PRODUCT_SUBCATEGORY").isUNDEFNULL()){
+                                    var subcategoryCodeValueForSubcategory=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_SUBCATEGORY",crd.item("PRODUCT_SUBCATEGORY").getValue(),"PRODUCT_SUBCATEGORY_CODE");
+                                    if(subcategoryCodeValueForSubcategory==undefined) subcategoryCodeValueForSubcategory=null;
+                                    crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(subcategoryCodeValueForSubcategory);
+                                }
+                                if(crd.item("PRODUCT_COLLECTION").isEMPTY())
+                                    crd.item("PRODUCT_COLLECTION").setValue(thisInstance.detailHeader.getContentDataItem("PRODUCT_COLLECTION"));
+                                if(crd.item("PRODUCT_COLLECTION_CODE").isChanged()&&!crd.item("PRODUCT_COLLECTION_CODE").isUNDEFNULL()){
+                                    var collectionValueForCollectionCode=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_COLLECTION_CODE",crd.item("PRODUCT_COLLECTION_CODE").getValue(),"PRODUCT_COLLECTION");
+                                    if(collectionValueForCollectionCode==undefined) collectionValueForCollectionCode=null;
+                                    crd.item("PRODUCT_COLLECTION").setValue(collectionValueForCollectionCode);
+                                } else if(crd.item("PRODUCT_COLLECTION").isChanged()&&!crd.item("PRODUCT_COLLECTION").isUNDEFNULL()){
+                                    var collectionCodeValueForCollection=
+                                            detailTable.getAutocompleteColumnValueForItem("PRODUCT_COLLECTION",crd.item("PRODUCT_COLLECTION").getValue(),"PRODUCT_COLLECTION_CODE");
+                                    if(collectionCodeValueForCollection==undefined) collectionCodeValueForCollection=null;
+                                    crd.item("PRODUCT_COLLECTION_CODE").setValue(collectionCodeValueForCollection);
+                                }
+//                                //wrh_pinv_pinvproductslisthst.setProdDataByArticleFromPInv(changedRow,newProdData);
+                            } else
+                            if (supplierOrderNum && supplierOrderNum.trim().length>0
+                                    && crd.item("PRODUCT_ARTICLE").isChanged() && !crd.item("PRODUCT_ARTICLE").isEMPTY()){              console.log("PINV detailTableRowChangeCallback1 prod article from order bata ");
+//                                var condition={};
+//                                condition["SUPPLIER_ORDER_NUM"]= supplierOrderNum;
+//                                condition["PRODUCT_ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
+//                                Request.getJSONData({url:"/wrh/order_bata/get_order_bata_details_by_article", condition:condition, consoleLog:true},
+//                                        function(success,result){
+//                                            if (success&&result.item) {                                                 //console.log("PINV detailTableRowChangeCallback2 getJSONData success ",result);
+//                                                var prodDataFromOrderBata = result.item;
+//                                                crd.item("PRODUCT_GENDER_CODE").setValue(prodDataFromOrderBata["PRODUCT_GENDER_CODE"]);
+//                                                crd.item("PRODUCT_GENDER").setValue(prodDataFromOrderBata["PRODUCT_GENDER"]);
+//                                                crd.item("PRODUCT_CATEGORY_CODE").setValue(prodDataFromOrderBata["PRODUCT_CATEGORY_CODE"]);
+//                                                crd.item("PRODUCT_CATEGORY").setValue(prodDataFromOrderBata["PRODUCT_CATEGORY"]);
+//                                                crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(prodDataFromOrderBata["PRODUCT_SUBCATEGORY_CODE"]);
+//                                                crd.item("PRODUCT_SUBCATEGORY").setValue(prodDataFromOrderBata["PRODUCT_SUBCATEGORY"]);
+//                                                crd.item("PRICE").setValue(prodDataFromOrderBata["PRICE"]);
+//                                                if (crd.item("QTY").isEMPTYZERO()) crd.item("QTY").setValue(prodDataFromOrderBata["QTY"]);
+//                                                crd.item("PRODUCT_CODE").setValue(null);
+//                                                crd.item("PRODUCT_NAME").setValue(null);
+//                                                crd.item("PRODUCT_UM").setValue(null);
+//                                                crd.item("PRODUCT_PBARCODE").setValue(null);
+//                                                crd.item("BARCODE").setValue(null);
+//                                            }
+//                                            nextCallback();
+//                                        });
+//                                return;
+                            }
+                            nextCallback();
+                        })
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+                            if (!crd.item("PRODUCT_ARTICLE").isEMPTY()
+                            &&  (!crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_NAME").isChanged())){
+                                var condition={};
+                                condition["PRODUCT_ARTICLE"]=crd.item("PRODUCT_ARTICLE").getValue();
+                                condition["ID"]=crd.item("ID").getValue();
+                                Request.getJSONData({url:"/dir/products/getProdAttributesFromROperationsByArticle", condition:condition},
+                                        function(result){
+                                            if (!result || !result.item) {
+                                                nextCallback();
+                                                return;
+                                            }
+                                            var resData=result.item;
+                                            crd.item("PRODUCT_GENDER").setValue(resData["PRODUCT_GENDER"]);
+                                            crd.item("PRODUCT_GENDER_CODE").setValue(resData["PRODUCT_GENDER_CODE"]);
+                                            crd.item("PRODUCT_CATEGORY").setValue(resData["PRODUCT_CATEGORY"]);
+                                            crd.item("PRODUCT_CATEGORY_CODE").setValue(resData["PRODUCT_CATEGORY_CODE"]);
+                                            crd.item("PRODUCT_SUBCATEGORY").setValue(resData["PRODUCT_SUBCATEGORY"]);
+                                            crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(resData["PRODUCT_SUBCATEGORY_CODE"]);
+                                            crd.item("PRODUCT_COLLECTION").setValue(resData["PRODUCT_COLLECTION"]);
+                                            crd.item("PRODUCT_COLLECTION_CODE").setValue(resData["PRODUCT_COLLECTION_CODE"]);
+                                            crd.item("PRODUCT_TYPE").setValue(resData["PRODUCT_TYPE"]);
+                                            crd.item("PRODUCT_KIND").setValue(resData["PRODUCT_KIND"]);
+                                            crd.item("PRODUCT_COMPOSITION").setValue(resData["PRODUCT_COMPOSITION"]);
+                                            nextCallback(true);
+                                        });
+                                return;
+                            }
+                            nextCallback();
+                        })
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+                            if( !crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_NAME").isChanged()
+                                    &&  (crd.item("PRODUCT_ARTICLE").isChanged() || crd.item("PRODUCT_KIND").isChanged()
+                                        || crd.item("PRODUCT_COMPOSITION").isChanged() || crd.item("PRODUCT_SIZE").isChanged()
+                                        || crd.item("PRODUCT_COLLECTION").isChanged() || crd.item("PRODUCT_COLLECTION_CODE").isChanged()) ){
+                                var condition = {};
+                                if (!crd.item("PRODUCT_ARTICLE").isEMPTY())
+                                    condition["PRODUCT_ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
+                                if (!crd.item("PRODUCT_COLLECTION").isEMPTY())
+                                    condition["PRODUCT_COLLECTION"]= crd.item("PRODUCT_COLLECTION").getValue();
+                                if (!crd.item("PRODUCT_COLLECTION_CODE").isEMPTY())
+                                    condition["PRODUCT_COLLECTION_CODE"]= crd.item("PRODUCT_COLLECTION_CODE").getValue();
+                                if (!crd.item("PRODUCT_KIND").isEMPTY())
+                                    condition["PRODUCT_KIND"]= crd.item("PRODUCT_KIND").getValue();
+                                if (!crd.item("PRODUCT_COMPOSITION").isEMPTY())
+                                    condition["PRODUCT_COMPOSITION"]= encodeURIComponent(crd.item("PRODUCT_COMPOSITION").getValue());
+                                if (!crd.item("PRODUCT_SIZE").isEMPTY())
+                                    condition["PRODUCT_SIZE"]= crd.item("PRODUCT_SIZE").getValue();
+                                if (!crd.item("PRODUCT_UM").isEMPTY())
+                                    condition["PRODUCT_UM"]= crd.item("PRODUCT_UM").getValue();
+                                Request.getJSONData({url:"/dir/products/getProdNameByProdAttributes", condition:condition, resultItemName:"item"},
+                                        function(resData){
+                                            if (!resData) {
+                                                nextCallback();
+                                                return;
+                                            }
+                                            crd.item("PRODUCT_NAME").setValue(resData["PRODUCT_NAME"]);
+                                            crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
+                                            crd.item("PRODUCT_UM").setValue(resData["PRODUCT_UM"]);
+//                                            crd.item("PRODUCT_PBARCODE").setValue("");
+//                                            crd.item("BARCODE").setValue("");
+//                                            crd.item("PRODUCT_CODE").setValue("");
+                                            nextCallback(true);
+                                        });
+                                return;
+                            }
+                            nextCallback();
+                        })
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+                            if ( (crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_CODE").isEMPTY())
+                                    || (crd.item("PRODUCT_NAME").isChanged()&&!crd.item("PRODUCT_NAME").isEMPTY()) ) {
+                                var condition = {};
+                                if (crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_CODE").isEMPTY())
+                                    condition["PRODUCT_CODE"]= crd.item("PRODUCT_CODE").getValue();
+                                if (crd.item("PRODUCT_NAME").isChanged()&&!crd.item("PRODUCT_NAME").isEMPTY())
+                                    condition["PRODUCT_NAME"]= encodeURIComponent(crd.item("PRODUCT_NAME").getValue());
+                                Request.getJSONData({url:"/dir/products/get_product_by_code_name", condition:condition},
+                                        function(result){
+                                            if (!result || !result.item ) {
+                                                nextCallback();
+                                                return;
+                                            }
+                                            var resData=result.item;
+                                            crd.item("PRODUCT_CODE").setValue(resData["PRODUCT_CODE"]);
+                                            crd.item("PRODUCT_NAME").setValue(resData["PRODUCT_NAME"]);
+                                            crd.item("PRODUCT_UM").setValue(resData["PRODUCT_UM"]);
+                                            crd.item("PRODUCT_ARTICLE").setValue(resData["PRODUCT_ARTICLE"]);
+                                            crd.item("PRODUCT_PBARCODE").setValue(resData["PRODUCT_PBARCODE"]);
+                                            crd.item("PRODUCT_GENDER").setValue(resData["PRODUCT_GENDER"]);
+                                            crd.item("PRODUCT_GENDER_CODE").setValue(resData["PRODUCT_GENDER_CODE"]);
+                                            crd.item("PRODUCT_CATEGORY").setValue(resData["PRODUCT_CATEGORY"]);
+                                            crd.item("PRODUCT_CATEGORY_CODE").setValue(resData["PRODUCT_CATEGORY_CODE"]);
+                                            crd.item("PRODUCT_SUBCATEGORY").setValue(resData["PRODUCT_SUBCATEGORY"]);
+                                            crd.item("PRODUCT_SUBCATEGORY_CODE").setValue(resData["PRODUCT_SUBCATEGORY_CODE"]);
+                                            crd.item("PRODUCT_COLLECTION").setValue(resData["PRODUCT_COLLECTION"]);
+                                            crd.item("PRODUCT_COLLECTION_CODE").setValue(resData["PRODUCT_COLLECTION_CODE"]);
+                                            crd.item("PRODUCT_KIND").setValue(resData["PRODUCT_KIND"]);
+                                            crd.item("PRODUCT_COMPOSITION").setValue(resData["PRODUCT_COMPOSITION"]);
+                                            crd.item("PRODUCT_SIZE").setValue(resData["PRODUCT_SIZE"]);  //PRODUCT_PRINT_NAME
+                                            crd.item("PRODUCT_PRINT_NAME").setValue(resData["PRODUCT_PRINT_NAME"]);
+                                            crd.item("PRODUCT_TYPE").setValue(resData["PRODUCT_TYPE"]);
+                                            crd.item("BARCODE").setValue(resData["BARCODE"]);
+                                            nextCallback(true);
+                                        });
+                                return;
+                            }
+                            nextCallback();
+                        })
+                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){          //console.log("INV detailTableRowChangeCallback1 ",crd.data());
+                            var prevPOS=detailTable.getPrevRowDataItemValue(crd.data(),"POS");
+                            if(prevPOS===undefined||prevPOS===null||isNaN(prevPOS/1)) prevPOS=0;
+                            if (crd.item("POS").isUNDEFNULL()) crd.item("POS").setValue(prevPOS+1);
+                            else if (crd.item("POS").getValue()===prevPOS) crd.item("POS").setValue(prevPOS+1);
+                            if(crd.item("POS").isChanged()) crd.item("POSIND").setValue(crd.item("POS").getValue());
+                            if (crd.item("POSIND").isUNDEFNULL()&&!crd.item("POS").isUNDEFNULLZERO()) crd.item("POSIND").setValue(crd.item("POS").getValue());
+
+                            if (crd.item("QTY").isUNDEFNULL()) crd.item("QTY").setValue(1);
+                            if (crd.item("PRICE").isUNDEFNULL()) crd.item("PRICE").setValue(0);
+                            if (crd.item("POSSUM").isUNDEFNULL()) crd.item("POSSUM").setValue(0);
+                            if (crd.item("POSSUM").isChanged()&&!crd.item("POSSUM").isUNDEFNULL()){                                         //console.log("detailTableRowChangeCallback POSSUM changed",crd);
+                                if (crd.item("QTY").isEMPTY()&&!crd.item("PRICE").isEMPTYZERO())
+                                    crd.item("QTY").setValue( crd.item("POSSUM").getValue()/crd.item("PRICE").getValue() );
+                                else if (crd.item("QTY").isEMPTYZERO()) crd.item("PRICE").setValue( 0 );
+                                else crd.item("PRICE").setValue( crd.item("POSSUM").getValue()/crd.item("QTY").getValue() )
+                            } else if (crd.item("PRICE").isChanged()||crd.item("QTY").isChanged()){                                         //console.log("detailTableRowChangeCallback PRICE QTY changed",crd);
+                                if (crd.item("QTY").isUNDEFNULLZERO()||crd.item("PRICE").isUNDEFNULLZERO()) crd.item("POSSUM").setValue(0);
+                                else crd.item("POSSUM").setValue( crd.item("PRICE").getValue()*crd.item("QTY").getValue() )
+                            } else if (!crd.item("POSSUM").isEMPTY()) {
+                                if (crd.item("QTY").isEMPTYZERO()) crd.item("PRICE").setValue(0);
+                                else crd.item("PRICE").setValue( crd.item("POSSUM").getValue()/crd.item("QTY").getValue() )
+                            }
+                            if(crd.item("FACTOR").isEMPTYZERO()) crd.item("FACTOR").setValue(thisInstance.detailHeader.getContentDataItem("BASE_FACTOR"));
+                            var posrate = thisInstance.detailHeader.getContentDataItem("RATE");
+                            if (crd.item("SALE_PRICE").isChanged()) {                                                   console.log("PINV detailTableRowChangeCallback1 SALE_PRICE isChanged");
+                                if (!crd.item("QTY").isEMPTY()
+                                        && !crd.item("PRICE").isEMPTYZERO()
+                                        && posrate!==0) {
+                                    crd.item("FACTOR").setValue( crd.item("SALE_PRICE").getValue() / posrate / crd.item("PRICE").getValue() );
+                                } else
+                                    crd.item("FACTOR").setValue("");
+                            } else if (crd.item("PRICE").isChanged() || crd.item("FACTOR").isChanged()) {               console.log("PINV detailTableRowChangeCallback1 PRICE or FACTOR isChanged");
+                                if (!crd.item("PRICE").isEMPTY() && !crd.item("FACTOR").isEMPTY()) {
+                                    crd.item("SALE_PRICE").setValue( crd.item("PRICE").getValue() * posrate * crd.item("FACTOR").getValue() );
+                                } else
+                                    crd.item("SALE_PRICE").setValue("");
+                            }
+                            if (crd.item("SALE_PRICE").isChanged() && !crd.item("SALE_PRICE").isEMPTYZERO()){
+                                var posSelPrice = crd.item("SALE_PRICE").getValue();                                    console.log("PINV detailTableRowChangeCallback1 SALE_PRICE correct 0.49 ",posSelPrice);
+                                posSelPrice = Math.round(posSelPrice+0.49);
+                                crd.item("SALE_PRICE").setValue(posSelPrice);
+                                var price = crd.item("PRICE").getValue();
+                                if (price!==0)
+                                    crd.item("FACTOR").setValue( posSelPrice / posrate / price );
+                            }
+                            nextCallback();
+                        })
+
+
+//                        .addDetailTableRowAction("storeDetailTableSelectedRowsPrice",{},
+//                            function(detailTableRowData, actionParams, detailTableUpdatedRowData, startNextAction, finishedAction){
+//                                detailTableUpdatedRowData["PRICELIST_PRICE"]=123.45;
+//                                startNextAction();
+//                            })
+//                        .addDetailTableRowsAction("storeDetailTableSelectedRowsPrice",{
+//                            startAction:function(detailTableRowsData, actionParams, startDetailTableRowsAction) {
+//                                actionParams["finishedCounterByNoConnection"] = 0;
+//                                actionParams["finishedCounterByFailed"] = 0;
+//                                if (actionParams.toolPanes && actionParams.toolPanes[0]) actionParams.toolPanes[0].set("content", "");
+//                                startDetailTableRowsAction();
+//                            },
+//                            tableRowAction: function(contentTableRowData, actionParams, contentTableUpdatedRowData, startNextAction, finishedAction){
+//                                contentTableUpdatedRowData["PRICELIST_PRICE"]=123.45;
+//                                startNextAction();
+//                                    Request.postJSONData({url:"/dir/products_prices/store_product_price", data:contentTableRowData},
+//                                            function(result){                           console.log("tableRowAction result=",result);
+//                                                if (result && result.item) {
+//                                                    //var prodDataFromOrderBata = result.item;
+//                                                    contentTableUpdatedRowData["PRICELIST_PRICE"]= result.item["PRICELIST_PRICE"];}
+//                                                if(actionParams["finishedCounterByFailed"]>0) {
+//                                                    finishedAction();
+//                                                    return;
+//                                                }
+//                                                startNextAction();
+//                                            });
+//                                }
+//                        })
+//                        .addDetailTablePopupMenuAction("Применить цены продажи",{detailTableActionName:"storeDetailTableSelectedRowsPrice"})
+//                        .addDetailTableMenuItemAction("Применить цены продажи",{action:"storeDetailTableSelectedRowsPrice"}, function(selRowsData){
+//                            if(!selRowsData) return;
+//                            for(var selRowInd in selRowsData){
+//                                var selRowData= selRowsData[selRowInd], data={};
+//                                data["PRICELIST_ID"]= 0;
+//                                data["PRODUCT_CODE"]= selRowData["PRODUCT_CODE"];
+//                                data["PRICE"]= selRowData["SALE_PRICE"];
+//                                data["DISCOUNT_PECENT"]= 0;
+//                                data["PRICE_WITH_DISCOUNT"]= selRowData["SALE_PRICE"];
+//                                data["CHANGE_DATETIME"]= moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+//                                Request.postJSONData({url:"/dir/products_prices/store_product_price", data:data},
+//                                        function(result){                                                       console.log("PINV detailTableMenuItemAction postJSONData ", success,result);
+//                                            if (result && result.item) {
+//                                                //var prodDataFromOrderBata = result.item;
+//                                            }
+//                                        });
+//                            }
+//                        })
+
+                        .addToolPane({title:"экспорт"})
+                        .addToolPaneActionButton("таблица в эксель", {btnStyle: "width:200px;",detailTableActionName:"exportTableContentToExcel"})
+                        .addToolPane({title:"Печать"})
+                        .addToolPaneActionButton("Печать ценников", {btnStyle: "width:200px;",detailTableActionName:"printProdTags",
+                            actionFunction:  function(){
+                                var printWindow= window.open("/print/printTags");                                           //console.log("printProdTags.onClick printWindow=",printWindow);
+                                //window.open("/print?pinvid="+wrh_pinv_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
+                                printWindow["prodTagsContentData"]= this.detailTable.getContent();
+                                printWindow["pageProdTagType"]= "productTag58x30";}
+                            })
+                        .addToolPaneActionButton("Печать цен", {btnStyle: "width:200px;", detailTableActionName:"printProdPricesTags",
+                            actionFunction:function(){
+                                var printWindow= window.open("/print/printTags");                                           //console.log("printProdPricesTags.onClick printWindow=",printWindow);
+                                //window.open("/print?pinvid="+wrh_pinv_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
+                                var detailTableContentData=this.detailTable.getContentData();
+                                for(var row=0;row<detailTableContentData.length;row++) detailTableContentData[row]["QTY"]=1;
+                                printWindow["prodTagsContentData"]= detailTableContentData;
+                                printWindow["pageProdTagType"]= "tag40x25price";}
+                        })
+//                        .addToolPane("Доп")
+//                        .addToolPaneActionButton("Сохранить в прайс-лист", {}, "width:200px;")
+                        .addToolPane({title:"Информация о товаре",
+                            detailTableAction:function(toolPane, detailHeader,detailTable,thisInstance){
+                                var detailTableSelectedRow= detailTable.getSelectedRow();
+                                if(detailTableSelectedRow) {
+                                    var htCols = detailTable.getColumns(); var prodInfoHtml = "";
+                                    for(var c=0;c<htCols.length;c++){
+                                        var colItem = htCols[c]; var colData = colItem["data"];
+                                        var colValue = detailTableSelectedRow[colData];
+                                        if(colData.indexOf('PRODUCT')>=0 || colData.indexOf('BARCODE')>=0 || colData.indexOf('BATCH_NUMBER')==0)
+                                            prodInfoHtml = prodInfoHtml + "<tr><td>"+"<b>"+colItem["name"]+":</b> "+((!colValue)?'':colValue)+"</td></tr>";
+                                    }
+                                    toolPane.set("content","<table style=\"margin:0;padding:0;\">"+prodInfoHtml+"</table>");
+                                } else toolPane.set("content","");
+                            }
+                        })
+                        .addToolXPane("Ценник товара", function(toolPane, detailHeader,detailTable,thisInstance){
+                            toolPane.set("content","");
+                            var detailTableSelectedRow= detailTable.getSelectedRow();
+                            if(detailTableSelectedRow) {
+                                var prodTagContentData = {};
+                                for(var rowItemName in detailTableSelectedRow) prodTagContentData[rowItemName]= detailTableSelectedRow[rowItemName];
+                                toolPane.set("prodTagContentData", prodTagContentData);
+                                toolPane.set("href","/print/productTag58x30");
+                            }
+                        })
+                        .startUp();
+    });
+</script>
