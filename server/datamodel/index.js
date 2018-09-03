@@ -507,7 +507,8 @@ function _setDataItem(params, resultCallback){
  *              dataFunction:<sql function or sql expression>
  *             OR dataSource:<sourceName>, sourceField:<sourceFieldName>
  *             OR dataSource:<sourceName>, sourceField:<sourceFieldName>, linkCondition:<dataSource join link condition>
- *             OR childDataSource:<childSourceName>, childLinkField:<childSourceLinkFieldName>, parentDataSource, parentLinkField:<parentSourceLinkFieldName> },
+ *             OR childDataSource:<childSourceName>, sourceField:<child dataSource field name>, childLinkCondition:<child dataSource join link condition>
+ *             OR childDataSource:<childSourceName>, sourceField:<child dataSource field name>, childLinkField:<childSourceLinkFieldName>, parentDataSource, parentLinkField:<parentSourceLinkFieldName> },
  *          ...
  *      ],
  *      conditions={ <condition>:<conditionValue>, ... },
@@ -558,17 +559,17 @@ function _getDataItemsForTable(connection, params, resultCallback){
                 fieldsSources[fieldName]=tableColumnData.dataSource+"."+fieldName;
             else if(hasSources&&(params.source||this.source))
                 fieldsSources[fieldName]=((params.source)?params.source:this.source)+"."+fieldName;
-        } else if(!tableColumnData.dataFunction &&( tableColumnData.sourceField||tableColumnData.dataSource)){
+        } else if(!tableColumnData.dataFunction &&( tableColumnData.sourceField||tableColumnData.dataSource||tableColumnData.childDataSource)){
             if(tableColumnData.name) fieldsList.push(fieldName);
             if(tableColumnData.name&&hasAFunctions)groupedFieldsList.push(fieldName);
-            if(tableColumnData.dataSource&&tableColumnData.sourceField)
-                fieldsSources[fieldName]=tableColumnData.dataSource+"."+tableColumnData.sourceField;
-            else if(tableColumnData.dataSource)
-                fieldsSources[fieldName]=tableColumnData.dataSource+"."+fieldName;
-            else if(tableColumnData.sourceField&&hasSources)
-                fieldsSources[fieldName]=((params.source)?params.source:this.source)+"."+tableColumnData.sourceField;
-            else if(tableColumnData.sourceField)
-                fieldsSources[fieldName]=tableColumnData.sourceField;
+            var fieldDS="";
+            if(hasSources) fieldDS= (params.source)?params.source:this.source;
+            if(tableColumnData.dataSource) fieldDS=tableColumnData.dataSource+".";
+            if(tableColumnData.childDataSource) fieldDS=tableColumnData.childDataSource+".";
+            if(tableColumnData.sourceField)
+                fieldsSources[fieldName]=fieldDS+tableColumnData.sourceField;
+            else
+                fieldsSources[fieldName]=fieldDS+fieldName;
         } else if(tableColumnData.dataFunction){
             if(tableColumnData.name) fieldsList.push(fieldName);
             if(hasAFunctions&&tableColumnData.name&&!tableColumnData.dataFunction
@@ -597,7 +598,8 @@ function _getDataItemsForTable(connection, params, resultCallback){
             var parentDataSource=tableColumnData.parentDataSource;
             if(!parentDataSource&&params.source) parentDataSource=params.source;
             if(!parentDataSource&&this.source) parentDataSource=this.source;
-            childLinkConditions[tableColumnData.childDataSource+"."+tableColumnData.childLinkField+"="+parentDataSource+"."+tableColumnData.parentLinkField]=null;
+            if(tableColumnData.childLinkCondition) childLinkConditions[tableColumnData.childLinkCondition]=null;
+            else childLinkConditions[tableColumnData.childDataSource+"."+tableColumnData.childLinkField+"="+parentDataSource+"."+tableColumnData.parentLinkField]=null;
             params.leftJoinedSources[tableColumnData.childDataSource]=childLinkConditions;
         }
         if(tableColumnData.leftJoinedSources){

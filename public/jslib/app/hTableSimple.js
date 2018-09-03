@@ -197,7 +197,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                         else {
                             firstItem=r2;
                             for (var ri = r2; ri <= r; ri++) selection[ri] = this.getContentRow(ri);
-                        }
+                        }                                                                                   console.log("HTableSimple afterSelectionEnd selection1=",selection[firstItem]);
                         parent.onSelect(selection[firstItem], selection);
                     }
                 });

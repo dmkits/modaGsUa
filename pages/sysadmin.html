@@ -36,6 +36,7 @@
                     <td><button id="sysadmin_btnDatabase">Database</button></td>
                     <!--<td><button id="sysadmin_btnAppModelSettings">AppModelSettings</button></td>-->
                     <!--<td><button id="sysadmin_btnSynchronization">Synchronization</button></td>-->
+                    <td><button id="sysadmin_btnLogins">Logins</button></td>
                     <td><button id="sysadmin_btnLogs">Logs</button></td>
                     <td width="500px"></td>
                     <td><button id="btnLogout">Logout</button></td>
@@ -69,6 +70,8 @@
 //                functionalButtons.push(sysadmin_btnAppModelSettings);
 //                var sysadmin_btnSynchronization=new ToggleButton({id:"sysadmin_btnSynchronization",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnSynchronization" );
 //                functionalButtons.push(sysadmin_btnSynchronization);
+                var sysadmin_btnLogins=new ToggleButton({id:"sysadmin_btnLogins",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogins" );
+                functionalButtons.push(sysadmin_btnLogins);
                 var sysadmin_btnLogs=new ToggleButton({id:"sysadmin_btnLogs",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogs" );
                 functionalButtons.push(sysadmin_btnLogs);
                 var btnLogout = new ToggleButton({id:"btnLogout"},"btnLogout");
@@ -213,6 +216,11 @@
 //                            "Synchronization", false, "/system/synchronization");
 //                    checkButton(this);
 //                };
+                sysadmin_btnLogins.onClick=function(){
+                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnLogins, "sysadmin_btnLogins",
+                            "Logins", false, "/sysadmin/logins");
+                    checkButton(this);
+                };
                 sysadmin_btnLogs.onClick=function(){
                     sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnLogs, "sysadmin_btnLogs",
                             "Logs", false, "/sysadmin/logs");

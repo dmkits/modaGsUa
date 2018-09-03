@@ -9,10 +9,12 @@ var appModules=require(appModulesPath), getValidateError=appModules.getValidateE
 var moment=require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron'), moment = require('moment')*/;
 
 var dataModel=require('../datamodel');
-var changeLog= require(appDataModelPath+"change_log");
+var changeLog= require(appDataModelPath+"change_log"),
+    r_Users= require(appDataModelPath+"r_Users"),r_Emps= require(appDataModelPath+"r_Emps"),r_Uni= require(appDataModelPath+"r_Uni"),
+    sysusers=require(appDataModelPath+"sysusers"), sys_server_principals=require(appDataModelPath+"sys_server_principals");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([changeLog], errs,
+    dataModel.initValidateDataModels([changeLog,r_Users,r_Emps,r_Uni,sysusers,sys_server_principals], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -325,8 +327,221 @@ module.exports.init = function(app){
         });
     });
 
-    app.get("/sysadmin/appModelSettings", function (req, res) {
-        res.sendFile(appViewsPath+'sysadmin/appModelSettings.html');
+    app.get("/sysadmin/logins", function (req, res) {
+        res.sendFile(appViewsPath+'sysadmin/logins.html');
+    });
+    var userVisiblePass="****************",
+        loginsTableColumns=[
+            {data: "UserID", name: "UserID", width: 200, type: "text", readOnly:true, visible:false},
+            {data: "UserName", name: "User name", width: 250, type: "text", readOnly:true},
+            {data: "EmpName", name: "Employee name", width: 300, type: "text", readOnly:true,
+            dataSource:"r_Emps",linkCondition:"r_Emps.EmpID=r_Users.EmpID"},
+            {data: "EmpID", name: "EmpID", width: 120, dataSource:"r_Emps", visible:false},
+            {data: "ShiftPostID", name: "User role", width: 120, dataSource:"r_Emps", visible:false},
+            {data: "ShiftPostName", name: "User role", width: 120,
+                dataSource:"r_Uni", sourceField:"RefName", linkCondition:"r_Uni.RefTypeID=10606 and r_Uni.RefID=r_Emps.ShiftPostID",
+                type: "combobox", sourceURL:"/sysadmin/logins/getDataForUserRoleCombobox"},
+            {data: "suname", name: "DB User Name", width: 250, type: "text", readOnly:true,
+                childDataSource:"sysusers", sourceField:"name",
+                childLinkCondition:"sysusers.islogin=1 and (sysusers.name=r_Users.UserName or (sysusers.Name='dbo' and r_Users.UserName='sa'))"},
+            {data: "login", name: "login", width: 150, type: "text", readOnly:true,
+                childDataSource:"sys.server_principals", sourceField:"name",
+                childLinkCondition:"sys.server_principals.type in ('S','U') and sys.server_principals.sid=sysusers.sid"},
+            {data: "lPass", name: "Password", width: 150, type: "text",
+                dataSource:"sys.server_principals", dataFunction:"CASE When sys.server_principals.sid is Null Then '' else '"+userVisiblePass+"' END"},
+            {data: "is_disabled", name: "Disabled", width: 75, type: "checkboxMSSQL",
+                dataSource:"sys.server_principals", sourceField:"is_disabled"}
+    ];
+    app.get('/sysadmin/logins/getLoginsDataForTable', function (req, res) {
+        r_Users.getDataForTable(req.dbUC,{tableColumns:loginsTableColumns, identifier:loginsTableColumns[0].data,
+                conditions:{"1=1":null}, order:"UserID"},
+            function(result){
+                res.send(result);
+            });
+    });
+    app.get('/sysadmin/logins/getDataForUserRoleCombobox', function(req,res){  //ShiftPostID
+        r_Uni.getDataItemsForTableCombobox(req.dbUC,{ comboboxFields:{"ShiftPostName":"RefName","ShiftPostID":"RefID" },
+                source:"r_Uni",fields:["RefID","RefName"],
+                order:"RefName",
+                conditions:{"RefTypeID=":10606}},
+            function(result){
+                res.send(result);
+            });
+    });
+    /**
+     * callback = function(result,login,lpass,suname)
+     */
+    r_Users.checkLoginPassDBUser= function(dbUC,loginData,callback){
+        var result={};
+        var login= loginData["login"],lpass= loginData["lPass"],suname=loginData["suname"];
+        if(!suname||suname.trim().length==0) suname=loginData["UserName"];
+        if(!login||login.trim().length==0) login=suname;
+        if(!login||login.trim().length==0) {
+            result.error="Failed create login! Reason: no login op login is empty!";
+            result.userErrorMsg="Невозможно создать имя входа! Имя входа не указано или пустое!";
+        } else if(login.indexOf("\\")>=0){
+            result.error="Failed create login! Reason: cannot create login for type 'WINDOWS_LOGIN'! This function cannot support.";
+            result.userErrorMsg="Не удалось создать или изменить данные имени входа! Создание или изменение имен входа для аутентификации windows не поддерживается!";
+        } else if(!lpass||lpass.trim().length==0) {
+            result.error="Failed create login! Reason: no password op password is empty!";
+            result.userErrorMsg="Невозможно созать или изменить пароль для имени входа! Не указан пароль или пароль пустой!";
+        }
+        callback(result,login,lpass,suname);
+    };
+    /**
+     * callback = function(result)
+     */
+    r_Users.getLoginData= function(dbUC,loginData,storeResult,callback){
+        r_Users.getDataItemForTable(dbUC,{tableColumns:loginsTableColumns,conditions:{"UserID=":loginData["UserID"]}},
+            function(result){
+                if(result.error) storeResult.error="Failed get result inserted data item! Reason:"+result.error;
+                if (result.item) storeResult.resultItem= result.item;
+                callback(storeResult);
+            })
+    };
+    /**
+     * callback = function(result)
+     */
+    r_Users.createLoginIfNotExists= function(dbUC,loginData,login,lpass,suname,callback){
+        /* create login kassir12 WITH PASSWORD = 'QWErty123QWErty123QWErty123'*/
+        sys_server_principals.getDataItems(dbUC,{fields:["name","type"],conditions:{"name=":login}},function(result){
+            if(result.error){
+                var resultCreateLogin={};
+                resultCreateLogin.error="Failed create login! Reason: cannot check if login exists!";
+                resultCreateLogin.userErrorMsg="Не удалось создать имя входа! Не удалось проверить существование имени входа!";
+                callback(resultCreateLogin);
+                return;
+            }
+            var resultItems=result.items;
+            if(!resultItems||resultItems.length==0){
+                database.executeQuery(dbUC,"create login "+login+" WITH PASSWORD = '"+lpass+"'",function(err, updateCount){
+                    if(err){
+                        var resultCreateLogin={};
+                        resultCreateLogin.error="Failed create login! Reason: password no strong!";
+                        resultCreateLogin.userErrorMsg="Не удалось создать имя входа! Пароль не удовлетворяет политике безопастности сервера!";
+                        callback(resultCreateLogin);
+                        return;
+                    }
+                    callback({});
+                });
+                return;
+            }
+            callback({});
+        });
+    };
+    /**
+     * callback = function(result)
+     */
+    r_Users.createDBUserIfNotExists= function(dbUC,loginData,login,lpass,suname,callback){
+        /* CREATE USER kassir5 FOR LOGIN kassir5	--exec sp_grantdbaccess 'kassir5', 'kassir5' */
+        sysusers.getDataItems(dbUC,{fields:["name"],conditions:{"islogin=":1,"name=":suname}},function(result) {
+            if (result.error) {
+                var resultCreateDBUser = {};
+                resultCreateDBUser.error = "Failed create dbuser! Reason: cannot check if dbuser exists!";
+                resultCreateDBUser.userErrorMsg = "Не удалось создать пользователя базы данных! Не удалось проверить существование пользователя базы данных!";
+                callback(resultCreateDBUser);
+                return;
+            }
+            if(!result.items||result.items.length==0){
+                database.executeQuery(dbUC,"CREATE USER "+suname+" FOR LOGIN "+login,function(err, updateCount){
+                    if(err){
+                        var resultCreateDBUser={};
+                        resultCreateDBUser.error="Failed create dbuser! Reason: cannot create dbuser for login'"+login+"'!";
+                        resultCreateDBUser.userErrorMsg="Не удалось создать пользователя базы данных! Не удалось создать пользователя базы данных для имени входа '"+login+"'!";
+                        callback(resultCreateDBUser);
+                        return;
+                    }
+                    callback({});
+                });
+                return;
+            }
+            callback({});
+        });
+    };
+    /**
+     * callback = function(result)
+     */
+    r_Users.updateLoginDBUser= function(dbUC,loginData,login,lpass,suname,callback){
+        /* alter login kassir12 WITH PASSWORD = 'Kassir321'
+         exec sp_addrolemember 'db_ddladmin', 'kassir12'
+         exec sp_addrolemember 'db_owner', 'kassir12'
+         ALTER LOGIN kassir12 WITH CHECK_POLICY=ON,CHECK_EXPIRATION=ON
+         go
+         EXEC sp_change_users_login 'Update_One', 'kassir12', 'kassir12'
+         go */
+        database.executeQuery(dbUC,"exec sp_addrolemember 'db_ddladmin', '"+suname+"'",function(err, updateCount){
+            database.executeQuery(dbUC,"exec sp_addrolemember 'db_owner', '"+suname+"'",function(err, updateCount){
+                database.executeQuery(dbUC,"ALTER LOGIN "+login+" WITH CHECK_POLICY=ON,CHECK_EXPIRATION=ON",function(err, updateCount){
+                    database.executeQuery(dbUC,"EXEC sp_change_users_login 'Update_One', '"+suname+"', '"+login+"'",function(err, updateCount){
+                        var resultUpdateLoginDBUser={updateCount:1};
+                        if(err){
+                            resultUpdateLoginDBUser.updateCount=0;
+                            resultUpdateLoginDBUser.error="Failed update login! Reason: database user do not map to a login!";
+                            resultUpdateLoginDBUser.userErrorMsg="Не удалось сопоставить имя входа с пользователем базы данных!";
+                            r_Users.getLoginData(dbUC,loginData,resultUpdateLoginDBUser,callback);
+                            return;
+                        }
+                        if(lpass!=userVisiblePass){
+                            database.executeQuery(dbUC,"alter login "+login+" WITH PASSWORD = '"+lpass+"'",function(err, updateCount){
+                                if(err){
+                                    resultUpdateLoginDBUser.updateCount=0;
+                                    resultUpdateLoginDBUser.error="Failed update login password! Reason: password no strong!";
+                                    resultUpdateLoginDBUser.userErrorMsg="Не удалось изменить пароль для имени входа! Пароль не удовлетворяет политике безопастности сервера!";
+                                }
+                                r_Users.getLoginData(dbUC,loginData,resultUpdateLoginDBUser,callback);
+                            });
+                            return
+                        }
+                        r_Users.getLoginData(dbUC,loginData,resultUpdateLoginDBUser,callback);
+                    });
+                });
+            });
+        });
+    };
+    /**
+     * callback = function(result)
+     */
+    r_Users.updateUserData= function(dbUC,loginData,login,lpass,suname,callback){
+        r_Emps.updDataItem(dbUC,{updData:{"ShiftPostID":loginData["ShiftPostID"]},conditions:{"EmpID=":loginData["EmpID"]}},function(result){
+            var resultUpdateUserData={updateCount:1};
+            if(result.error){
+                resultUpdateUserData.updateCount=0;
+                resultUpdateUserData.error="Failed update user emp data! Reason: "+result.error+"!";
+                resultUpdateUserData.userErrorMsg="Не удалось изменить данные служащего для пользователя!";
+            }
+            r_Users.getLoginData(dbUC,loginData,resultUpdateUserData,callback);
+        });
+    };
+
+    app.post("/sysadmin/logins/storeLoginsTableData", function(req, res){
+        var tLoginData=req.body;
+        r_Users.checkLoginPassDBUser(req.dbUC,tLoginData,function(result,login,lpass,suname){
+            if(result.error){
+                res.send(result);
+                return;
+            }
+            r_Users.createLoginIfNotExists(req.dbUC,tLoginData,login,lpass,suname,function(result){                                       console.log("createLogin",result);
+                if(result.error){
+                    res.send(result);
+                    return;
+                }
+                r_Users.createDBUserIfNotExists(req.dbUC,tLoginData,login,lpass,suname,function(result){                                       console.log("createLogin",result);
+                    if(result.error){
+                        res.send(result);
+                        return;
+                    }
+                    r_Users.updateLoginDBUser(req.dbUC,tLoginData,login,lpass,suname,function(result){                                       console.log("createLogin",result);
+                        if(result.error){
+                            res.send(result);
+                            return;
+                        }
+                        r_Users.updateUserData(req.dbUC,tLoginData,login,lpass,suname,function(result){                                       console.log("createLogin",result);
+                            res.send(result);
+                        });
+                    });
+                });
+            });
+        });
     });
 
     app.get("/sysadmin/logs", function (req, res) {
