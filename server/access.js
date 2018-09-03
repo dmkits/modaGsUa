@@ -109,7 +109,6 @@ module.exports= function(app) {
             renderToDbFailed(res,msg);
             return;
         }
-
         if(!userConnectionData||!userConnectionData.connection){
             if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
                 res.send({
@@ -123,12 +122,24 @@ module.exports= function(app) {
             });
             return;
         }
+        if(!sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
+            var errMsg="Невозможно получить данные! Пользователь не авторизироват как сисадмин!";
+            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+                res.send({
+                    error: "Failed to get data! Reason: login user is not sysadmin!",
+                    userErrorMsg: errMsg
+                });
+                return;
+            }
+            renderToDbFailed(res,errMsg);
+            return;
+        }
         req.dbUC = userConnectionData.connection;
         getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
             if(errMsg){
                 if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
                     res.send({
-                        error: "Failed to get data! Reason: failed get database SUSER_NAME!",
+                        error: "Failed to get data! Reason: failed to get login user data from database!",
                         userErrorMsg: errMsg
                     });
                     return;
