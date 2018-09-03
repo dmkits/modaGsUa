@@ -10,12 +10,14 @@
     "dirsCommon",
     "dirsForDocs",
     "dirsForProds",
-    "rec"
+    "rec",
     /*"mainPage",*/
     /*"system",*/
+    "reportsCashier"
   ],
   "appMenu":[
     { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },
+    { "menuItemName":"menuBarItemReportsCashier", "menuTitle":"Отчеты кассира", "pageTitle":"Отчеты кассира", "module":"reportsCashier", "closable":false },
     { "menuItemName":"menuBarItemHelpAbout", "menuTitle":"О программе", "action":"help_about" },
     { "menuItemName":"menuBarItemClose", "menuTitle":"Выход", "action":"close" }
   ],
@@ -25,8 +27,8 @@
       "autorun":["menuBarItemRec"]
     },
     "cashier":{
-      "menu":["menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":[]
+      "menu":["menuBarItemReportsCashier","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemReportsCashier"]
     }
   }
 }

@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="reportsCashier_PageContainer" style="width:100%;height:100%;">
+    <div id="reportsCashier_ContentPaneLeft" style="width:165px;height:100%; margin:0;padding:0;">
+        <table>
+            <tr><th>Отчеты</th></tr>
+            <tr><td>
+                <button id="reportsCashier_btnProdsRems">Остатки товаров</button>
+            </td></tr>
+        </table>
+    </div>
+    <div id="reportsCashier_ContentPaneDetailContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app/app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/Button", "app/tDocSimpleTable"],
+            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocSimpleTable) {
+                var pageContainer= APP.instanceForID("reportsCashier_PageContainer", BorderContainer, {});
+                APP.instanceForID("reportsCashier_ContentPaneLeft", ContentPane, {region:'left', splitter:true});
+                var btnProdsRems= APP.instanceForID("reportsCashier_btnProdsRems", Button, {},{"width":"150px"});
+                var contentPaneDetailContainer= APP.instanceForID("reportsCashier_ContentPaneDetailContainer", StackContainer, {region:'center'});
+                btnProdsRems.onClick= function(){
+                    if (!btnProdsRems.report){
+                        btnProdsRems.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsRems",
+                                TDocSimpleTable, {titleText:"Текущие остатки товаров", dataURL:"/reports/prodsRems/getProductsRems"})
+                                .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
+                                    loadDropDownURL:"/reports/cashier/getDirStocksForSelect",
+                                    contentTableCondition:"StockID="/*, width:300*/})
+//                                .addCheckBtnCondition("Не нулевые",{width:90,contentTableConditions:{"SUM(Qty)<>":"0"}})
+//                                .addCheckBtnCondition("Все",{width:85})
+//                                .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
+//                                .addHeaderDateBox("по",{contentTableCondition:"DocDate<="})
+                                .addTotalCountNumberBox("ИТОГО строк:", 140)
+                                .addTotalSumNumberTextBox("ИТОГО остаток:", 510, "TQty", {style:"font-weight:bold;"})
+                                .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(btnProdsRems.report);
+                };
+                pageContainer.layout();
+                btnProdsRems.onClick();
+        });
+</script>
+</html>

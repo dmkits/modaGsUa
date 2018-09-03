@@ -161,8 +161,8 @@ module.exports.initValidateDataModels=function(dataModelsList, errs, resultCallb
  *              "<function>" OR
  *              { function:<function>, source:<functionSource>, sourceField:<functionSourceField>, fields:[ <functionBodySourceFieldName> ] },
  *      ... },
- *      joinedSources = { <sourceName>:<linkConditions> = { <linkCondition>:null or <linkCondition>:<value>, ... } },
- *      leftJoinedSources = { <sourceName>:<linkConditions> = { <linkCondition>:null or <linkCondition>:<value>, ... } },
+ *      joinedSources = { <sourceName>:<linkConditions> = <linkConditions> or { <linkCondition>:null or <linkCondition>:<value>, ... } },
+ *      leftJoinedSources = { <sourceName>:<linkConditions> = <linkConditions> or { <linkCondition>:null or <linkCondition>:<value>, ... } },
  *      groupedFields = [ <fieldName>, ... ],
  *      conditions={ <condition>:<conditionValue>, ... } OR conditions=[ { fieldName:"...", condition:"...", value:"..." }, ... ],
  *      order = "<fieldName>" OR "<fieldName>,<fieldName>,..." OR [ <fieldName>, ... ]
@@ -219,16 +219,20 @@ function _getSelectItems(connection, params,resultCallback){                    
     if(params.joinedSources){
         for(var joinSourceName in params.joinedSources) {
             var joinedSourceConditions=params.joinedSources[joinSourceName], joinedSourceOnCondition=null;
-            for(var linkCondition in joinedSourceConditions)
-                joinedSourceOnCondition= (!joinedSourceOnCondition)?linkCondition:joinedSourceOnCondition+" and "+linkCondition;
+            if(typeof joinedSourceConditions=="string") joinedSourceOnCondition=joinedSourceConditions;
+            else
+                for(var linkCondition in joinedSourceConditions)
+                    joinedSourceOnCondition= (!joinedSourceOnCondition)?linkCondition:joinedSourceOnCondition+" and "+linkCondition;
             joins += " inner join " + joinSourceName + " on "+joinedSourceOnCondition;
         }
     }
     if(params.leftJoinedSources){
         for(var leftJoinSourceName in params.leftJoinedSources) {
             var leftJoinedSourceConditions=params.leftJoinedSources[leftJoinSourceName], leftJoinedSourceOnCondition="";
-            for(var leftJoinLinkCondition in leftJoinedSourceConditions)
-                leftJoinedSourceOnCondition= (!leftJoinedSourceOnCondition)?leftJoinLinkCondition:leftJoinedSourceOnCondition+" and "+leftJoinLinkCondition;
+            if(typeof leftJoinedSourceConditions=="string") leftJoinedSourceOnCondition=leftJoinedSourceConditions;
+            else
+                for(var leftJoinLinkCondition in leftJoinedSourceConditions)
+                    leftJoinedSourceOnCondition= (!leftJoinedSourceOnCondition)?leftJoinLinkCondition:leftJoinedSourceOnCondition+" and "+leftJoinLinkCondition;
             joins += " left join " + leftJoinSourceName + " on "+leftJoinedSourceOnCondition;
         }
     }
@@ -400,7 +404,11 @@ function _getDataItemsForSelect(connection, params, resultCallback){
     if(!params.source) params.source=this.source;
     if(!params.conditions) params.conditions={"1=1":null};
     params.fields=[params.valueField];
-    if(params.labelField&&params.labelField!=params.valueField) params.fields.push(params.labelField);
+    params.fieldsSources={}; params.fieldsSources[params.valueField]=params.source+"."+params.valueField;
+    if(params.labelField&&params.labelField!=params.valueField) {
+        params.fields.push(params.labelField);
+        params.fieldsSources[params.labelField]=params.source+"."+params.labelField;
+    }
     _getDataItems(connection, params,function(result){
         if(result.items){
             var resultItems=result.items;
