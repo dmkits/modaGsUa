@@ -5,13 +5,17 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
     nextValidateModuleCallback();
 };
 
-function getUserMenuByUserRole(userRole, usersRoleMenu, appMenu){
+function setUserRoleMenu(outData, userRole, usersRolesConfig, appMenu){
     var userMenu=[];
-    if(!userRole) return userMenu;
-    var userRoleMenuItems=usersRoleMenu[userRole];
-    if (userRoleMenuItems==undefined) return appMenu;
-    for(var i in userRoleMenuItems) {
-        var userRoleMenuItemName = userRoleMenuItems[i];
+    var userRoleItems=usersRolesConfig[userRole];
+    if (!userRoleItems&&userRole=="sysadmin") {
+        outData.menuBar= appMenu;
+        return;
+    }
+    if (!userRoleItems) userRoleItems={menu:["menuBarItemHelpAbout","menuBarItemClose"]};
+    var userRoleMenu=userRoleItems.menu;
+    for(var i in userRoleMenu) {
+        var userRoleMenuItemName = userRoleMenu[i];
         for (var j in appMenu) {
             var appMenuItem = appMenu[j];
             if (userRoleMenuItemName == appMenuItem.menuItemName) {
@@ -38,7 +42,8 @@ function getUserMenuByUserRole(userRole, usersRoleMenu, appMenu){
             }
         }
     }
-    return userMenu;
+    outData.menuBar= userMenu;
+    outData.autorun= userRoleItems.autorun;
 }
 
 module.exports.modulePageURL = "/";
@@ -49,23 +54,22 @@ module.exports.init= function(app){
         var outData= {};
         outData.mode= appParams.mode;
         outData.modeStr= appParams.mode;
-        outData.title=appConfig.title;
-        outData.icon32x32=appConfig.icon32x32;
-        outData.imageSmall=appConfig.imageSmall;
-        outData.imageMain=appConfig.imageMain;
         outData.dbUserName=(req.dbUserName)?req.dbUserName:"unknown";
-        outData.EmpName=(req.dbUserParams&&req.dbUserParams.EmpName)?req.dbUserParams.EmpName:"unknown";
-        //var userRole=req.mduUserRole;
-        //outData.menuBar=getUserMenuByUserRole(userRole, appConfig.usersRoleMenu, appConfig.appMenu);
-        outData.menuBar=appConfig.appMenu;
-        outData.autorun=appConfig.autorun;
+        outData.EmpName=(req.dbUserParams&&req.dbUserParams["EmpName"])?req.dbUserParams["EmpName"]:"unknown";
         if (!appConfig||appConfig.error) {
             outData.error= "Failed load application configuration!"+(appConfig&&appConfig.error)?" Reason:"+appConfig.error:"";
             res.send(outData);
             return;
         }
-        if (database.getDBConnectError()) {
-            outData.dbConnection= database.getDBConnectError();
+        outData.title=appConfig.title;
+        outData.icon32x32=appConfig.icon32x32;
+        outData.imageSmall=appConfig.imageSmall;
+        outData.imageMain=appConfig.imageMain;
+        var empRole=(req.dbUserParams)?req.dbUserParams["EmpRole"]:null;
+        setUserRoleMenu(outData, empRole, appConfig.usersRoles, appConfig.appMenu);
+        var dbConErr=database.getDBConnectError();
+        if (dbConErr) {
+            outData.dbConnection= dbConErr;
             res.send(outData);
             return;
         }

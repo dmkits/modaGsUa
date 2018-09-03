@@ -15,9 +15,18 @@
     /*"system",*/
   ],
   "appMenu":[
-    { "menuTitle":"Приход товара", "menuItemName":"menuBarItemRec", "pageTitle":"Приход товара", "module":"rec", "closable":false},
-    { "menuTitle":"Выход", "menuItemName":"menuBarItemClose", "action":"close"},
-    { "menuTitle":"О программе", "menuItemName":"menuBarItemHelpAbout", "action":"help_about"}
+    { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },
+    { "menuItemName":"menuBarItemHelpAbout", "menuTitle":"О программе", "action":"help_about" },
+    { "menuItemName":"menuBarItemClose", "menuTitle":"Выход", "action":"close" }
   ],
-  "autorun":["menuBarItemRec"]
+  "usersRoles":{
+    "manager":{
+      "menu":["menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemRec"]
+    },
+    "cashier":{
+      "menu":["menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":[]
+    }
+  }
 }

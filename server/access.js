@@ -53,7 +53,8 @@ module.exports= function(app) {
             "t_StockID=dbo.zf_Var('t_StockID'),t_OneStock=dbo.zf_Var('t_OneStock'),it_MainStockID=dbo.zf_Var('it_MainStockID'),"+
             "t_SecID=dbo.zf_Var('t_SecID'),DefaultUM=dbo.zf_Var('DefaultUM'), "+
             "EmpID=(select EmpID from r_Users where UserName=SUSER_NAME()), "+
-            "EmpName=(select EmpName from r_Users u, r_Emps e where e.EmpID=u.EmpID and u.UserName=SUSER_NAME())",
+            "EmpName=(select EmpName from r_Users u, r_Emps e where e.EmpID=u.EmpID and u.UserName=SUSER_NAME()),"+
+            "EmpRole=(select un.Notes from r_Users u, r_Emps e,r_Uni un where e.EmpID=u.EmpID and u.UserName=SUSER_NAME() and un.RefTypeID=10606 and un.RefID=e.ShiftPostID)",
             function(err, recordset){
                 if(err||(recordset&&recordset.length==0)){
                     callback("Не удалось получить данные пользователя из базы даных! Обратитесь к системному администратору.");
@@ -83,6 +84,7 @@ module.exports= function(app) {
         }
         var userConnectionData=database.getUserConnectionData(uuid);
         var sysadminName=getSysadminNameByUUID(uuid);
+        if(sysadminName)req.dbSysadminName=sysadminName;
         if(sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
             req.dbUC = (userConnectionData)?userConnectionData.connection:null;
             getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
@@ -100,7 +102,7 @@ module.exports= function(app) {
                 });
                 return;
             }
-            if(getSysadminNameByUUID(uuid)&&req.originalUrl!=="/sysadmin") {
+            if(sysadminName&&req.originalUrl!=="/sysadmin") {
                 res.redirect('/sysadmin');
                 return;
             }
