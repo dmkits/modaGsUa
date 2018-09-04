@@ -31,7 +31,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
         dataModel.doValidate(errs, nextValidateDataModelCallback);
         return;
     }
-    var tableName, viewName, tableFieldsList=[],tableFields={}, idFieldName, joinedSources={};
+    var tableName, viewName, queryName, tableFieldsList=[],tableFields={}, idFieldName, joinedSources={};
     if(dataModel.changeLog){
         for(var i=0;i<dataModel.changeLog.length;i++){
             var changeLogItem=dataModel.changeLog[i];
@@ -66,6 +66,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
         var modelData=dataModel.modelData;
         if(modelData.tableName) tableName=modelData.tableName;
         if(modelData.viewName) viewName=modelData.viewName;
+        if(modelData.queryName) queryName=modelData.queryName;
         if(modelData.idField) idFieldName=modelData.idField;
         if(modelData.fields)
             for(var fieldIndex in modelData.fields){
@@ -99,9 +100,9 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.calcNewIDValueOnStoreTableDataItem= _calcNewIDValueOnStoreTableDataItem;
     dataModel.storeTableDataItem= _storeTableDataItem;
     dataModel.delTableDataItem= _delTableDataItem;
-    if(!tableName&&!viewName) {
+    if(!tableName&&!viewName&&!queryName) {
         errs[dataModelName+"_initError"]="Failed init dataModel:"+dataModelName
-            +"! Reason: no model table or view name!";                                              log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model table or view name!");//test
+            +"! Reason: no model table or view name or query name!";                               log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model table or view name or query name!");//test
         nextValidateDataModelCallback();
         return;
     }
@@ -112,18 +113,28 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
         return;
     }
     if(tableName) {
-        dataModel.sourceType="table"; dataModel.source=tableName;
+        dataModel.sourceType="table"; dataModel.sourceName=tableName; dataModel.source=tableName;
     } else if(viewName) {
-        dataModel.sourceType="view"; dataModel.source=viewName;
+        dataModel.sourceType="view"; dataModel.sourceName=viewName; dataModel.source=viewName;
+    } else if(queryName){
+        dataModel.sourceType="query";  dataModel.sourceName=modelData.queryName;
+        dataModel.source=modelData.query; dataModel.sourceParamsNames=modelData.parameters;
     }
-    dataModel.fields=tableFieldsList; dataModel.idField=idFieldName;                                log.debug('Init data model '+dataModel.sourceType+":"+dataModel.source+" fields:",dataModel.fields," idField:"+dataModel.idField);//test
+    dataModel.fields=tableFieldsList; dataModel.idField=idFieldName;                                log.debug('Init data model '+dataModel.sourceType+":"+dataModel.sourceName+" fields:",dataModel.fields," idField:"+dataModel.idField);//test
     dataModel.fieldsMetadata=tableFields;
-    dataModel.joinedSources=joinedSources;                                                          log.debug('Init data model '+dataModel.sourceType+":"+dataModel.source+" joined sources:",dataModel.joinedSources,{});//test
-    if(!dataModel.idField)                                                                          log.warn('NO id filed name in data model '+dataModel.sourceType+":"+dataModel.source+"! Model cannot used functions insert/update/delete!");//test
+    dataModel.joinedSources=joinedSources;                                                          log.debug('Init data model '+dataModel.sourceType+":"+dataModel.sourceName+" joined sources:",dataModel.joinedSources,{});//test
+    if(!dataModel.idField)                                                                          log.warn('NO id filed name in data model '+dataModel.sourceType+":"+dataModel.sourceName+"! Model cannot used functions insert/update/delete!");//test
+    var sourceParams=[];
+    if(dataModel.source&&dataModel.sourceParamsNames){
+        for(var i=0;i<dataModel.sourceParamsNames.length;i++){
+            var sourceParamName=(dataModel.sourceParamsNames)?dataModel.sourceParamsNames[i]:null;
+            if(sourceParamName)sourceParams.push(null);
+        }
+    }
     var idIsNullCondition=tableFieldsList[0]+" is NULL";
     var validateCondition={}; validateCondition[idIsNullCondition]=null;
     dataModel.doValidate= function(errs, resultCallback){
-        dataModel.getDataItems(database.getDBSystemConnection(),{conditions:validateCondition},function(result){
+        dataModel.getDataItems(database.getDBSystemConnection(),{sourceParams:sourceParams,conditions:validateCondition},function(result){
             if(result.error) {                                                                      log.error('FAILED validate data model:'+dataModelName+"! Reason:"+result.error+"!");//test
                 errs[dataModelName+"_validateError"]="Failed validate dataModel:"+dataModelName+"! Reason:"+result.error;
             }
@@ -153,7 +164,7 @@ module.exports.initValidateDataModels=function(dataModelsList, errs, resultCallb
 };
 
 /**
- * params = { source,
+ * params = { source, sourceType, sourceName, sourceParamsNames, sourceParams,
  *      fields = [ <fieldName> or <functionFieldName>, ... ],
  *      fieldsSources = { <fieldName>:<sourceName>.<sourceFieldName>, ... },
  *      fieldsFunctions = {
@@ -214,7 +225,22 @@ function _getSelectItems(connection, params,resultCallback){                    
         }
         queryFields+= ((fieldFunction)?fieldFunction+" as ":"") + fieldName;
     }
-    var selectQuery="select "+queryFields+" from "+params.source;
+    var querySource=params.source, queryValues=[];
+    if(querySource&&params.sourceParams){
+        for(var i=0;i<params.sourceParams.length;i++){
+            var sourceParamName=(params.sourceParamsNames)?params.sourceParamsNames[i]:null;
+            var sourceParamValue=params.sourceParams[i];
+            if(sourceParamName&&sourceParamValue===null){
+                querySource=querySource.replace(new RegExp(sourceParamName,'g'), "0");
+            } else if(sourceParamName){
+                querySource=querySource.replace(new RegExp(sourceParamName,'g'), 'p'+queryValues.length);
+                queryValues.push(params.sourceParams[i]);
+            }
+        }
+    }
+    if(!params.sourceName) params.sourceName="m";
+    if(params.sourceType=="query") querySource= "(\n"+querySource+"\n) "+params.sourceName;
+    var selectQuery="select "+queryFields+" from "+querySource;
     var joins="";
     if(params.joinedSources){
         for(var joinSourceName in params.joinedSources) {
@@ -237,18 +263,18 @@ function _getSelectItems(connection, params,resultCallback){                    
         }
     }
     selectQuery+=joins;
-    var wConditionQuery, hConditionQuery, coditionValues=[];
+    var wConditionQuery, hConditionQuery;
     if (params.conditions&&typeof(params.conditions)=="object"&&params.conditions.length===undefined) {//object
         for(var conditionItem in params.conditions) {
             var conditionItemValue=params.conditions[conditionItem];
             //var conditionItemValueQuery= (conditionItemValue===null)?conditionItem:conditionItem+"?";
-            var conditionItemValueQuery= (conditionItemValue===null||conditionItemValue==='null')?conditionItem:conditionItem+"@p"+coditionValues.length;
+            var conditionItemValueQuery= (conditionItemValue===null||conditionItemValue==='null')?conditionItem:conditionItem+"@p"+queryValues.length;
             conditionItemValueQuery= conditionItemValueQuery.replace("~","=");
             if(conditionItem.indexOf("SUM(")>=0)
                 hConditionQuery= (!hConditionQuery)?conditionItemValueQuery:hConditionQuery+" and "+conditionItemValueQuery;
             else
                 wConditionQuery= (!wConditionQuery)?conditionItemValueQuery:wConditionQuery+" and "+conditionItemValueQuery;
-            if (conditionItemValue!==null) coditionValues.push(conditionItemValue);
+            if (conditionItemValue!==null) queryValues.push(conditionItemValue);
         }
     } else if (params.conditions&&typeof(params.conditions)=="object"&&params.conditions.length>0) {//array
         for(var ind in params.conditions) {
@@ -258,9 +284,9 @@ function _getSelectItems(connection, params,resultCallback){                    
                 conditionFieldName= params.fieldsSources[conditionFieldName];
             var conditionItemValueQuery=
                 //(conditionItem.value===null)?conditionFieldName+conditionItem.condition:conditionFieldName+conditionItem.condition+"?";
-                (conditionItem.value===null)?conditionFieldName+conditionItem.condition:conditionFieldName+conditionItem.condition+"@p"+coditionValues.length;
+                (conditionItem.value===null)?conditionFieldName+conditionItem.condition:conditionFieldName+conditionItem.condition+"@p"+queryValues.length;
             wConditionQuery= (!wConditionQuery)?conditionItemValueQuery:wConditionQuery+" and "+conditionItemValueQuery;
-            if (conditionItem.value!==null) coditionValues.push(conditionItem.value);
+            if (conditionItem.value!==null) queryValues.push(conditionItem.value);
         }
     }
     if(wConditionQuery)selectQuery+=" where "+wConditionQuery;
@@ -277,8 +303,8 @@ function _getSelectItems(connection, params,resultCallback){                    
         selectQuery+=" group by "+queryGroupedFields;
     }
     if(hConditionQuery)selectQuery+=" having "+hConditionQuery;
-    if (params.order) selectQuery+=" order by "+params.order;
-    if (coditionValues.length==0)
+    if (params.order) selectQuery+=" order by "+params.order;                                       //log.debug('_getSelectItems selectQuery:',selectQuery);//test
+    if (queryValues.length==0)
         database.selectQuery(connection,selectQuery, function(err, recordset, count, fields){
             if(err) {                                                                               log.error("FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
@@ -286,7 +312,7 @@ function _getSelectItems(connection, params,resultCallback){                    
                 resultCallback(null,recordset);
         });
     else
-        database.selectParamsQuery(connection,selectQuery,coditionValues, function(err, recordset, count, fieldsMetadata){
+        database.selectParamsQuery(connection,selectQuery,queryValues, function(err, recordset, count, fieldsMetadata){
             if(err) {                                                                               log.error("FAILED _getSelectItems selectParamsQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             } else {
@@ -296,16 +322,20 @@ function _getSelectItems(connection, params,resultCallback){                    
 }
 module.exports.getSelectItems=_getSelectItems;
 /**
- * params = { source,
+ * params = { source, sourceType, sourceName, sourceParamsNames, sourceParams,
  *      fields = [<tableFieldName>,<tableFieldName>,<tableFieldName>,...],
  *      conditions={ <condition>:<conditionValue>, ... },
  *      order = "<orderFieldsList>"
  * }
  * resultCallback = function(result), result = { items:[ {<tableFieldName>:<value>,...}, ... ], error, errorCode } )
  */
-function _getDataItems(connection, params, resultCallback){                                                          //log.debug('_getDataItems: params:',params,{});//test
+function _getDataItems(connection, params, resultCallback){                                         //log.debug('_getDataItems: params:',params,{});//test
     if(!params) params={};
     if(!params.source) params.source= this.source;
+    if(!params.sourceName) params.sourceName= this.sourceName;
+    if(!params.sourceType) params.sourceType= this.sourceType;
+    if(!params.sourceParamsNames) params.sourceParamsNames= this.sourceParamsNames;
+    if(!params.sourceParams) params.sourceParams= this.sourceParams;
     if(!params.fields) params.fields=this.fields;
     if(!params.conditions){                                                                         log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!");//test
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!"});
@@ -508,7 +538,7 @@ function _setDataItem(params, resultCallback){
 }
 
 /**
- * params = { source,
+ * params = { source, sourceName, sourceType, sourceParamsNames, sourceParams,
  *      tableColumns = [
  *          {data:<dataFieldName>, name:<tableColumnHeader>, width:<tableColumnWidth>, type:<dataType>, readOnly:true/false, visible:true/false,
  *              sourceField:<sourceFieldName>,
@@ -546,6 +576,11 @@ function _getDataItemsForTable(connection, params, resultCallback){
         return;
     }
     if(!params.source&&this.source) params.source=this.source;
+    if(!params.sourceName) params.sourceName=this.sourceName;
+    if(!params.sourceName) params.sourceName=this.source;
+    if(!params.sourceType) params.sourceType= this.sourceType;
+    if(!params.sourceParamsNames) params.sourceParamsNames= this.sourceParamsNames;
+    if(!params.sourceParams) params.sourceParams= this.sourceParams;
     var hasSources=false, hasAFunctions=false;
     for(var i in params.tableColumns) {
         var tableColumnData=params.tableColumns[i];
@@ -565,13 +600,13 @@ function _getDataItemsForTable(connection, params, resultCallback){
                 fieldsSources[fieldName]=tableColumnData.dataSource+"."+tableColumnData.sourceField;
             else if(tableColumnData.dataSource)
                 fieldsSources[fieldName]=tableColumnData.dataSource+"."+fieldName;
-            else if(hasSources&&(params.source||this.source))
-                fieldsSources[fieldName]=((params.source)?params.source:this.source)+"."+fieldName;
+            else if(hasSources&&params.sourceName)
+                fieldsSources[fieldName]=params.sourceName+"."+fieldName;
         } else if(!tableColumnData.dataFunction &&( tableColumnData.sourceField||tableColumnData.dataSource||tableColumnData.childDataSource)){
             if(tableColumnData.name) fieldsList.push(fieldName);
             if(tableColumnData.name&&hasAFunctions)groupedFieldsList.push(fieldName);
             var fieldDS="";
-            if(hasSources) fieldDS= (params.source)?params.source:this.source;
+            if(hasSources) fieldDS= params.sourceName+".";
             if(tableColumnData.dataSource) fieldDS=tableColumnData.dataSource+".";
             if(tableColumnData.childDataSource) fieldDS=tableColumnData.childDataSource+".";
             if(tableColumnData.sourceField)

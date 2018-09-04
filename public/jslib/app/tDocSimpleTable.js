@@ -84,7 +84,10 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
                         if(headerInstanceType=="DateBox"&&headerInstance.contentTableCondition){
                             condition[headerInstance.contentTableCondition.replace("=","~")] =
                                 headerInstance.format(headerInstance.get("value"),{selector:"date",datePattern:"yyyy-MM-dd"});
-                        } else if(headerInstanceType=="CheckButton"&&headerInstance.checked==true&&headerInstance.contentTableConditions){
+                        }else if(headerInstanceType=="DateBox"&&headerInstance.contentTableParam){
+                            condition[headerInstance.contentTableParam] =
+                                headerInstance.format(headerInstance.get("value"),{selector:"date",datePattern:"yyyy-MM-dd"});
+                        }else if(headerInstanceType=="CheckButton"&&headerInstance.checked==true&&headerInstance.contentTableConditions){
                             var checkBtnConditions=headerInstance.contentTableConditions;
                             for(var conditionItemName in checkBtnConditions) condition[conditionItemName]=checkBtnConditions[conditionItemName];
                         } else if(headerInstanceType=="SelectBox"&&headerInstance.contentTableCondition){
@@ -132,7 +135,8 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
             },
 
             /**
-             * params : { initValueDate:"curDate"/"curMonthBDate"/"curMonthEDate", contentTableCondition:"<conditions>" }
+             * params : { initValueDate:"curDate"/"curMonthBDate"/"curMonthEDate",
+             *  contentTableCondition:"<condition>", contentTableParam:"<paramName>" }
              * default params.initValueDate = "curDate"
              * default params.width = 100
              */
@@ -149,6 +153,7 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
                 if(!this.headerData) this.headerData=[];
                 this.headerData.push({type:"DateBox",instance:dateBox});
                 if(params.contentTableCondition) dateBox.contentTableCondition=params.contentTableCondition;
+                if(params.contentTableParam) dateBox.contentTableParam=params.contentTableParam;
                 var instance = this;
                 dateBox.onChange = function(){
                     instance.loadTableContent();
