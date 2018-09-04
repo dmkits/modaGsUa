@@ -62,7 +62,10 @@ module.exports.init = function(app){
     ];
     app.get("/reports/prodsRems/getProductsRems", function(req, res){
         var conditions={};
-        for(var condItem in req.query) conditions["t_Rem."+condItem]=req.query[condItem];
+        for(var condItem in req.query) {
+            if(condItem.indexOf("SUM(")<0) conditions["t_Rem."+condItem]=req.query[condItem];
+            else conditions[condItem]=req.query[condItem];
+        }
         t_Rem.getDataForTable(req.dbUC,{tableColumns:tProdRemsTableColumns, identifier:tProdRemsTableColumns[0].data,
                 conditions:conditions, order:"OurID, StockID, ProdName"},
             function(result){
