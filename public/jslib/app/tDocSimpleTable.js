@@ -11,7 +11,7 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
             *       printFormats={ ... } }
             * default:
             * rightPane.width=150,
-            * buttonUpdate=true, buttonPrint=true,
+            * buttonUpdate=true, buttonPrint=true, buttonExportToExcel=true,
             * default printFormats={ dateFormat:"DD.MM.YY", numericFormat:"#,###,###,###,##0.#########", currencyFormat:"#,###,###,###,##0.00#######" }
             * */
             constructor: function(args,parentName){
@@ -258,7 +258,6 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
              */
             addBtnPrint: function(width, labelText, printFormats, params){
                 if (width===undefined) width=100;
-                if (!this.btnUpdate) this.addBtnUpdate(width);
                 if (!labelText) labelText="Печатать";
                 var btnParams={labelText:labelText, cellWidth:1, cellStyle:"text-align:right;"};
                 if(params&&params.items!=undefined&&params.items.length>0){
@@ -273,7 +272,6 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
             },
             addBtnExportToExcel: function(width, labelText){
                 if (width===undefined) width=100;
-                if (!this.btnUpdate) this.addBtnUpdate(width);
                 if (!labelText) labelText="Экспорт в excel";
                 this.btnExportToExcel= this.addTableCellButtonTo(this.topTableRow, {labelText:labelText, cellWidth:1, cellStyle:"text-align:right;"});
                 var instance = this;

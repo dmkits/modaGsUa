@@ -118,17 +118,17 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
         dataModel.sourceType="view"; dataModel.sourceName=viewName; dataModel.source=viewName;
     } else if(queryName){
         dataModel.sourceType="query";  dataModel.sourceName=modelData.queryName;
-        dataModel.source=modelData.query; dataModel.sourceParamsNames=modelData.parameters;
+        dataModel.source=modelData.query; dataModel.sourceParamsNames=modelData.queryParameters;
     }
     dataModel.fields=tableFieldsList; dataModel.idField=idFieldName;                                log.debug('Init data model '+dataModel.sourceType+":"+dataModel.sourceName+" fields:",dataModel.fields," idField:"+dataModel.idField);//test
     dataModel.fieldsMetadata=tableFields;
     dataModel.joinedSources=joinedSources;                                                          log.debug('Init data model '+dataModel.sourceType+":"+dataModel.sourceName+" joined sources:",dataModel.joinedSources,{});//test
     if(!dataModel.idField)                                                                          log.warn('NO id filed name in data model '+dataModel.sourceType+":"+dataModel.sourceName+"! Model cannot used functions insert/update/delete!");//test
-    var sourceParams=[];
+    var sourceParams={};
     if(dataModel.source&&dataModel.sourceParamsNames){
         for(var i=0;i<dataModel.sourceParamsNames.length;i++){
             var sourceParamName=(dataModel.sourceParamsNames)?dataModel.sourceParamsNames[i]:null;
-            if(sourceParamName)sourceParams.push(null);
+            if(sourceParamName)sourceParams[sourceParamName]=null;
         }
     }
     var idIsNullCondition=tableFieldsList[0]+" is NULL";
@@ -164,7 +164,7 @@ module.exports.initValidateDataModels=function(dataModelsList, errs, resultCallb
 };
 
 /**
- * params = { source, sourceType, sourceName, sourceParamsNames, sourceParams,
+ * params = { source, sourceType= table/view/query, sourceName, sourceParamsNames = [<param1Name>,...], sourceParams={<param1Name>:<value>,...},
  *      fields = [ <fieldName> or <functionFieldName>, ... ],
  *      fieldsSources = { <fieldName>:<sourceName>.<sourceFieldName>, ... },
  *      fieldsFunctions = {
@@ -227,14 +227,13 @@ function _getSelectItems(connection, params,resultCallback){                    
     }
     var querySource=params.source, queryValues=[];
     if(querySource&&params.sourceParams){
-        for(var i=0;i<params.sourceParams.length;i++){
-            var sourceParamName=(params.sourceParamsNames)?params.sourceParamsNames[i]:null;
-            var sourceParamValue=params.sourceParams[i];
+        for(var sourceParamName in params.sourceParams){
+            var sourceParamValue=params.sourceParams[sourceParamName];
             if(sourceParamName&&sourceParamValue===null){
                 querySource=querySource.replace(new RegExp(sourceParamName,'g'), "0");
             } else if(sourceParamName){
-                querySource=querySource.replace(new RegExp(sourceParamName,'g'), 'p'+queryValues.length);
-                queryValues.push(params.sourceParams[i]);
+                querySource=querySource.replace(new RegExp(sourceParamName,'g'), '@p'+queryValues.length);
+                queryValues.push(sourceParamValue);
             }
         }
     }

@@ -1,11 +1,11 @@
 var dataModel=require('../datamodel');
 var t_Rem= require(appDataModelPath+"t_Rem");
 var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
-    r_Prods=require(appDataModelPath+"r_Prods"),
+    r_Prods=require(appDataModelPath+"r_Prods"), z_Docs=require(appDataModelPath+"z_Docs"),
     queryProdMove=require(appDataModelPath+"queryProdMove");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([t_Rem,r_Ours,r_Stocks,r_Prods,queryProdMove], errs,
+    dataModel.initValidateDataModels([t_Rem,r_Ours,r_Stocks,r_Prods,queryProdMove,z_Docs], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -54,7 +54,7 @@ module.exports.init = function(app){
         {data: "Article1", name: "Артикул1 товара", width: 200, type: "text",
             dataSource:"r_Prods", sourceField:"Article1"},
         //{data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_Rem", visible:false},
-        {data: "ProdID", name: "Код товара", width: 50, type: "text", visible:true, dataSource:"t_Rem"},
+        {data: "ProdID", name: "Код товара", width: 50, type: "text", align:"center", visible:true, dataSource:"t_Rem"},
         {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
             dataSource:"r_Prods", sourceField:"ProdName" },
         {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"r_Prods", sourceField:"UM"},
@@ -88,22 +88,27 @@ module.exports.init = function(app){
         //    dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"},
         //{data: "PGrName1", name: "Линия товара", width: 70, type: "text",
         //    dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
-
         //{data: "ColorName", name: "Цвет товара", width: 80, type: "text",
         //    dataSource:"ir_ProdColors", dataFunction:"CASE When ir_ProdColors.ColorID>0 Then ir_ProdColors.ColorName Else '' END",
         //    linkCondition:"ir_ProdColors.ColorID=r_Prods.ColorID"},
         //{data: "SizeName", name: "Размер товара", width: 70, type: "text",
         //    dataSource:"ir_ProdSizes", dataFunction:"CASE When ir_ProdSizes.ChID>100000001 Then ir_ProdSizes.SizeName Else '' END",
         //    linkCondition:"ir_ProdSizes.SizeName=r_Prods.SizeName"},
-
         {data: "Article1", name: "Артикул1 товара", width: 200, type: "text",
             dataSource:"r_Prods", sourceField:"Article1"},
         //{data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_Rem", visible:false},
-        {data: "ProdID", name: "Код товара", width: 50, type: "text", visible:true, dataSource:"queryProdMove"},
+        {data: "ProdID", name: "Код товара", width: 50, type: "text", align:"center", visible:true, dataSource:"queryProdMove"},
         {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
             dataSource:"r_Prods", sourceField:"ProdName" },
         {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"r_Prods", sourceField:"UM"},
-        {data: "Qty", name: "Кол-во", width: 50, type: "numeric"}
+        {data: "DocDate", name: "Дата", width: 60, type: "dateAsText",align:"center"},
+        {data: "DocCode", name: "DocCode", width: 50, type: "text", visible:false,
+            dataSource:"z_Docs", sourceField:"DocCode", linkCondition:"z_Docs.DocCode=queryProdMove.DocCode"},
+        {data: "DocName", name: "Документ", width: 170, type: "text",
+            dataSource:"z_Docs", dataFunction:"CASE When queryProdMove.DocCode=0 Then '' Else DocName END"},
+        {data: "BQty", name: "Нач. ост.", width: 50, type: "numeric"},
+        {data: "Qty", name: "Кол-во", width: 50, type: "numeric"},
+        {data: "TQty", name: "Кон. ост.", width: 50, type: "numeric"}
     ];
     app.get("/reports/prodsRems/getProductsMoves", function(req, res){
         var conditions={}, params={};
@@ -116,9 +121,12 @@ module.exports.init = function(app){
             } else
                 conditions[condItem]=req.query[condItem];
         }
-        queryProdMove.getDataForTable(req.dbUC,{tableColumns:tProdsMovesTableColumns, identifier:tProdsMovesTableColumns[0].data,
-                sourceParams:[null,null],
-                conditions:conditions, order:"OurID, StockID, ProdID"},
+        queryProdMove.getDataForTable(req.dbUC,
+            {tableColumns:tProdsMovesTableColumns, identifier:tProdsMovesTableColumns[0].data,
+                sourceParams:params, conditions:conditions,
+                order:"ProdID, OurID, StockID, "+
+                    "CASE When BQty is Not NULL Then 0 When Qty is Not NULL Then 1 Else 2 END, "+
+                    "DocDate,OperType desc,OperSNum,DocCode"},
             function(result){
                 res.send(result);
             });
