@@ -34,9 +34,9 @@
                         btnProdsSales.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsSales",
                                 TDocSimpleTable, {titleText:"Продажи товаров", dataURL:"/reports/prodsSales/getProductsSales",
                                     buttonPrint:false, buttonExportToExcel:false})
-                                .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
-                                    loadDropDownURL:"/reports/cashier/getDirStocksForSelect",
-                                    contentTableCondition:"StockID="/*, width:300*/})
+                                .addSelectBox("Касса",{valueItemName:"CRID", labelItemName:"CRName",
+                                    loadDropDownURL:"/reports/cashier/getDirCRsForSelect",
+                                    contentTableCondition:"CRID=", width:500})
                                 .addHeaderDateBox("с",{contentTableCondition:"DocDate>="})
                                 .addHeaderDateBox("по",{contentTableCondition:"DocDate<="})
                                 .addTotalCountNumberBox("ИТОГО строк:", 140)
@@ -59,7 +59,7 @@
                             .addCheckBtnCondition("Все",{width:85})
                             .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
                             .addTotalCountNumberBox("ИТОГО строк:", 140)
-                            .addTotalSumNumberTextBox("ИТОГО остаток:", 1160, "TQty", {style:"font-weight:bold;"})
+                            .addTotalSumNumberTextBox("ИТОГО остаток:", 565, "TQty", {style:"font-weight:bold;"})
                             .startUp();
                     }
                     contentPaneDetailContainer.selectChild(btnProdsRems.report);

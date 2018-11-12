@@ -1,12 +1,13 @@
 var dataModel=require('../datamodel');
 var t_Rem= require(appDataModelPath+"t_Rem");
 var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
+    r_CRs= require(appDataModelPath+"r_CRs"),
     r_Prods=require(appDataModelPath+"r_Prods"), z_Docs=require(appDataModelPath+"z_Docs"),
     t_Sale=require(appDataModelPath+"t_Sale"),t_SaleD=require(appDataModelPath+"t_SaleD"),
     queryProdMove=require(appDataModelPath+"queryProdMove");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([t_Rem,r_Ours,r_Stocks,r_Prods,t_Sale,t_SaleD,queryProdMove,z_Docs], errs,
+    dataModel.initValidateDataModels([t_Rem,r_Ours,r_Stocks,r_CRs,r_Prods,t_Sale,t_SaleD,queryProdMove,z_Docs], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -15,18 +16,17 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 module.exports.modulePageURL = "/reports/cashier";
 module.exports.modulePagePath = "reports/cashier.html";
 module.exports.init = function(app){
-    app.get("/reports/cashier/getDirStocksForSelect", function(req, res){
+    app.get("/reports/cashier/getDirCRsForSelect", function(req, res){
         var empID=req.dbUserParams["EmpID"];
-        r_Stocks.getDataItemsForSelect(req.dbUC,
-            {valueField:"StockID",labelField:"StockName",
+        r_CRs.getDataItemsForSelect(req.dbUC,
+            {valueField:"CRID",labelField:"CRName",
                 joinedSources: {
-                    "r_CRs": "r_CRs.StockID=r_Stocks.StockID",
                     "r_OperCRs": "r_OperCRs.CRID=r_CRs.CRID",
                     "r_Opers": "r_Opers.OperID=r_OperCRs.OperID"
                 },
-                groupedFields:["r_Stocks.StockID","r_Stocks.StockName"],
-                conditions:{"r_Stocks.StockID>":0,"r_Opers.EmpID=":empID},
-                order: "StockName" },
+                groupedFields:["r_CRs.CRID","r_CRs.CRName"],
+                conditions:{"r_CRs.CRID>":0,"r_Opers.EmpID=":empID},
+                order: "CRName" },
             function (result) {
                 res.send(result);
             });
@@ -69,22 +69,37 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-
+    app.get("/reports/cashier/getDirStocksForSelect", function(req, res){
+        var empID=req.dbUserParams["EmpID"];
+        r_Stocks.getDataItemsForSelect(req.dbUC,
+            {valueField:"StockID",labelField:"StockName",
+                joinedSources: {
+                    "r_CRs": "r_CRs.StockID=r_Stocks.StockID",
+                    "r_OperCRs": "r_OperCRs.CRID=r_CRs.CRID",
+                    "r_Opers": "r_Opers.OperID=r_OperCRs.OperID"
+                },
+                groupedFields:["r_Stocks.StockID","r_Stocks.StockName"],
+                conditions:{"r_Stocks.StockID>":0,"r_Opers.EmpID=":empID},
+                order: "StockName" },
+            function (result) {
+                res.send(result);
+            });
+    });
     var tProdsRemsTableColumns=[
         {data: "OurID", name: "OurID", width: 50, type: "text", visible:false, dataSource:"t_Rem"},
         {data: "StockID", name: "StockID", width: 50, type: "text", visible:false, dataSource:"t_Rem"},
         {data: "ProdChID", name: "ProdChID", width: 50, type: "text", visible:false,
             dataSource:"r_Prods", sourceField:"ChID", linkCondition:"r_Prods.ProdID=t_Rem.ProdID"},
-        {data: "PCatName", name: "Бренд товара", width: 140, type: "text",
-            dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
-        {data: "PGrName", name: "Коллекция товара", width: 95, type: "text",
-            dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"},
-        {data: "PGrName2", name: "Тип товара", width: 140, type: "text",
-            dataSource:"r_ProdG2", sourceField:"PGrName2", linkCondition:"r_ProdG2.PGrID2=r_Prods.PGrID2"},
-        {data: "PGrName3", name: "Вид товара", width: 150, type: "text",
-            dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"},
-        {data: "PGrName1", name: "Линия товара", width: 70, type: "text",
-            dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
+        // {data: "PCatName", name: "Бренд товара", width: 140, type: "text", visible:false,
+        //     dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
+        // {data: "PGrName", name: "Коллекция товара", width: 95, type: "text", visible:false,
+        //     dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"},
+        // {data: "PGrName2", name: "Тип товара", width: 140, type: "text", visible:false,
+        //     dataSource:"r_ProdG2", sourceField:"PGrName2", linkCondition:"r_ProdG2.PGrID2=r_Prods.PGrID2"},
+        // {data: "PGrName3", name: "Вид товара", width: 150, type: "text", visible:false,
+        //     dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"},
+        // {data: "PGrName1", name: "Линия товара", width: 70, type: "text", visible:false,
+        //     dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
         //{data: "ColorName", name: "Цвет товара", width: 80, type: "text",
         //    dataSource:"ir_ProdColors", dataFunction:"CASE When ir_ProdColors.ColorID>0 Then ir_ProdColors.ColorName Else '' END",
         //    linkCondition:"ir_ProdColors.ColorID=r_Prods.ColorID"},

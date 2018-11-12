@@ -199,8 +199,8 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
             addSelectBox:function(label, params){
                 if (!params) params={};
                 if(!params.width)params.width=275;
-                var input=this.addTableInputTo(this.topTableRow,{labelText:label, labelStyle:"margin-left:5px; ", cellWidth:params.width, cellStyle:"text-align:right" +
-                "; padding-left:10px;"});
+                var input=this.addTableInputTo(this.topTableRow,{labelText:label, labelStyle:"margin-left:5px; ", cellWidth:params.width,
+                    cellStyle:"text-align:right;padding-left:10px;"});
                 var select= APP.instanceFor(input, Select,
                     {style:"width:180px;", labelDataItem:params.labelDataItem,loadDropDownURL:params.loadDropDownURL,contentTableCondition:params.contentTableCondition});
 
