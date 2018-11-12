@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact name="moda.gs.ua">
-    <output-path>$PROJECT_DIR$/out/artifacts/moda_gs_ua</output-path>
+    <output-path>$PROJECT_DIR$/out/artifacts/modaGsUa</output-path>
     <root id="root">
       <element id="directory" name="pages">
         <element id="dir-copy" path="$PROJECT_DIR$/pages" />

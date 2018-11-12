@@ -10,6 +10,7 @@
         <table>
             <tr><th>Отчеты</th></tr>
             <tr><td>
+                <button id="reportsCashier_btnProdsSales">Продажи товаров</button>
                 <button id="reportsCashier_btnProdsRems">Остатки товаров</button>
                 <button id="reportsCashier_btnProdsMoves">Движение товаров</button>
             </td></tr>
@@ -24,23 +25,41 @@
             function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocSimpleTable) {
                 var pageContainer= APP.instanceForID("reportsCashier_PageContainer", BorderContainer, {});
                 APP.instanceForID("reportsCashier_ContentPaneLeft", ContentPane, {region:'left', splitter:true});
-                var btnProdsRems= APP.instanceForID("reportsCashier_btnProdsRems", Button, {},{"width":"150px"});
-                var btnProdsMoves= APP.instanceForID("reportsCashier_btnProdsMoves", Button, {},{"width":"150px"});
+                var btnProdsSales= APP.instanceForID("reportsCashier_btnProdsSales", Button, {},{"width":"150px"}),
+                    btnProdsRems= APP.instanceForID("reportsCashier_btnProdsRems", Button, {},{"width":"150px"}),
+                    btnProdsMoves= APP.instanceForID("reportsCashier_btnProdsMoves", Button, {},{"width":"150px"});
                 var contentPaneDetailContainer= APP.instanceForID("reportsCashier_ContentPaneDetailContainer", StackContainer, {region:'center'});
-                btnProdsRems.onClick= function(){
-                    if (!btnProdsRems.report){
-                        btnProdsRems.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsRems",
-                                TDocSimpleTable, {titleText:"Текущие остатки товаров", dataURL:"/reports/prodsRems/getProductsRems",
+                btnProdsSales.onClick= function(){
+                    if (!btnProdsSales.report){
+                        btnProdsSales.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsSales",
+                                TDocSimpleTable, {titleText:"Продажи товаров", dataURL:"/reports/prodsSales/getProductsSales",
                                     buttonPrint:false, buttonExportToExcel:false})
                                 .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
                                     loadDropDownURL:"/reports/cashier/getDirStocksForSelect",
                                     contentTableCondition:"StockID="/*, width:300*/})
-                                .addCheckBtnCondition("Не нулевые",{width:90,contentTableConditions:{"SUM(Qty)<>":"0"}})
-                                .addCheckBtnCondition("Все",{width:85})
-                                .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
+                                .addHeaderDateBox("с",{contentTableCondition:"DocDate>="})
+                                .addHeaderDateBox("по",{contentTableCondition:"DocDate<="})
                                 .addTotalCountNumberBox("ИТОГО строк:", 140)
-                                .addTotalSumNumberTextBox("ИТОГО остаток:", 1160, "TQty", {style:"font-weight:bold;"})
+                                .addTotalSumNumberTextBox("ИТОГО Кол-во:", 795, "Qty", {style:"font-weight:bold;"})
+                                .addTotalSumNumberTextBox("ИТОГО Сумма:", 200, "RealSum", {style:"font-weight:bold;",inputStyle:"width:75px",pattern:"#,###,###,###,##0.00#######"})
                                 .startUp();
+                    }
+                    contentPaneDetailContainer.selectChild(btnProdsSales.report);
+                };
+                btnProdsRems.onClick= function(){
+                    if (!btnProdsRems.report){
+                        btnProdsRems.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsRems",
+                            TDocSimpleTable, {titleText:"Текущие остатки товаров", dataURL:"/reports/prodsRems/getProductsRems",
+                                buttonPrint:false, buttonExportToExcel:false})
+                            .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
+                                loadDropDownURL:"/reports/cashier/getDirStocksForSelect",
+                                contentTableCondition:"StockID="/*, width:300*/})
+                            .addCheckBtnCondition("Не нулевые",{width:90,contentTableConditions:{"SUM(Qty)<>":"0"}})
+                            .addCheckBtnCondition("Все",{width:85})
+                            .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
+                            .addTotalCountNumberBox("ИТОГО строк:", 140)
+                            .addTotalSumNumberTextBox("ИТОГО остаток:", 1160, "TQty", {style:"font-weight:bold;"})
+                            .startUp();
                     }
                     contentPaneDetailContainer.selectChild(btnProdsRems.report);
                 };
@@ -61,7 +80,7 @@
                     contentPaneDetailContainer.selectChild(btnProdsMoves.report);
                 };
                 pageContainer.layout();
-                btnProdsRems.onClick();
+                btnProdsSales.onClick();
 //                btnProdsMoves.onClick();
         });
 </script>
