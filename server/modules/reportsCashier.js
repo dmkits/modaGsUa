@@ -51,9 +51,11 @@ module.exports.init = function(app){
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_SaleD.ProdID" },
         {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"t_SaleD" },
         {data: "Qty", name: "Кол-во", width: 50, type: "numeric",source:"t_SaleD" },
-        {data: "PurPriceCC_wt", name: "Цена без скидки", width: 65, type: "numeric2",source:"t_SaleD" },
         {data: "RealPrice", name: "Цена", width: 65, type: "numeric2",source:"t_SaleD" },
-        {data: "RealSum", name: "Сумма", width: 75, type: "numeric2",source:"t_SaleD" }
+        {data: "PurPriceCC_wt", name: "Цена без скидки", width: 65, type: "numeric2",source:"t_SaleD" },
+        {data: "RealSum", name: "Сумма", width: 75, type: "numeric2",source:"t_SaleD" },
+        {data: "DiscountP", name: "Скидка", width: 65, type: "numeric",dataFunction:"(1-RealPrice/PurPriceCC_wt)*100" },
+        {data: "DiscountSum", name: "Сумма скидки", width: 65, type: "numeric2",dataFunction:"(PurPriceCC_wt-RealPrice)*Qty" }
     ];
     app.get("/reports/prodsSales/getProductsSales", function(req, res){
         var conditions={};
