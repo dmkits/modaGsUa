@@ -203,10 +203,10 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                 filterMenu.style.left = (position.left) + 'px';
                 filterMenu.colProp = colProp; filterMenu.colType = colType; filterMenu.colProps = colProps;
                 while(filterMenu.firstChild) filterMenu.removeChild(filterMenu.firstChild);
-                filterMenu.valueType = (colType="autocomplete")?"text":colType;
+                filterMenu.valueType = (colType=="autocomplete")?"text":colType;
                 filterMenu.valueEdit = null; filterMenu.valueItems = [];
 
-                filterItems = filterItems.sort();                                                                       console.log("HTableSimpleFiltered.handsonTable.showFilterMenu filterItems",filterItems);
+                filterItems = filterItems.sort();                                                               //console.log("HTableSimpleFiltered.handsonTable.showFilterMenu filterItems",filterItems);
                 var createMenuItem = function(filterMenu,idPostfix,itemType, filterMenuItemData){
                     var filterMenuItem = document.createElement("LI");
                     filterMenuItem["id"]= "filter_menu_item_"+idPostfix; filterMenuItem["filterMenu"] = filterMenu;

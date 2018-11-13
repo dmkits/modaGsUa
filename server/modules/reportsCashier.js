@@ -37,12 +37,12 @@ module.exports.init = function(app){
             dataSource:"t_Sale", sourceField:"DocID", linkCondition:"t_Sale.ChID=t_SaleD.ChID"},
         {data: "StockID", name: "StockID", width: 50, type: "text", visible:false, dataSource:"t_Sale"},
         {data: "CRID", name: "CRID", width: 50, type: "text", visible:false, dataSource:"t_Sale"},
-        {data: "CRName", name: "Касса", width: 200, type: "text", visible:true,
+        {data: "CRName", name: "Касса", width: 200, type: "text", visible:false,
             dataSource:"r_CRs", sourceField:"CRName", linkCondition:"r_CRs.CRID=t_Sale.CRID"},
         {data: "DocID", name: "Номер чека", width: 70, type: "text", align:"center", visible:true, dataSource:"t_Sale"},
         {data: "DocDate", name: "Дата чека", width: 55, type: "dateAsText", visible:true, dataSource:"t_Sale"},
         {data: "DocTime", name: "Дата время чека", width: 55, type: "datetimeAsText", visible:true, dataSource:"t_Sale"},
-        {data: "SrcPosID", name: "Позиция", width: 50, type: "text", align:"right", visible:true, dataSource:"t_SaleD"},
+        {data: "SrcPosID", name: "Позиция", width: 50, type: "numeric", align:"right", visible:true, dataSource:"t_SaleD"},
         {data: "Barcode", name: "Штрихкод", width: 75, type: "text", align:"center", visible:false, dataSource:"t_SaleD"},
         {data: "ProdID", name: "Код товара", width: 50, type: "text", align:"center", visible:true, dataSource:"t_SaleD"},
         // {data: "Article1", name: "Артикул1 товара", width: 200, type: "text",
@@ -51,17 +51,24 @@ module.exports.init = function(app){
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_SaleD.ProdID" },
         {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"t_SaleD" },
         {data: "Qty", name: "Кол-во", width: 50, type: "numeric",source:"t_SaleD" },
-        {data: "RealPrice", name: "Цена", width: 65, type: "numeric2",source:"t_SaleD" },
         {data: "PurPriceCC_wt", name: "Цена без скидки", width: 65, type: "numeric2",source:"t_SaleD" },
-        {data: "RealSum", name: "Сумма", width: 75, type: "numeric2",source:"t_SaleD" },
         {data: "DiscountP", name: "Скидка", width: 65, type: "numeric",dataFunction:"(1-RealPrice/PurPriceCC_wt)*100" },
+        {data: "RealPrice", name: "Цена", width: 65, type: "numeric2",source:"t_SaleD" },
+        {data: "RealSum", name: "Сумма", width: 75, type: "numeric2",source:"t_SaleD" },
         {data: "DiscountSum", name: "Сумма скидки", width: 65, type: "numeric2",dataFunction:"(PurPriceCC_wt-RealPrice)*Qty" }
     ];
     app.get("/reports/prodsSales/getProductsSales", function(req, res){
         var conditions={};
         for(var condItem in req.query) {
-            if(condItem.indexOf("SUM(")<0) conditions["t_Sale."+condItem]=req.query[condItem];
-            else conditions[condItem]=req.query[condItem];
+            if(condItem.indexOf("DiscountP")==0) conditions[condItem.replace("DiscountP","(PurPriceCC_wt-RealPrice)")]=req.query[condItem];
+            else {
+                var newCondItem=condItem;
+                for(var cInd in tProdsSalesTableColumns){
+                    var colData=tProdsSalesTableColumns[cInd];
+                    if(colData&&colData.data&&condItem.indexOf(colData.data)==0&&colData.dataSource)newCondItem=colData.dataSource+"."+condItem;
+                }
+                conditions[newCondItem]=req.query[condItem];
+            }
         }
         t_SaleD.getDataForTable(req.dbUC,{tableColumns:tProdsSalesTableColumns, identifier:tProdsSalesTableColumns[0].data,
                 conditions:conditions, order:"OurID, StockID, SrcPosID"},
