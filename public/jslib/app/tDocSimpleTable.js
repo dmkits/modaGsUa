@@ -3,7 +3,7 @@
  */
 define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "app/hTableSimpleFiltered","app/request"],
     function(declare, APP, DocumentBase,Select, HTable, Request) {
-        return declare("TemplateDocumentSimpleTable", [DocumentBase], {
+        return declare("TDocSimpleTable", [DocumentBase], {
             /**
             * args: {titleText, dataURL, dataURLCondition={...},
             *       rightPane:{ width:<width> },
@@ -365,7 +365,7 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
                 return this;
             },
             /**
-             * params = { title, contentTableAction }
+             * params = { title, width, contentTableAction }
              * params.contentTableAction = function(params)
              * params.contentTableAction calls on this.contentTable select row, or updated table content
              *  contentTableAction.params = { thisToolPane, contentTable:<this.ContentTable>, instance:<this>,

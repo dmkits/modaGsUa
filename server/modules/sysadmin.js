@@ -1,20 +1,18 @@
-var path = require('path'), fs = require('fs');
-var server=require('../server'), getLoadInitModulesError=server.getLoadInitModulesError;
-var log = server.log;
-var appParams=server.getAppStartupParams(), getServerConfig=server.getServerConfig, setAppConfig=server.setAppConfig, getConfig=server.getConfig;
-var loadServerConfiguration=server.loadServerConfiguration;
-
+var path = require('path'), fs = require('fs'),
+    moment=require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron')*/;
+var server=require('../server'), getLoadInitModulesError=server.getLoadInitModulesError, log = server.log,
+    appParams=server.getAppStartupParams(), getServerConfig=server.getServerConfig, setAppConfig=server.setAppConfig, getConfig=server.getConfig,
+    loadServerConfiguration=server.loadServerConfiguration;
 var common=require('../common'), database=require('../databaseMSSQL');
-var appModules=require(appModulesPath), getValidateError=appModules.getValidateError;
-var moment=require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron'), moment = require('moment')*/;
-
-var dataModel=require('../datamodel');
-var changeLog= require(appDataModelPath+"change_log"),
-    r_Users= require(appDataModelPath+"r_Users"),r_Emps= require(appDataModelPath+"r_Emps"),r_Uni= require(appDataModelPath+"r_Uni"),
+var appModules=require(appModulesPath), getValidateError=appModules.getValidateError,
+    dataModel=require('../datamodel'),
+    changeLog= require(appDataModelPath+"change_log"),
+    r_Users= require(appDataModelPath+"r_Users"),ir_UserData= require(appDataModelPath+"ir_UserData"),
+    r_Emps= require(appDataModelPath+"r_Emps"),r_Uni= require(appDataModelPath+"r_Uni"),
     sysusers=require(appDataModelPath+"sysusers"), sys_server_principals=require(appDataModelPath+"sys_server_principals");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([changeLog,r_Users,r_Emps,r_Uni,sysusers,sys_server_principals], errs,
+    dataModel.initValidateDataModels([changeLog,r_Users,ir_UserData,r_Emps,r_Uni,sysusers,sys_server_principals], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -22,10 +20,7 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 
 module.exports.modulePageURL = "/sysadmin";
 module.exports.modulePagePath = "sysadmin.html";
-var thisInstance=this;
-
 module.exports.init = function(app){
-
     app.get("/sysadmin/serverState", function(req, res){
         var revalidateModules= false;
         if (req.query&&req.query["REVALIDATE"]) revalidateModules= true;
@@ -79,9 +74,7 @@ module.exports.init = function(app){
         database.selectQuery(database.getDBSystemConnection(),
             "select	name "+
             "from sys.databases "+
-            "where name not in ('master','tempdb','model','msdb') "+
-            "and is_distributor = 0 "+
-            "and source_database_id is null",
+            "where name not in ('master','tempdb','model','msdb') and is_distributor = 0 and source_database_id is null",
             function(err,recordset){
                 if(err){
                     res.send({error:err.message});
@@ -190,7 +183,6 @@ module.exports.init = function(app){
         {data: "type", name: "type", width: 100, type: "text"},
         {data: "message", name: "message", width: 200, type: "text"}
     ];
-
     app.get("/sysadmin/database/getCurrentChanges", function (req, res) {
         var outData = { columns:changesTableColumns, identifier:changesTableColumns[0].data, items:[] };
         checkIfChangeLogExists(function(tableData) {
@@ -332,16 +324,16 @@ module.exports.init = function(app){
     });
     var userVisiblePass="****************",
         loginsTableColumns=[
-            {data: "UserID", name: "UserID", width: 200, type: "text", readOnly:true, visible:false},
+            {data: "UserID", name: "UserID", width: 65, type: "numeric",align:"center", readOnly:true, visible:false},
             {data: "UserName", name: "User name", width: 250, type: "text", readOnly:true},
+            {data: "EmpID", name: "EmpID", width: 65, type:"numeric",align:"center", dataSource:"r_Users", readOnly:true, visible:false},
             {data: "EmpName", name: "Employee name", width: 300, type: "text", readOnly:true,
-            dataSource:"r_Emps",linkCondition:"r_Emps.EmpID=r_Users.EmpID"},
-            {data: "EmpID", name: "EmpID", width: 120, dataSource:"r_Emps", visible:false},
+                dataSource:"r_Emps",linkCondition:"r_Emps.EmpID=r_Users.EmpID"},
             {data: "ShiftPostID", name: "User role", width: 120, dataSource:"r_Emps", visible:false},
             {data: "ShiftPostName", name: "User role", width: 120,
                 dataSource:"r_Uni", sourceField:"RefName", linkCondition:"r_Uni.RefTypeID=10606 and r_Uni.RefID=r_Emps.ShiftPostID",
                 type: "combobox", sourceURL:"/sysadmin/logins/getDataForUserRoleCombobox"},
-            {data: "suname", name: "DB User Name", width: 250, type: "text", readOnly:true,
+            {data: "suname", name: "DB User Name", width: 250, type: "text", readOnly:true, visible:false,
                 childDataSource:"sysusers", sourceField:"name",
                 childLinkCondition:"sysusers.islogin=1 and (sysusers.name=r_Users.UserName or (sysusers.Name='dbo' and r_Users.UserName='sa'))"},
             {data: "login", name: "login", width: 150, type: "text", readOnly:true,
@@ -349,6 +341,9 @@ module.exports.init = function(app){
                 childLinkCondition:"sys.server_principals.type in ('S','U') and sys.server_principals.sid=sysusers.sid"},
             {data: "lPass", name: "Password", width: 150, type: "text",
                 dataSource:"sys.server_principals", dataFunction:"CASE When sys.server_principals.sid is Null Then '' else '"+userVisiblePass+"' END"},
+            {data: "PswrdNote", name: "Password note", width: 150, type: "text", readOnly:false, visible:false,
+                childDataSource:"ir_UserData", sourceField:"pswrdNote",
+                childLinkCondition:"ir_UserData.UserID=r_Users.UserID"},
             {data: "is_disabled", name: "Disabled", width: 75, type: "checkboxMSSQL",
                 dataSource:"sys.server_principals", sourceField:"is_disabled"}
     ];
@@ -392,10 +387,11 @@ module.exports.init = function(app){
      * callback = function(result)
      */
     r_Users.getLoginData= function(dbUC,loginData,storeResult,callback){
-        r_Users.getDataItemForTable(dbUC,{tableColumns:loginsTableColumns,conditions:{"UserID=":loginData["UserID"]}},
+        r_Users.getDataItemForTable(dbUC,{tableColumns:loginsTableColumns,conditions:{"r_Users.UserID=":loginData["UserID"]}},
             function(result){
                 if(result.error) storeResult.error="Failed get result inserted data item! Reason:"+result.error;
                 if (result.item) storeResult.resultItem= result.item;
+                if (storeResult.resultItem&&!storeResult.resultItem["pswrdNote"]) storeResult.resultItem["pswrdNote"]= loginData["lPass"];
                 callback(storeResult);
             })
     };
@@ -409,7 +405,7 @@ module.exports.init = function(app){
                 var resultCreateLogin={};
                 resultCreateLogin.error="Failed create login! Reason: cannot check if login exists!";
                 resultCreateLogin.userErrorMsg="Не удалось создать имя входа! Не удалось проверить существование имени входа!";
-                callback(resultCreateLogin);
+                r_Users.getLoginData(dbUC,loginData,resultCreateLogin,callback);
                 return;
             }
             var resultItems=result.items;
@@ -419,7 +415,7 @@ module.exports.init = function(app){
                         var resultCreateLogin={};
                         resultCreateLogin.error="Failed create login! Reason: password no strong!";
                         resultCreateLogin.userErrorMsg="Не удалось создать имя входа! Пароль не удовлетворяет политике безопастности сервера!";
-                        callback(resultCreateLogin);
+                        r_Users.getLoginData(dbUC,loginData,resultCreateLogin,callback);
                         return;
                     }
                     callback({});
@@ -439,7 +435,7 @@ module.exports.init = function(app){
                 var resultCreateDBUser = {};
                 resultCreateDBUser.error = "Failed create dbuser! Reason: cannot check if dbuser exists!";
                 resultCreateDBUser.userErrorMsg = "Не удалось создать пользователя базы данных! Не удалось проверить существование пользователя базы данных!";
-                callback(resultCreateDBUser);
+                r_Users.getLoginData(dbUC,loginData,resultCreateDBUser,callback);
                 return;
             }
             if(!result.items||result.items.length==0){
@@ -448,7 +444,7 @@ module.exports.init = function(app){
                         var resultCreateDBUser={};
                         resultCreateDBUser.error="Failed create dbuser! Reason: cannot create dbuser for login'"+login+"'!";
                         resultCreateDBUser.userErrorMsg="Не удалось создать пользователя базы данных! Не удалось создать пользователя базы данных для имени входа '"+login+"'!";
-                        callback(resultCreateDBUser);
+                        r_Users.getLoginData(dbUC,loginData,resultCreateDBUser,callback);
                         return;
                     }
                     callback({});
@@ -487,12 +483,14 @@ module.exports.init = function(app){
                                     resultUpdateLoginDBUser.updateCount=0;
                                     resultUpdateLoginDBUser.error="Failed update login password! Reason: password no strong!";
                                     resultUpdateLoginDBUser.userErrorMsg="Не удалось изменить пароль для имени входа! Пароль не удовлетворяет политике безопастности сервера!";
+                                    r_Users.getLoginData(dbUC,loginData,resultUpdateLoginDBUser,callback);
+                                    return
                                 }
-                                r_Users.getLoginData(dbUC,loginData,resultUpdateLoginDBUser,callback);
+                                callback({});
                             });
                             return
                         }
-                        r_Users.getLoginData(dbUC,loginData,resultUpdateLoginDBUser,callback);
+                        callback({});
                     });
                 });
             });
@@ -501,18 +499,55 @@ module.exports.init = function(app){
     /**
      * callback = function(result)
      */
-    r_Users.updateUserData= function(dbUC,loginData,login,lpass,suname,callback){
+    r_Users.updateEmpData= function(dbUC,loginData,login,lpass,suname,callback){
         r_Emps.updDataItem(dbUC,{updData:{"ShiftPostID":loginData["ShiftPostID"]},conditions:{"EmpID=":loginData["EmpID"]}},function(result){
+            var resultUpdateEmpData={updateCount:1};
+            if(result.error){
+                resultUpdateEmpData.updateCount=0;
+                resultUpdateEmpData.error="Failed update user emp data! Reason: "+result.error+"!";
+                resultUpdateEmpData.userErrorMsg="Не удалось изменить данные служащего для пользователя!";
+                r_Users.getLoginData(dbUC,loginData,resultUpdateEmpData,callback);
+                return;
+            }
+            callback({});
+        });
+    };
+    /**
+     * callback = function(result)
+     */
+    ir_UserData.updateUserData= function(dbUC,loginData,login,lpass,suname,callback){
+        ir_UserData.getDataItems(dbUC,{fields:["UserID"],conditions:{"UserID=":loginData["UserID"]}},function(result) {
             var resultUpdateUserData={updateCount:1};
             if(result.error){
                 resultUpdateUserData.updateCount=0;
-                resultUpdateUserData.error="Failed update user emp data! Reason: "+result.error+"!";
-                resultUpdateUserData.userErrorMsg="Не удалось изменить данные служащего для пользователя!";
+                resultUpdateUserData.error="Failed update user adding data! Reason: "+result.error+"!";
+                resultUpdateUserData.userErrorMsg="Не удалось изменить доп. данные пользователя! Не удалось проверить налицие доп.данных пользователя!";
+                r_Users.getLoginData(dbUC,loginData,resultUpdateUserData,callback);
+                return
             }
-            r_Users.getLoginData(dbUC,loginData,resultUpdateUserData,callback);
+            if(result.items.length==0){
+                ir_UserData.insDataItem(dbUC,{insData:{"UserID":loginData["UserID"],"PswrdNote":lpass}},function(result){
+                    var resultUpdateUserData={updateCount:1};
+                    if(result.error){
+                        resultUpdateUserData.updateCount=0;
+                        resultUpdateUserData.error="Failed insert user added data! Reason: "+result.error+"!";
+                        resultUpdateUserData.userErrorMsg="Не удалось добавить доп. данные для пользователя!";
+                    }
+                    r_Users.getLoginData(dbUC,loginData,resultUpdateUserData,callback);
+                });
+                return
+            }
+            ir_UserData.updDataItem(dbUC,{updData:{"PswrdNote":lpass},conditions:{"UserID=":loginData["UserID"]}},function(result){
+                var resultUpdateUserData={updateCount:1};
+                if(result.error){
+                    resultUpdateUserData.updateCount=0;
+                    resultUpdateUserData.error="Failed update user added data! Reason: "+result.error+"!";
+                    resultUpdateUserData.userErrorMsg="Не удалось изменить доп. данные для пользователя!";
+                }
+                r_Users.getLoginData(dbUC,loginData,resultUpdateUserData,callback);
+            });
         });
     };
-
     app.post("/sysadmin/logins/storeLoginsTableData", function(req, res){
         var tLoginData=req.body;
         r_Users.checkLoginPassDBUser(req.dbUC,tLoginData,function(result,login,lpass,suname){
@@ -520,23 +555,29 @@ module.exports.init = function(app){
                 res.send(result);
                 return;
             }
-            r_Users.createLoginIfNotExists(req.dbUC,tLoginData,login,lpass,suname,function(result){                                       console.log("createLogin",result);
+            r_Users.createLoginIfNotExists(req.dbUC,tLoginData,login,lpass,suname,function(result){         //console.log("createLogin",result);
                 if(result.error){
                     res.send(result);
                     return;
                 }
-                r_Users.createDBUserIfNotExists(req.dbUC,tLoginData,login,lpass,suname,function(result){                                       console.log("createLogin",result);
+                r_Users.createDBUserIfNotExists(req.dbUC,tLoginData,login,lpass,suname,function(result){
                     if(result.error){
                         res.send(result);
                         return;
                     }
-                    r_Users.updateLoginDBUser(req.dbUC,tLoginData,login,lpass,suname,function(result){                                       console.log("createLogin",result);
+                    r_Users.updateLoginDBUser(req.dbUC,tLoginData,login,lpass,suname,function(result){
                         if(result.error){
                             res.send(result);
                             return;
                         }
-                        r_Users.updateUserData(req.dbUC,tLoginData,login,lpass,suname,function(result){                                       console.log("createLogin",result);
-                            res.send(result);
+                        r_Users.updateEmpData(req.dbUC,tLoginData,login,lpass,suname,function(result){
+                            if(result.error){
+                                res.send(result);
+                                return;
+                            }
+                            ir_UserData.updateUserData(req.dbUC,tLoginData,login,lpass,suname,function(result){
+                                res.send(result);
+                            });
                         });
                     });
                 });

@@ -19,10 +19,23 @@
                 APP.childFor(logins_ContentContainer, "loginsTable",
                         TDocSimpleTableEdt, {titleText:"Имена входа в систему",
                         buttonExportToExcel:false,
-                        rightPane:{width:150}, rightToolPane:{title:"Действия",
+                        rightPane:{width:300}, rightToolPane:{title:"Действия",
                             buttons:{ allowEditTableSelectedRow:"Изменить", storeTableSelectedRow:"Сохранить"}},
                         dataURL:"/sysadmin/logins/getLoginsDataForTable", dataStoreURL:"/sysadmin/logins/storeLoginsTableData"
                     })
+                    .addToolPane({title:"info",
+                        contentTableAction:function(params){
+                            var infoContent="";
+                            if(params.contentTableSelectedRow){
+                                infoContent="<b>UserID</b>:"+params.contentTableSelectedRow["UserID"]+
+                                        "<br><b>UserName</b>:"+params.contentTableSelectedRow["UserName"]+
+                                        "<br><b>EmpID</b>:"+params.contentTableSelectedRow["EmpID"]+
+                                        "<br><b>EmpName</b>:"+params.contentTableSelectedRow["EmpName"]+
+                                        "<br><b>dbUserName</b>:"+params.contentTableSelectedRow["suname"]+
+                                        "<br><b>PswrdNote</b>:"+(params.contentTableSelectedRow["PswrdNote"]||"");
+                            }
+                            params.thisToolPane.set("content",infoContent);
+                        }})
                     .addContentTableRowChangeCallback(function(crd/*changedRowData*/, contentTable, params, nextCallback){
                             if (crd.item("ShiftPostName").isChanged()){
                                 var shiftPostID=
