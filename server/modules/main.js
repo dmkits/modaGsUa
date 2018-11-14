@@ -1,4 +1,4 @@
-var server= require("../server"), log= server.log, appParams= server.getAppStartupParams(), appConfig= server.getConfig();
+var server= require("../server"), log= server.log, appParams= server.getAppStartupParams(), appConfig= server.getAppConfig();
 var database= require("../databaseMSSQL");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){

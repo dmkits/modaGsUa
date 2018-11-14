@@ -1,8 +1,9 @@
 var path = require('path'), fs = require('fs'),
     moment=require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron')*/;
 var server=require('../server'), getLoadInitModulesError=server.getLoadInitModulesError, log = server.log,
-    appParams=server.getAppStartupParams(), getServerConfig=server.getServerConfig, setAppConfig=server.setAppConfig, getConfig=server.getConfig,
-    loadServerConfiguration=server.loadServerConfiguration;
+    appParams=server.getAppStartupParams(),
+    getStartupConfig=server.getStartupConfig, setStartupConfig=server.setStartupConfig,loadStartupConfig=server.loadStartupConfig,
+    getAppConfig=server.getAppConfig;
 var common=require('../common'), database=require('../databaseMSSQL');
 var appModules=require(appModulesPath), getValidateError=appModules.getValidateError,
     dataModel=require('../datamodel'),
@@ -28,13 +29,13 @@ module.exports.init = function(app){
         outData.mode= appParams.mode;
         outData.port=appParams.port;
         outData.dbUserName=req.dbUserName;
-        var serverConfig=getServerConfig();
-        if (!serverConfig||serverConfig.error) {
-            outData.error= (serverConfig&&serverConfig.error)?serverConfig.error:"unknown";
+        var startupConfig=getStartupConfig();
+        if (!startupConfig||startupConfig.error) {
+            outData.error= (startupConfig&&startupConfig.error)?startupConfig.error:"unknown";
             res.send(outData);
             return;
         }
-        outData.configuration= serverConfig;
+        outData.configuration= startupConfig;
         var systemConnectionErr= database.getSystemConnectionErr();
         if (systemConnectionErr) {
             outData.systemConnectionErr= systemConnectionErr;
@@ -52,23 +53,23 @@ module.exports.init = function(app){
             });
             return;
         }
-        outData.config=getConfig();
+        outData.config=getAppConfig();
         var validateError=getValidateError();
         if(validateError) outData.dbValidation=validateError; else outData.dbValidation = "success";
         res.send(outData);
     });
 
     app.get("/sysadmin/serverConfig", function (req, res) {
-        res.sendFile(appViewsPath+'sysadmin/serverConfig.html');
+        res.sendFile(appViewsPath+'sysadmin/startupConfig.html');
     });
 
-    app.get("/sysadmin/server/getServerConfig", function (req, res) {
-        var serverConfig=getServerConfig();
-        if (!serverConfig||serverConfig.error) {
-            res.send({error:(serverConfig&&serverConfig.error)?serverConfig.error:"unknown"});
+    app.get("/sysadmin/server/getStartupConfig", function (req, res) {
+        var startupConfig=getStartupConfig();
+        if (!startupConfig||startupConfig.error) {
+            res.send({error:(startupConfig&&startupConfig.error)?startupConfig.error:"unknown"});
             return;
         }
-        res.send(serverConfig);
+        res.send(startupConfig);
     });
     app.get("/sysadmin/server/getDBList", function (req, res) {
         database.selectQuery(database.getDBSystemConnection(),
@@ -85,20 +86,20 @@ module.exports.init = function(app){
     });
 
     app.get("/sysadmin/server/loadServerConfig", function (req, res) {
-        loadServerConfiguration();
-        var serverConfig=getServerConfig();                                                         log.info("serverConfig=",serverConfig);
-        if (!serverConfig) {
+        loadStartupConfig();
+        var startupConfig=getStartupConfig();                                                         log.info("serverConfig=",startupConfig);
+        if (!startupConfig) {
             res.send({error: "Failed load server config!"});
             return;
         }
-        res.send(serverConfig);
+        res.send(startupConfig);
     });
 
     app.post("/sysadmin/serverConfig/storeServerConfigAndReconnect", function (req, res) {
-        var newServerConfig = req.body;
-        var currentDbName=server.getServerConfig().database;
-        var currentDbHost=server.getServerConfig().host;
-        common.saveConfig(appParams.mode+".cfg", newServerConfig,
+        var newStartupConfig = req.body;
+        var currentDbName=server.getStartupConfig().database;
+        var currentDbHost=server.getStartupConfig().host;
+        common.saveConfig(appParams.mode+".cfg", newStartupConfig,
             function (err) {
                 var outData = {};
                 if (err) {
@@ -106,16 +107,14 @@ module.exports.init = function(app){
                     res.send(outData);
                     return;
                 }
-                if(!(currentDbName==newServerConfig.database) || !(currentDbHost==newServerConfig.host)){
+                if(!(currentDbName==newStartupConfig.database) || !(currentDbHost==newStartupConfig.host)){
                     database.cleanConnectionPool();
                 }
-                setAppConfig(newServerConfig);
-                database.setDBSystemConnection(newServerConfig, function (err,result) {
+                setStartupConfig(newStartupConfig);
+                database.setDBSystemConnection(newStartupConfig, function (err,result) {
                     if (err) {
                         outData.DBConnectError = err.error;
                         outData.error="'\n Не удалось подключиться к базе данных!\n"+(err.userErrorMsg)?err.userErrorMsg:err.error;
-                        //res.send(outData);
-                        //return;
                     }
                     appModules.validateModules(function (errs, errMessage) {
                         if (errMessage) outData.dbValidation = errMessage;

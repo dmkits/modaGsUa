@@ -31,7 +31,7 @@
         <div id="sysadmin_TopActions">
             <table>
                 <tr>
-                    <td><button id="sysadmin_btnServerConfig">Server configuration</button></td>
+                    <td><button id="sysadmin_btnStartupConfig">Startup configuration</button></td>
                     <td><button id="sysadmin_btnDatabase">Database</button></td>
                     <!--<td><button id="sysadmin_btnAppModelSettings">AppModelSettings</button></td>-->
                     <!--<td><button id="sysadmin_btnSynchronization">Synchronization</button></td>-->
@@ -51,37 +51,33 @@
                 "dijit/form/ToggleButton", "dojox/layout/ContentPane", "dijit/form/Button",  "app/request", "dojo/domReady!"],
             function (APP, BorderContainer, StackContainer, ContentPane, ToggleButton, XContentPane, Button, Request) {     console.log("STARTING SYSADMIN PAGE...");//!!!IT'S FOR TESTING!!!
                 moment.locale("uk");
-                var sysadmin_MainContainer = APP.instanceForID("sysadmin_MainContainer", BorderContainer, {design: "headline"});
-                var sysadmin_TopContainer = APP.instanceForID("sysadmin_TopContainer",
-                        BorderContainer, { region: "top", design: "sidebar", class: "sysadmin_TopContent", gutters: true });
-                var sysadmin_TopImg = APP.instanceForID("sysadmin_TopImg",
-                        ContentPane, { region: "left", class: "sysadmin_TopContent" });
-                var sysadmin_TopStateInfo = APP.instanceForID("sysadmin_TopStateInfo",
-                        ContentPane, { region: "top", class: "sysadmin_TopContent" });
-                var sysadmin_TopActions = APP.instanceForID("sysadmin_TopActions",
-                        ContentPane, { region: "bottom", class: "sysadmin_TopContent" });
+                var mainContainer = APP.instanceForID("sysadmin_MainContainer", BorderContainer, {design: "headline"});
+                var topContainer = APP.instanceForID("sysadmin_TopContainer",
+                    BorderContainer, { region: "top", design: "sidebar", class: "sysadmin_TopContent", gutters: true });
+                var topImg = APP.instanceForID("sysadmin_TopImg",ContentPane, { region: "left", class: "sysadmin_TopContent" });
+                var topStateInfo = APP.instanceForID("sysadmin_TopStateInfo",ContentPane, { region: "top", class: "sysadmin_TopContent" });
+                var topActions = APP.instanceForID("sysadmin_TopActions",ContentPane, { region: "bottom", class: "sysadmin_TopContent" });
                 var functionalButtons=[];
-                var sysadmin_btnServerConfig = new ToggleButton({id:"sysadmin_btnServerConfig",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnServerConfig");
-                functionalButtons.push(sysadmin_btnServerConfig);
+                var btnStartupConfig = new ToggleButton({id:"sysadmin_btnStartupConfig",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnStartupConfig");
+                functionalButtons.push(btnStartupConfig);
                 var sysadmin_btnDatabase = new ToggleButton({id:"sysadmin_btnDatabase",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnDatabase");
                 functionalButtons.push(sysadmin_btnDatabase);
 //                var sysadmin_btnAppModelSettings = new ToggleButton({id:"sysadmin_btnAppModelSettings",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnAppModelSettings");
 //                functionalButtons.push(sysadmin_btnAppModelSettings);
 //                var sysadmin_btnSynchronization=new ToggleButton({id:"sysadmin_btnSynchronization",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnSynchronization" );
 //                functionalButtons.push(sysadmin_btnSynchronization);
-                var sysadmin_btnLogins=new ToggleButton({id:"sysadmin_btnLogins",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogins" );
-                functionalButtons.push(sysadmin_btnLogins);
-                var sysadmin_btnLogs=new ToggleButton({id:"sysadmin_btnLogs",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogs" );
-                functionalButtons.push(sysadmin_btnLogs);
+                var btnLogins=new ToggleButton({id:"sysadmin_btnLogins",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogins" );
+                functionalButtons.push(btnLogins);
+                var btnLogs=new ToggleButton({id:"sysadmin_btnLogs",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogs" );
+                functionalButtons.push(btnLogs);
                 var btnLogout = new ToggleButton({id:"btnLogout"},"btnLogout");
-                var sysadmin_ContentContainer = APP.instanceForID("sysadmin_ContentContainer",
-                        StackContainer, {region: "center", tabPosition: "top", class: "sysadmin_Content"});
+                var contentContainer = APP.instanceForID("sysadmin_ContentContainer",StackContainer, {region: "center", tabPosition: "top", class: "sysadmin_Content"});
                 document.body.style.display = "";
-                sysadmin_MainContainer.startup();
+                mainContainer.startup();
                 /** getting main json data from server and run action parameter function
                  * params = { revalidate:true/false }
                  */
-                sysadmin_MainContainer.updateDBState = function (params) {
+                mainContainer.updateDBState = function (params) {
                     var condition;
                     if(params&&params.revalidate) condition={"REVALIDATE":true};
                     Request.getJSONData({url: "/sysadmin/serverState", condition:condition, consoleLog: true},
@@ -89,14 +85,14 @@
                                 if(!result){
                                     document.getElementById("sysadmin_connectToDBState").innerHTML =
                                             "<b>DB CONNECTION STATE:<span id='dbConnection_color' style='color:red'>UNKNOWN</span></b>";
-                                    sysadmin_MainContainer.mainContentData = [];
+                                    mainContainer.mainContentData = [];
                                     return;
                                 }
                                 if(result.error){
-                                    sysadmin_MainContainer.mainContentData["error"] = result.error;
+                                    mainContainer.mainContentData["error"] = result.error;
                                     return;
                                 }
-                                sysadmin_MainContainer.mainContentData = result;
+                                mainContainer.mainContentData = result;
                                 var eAppMode = document.getElementById("sysadmin_app_mode");
                                 var eAppPort = document.getElementById("sysadmin_app_port");
                                 eAppMode.innerHTML = "<b>MODE:</b>";
@@ -141,10 +137,10 @@
                                     var dbConnection_color = document.getElementById("dbConnection_color");
                                     if (result.systemConnectionErr == "Connected") {
                                         dbConnection_color.setAttribute("style", "color:dimgrey");
-                                        sysadmin_TopContainer.set("style","height:63px; margin:0; padding:0");
+                                        topContainer.set("style","height:63px; margin:0; padding:0");
                                     }else {
                                         dbConnection_color.setAttribute("style", "color:red");
-                                        sysadmin_TopContainer.set("style","height:75px; margin:0; padding:0");
+                                        topContainer.set("style","height:75px; margin:0; padding:0");
                                     }
                                 } else {
                                     document.getElementById("sysadmin_connectToDBState").innerHTML =
@@ -162,28 +158,28 @@
                                     var dbValidationColor = document.getElementById("dbValidationcolor");
                                     if (result.dbValidation == "success") {
                                         dbValidationColor.setAttribute("style", "color:dimgrey");
-                                        sysadmin_TopContainer.set("style","height:63px; margin:0; padding:0");
+                                        topContainer.set("style","height:63px; margin:0; padding:0");
                                     }else {
                                         dbValidationColor.setAttribute("style", "color:red");
-                                        sysadmin_TopContainer.set("style","height:75px; margin:0; padding:0");
+                                        topContainer.set("style","height:75px; margin:0; padding:0");
                                     }
                                 } else
                                     sysadmin_dbValidateState.innerHTML ="UNKNOWN";
-                                sysadmin_TopContainer.resize();
-                                sysadmin_MainContainer.layout();
+                                topContainer.resize();
+                                mainContainer.layout();
                             }
                     )
                 };
-                sysadmin_MainContainer.runSysadminContentPage = function (owner, id, title, closable, contentURL) {     console.log("sysadmin_MainContainer.runSysadminContentPage: ", contentURL);//!!!IT'S FOR TESTING!!!
+                mainContainer.runSysadminContentPage = function (owner, id, title, closable, contentURL) {     console.log("sysadmin_MainContainer.runSysadminContentPage: ", contentURL);//!!!IT'S FOR TESTING!!!
                     if(!owner.pageContentPane){
                         owner.pageContentPane=
-                                APP.childFor(sysadmin_ContentContainer, "PageContentPane_" + id,
+                                APP.childFor(contentContainer, "PageContentPane_" + id,
                                         XContentPane, {title: title, closable: closable,parseOnLoad: false,style: "margin:0;padding:0;"});
                         owner.pageContentPane.set("content", "");
                         owner.pageContentPane.set("href", contentURL);
-                        owner.pageContentPane.updateDBState = sysadmin_MainContainer.updateDBState;
+                        owner.pageContentPane.updateDBState = mainContainer.updateDBState;
                     }
-                    sysadmin_ContentContainer.selectChild(owner.pageContentPane);
+                    contentContainer.selectChild(owner.pageContentPane);
                 };
 
                 var checkButton= function(button){
@@ -195,13 +191,13 @@
                         }
                     }
                 };
-                sysadmin_btnServerConfig.onClick=function() {
-                   sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnServerConfig, "sysadmin_ServerConfig",
+                btnStartupConfig.onClick=function() {
+                   mainContainer.runSysadminContentPage(btnStartupConfig, "sysadmin_ServerConfig",
                            "Server configuration", false, "/sysadmin/serverConfig");
                     checkButton(this);
                 };
                 sysadmin_btnDatabase.onClick=function(){
-                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnDatabase, "sysadmin_btnDatabase",
+                    mainContainer.runSysadminContentPage(sysadmin_btnDatabase, "sysadmin_btnDatabase",
                             "Database", false, "/sysadmin/database");
                     checkButton(this);
                 };
@@ -215,13 +211,13 @@
 //                            "Synchronization", false, "/system/synchronization");
 //                    checkButton(this);
 //                };
-                sysadmin_btnLogins.onClick=function(){
-                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnLogins, "sysadmin_btnLogins",
+                btnLogins.onClick=function(){
+                    mainContainer.runSysadminContentPage(btnLogins, "sysadmin_btnLogins",
                             "Logins", false, "/sysadmin/logins");
                     checkButton(this);
                 };
-                sysadmin_btnLogs.onClick=function(){
-                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnLogs, "sysadmin_btnLogs",
+                btnLogs.onClick=function(){
+                    mainContainer.runSysadminContentPage(btnLogs, "sysadmin_btnLogs",
                             "Logs", false, "/sysadmin/logs");
                     checkButton(this);
                 };
@@ -246,7 +242,7 @@
                 function setBrending(config){
                     if(config.title) document.title=config.title;
                     if(config.icon32x32)changeFavicon(config.icon32x32);
-                    if(config.imageSmall)sysadmin_TopImg.set("style","background-image: url(\""+config.imageSmall+"\")");
+                    if(config.imageSmall)topImg.set("style","background-image: url(\""+config.imageSmall+"\")");
                 }
                 function changeFavicon(src) {
                     document.head = document.head || document.getElementsByTagName('head')[0];
@@ -260,8 +256,8 @@
                     }
                     document.head.appendChild(link);
                 }
-                sysadmin_MainContainer.updateDBState();
-                sysadmin_btnServerConfig.onClick();
+                mainContainer.updateDBState();
+                btnStartupConfig.onClick();
             });
 </script>
 </html>

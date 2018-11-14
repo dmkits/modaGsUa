@@ -27,10 +27,10 @@ function createNewUserDBConnection(userData, callback){
         callback({error:dbConnectError});
         return;
     }
-    var dbConfig=server.getServerConfig();
+    var dbConfig=server.getStartupConfig();
     if(!dbConfig){
         callback({error:"Failed create database system connection! Reason: no server configuration!",
-            userErrorMsg: "Авторизация неудалась!<br> Не удалось загрузить параметры запуска приложения!<br> Обратитесь к системному администратору."});
+            userErrorMsg:"Не удалось подключиться к базе данных!<br> Нет параметров подключения к базе данных!<br> Обратитесь к системному администратору."});
         return;
     }
     var dbUserConnection = new mssql.ConnectionPool({

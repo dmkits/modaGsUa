@@ -17,10 +17,11 @@
 
             logins_ContentContainer.document =
                 APP.childFor(logins_ContentContainer, "loginsTable",
-                        TDocSimpleTableEdt, {titleText:"Имена входа в систему",
+                        TDocSimpleTableEdt, {titleText:"Database logins",
                         buttonExportToExcel:false,
-                        rightPane:{width:300}, rightToolPane:{title:"Действия",
-                            buttons:{ allowEditTableSelectedRow:"Изменить", storeTableSelectedRow:"Сохранить"}},
+                        rightPane:{width:300},
+                        rightToolPane:{title:"Actions",
+                            buttons:{ allowEditTableSelectedRow:"Change", storeTableSelectedRow:"Store"}},
                         dataURL:"/sysadmin/logins/getLoginsDataForTable", dataStoreURL:"/sysadmin/logins/storeLoginsTableData"
                     })
                     .addToolPane({title:"info",

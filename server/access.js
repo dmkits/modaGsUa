@@ -1,6 +1,6 @@
 var path=require('path'), fs=require('fs');
 var log=require("./server").log,
-    getServerConfig=require("./server").getServerConfig,
+    server=require("./server"), getStartupConfig=server.getStartupConfig,getAppConfig=server.getAppConfig,
     database=require("./databaseMSSQL"),
     common=require("./common");
 
@@ -13,9 +13,17 @@ module.exports= function(app) {
     var reqIsAJAX = function (headers) {
         return (headers && headers["content-type"] == "application/x-www-form-urlencoded" && headers["x-requested-with"] == "XMLHttpRequest");
     };
+    var renderToLogin= function (res,loginMsg){
+        var appConfig=getAppConfig();
+        res.render(path.join(__dirname, "../pages/login.ejs"), {
+            title: (appConfig&&appConfig.title)?appConfig.title:"",
+            loginMsg: loginMsg
+        });
+    };
     var renderToDbFailed= function (res,msg){
+        var appConfig=getAppConfig();
         res.render(path.join(__dirname, "../pages/dbFailed.ejs"), {
-            title: "REPORTS",
+            title: (appConfig&&appConfig.title)?appConfig.title:"",
             bigImg: "imgs/girls_big.jpg",
             icon: "icons/profits32x32.jpg",
             errorReason: msg
@@ -77,9 +85,7 @@ module.exports= function(app) {
                 });
                 return;
             }
-            res.render(path.join(__dirname, '../pages/login.ejs'), {
-                loginMsg: ""
-            });
+            renderToLogin(res,"");
             return;
         }
         var userConnectionData=database.getUserConnectionData(uuid);
@@ -117,9 +123,7 @@ module.exports= function(app) {
                 });
                 return;
             }
-            res.render(path.join(__dirname, '../pages/login.ejs'), {
-                loginMsg: "<div>Время сессии истекло.<br> Необходима авторизация.</div>"
-            });
+            renderToLogin(res,"<div>Время сессии истекло.<br> Необходима авторизация.</div>");
             return;
         }
         if(!sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
@@ -154,9 +158,7 @@ module.exports= function(app) {
     });
 
     app.get("/login", function (req, res) {                                                         log.info("app.get /login");
-        res.render(path.join(__dirname, '../pages/login.ejs'), {
-            loginMsg: ""
-        });
+        renderToLogin(res,"");
     });
     /**
      * sysadminData = { uuid, userName }
@@ -177,7 +179,7 @@ module.exports= function(app) {
         }
         var uuid = common.getUIDNumber();
         database.createNewUserDBConnection({uuid:uuid,login:userName,password:userPswrd}, function(err,result){
-            var  isSysadmin=false, serverConfig=getServerConfig();
+            var  isSysadmin=false, serverConfig=getStartupConfig();
             if(serverConfig && userName==serverConfig.user && userPswrd==serverConfig.password) isSysadmin=true;
             if(err){
                 if(isSysadmin){

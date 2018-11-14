@@ -63,28 +63,28 @@ module.exports.getApp=function(){
     return server;
 };
 
-var serverConfig=null;
+var startupConfig=null;
 global.serverConfigPath= path.join(__dirname,'/../','');
-function loadServerConfiguration(){
+function loadStartupConfig(){
     try {
-        serverConfig= common.loadConfig(appStartupParams.mode + '.cfg');
+        startupConfig= common.loadConfig(appStartupParams.mode + '.cfg');
     } catch (e) {
         log.error("Failed to load configuration! Reason:" + e);
-        serverConfig= null;
+        startupConfig= null;
     }
 }
-loadServerConfiguration();                                                                          log.info('load server configuration loaded on ', new Date().getTime()-startTime);//test
-module.exports.loadServerConfiguration= loadServerConfiguration;                                    log.info('startup mode:'+appStartupParams.mode,' server configuration:', serverConfig);//test
-module.exports.getServerConfig= function(){ return serverConfig };
-module.exports.setAppConfig= function(newAppConfig){ serverConfig=newAppConfig; };
+loadStartupConfig();                                                                                log.info('startup configuration loaded on ', new Date().getTime()-startTime);//test
+module.exports.loadStartupConfig= loadStartupConfig;                                                log.info('startup mode:'+appStartupParams.mode,' startup configuration:', startupConfig);//test
+module.exports.getStartupConfig= function(){ return startupConfig };
+module.exports.setStartupConfig= function(newStartupConfig){ startupConfig=newStartupConfig; };
 
 var database = require('./databaseMSSQL');                                                          log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
 
-var configFileName=(serverConfig&&serverConfig.configName)?serverConfig.configName:'config.json';
-var config=JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+configFileName,'utf-8')));
-module.exports.getConfig=function(){ return config; };
-module.exports.getConfigAppMenu=function(){ return (config&&config.appMenu)?config.appMenu:null; };
-module.exports.getConfigModules=function(){ return (config&&config.modules)?config.modules:null; };
+var configFileName=(startupConfig&&startupConfig.configName)?startupConfig.configName:'config.json',
+    appConfig=JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+configFileName,'utf-8')));
+module.exports.getAppConfig=function(){ return appConfig; };
+module.exports.getConfigAppMenu=function(){ return (appConfig&&appConfig.appMenu)?appConfig.appMenu:null; };
+module.exports.getConfigModules=function(){ return (appConfig&&appConfig.modules)?appConfig.modules:null; };
 
 server.use(function (req, res, next) {
     next();
@@ -117,7 +117,7 @@ var startServer= function(){
     });                                                                                             log.info("server inited.");
 };
 
-database.setDBSystemConnection(serverConfig, function(err,result){
+database.setDBSystemConnection(startupConfig, function(err,result){
     if(err) log.error("FAILED to set system connection! Reason: ",err);
     appModules.validateModules(function(errs, errMessage){
         if (errMessage){                                                                            log.error("FAILED validate! Reason: ",errMessage);

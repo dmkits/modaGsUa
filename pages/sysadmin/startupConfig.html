@@ -5,15 +5,15 @@
     <title></title>
 </head>
 <body>
-<div id="sa_serverConfig_PageContent" style="width:510px;height:100%; margin:0;padding:0; display: none;">
+<div id="sa_startupConfig_PageContent" style="width:510px;height:100%; margin:0;padding:0; display: none;">
     <table width="100%">
         <tr height=100%>
             <td height="20px">
                 <table width="100%">
                     <tr>
-                        <th height="30px" width="180px"><b>server configuration:</b></th>
+                        <th height="30px" width="180px"><b>startup configuration:</b></th>
                         <th width="200px">
-                            <div id="sa_serverConfig_configState">default</div>
+                            <div id="sa_startupConfig_configState">default</div>
                         </th>
                         <th></th>
                     </tr>
@@ -62,8 +62,8 @@
         </tr>
         <tr>
             <td height="40px">
-                <button id="SA_serverConfig_btnLoadConfig">Load config</button>
-                <button id="SA_serverConfig_btnSaveConfigAndReconnect">Store config & reconnect to database</button>
+                <button id="sa_startupConfig_btnLoadConfig">Load config</button>
+                <button id="sa_startupConfig_btnSaveConfigAndReconnect">Store config & reconnect to database</button>
             </td>
         </tr>
     </table>
@@ -74,34 +74,34 @@
                 "dijit/form/TextBox", "dijit/form/DateTextBox", "dijit/form/Button","dijit/ConfirmDialog",
                 "dojo/keys","dojo/on", "app/sysadminDialogs","app/request"],
             function (APP, BorderContainer, LayoutContainer, ContentPane, TextBox, DateTextBox, Button, ConfirmDialog,keys,on,sysadminDialogs,Request) {
-                var sa_serverConfig_PageContent = APP.instanceForID("sa_serverConfig_PageContent", ContentPane, {});
-                sa_serverConfig_PageContent.domNode.style.display = "inline-block";
+                var pageContent = APP.instanceForID("sa_startupConfig_PageContent", ContentPane, {});
+                pageContent.domNode.style.display = "inline-block";
 
                 var hostInput=new TextBox({id:"db.host"},"db.host");
                 var databaseInput=new TextBox({id:"db.name"},"db.name");
                 var userInput=new TextBox({id:"db.user"},"db.user");
                 var dbPasswordInput=new TextBox({id:"db.password"},"db.password");
                 var configNameInput=new TextBox({id:"configName"},"configName");
-                var configState = document.getElementById("sa_serverConfig_configState");
-                var reloadBtn= APP.instanceForID("SA_serverConfig_btnLoadConfig", Button);
-                var saveAndReconnectBtn= APP.instanceForID("SA_serverConfig_btnSaveConfigAndReconnect", Button);
+                var startupConfigState = document.getElementById("sa_startupConfig_configState");
+                var reloadBtn= APP.instanceForID("sa_startupConfig_btnLoadConfig", Button);
+                var saveAndReconnectBtn= APP.instanceForID("sa_startupConfig_btnSaveConfigAndReconnect", Button);
 
-                function setServerConfigContent(DBConfigData) {
+                function setStartupConfigContent(DBConfigData) {
                     hostInput.set("value", DBConfigData["host"]);
                     databaseInput.set("value", DBConfigData["database"]);
                     userInput.set("value", DBConfigData["user"]);
                     dbPasswordInput.set("value",  DBConfigData["password"]);
                     configNameInput.set("value", DBConfigData["configName"] || "config.json");
                 }
-                sa_serverConfig_PageContent.getServerConfiguration = function(){
-                    Request.getJSONData({url: "/sysadmin/server/getServerConfig", consoleLog: true},
+                pageContent.getStartupConfiguration = function(){
+                    Request.getJSONData({url: "/sysadmin/server/getStartupConfig", consoleLog: true},
                             function (result, error) {
                                 if (!result) {
-                                    configState.innerHTML = "<div><b style='color:red'>UNKNOWN</b></div>";
+                                    startupConfigState.innerHTML = "<div><b style='color:red'>UNKNOWN</b></div>";
                                     return;
                                 }
                                 if (error) {
-                                    configState.innerHTML = "<div><b style='color:red'>Cannot get configuration parameters!</b> Reason:"+result.error+"</div>";
+                                    startupConfigState.innerHTML = "<div><b style='color:red'>Cannot get configuration parameters!</b> Reason:"+result.error+"</div>";
                                     return;
                                 }
                                 if(result.dbList){
@@ -118,10 +118,10 @@
                                 if(result.dbListError){
                                     document.getElementById("db_list").innerText=result.dbListError;
                                 }
-                                configState.innerHTML = "<div><b>Configuration loaded.</b></div>";
-                                setServerConfigContent(result);
+                                startupConfigState.innerHTML = "<div><b>Configuration loaded.</b></div>";
+                                setStartupConfigContent(result);
                                 getDBList();
-                                if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
+                                if (pageContent.getParent().updateDBState)  pageContent.getParent().updateDBState();
                             });
                 };
                 function getDBList(){
@@ -129,12 +129,12 @@
                             function(result){
                                 if (!result) {
                                     document.getElementById("db_list").innerHTML = "<div><b style='color:red'>No connection to the server!</b></div>";
-                                    if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
+                                    if (pageContent.getParent().updateDBState)  pageContent.getParent().updateDBState();
                                     return;
                                 }
                                 if (result.error) {
                                     document.getElementById("db_list").innerHTML = "<div><b style='color:red'>Failed to get database list!</b> Reason:"+result.error+"</div>";
-                                    if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
+                                    if (pageContent.getParent().updateDBState)  pageContent.getParent().updateDBState();
                                     return;
                                 }
                                 if(result.dbList){
@@ -149,28 +149,28 @@
                 }
 
                 reloadBtn.onClick= function() {
-                    configState.innerHTML = "<div><b>Loading configuration parameters...</b></div>";
+                    startupConfigState.innerHTML = "<div><b>Loading configuration parameters...</b></div>";
                     Request.getJSONData({url: "/sysadmin/server/loadServerConfig"},
                             function (result,error) {
                                 console.log('result=', result);
                                 console.log('error=', error);
                                 if (!result) {
-                                    configState.innerHTML = "<div><b style='color:red'>UNKNOWN</b></div>";
+                                    startupConfigState.innerHTML = "<div><b style='color:red'>UNKNOWN</b></div>";
                                     return;
                                 }
                                 if (error) {
-                                    configState.innerHTML = "<div><b style='color:red'>Cannot load configuration parameters!</b> Reason:"+error+"</div>";
-                                    setServerConfigContent(result);
+                                    startupConfigState.innerHTML = "<div><b style='color:red'>Cannot load configuration parameters!</b> Reason:"+error+"</div>";
+                                    setStartupConfigContent(result);
                                     return;
                                 }
-                                configState.innerHTML = "<div><b>Configuration reloaded.</b></div>";
-                                setServerConfigContent(result);
-                                if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
+                                startupConfigState.innerHTML = "<div><b>Configuration reloaded.</b></div>";
+                                setStartupConfigContent(result);
+                                if (pageContent.getParent().updateDBState)  pageContent.getParent().updateDBState();
                             }
                     );
                 };
                 saveAndReconnectBtn.onClick = function () {
-                    configState.innerHTML = "<div><b>Configuration saving and reconnecting to database...</b></div>";
+                    startupConfigState.innerHTML = "<div><b>Configuration saving and reconnecting to database...</b></div>";
                     var newDBConfig={
                         host: hostInput.get('value'),
                         database: databaseInput.get('value'),
@@ -181,28 +181,28 @@
                     Request.postJSONData({url:  "/sysadmin/serverConfig/storeServerConfigAndReconnect", data: newDBConfig},
                             function (result,error) {
                                 if (!result) {
-                                        configState.innerHTML = "<div><b style='color:red'>UNKNOWN</b></div>";
-                                    if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
+                                        startupConfigState.innerHTML = "<div><b style='color:red'>UNKNOWN</b></div>";
+                                    if (pageContent.getParent().updateDBState)  pageContent.getParent().updateDBState();
                                     return;
                                 }
                                 if (result.DBConnectError)
-                                    configState.innerHTML=
-                                            configState.innerHTML+ "<br><div><b style='color:red'>Failed connect to database ! Reason:" + result["DBConnectError"] + "</b></div>";
+                                    startupConfigState.innerHTML=
+                                            startupConfigState.innerHTML+ "<br><div><b style='color:red'>Failed connect to database ! Reason:" + result["DBConnectError"] + "</b></div>";
                                 else
-                                    configState.innerHTML =
-                                            configState.innerHTML+ "<br><div><b>Reconnected to database.</b></div>";
+                                    startupConfigState.innerHTML =
+                                            startupConfigState.innerHTML+ "<br><div><b>Reconnected to database.</b></div>";
                                 if (error){
-                                    configState.innerHTML = "<div><b style='color:red'>Failed! Reason:" + error + "</b></div>";
-                                    if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
+                                    startupConfigState.innerHTML = "<div><b style='color:red'>Failed! Reason:" + error + "</b></div>";
+                                    if (pageContent.getParent().updateDBState)  pageContent.getParent().updateDBState();
                                     return;
                                 }
-                                configState.innerHTML = "<div><b>Configuration saved.</b></div>";
-                                if (sa_serverConfig_PageContent.getParent().updateDBState)  sa_serverConfig_PageContent.getParent().updateDBState();
+                                startupConfigState.innerHTML = "<div><b>Configuration saved.</b></div>";
+                                if (pageContent.getParent().updateDBState)  pageContent.getParent().updateDBState();
                                 getDBList();
                             });
                 };
 
-                sa_serverConfig_PageContent.getServerConfiguration();
+                pageContent.getStartupConfiguration();
             });
 </script>
 </html>

@@ -32,8 +32,8 @@ define(["dojo/_base/declare", "app/app", "app/tDocSimpleTable", "app/hTableEdita
                 this.createContentTable(HTableEditable, {readOnly:false,allowFillHandle:true});
                 this.createRightContent();
                 if(this.rightToolPaneParams){
-                    if(this.rightToolPaneParams.title){
-                        this.addToolPane({title:"Действия"});
+                    if(this.rightToolPaneParams){
+                        this.addToolPane({title:this.rightToolPaneParams.title});
                     }
                     var rightPaneWidth=this.rightContainerParams.width;
                     for (var btnActionName in this.rightToolPaneParams.buttons) {

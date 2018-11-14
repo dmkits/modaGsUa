@@ -1,4 +1,4 @@
-var server= require("../server"), config= server.getConfig();
+var server= require("../server"), appConfig= server.getAppConfig();
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     nextValidateModuleCallback();
@@ -6,7 +6,7 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 
 module.exports.init = function(app){
     app.get("/print/printSimpleDocument", function (req, res) {
-        var icon32x32=config['icon32x32'] ||  "/icons/modaua32x32.ico";
+        var icon32x32=appConfig['icon32x32'] ||  "/icons/modaua32x32.ico";
         res.render(appViewsPath+"print/printSimpleDocument.ejs",{icon:icon32x32});
     });
     app.get("/print/printProductsTags", function (req, res) {
