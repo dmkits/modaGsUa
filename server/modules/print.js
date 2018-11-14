@@ -6,8 +6,9 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 
 module.exports.init = function(app){
     app.get("/print/printSimpleDocument", function (req, res) {
-        var icon32x32=appConfig['icon32x32'] ||  "/icons/modaua32x32.ico";
-        res.render(appViewsPath+"print/printSimpleDocument.ejs",{icon:icon32x32});
+        var icon32x32=(appConfig['icon32x32'] ||  "/icons/modaua32x32.ico"),
+            title=((appConfig.title)?appConfig.title:"")+" Print document";
+        res.render(appViewsPath+"print/printSimpleDocument.ejs",{icon:icon32x32, title:title});
     });
     app.get("/print/printProductsTags", function (req, res) {
         res.sendFile(appViewsPath+"print/printProductsTags.html");
