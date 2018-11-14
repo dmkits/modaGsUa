@@ -397,66 +397,66 @@ module.exports.init = function(app){
     /**
      * callback = function(result)
      */
-    r_Users.createLoginIfNotExists= function(dbUC,loginData,login,lpass,suname,callback){
+    r_Users.createLoginIfNotExists= function(dbUC,loginData,login,lpass,suname,prevResult,callback){
         /* create login kassir12 WITH PASSWORD = 'QWErty123QWErty123QWErty123'*/
         sys_server_principals.getDataItems(dbUC,{fields:["name","type"],conditions:{"name=":login}},function(result){
             if(result.error){
-                var resultCreateLogin={};
-                resultCreateLogin.error="Failed create login! Reason: cannot check if login exists!";
-                resultCreateLogin.userErrorMsg="Не удалось создать имя входа! Не удалось проверить существование имени входа!";
-                r_Users.getLoginData(dbUC,loginData,resultCreateLogin,callback);
+                prevResult.error="Failed create login! Reason: cannot check if login exists!";
+                prevResult.userErrorMsg="Не удалось создать имя входа! Не удалось проверить существование имени входа!";
+                r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 return;
             }
             var resultItems=result.items;
             if(!resultItems||resultItems.length==0){
                 database.executeQuery(dbUC,"create login "+login+" WITH PASSWORD = '"+lpass+"'",function(err, updateCount){
+                    if(prevResult.updateCount===undefined)prevResult.updateCount=1;
                     if(err){
-                        var resultCreateLogin={};
-                        resultCreateLogin.error="Failed create login! Reason: password no strong!";
-                        resultCreateLogin.userErrorMsg="Не удалось создать имя входа! Пароль не удовлетворяет политике безопастности сервера!";
-                        r_Users.getLoginData(dbUC,loginData,resultCreateLogin,callback);
+                        prevResult.updateCount=0;
+                        prevResult.error="Failed create login! Reason: password no strong!";
+                        prevResult.userErrorMsg="Не удалось создать имя входа! Пароль не удовлетворяет политике безопастности сервера!";
+                        r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                         return;
                     }
-                    callback({});
+                    callback(prevResult);
                 });
                 return;
             }
-            callback({});
+            callback(prevResult);
         });
     };
     /**
      * callback = function(result)
      */
-    r_Users.createDBUserIfNotExists= function(dbUC,loginData,login,lpass,suname,callback){
+    r_Users.createDBUserIfNotExists= function(dbUC,loginData,login,lpass,suname,prevResult,callback){
         /* CREATE USER kassir5 FOR LOGIN kassir5	--exec sp_grantdbaccess 'kassir5', 'kassir5' */
         sysusers.getDataItems(dbUC,{fields:["name"],conditions:{"islogin=":1,"name=":suname}},function(result) {
             if (result.error) {
-                var resultCreateDBUser = {};
-                resultCreateDBUser.error = "Failed create dbuser! Reason: cannot check if dbuser exists!";
-                resultCreateDBUser.userErrorMsg = "Не удалось создать пользователя базы данных! Не удалось проверить существование пользователя базы данных!";
-                r_Users.getLoginData(dbUC,loginData,resultCreateDBUser,callback);
+                prevResult.error = "Failed create dbuser! Reason: cannot check if dbuser exists!";
+                prevResult.userErrorMsg = "Не удалось создать пользователя базы данных! Не удалось проверить существование пользователя базы данных!";
+                r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 return;
             }
             if(!result.items||result.items.length==0){
                 database.executeQuery(dbUC,"CREATE USER "+suname+" FOR LOGIN "+login,function(err, updateCount){
+                    if(prevResult.updateCount===undefined)prevResult.updateCount=1;
                     if(err){
-                        var resultCreateDBUser={};
-                        resultCreateDBUser.error="Failed create dbuser! Reason: cannot create dbuser for login'"+login+"'!";
-                        resultCreateDBUser.userErrorMsg="Не удалось создать пользователя базы данных! Не удалось создать пользователя базы данных для имени входа '"+login+"'!";
-                        r_Users.getLoginData(dbUC,loginData,resultCreateDBUser,callback);
+                        prevResult.updateCount=0;
+                        prevResult.error="Failed create dbuser! Reason: cannot create dbuser for login'"+login+"'!";
+                        prevResult.userErrorMsg="Не удалось создать пользователя базы данных! Не удалось создать пользователя базы данных для имени входа '"+login+"'!";
+                        r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                         return;
                     }
-                    callback({});
+                    callback(prevResult);
                 });
                 return;
             }
-            callback({});
+            callback(prevResult);
         });
     };
     /**
      * callback = function(result)
      */
-    r_Users.updateLoginDBUser= function(dbUC,loginData,login,lpass,suname,callback){
+    r_Users.updateLoginDBUser= function(dbUC,loginData,login,lpass,suname,prevResult,callback){
         /* alter login kassir12 WITH PASSWORD = 'Kassir321'
          exec sp_addrolemember 'db_ddladmin', 'kassir12'
          exec sp_addrolemember 'db_owner', 'kassir12'
@@ -468,28 +468,28 @@ module.exports.init = function(app){
             database.executeQuery(dbUC,"exec sp_addrolemember 'db_owner', '"+suname+"'",function(err, updateCount){
                 database.executeQuery(dbUC,"ALTER LOGIN "+login+" WITH CHECK_POLICY=ON,CHECK_EXPIRATION=ON",function(err, updateCount){
                     database.executeQuery(dbUC,"EXEC sp_change_users_login 'Update_One', '"+suname+"', '"+login+"'",function(err, updateCount){
-                        var resultUpdateLoginDBUser={updateCount:1};
+                        if(prevResult.updateCount===undefined)prevResult.updateCount=1;
                         if(err){
-                            resultUpdateLoginDBUser.updateCount=0;
-                            resultUpdateLoginDBUser.error="Failed update login! Reason: database user do not map to a login!";
-                            resultUpdateLoginDBUser.userErrorMsg="Не удалось сопоставить имя входа с пользователем базы данных!";
-                            r_Users.getLoginData(dbUC,loginData,resultUpdateLoginDBUser,callback);
+                            prevResult.updateCount=0;
+                            prevResult.error="Failed update login! Reason: database user do not map to a login!";
+                            prevResult.userErrorMsg="Не удалось сопоставить имя входа с пользователем базы данных!";
+                            r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                             return;
                         }
                         if(lpass!=userVisiblePass){
                             database.executeQuery(dbUC,"alter login "+login+" WITH PASSWORD = '"+lpass+"'",function(err, updateCount){
                                 if(err){
-                                    resultUpdateLoginDBUser.updateCount=0;
-                                    resultUpdateLoginDBUser.error="Failed update login password! Reason: password no strong!";
-                                    resultUpdateLoginDBUser.userErrorMsg="Не удалось изменить пароль для имени входа! Пароль не удовлетворяет политике безопастности сервера!";
-                                    r_Users.getLoginData(dbUC,loginData,resultUpdateLoginDBUser,callback);
+                                    prevResult.updateCount=0;
+                                    prevResult.error="Failed update login password! Reason: password no strong!";
+                                    prevResult.userErrorMsg="Не удалось изменить пароль для имени входа! Пароль не удовлетворяет политике безопастности сервера!";
+                                    r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                                     return
                                 }
-                                callback({});
+                                callback(prevResult);
                             });
                             return
                         }
-                        callback({});
+                        callback(prevResult);
                     });
                 });
             });
@@ -498,52 +498,51 @@ module.exports.init = function(app){
     /**
      * callback = function(result)
      */
-    r_Users.updateEmpData= function(dbUC,loginData,login,lpass,suname,callback){
+    r_Users.updateEmpData= function(dbUC,loginData,login,lpass,suname,prevResult,callback){
         r_Emps.updDataItem(dbUC,{updData:{"ShiftPostID":loginData["ShiftPostID"]},conditions:{"EmpID=":loginData["EmpID"]}},function(result){
-            var resultUpdateEmpData={updateCount:1};
+            if(prevResult.updateCount===undefined)prevResult.updateCount=1;
             if(result.error){
-                resultUpdateEmpData.updateCount=0;
-                resultUpdateEmpData.error="Failed update user emp data! Reason: "+result.error+"!";
-                resultUpdateEmpData.userErrorMsg="Не удалось изменить данные служащего для пользователя!";
-                r_Users.getLoginData(dbUC,loginData,resultUpdateEmpData,callback);
+                prevResult.updateCount=0;
+                prevResult.error="Failed update user emp data! Reason: "+result.error+"!";
+                prevResult.userErrorMsg="Не удалось изменить данные служащего для пользователя!";
+                r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 return;
             }
-            callback({});
+            callback(prevResult);
         });
     };
     /**
      * callback = function(result)
      */
-    ir_UserData.updateUserData= function(dbUC,loginData,login,lpass,suname,callback){
+    ir_UserData.updateUserData= function(dbUC,loginData,login,lpass,suname,prevResult,callback){
         ir_UserData.getDataItems(dbUC,{fields:["UserID"],conditions:{"UserID=":loginData["UserID"]}},function(result) {
-            var resultUpdateUserData={updateCount:1};
             if(result.error){
-                resultUpdateUserData.updateCount=0;
-                resultUpdateUserData.error="Failed update user adding data! Reason: "+result.error+"!";
-                resultUpdateUserData.userErrorMsg="Не удалось изменить доп. данные пользователя! Не удалось проверить налицие доп.данных пользователя!";
-                r_Users.getLoginData(dbUC,loginData,resultUpdateUserData,callback);
+                prevResult.updateCount=0;
+                prevResult.error="Failed update user adding data! Reason: "+result.error+"!";
+                prevResult.userErrorMsg="Не удалось изменить доп. данные пользователя! Не удалось проверить налицие доп.данных пользователя!";
+                r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 return
             }
             if(result.items.length==0){
                 ir_UserData.insDataItem(dbUC,{insData:{"UserID":loginData["UserID"],"PswrdNote":lpass}},function(result){
-                    var resultUpdateUserData={updateCount:1};
+                    if(prevResult.updateCount===undefined)prevResult.updateCount=1;
                     if(result.error){
-                        resultUpdateUserData.updateCount=0;
-                        resultUpdateUserData.error="Failed insert user added data! Reason: "+result.error+"!";
-                        resultUpdateUserData.userErrorMsg="Не удалось добавить доп. данные для пользователя!";
+                        prevResult.updateCount=0;
+                        prevResult.error="Failed insert user added data! Reason: "+result.error+"!";
+                        prevResult.userErrorMsg="Не удалось добавить доп. данные для пользователя!";
                     }
-                    r_Users.getLoginData(dbUC,loginData,resultUpdateUserData,callback);
+                    r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 });
                 return
             }
             ir_UserData.updDataItem(dbUC,{updData:{"PswrdNote":lpass},conditions:{"UserID=":loginData["UserID"]}},function(result){
-                var resultUpdateUserData={updateCount:1};
+                if(prevResult.updateCount===undefined)prevResult.updateCount=1;
                 if(result.error){
-                    resultUpdateUserData.updateCount=0;
-                    resultUpdateUserData.error="Failed update user added data! Reason: "+result.error+"!";
-                    resultUpdateUserData.userErrorMsg="Не удалось изменить доп. данные для пользователя!";
+                    prevResult.updateCount=0;
+                    prevResult.error="Failed update user added data! Reason: "+result.error+"!";
+                    prevResult.userErrorMsg="Не удалось изменить доп. данные для пользователя!";
                 }
-                r_Users.getLoginData(dbUC,loginData,resultUpdateUserData,callback);
+                r_Users.getLoginData(dbUC,loginData,prevResult,callback);
             });
         });
     };
@@ -554,27 +553,34 @@ module.exports.init = function(app){
                 res.send(result);
                 return;
             }
-            r_Users.createLoginIfNotExists(req.dbUC,tLoginData,login,lpass,suname,function(result){         //console.log("createLogin",result);
+            var storeLoginResult={};
+            r_Users.createLoginIfNotExists(req.dbUC,tLoginData,login,lpass,suname,storeLoginResult,function(result){         //console.log("createLogin",result);
                 if(result.error){
                     res.send(result);
                     return;
                 }
-                r_Users.createDBUserIfNotExists(req.dbUC,tLoginData,login,lpass,suname,function(result){
+                r_Users.createDBUserIfNotExists(req.dbUC,tLoginData,login,lpass,suname,result,function(result){
                     if(result.error){
                         res.send(result);
                         return;
                     }
-                    r_Users.updateLoginDBUser(req.dbUC,tLoginData,login,lpass,suname,function(result){
+                    r_Users.updateLoginDBUser(req.dbUC,tLoginData,login,lpass,suname,result,function(result){
                         if(result.error){
                             res.send(result);
                             return;
                         }
-                        r_Users.updateEmpData(req.dbUC,tLoginData,login,lpass,suname,function(result){
+                        r_Users.updateEmpData(req.dbUC,tLoginData,login,lpass,suname,result,function(result){
                             if(result.error){
                                 res.send(result);
                                 return;
                             }
-                            ir_UserData.updateUserData(req.dbUC,tLoginData,login,lpass,suname,function(result){
+                            if(lpass==userVisiblePass){
+                                r_Users.getLoginData(req.dbUC,tLoginData,result,function(result){
+                                    res.send(result);
+                                });
+                                return;
+                            }
+                            ir_UserData.updateUserData(req.dbUC,tLoginData,login,lpass,suname,result,function(result){
                                 res.send(result);
                             });
                         });
