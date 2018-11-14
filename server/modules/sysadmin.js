@@ -340,7 +340,7 @@ module.exports.init = function(app){
                 childLinkCondition:"sys.server_principals.type in ('S','U') and sys.server_principals.sid=sysusers.sid"},
             {data: "lPass", name: "Password", width: 150, type: "text",
                 dataSource:"sys.server_principals", dataFunction:"CASE When sys.server_principals.sid is Null Then '' else '"+userVisiblePass+"' END"},
-            {data: "PswrdNote", name: "Password note", width: 150, type: "text", readOnly:false, visible:false,
+            {data: "PswrdNote", name: "Password note", width: 150, type: "text", readOnly:true, visible:true,
                 childDataSource:"ir_UserData", sourceField:"pswrdNote",
                 childLinkCondition:"ir_UserData.UserID=r_Users.UserID"},
             {data: "is_disabled", name: "Disabled", width: 75, type: "checkboxMSSQL",
