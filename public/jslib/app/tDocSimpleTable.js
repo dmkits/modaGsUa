@@ -194,15 +194,17 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
                 return this;
             },
             /**
-             * params : { width, loadDropDownURL, valueItemName, labelDataItem, contentTableCondition:"<conditions>" }
+             * params : { width, labelDataItem, loadDropDownURL, contentTableCondition:"<conditions>" }
+             * --style, inputStyle,--for adding dmkits 20181115
              */
             addSelectBox:function(label, params){
                 if (!params) params={};
                 if(!params.width)params.width=275;
-                var input=this.addTableInputTo(this.topTableRow,{labelText:label, labelStyle:"margin-left:5px; ", cellWidth:params.width,
-                    cellStyle:"text-align:right;padding-left:10px;"});
-                var select= APP.instanceFor(input, Select,
-                    {style:"width:180px;", labelDataItem:params.labelDataItem,loadDropDownURL:params.loadDropDownURL,contentTableCondition:params.contentTableCondition});
+                var input=this.addTableInputTo(this.topTableRow,{labelText:label, labelStyle:"margin-left:5px; ",
+                    cellWidth:params.width, cellStyle:"text-align:right;padding-left:10px;"});
+                var select= APP.instanceFor(input, Select,{style:"width:180px;",
+                    labelDataItem:params.labelDataItem,
+                    loadDropDownURL:params.loadDropDownURL,contentTableCondition:params.contentTableCondition});
 
                 select.printParams = {cellWidth:params.width, labelText:label/*, printStyle:params.style*/};
 
@@ -565,38 +567,29 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
             },
 
             /**
-             * printParams={ cellWidth:params.cellWidth, cellStyle:params.cellStyle,
-                    labelText:params.labelText, labelStyle:params.labelStyle, inputStyle:params.inputStyle };
-             * @param printFormats
              */
             doPrint: function(printFormats){
                 var printData = {};
                 if (this.titleText) {
-                    this.addPrintDataSubItemTo(printData, "header",
-                        {label:this.titleText, width:0, align:"center",style:"width:100%;font-size:14px;font-weight:bold;text-align:center;", contentStyle:"margin-top:5px;margin-bottom:3px;"});
+                    this.addPrintDataSubItemTo(printData, "header",{label:this.titleText, width:0, align:"center",
+                        style:"width:100%;font-size:14px;font-weight:bold;text-align:center;",contentStyle:"margin-top:5px;margin-bottom:3px;"});
                 }
-                var headerTextStyle="font-size:14px;", headerDateContentStyle="margin-bottom:3px;";
+                var headerTextStyle="font-size:14px;", headerContentStyle="margin-bottom:3px;";
                 if(this.headerData){
                     this.addPrintDataItemTo(printData, "header", {newTable:true, style:headerTextStyle});
                     this.addPrintDataSubItemTo(printData, "header");
                     for(var i in this.headerData){
-                        var headerItemData=this.headerData[i];
-                        var printParams={};
-                        if(headerItemData.type=="DateBox"){
-                            printParams = headerItemData.instance.printParams;
-                                this.addPrintDataSubItemTo(printData, "header",
-                                    {label:printParams.labelText, width:printParams.cellWidth, align:"left",style:headerTextStyle, contentStyle:headerDateContentStyle, value:headerItemData.instance.get("value"),type:"date"});
-                        }else if(headerItemData.type=="SelectBox"){
-                            printParams = headerItemData.instance.printParams;
-                            this.addPrintDataSubItemTo(printData, "header",
-                                        {label:printParams.labelText, width:printParams.cellWidth, align:"left",style:headerTextStyle, contentStyle:headerDateContentStyle, value:headerItemData.instance.get("value")});
-                        }else if(headerItemData.type=="CheckButton"){
-                            if(headerItemData.instance.checked==true) {
-                                printParams = headerItemData.instance.printParams;
-                                this.addPrintDataSubItemTo(printData, "header",
-                                    {label: printParams.labelText, width: printParams.cellWidth, align: "left", style: headerTextStyle, contentStyle: headerDateContentStyle});
-                            }
+                        var headerItemData=this.headerData[i];                                                              console.log('doPrint headerItemData=',headerItemData);
+                        var printParams={}, print=true, value="";
+                        if(headerItemData.instance&&headerItemData.instance.printParams)printParams = headerItemData.instance.printParams;
+                        if(headerItemData.type=="DateBox") value=headerItemData.instance.textbox.value;
+                        else if(headerItemData.type=="SelectBox") value=headerItemData.instance.textDirNode.textContent;
+                        else if(headerItemData.type=="CheckButton"){
+                            if(headerItemData.instance.checked==true) value=undefined; else print=false;
                         }
+                        if(!print)continue;
+                        this.addPrintDataSubItemTo(printData, "header",{label:printParams.labelText, width:printParams.cellWidth+5, align:"left",
+                            style:headerTextStyle+printParams.printStyle, contentStyle:headerContentStyle, valueStyle:printParams.inputStyle, value:value});
                     }
                 }
                 this.addPrintDataSubItemTo(printData, "header");
@@ -613,8 +606,9 @@ define(["dojo/_base/declare", "app/app", "app/tDocBase","dijit/form/Select", "ap
                                 this.addPrintDataSubItemTo(printData, "total");
                                 continue
                             }
-                            this.addPrintDataSubItemTo(printData, "total", {width:tCellData.cellWidth+5, style:tCellData.printStyle, align:"right",
-                                contentStyle:"margin-top:3px;", label:tCellData.labelText, value:tCellData.textbox.value, type:"text", valueStyle:tCellData.inputStyle});
+                            this.addPrintDataSubItemTo(printData, "total", {label:tCellData.labelText,width:tCellData.cellWidth+5, align:"right",
+                                style:tCellData.printStyle, contentStyle:"margin-top:3px;",
+                                value:tCellData.textbox.value, type:"text", valueStyle:tCellData.inputStyle});
                         }
                     }
                 }
