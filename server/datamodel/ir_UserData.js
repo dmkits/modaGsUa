@@ -1,5 +1,5 @@
 module.exports.id=module.id;
-module.exports.changeLog= [
+module.exports.changeLog = [
     { changeID:"ir_UserData__1", changeDatetime:"2018-11-13 18:51:00", changeObj:"ir_UserData",
         changeVal:"CREATE TABLE dbo.ir_UserData(\n"+
             "UserID smallint NOT NULL,\n"+

@@ -1,5 +1,5 @@
 module.exports.id=module.id;
-var modelData= { queryName:"queryProdMove",
+module.exports.modelData = { queryName:"queryProdMove",
     query:"select OurID,StockID,ProdID,DocCode,DocDate,OperType,OperSNum,BQty,Qty,TQty\n"+
         "   from (\n"+
         "       select OurID,StockID,ProdID,DocCode=0,DocDate=@BDate,OperType=null,OperSNum=null,BQty=SUM(Qty),Qty=null,TQty=null --,SUM(AccQty)\n"+
@@ -25,4 +25,3 @@ var modelData= { queryName:"queryProdMove",
     queryParameters:["@BDate","@EDate"],
     fields:["OurID","StockID","ProdID","DocCode","DocDate","OperType","OperSNum","BQty","Qty","TQty"]
 };
-module.exports.modelData=modelData;

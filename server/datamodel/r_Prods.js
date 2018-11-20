@@ -1,5 +1,5 @@
 module.exports.id=module.id;
-var modelData = { tableName:"r_Prods",idField:"ProdID",
+module.exports.modelData = { tableName:"r_Prods",idField:"ProdID",
     fields:["ChID","ProdID","ProdName","UM","Country","Notes", "Note1","Note2","Note3", "Article1","Article2","Article3","Weight","Age",
         "InRems","IsDecQty","InStopList",
         "PCatID","PGrID","PGrID1","PGrID2","PGrID3","PGrAID","PBGrID","SizeName","ColorID","ValidSizes",
@@ -13,4 +13,3 @@ var modelData = { tableName:"r_Prods",idField:"ProdID",
         "PrepareTime", "Producer", "Growth", "Volume","Length",
         "ScaleGrID","ScaleStandard","ScaleConditions","ScaleComponents"]
 };
-module.exports.modelData=modelData;

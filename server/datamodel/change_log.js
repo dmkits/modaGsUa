@@ -1,5 +1,5 @@
 module.exports.id=module.id;
-var changeLog= [
+module.exports.changeLog = [
     { changeID:"chl__1", changeDatetime:"2016-08-29 09:01:00", changeObj:"change_log",
         changeVal:"CREATE TABLE change_log(" +
             "ID VARCHAR(64) NOT NULL PRIMARY KEY, CHANGE_DATETIME DATETIME NOT NULL," +
@@ -8,4 +8,3 @@ var changeLog= [
         tableName:"change_log",
         fields:["ID","CHANGE_DATETIME","CHANGE_OBJ","CHANGE_VAL","APPLIED_DATETIME"] , id:"ID"}
 ];
-module.exports.changeLog=changeLog;

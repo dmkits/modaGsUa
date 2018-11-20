@@ -1,5 +1,5 @@
 module.exports.id=module.id;
-var modelData = { tableName:"r_Emps",idField:"ChID",
+module.exports.modelData = { tableName:"r_Emps",idField:"ChID",
     fields:["ChID","EmpID","EmpName","UAEmpName","EmpLastName","EmpFirstName","EmpParName",
         "UAEmpLastName","UAEmpFirstName","UAEmpParName",
         "EmpInitials","UAEmpInitials","TaxCode","EmpSex","BirthDay",
@@ -9,4 +9,3 @@ var modelData = { tableName:"r_Emps",idField:"ChID",
         "PassNo","PassSer","PassDate","PassDept","DisNum","PensNum","WorkBookNo","WorkBookSer","PerFileNo","InStopList","BarCode",
         "ShiftPostID","IsCitizen","CertInsurSer","CertInsurNum"]
 };
-module.exports.modelData=modelData;
