@@ -7,11 +7,14 @@ var log=require("./server").log,
 var sysadminsList={};
 
 module.exports= function(app) {
-    var reqIsJSON = function (headers) {
-        return (headers && headers["x-requested-with"] && headers["x-requested-with"] == "application/json; charset=utf-8")
+    var isReqJSON = function (method,headers) {
+        return (headers && (
+            (headers["x-requested-with"] && headers["x-requested-with"] == "application/json; charset=utf-8")
+                || (headers["x-requested-with"] && headers["x-requested-with"].indexOf("application/json; charset=utf-8")>=0))
+        )
     };
-    var reqIsAJAX = function (headers) {
-        return (headers && headers["content-type"] == "application/x-www-form-urlencoded" && headers["x-requested-with"] == "XMLHttpRequest");
+    var isReqInternalPage = function (method,headers) {
+        return (headers && headers["x-requested-with"] == "XMLHttpRequest" && headers["content-type"] == "application/x-www-form-urlencoded");
     };
     var renderToLogin= function (res,loginMsg){
         var appConfig=getAppConfig();
@@ -45,7 +48,7 @@ module.exports= function(app) {
         }
     };
     var getSysadminNameByUUID=function(uuid){
-        if (!sysadminsList) return;
+        if(!sysadminsList) return;
         for(var saUUID in sysadminsList)
             if (saUUID==uuid) return sysadminsList[saUUID];
     };
@@ -71,14 +74,14 @@ module.exports= function(app) {
                 callback(null,recordset[0]);
             });
     };
-    app.use(function (req, res, next) {                                                             log.info("ACCESS CONTROLLER  req.path=", req.path, " params:",req.query,{});
-        if (req.originalUrl.indexOf("/login") == 0) {
+    app.use(function (req, res, next) {                                                         log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
+        if(req.originalUrl.indexOf("/login")==0){
             next();
             return;
-        }
+        }                                                                                       //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
         var uuid=req.cookies.uuid;
-        if (uuid===undefined||uuid===null) {
-            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+        if(uuid===undefined||uuid===null){
+            if(isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)){
                 res.send({
                     error: "Failed to get data! Reason: user is not authorized!",
                     userErrorMsg: "Не удалось получить данные. Пользователь не авторизирован."
@@ -94,14 +97,15 @@ module.exports= function(app) {
         if(sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
             req.dbUC = (userConnectionData)?userConnectionData.connection:null;
             getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
-                if(errMsg) req.dbUserName=sysadminName; else req.dbUserName=dbUserParameters.dbUserName;        log.info('ACCESS CONTROLLER DB user: ', req.dbUserName);
+                req.dbUserParams=dbUserParameters;
+                if(errMsg) req.dbUserName=sysadminName; else req.dbUserName=dbUserParameters.dbUserName;    log.info('ACCESS CONTROLLER: dbUserName:',req.dbUserName,'dbUserParams:',req.dbUserParams);
                 next();
             });
             return;
         }
         if(database.getSystemConnectionErr()){
             var msg="Нет системного подключения к базе данных! <br>Обратитесь к системному администратору.";
-            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+            if (isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)) {
                 res.send({
                     error: "Failed to get data! Reason: failed get system connection to database!",
                     userErrorMsg: msg
@@ -116,7 +120,7 @@ module.exports= function(app) {
             return;
         }
         if(!userConnectionData||!userConnectionData.connection){
-            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+            if (isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)) {
                 res.send({
                     error: "Failed to get data! Reason:the session has expired!",
                     userErrorMsg: "Не удалось получить данные. Время сессии истекло. Необходима авторизация."
@@ -128,7 +132,7 @@ module.exports= function(app) {
         }
         if(!sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
             var errMsg="Невозможно получить данные! Пользователь не авторизироват как сисадмин!";
-            if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+            if (isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)) {
                 res.send({
                     error: "Failed to get data! Reason: login user is not sysadmin!",
                     userErrorMsg: errMsg
@@ -141,7 +145,7 @@ module.exports= function(app) {
         req.dbUC = userConnectionData.connection;
         getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
             if(errMsg){
-                if (reqIsJSON(req.headers) || reqIsAJAX(req.headers)) {
+                if (isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)) {
                     res.send({
                         error: "Failed to get data! Reason: failed to get login user data from database!",
                         userErrorMsg: errMsg
@@ -152,12 +156,12 @@ module.exports= function(app) {
                 return;
             }
             req.dbUserParams=dbUserParameters;
-            req.dbUserName=dbUserParameters.dbUserName;                                             log.info('ACCESS CONTROLLER DB user:', req.dbUserName,' DB user params:', req.dbUserParams);
+            req.dbUserName=dbUserParameters.dbUserName;                                             log.info('ACCESS CONTROLLER: dbUserName=',req.dbUserName,'dbUserParams=',req.dbUserParams);
             next();
         });
     });
 
-    app.get("/login", function (req, res) {                                                         log.info("app.get /login");
+    app.get("/login", function (req, res) {                                                         log.info("ACCESS CONTROLLER: get /login");
         renderToLogin(res,"");
     });
     /**
@@ -171,7 +175,7 @@ module.exports= function(app) {
             if(callback)callback();
         });
     };
-    app.post("/login", function (req, res) {                                                        log.info("app.post /login",req.body.user, 'userPswrd=',req.body.pswrd);
+    app.post("/login", function (req, res) {                                                        log.info("ACCESS CONTROLLER: post /login user=",req.body.user,'pswrd=',req.body.pswrd);
         var userName=req.body.user, userPswrd=req.body.pswrd;
         if(!userName ||!userPswrd ){
             res.send({error:"Authorisation failed! No login or password!", userErrorMsg:"Пожалуйста введите имя и пароль."});
@@ -185,7 +189,7 @@ module.exports= function(app) {
                 if(isSysadmin){
                     storeSysadminUUID({uuid:uuid,userName:userName},function(){
                         res.cookie("uuid", uuid);
-                        res.send({result: "success"});
+                        res.send({"uuid":uuid});
                     });
                     return;
                 }
@@ -194,7 +198,7 @@ module.exports= function(app) {
             }
             if(isSysadmin) storeSysadminUUID({uuid:uuid,userName:userName});
             res.cookie("uuid", uuid);
-            res.send({result: "success"});
+            res.send({"uuid":uuid});
         });
     });
 };

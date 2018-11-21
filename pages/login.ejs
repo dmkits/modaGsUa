@@ -51,7 +51,7 @@
                                     loginDialog.reset();
                                     return;
                                 }
-                                if(result && result.result && result.result== "success") {
+                                if(result && result.uuid && result.uuid.toString().trim()!="") {
                                     if(window.location.href.indexOf("/login")>=0)window.location.replace("/");
                                     else window.location.replace(window.location.href);
                                 }
