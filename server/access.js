@@ -74,12 +74,14 @@ module.exports= function(app) {
                 callback(null,recordset[0]);
             });
     };
-    app.use(function (req, res, next) {                                                         log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
+    app.use(function (req, res, next) {                                                         log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
         if(req.originalUrl.indexOf("/login")==0){
             next();
             return;
         }                                                                                       //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
         var uuid=req.cookies.uuid;
+        if(uuid===undefined)uuid=req.headers['uuid'];
+        res.header("Access-Control-Allow-Headers","Content-Type,Content-Length, Accept, X-Requested-With, uuid");
         if(uuid===undefined||uuid===null){
             if(isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)){
                 res.send({
@@ -98,7 +100,7 @@ module.exports= function(app) {
             req.dbUC = (userConnectionData)?userConnectionData.connection:null;
             getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
                 req.dbUserParams=dbUserParameters;
-                if(errMsg) req.dbUserName=sysadminName; else req.dbUserName=dbUserParameters.dbUserName;    log.info('ACCESS CONTROLLER: dbUserName:',req.dbUserName,'dbUserParams:',req.dbUserParams);
+                if(errMsg) req.dbUserName=sysadminName; else req.dbUserName=dbUserParameters.dbUserName;    //log.info('ACCESS CONTROLLER: dbUserName:',req.dbUserName,'dbUserParams:',req.dbUserParams);
                 next();
             });
             return;
