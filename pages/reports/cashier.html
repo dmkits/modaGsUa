@@ -33,7 +33,7 @@
                     if (!btnProdsSales.report){
                         btnProdsSales.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsSales",
                                 TDocSimpleTable, {titleText:"Продажи товаров", dataURL:"/reports/prodsSales/getProductsSales",
-                                    buttonPrint:true, buttonExportToExcel:false})
+                                    buttonPrint:true, buttonExportToExcel:true})
                                 .addSelectBox("Касса",{valueItemName:"CRID", labelDataItem:"CRName",
                                     loadDropDownURL:"/reports/cashier/getDirCRsForSelect",
                                     contentTableCondition:"CRID=", width:300})

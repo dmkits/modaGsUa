@@ -1,7 +1,5 @@
-
-var path=require('path'), fs=require('fs');
-var uid = require('uniqid');
-var BigNumber = require('big-number');
+var path=require('path'), fs=require('fs'),
+    uid = require('uniqid'), BigNumber = require('big-number');
 
 module.exports.getStartupParams = function() {
     var app_params = {};

@@ -46,9 +46,7 @@ module.exports.log=log;                                                         
 var common=require('./common');
 var tempExcelRepDir=path.join(__dirname, '/../temp/');
 try {
-    if (!fs.existsSync(tempExcelRepDir)) {
-        fs.mkdirSync(tempExcelRepDir);
-    }
+    if (!fs.existsSync(tempExcelRepDir)) fs.mkdirSync(tempExcelRepDir);
 }catch (e){                                                                                         log.warn('Failed create XLSX_temp directory! Reason:'+e);
     tempExcelRepDir=null;
 }

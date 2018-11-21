@@ -6,14 +6,15 @@
   "modules":[
     "sysadmin",
     "print",
+    "system",
     "main",
     "dirsCommon",
     "dirsForDocs",
     "dirsForProds",
     "rec",
     /*"mainPage",*/
-    /*"system",*/
-    "reportsCashier"
+    "reportsCashier",
+    "mobileVen"
   ],
   "appMenu":[
     { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },
@@ -22,7 +23,15 @@
     { "menuItemName":"menuBarItemClose", "menuTitle":"Выход", "action":"close" }
   ],
   "usersRoles":{
+    "admin":{
+      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemRec"]
+    },
     "manager":{
+      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemReportsCashier"]
+    },
+    "operatorRec":{
       "menu":["menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemRec"]
     },
