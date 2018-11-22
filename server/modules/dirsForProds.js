@@ -118,6 +118,13 @@ module.exports.init= function(app){
                 res.send(result);
             });
     });
+    app.get("/dirsProds/getProdDataByBarcode", function (req, res) {
+        var conditions=req.query;
+        r_Prods.getDataItemForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
+            function(result){
+                res.send(result);
+            });
+    });
     /**
      *
      * callback = function(error, prodData), error = {error,userErrorMsg}
