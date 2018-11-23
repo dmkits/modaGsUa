@@ -53,7 +53,8 @@ module.exports.init = function(app){
         r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
             function(result){
                 var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;
-                t_Ven.getDataItemsForTable(req.dbUC,{tableColumns:tVensListTableColumns, conditions:conditions, order:"DocDate, DocID"},
+                t_Ven.getDataItemsForTable(req.dbUC,{tableColumns:tVensListTableColumns, conditions:conditions,
+                        order:"DocDate desc, DocID desc", top:"top 50"},
                     function(result){
                         error+=(result.error)?result.error:'';
                         var outData={listStocks:listStocks,listInventsByStockID:(result)?result.items:null};

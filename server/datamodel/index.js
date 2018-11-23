@@ -177,6 +177,7 @@ module.exports.initValidateDataModels=function(dataModelsList, errs, resultCallb
  *      groupedFields = [ <fieldName>, ... ],
  *      conditions={ <condition>:<conditionValue>, ... } OR conditions=[ { fieldName:"...", condition:"...", value:"..." }, ... ],
  *      order = "<fieldName>" OR "<fieldName>,<fieldName>,..." OR [ <fieldName>, ... ]
+ *      top = "<TOP N>"
  * }
  * fieldsFunctions[].function: "maxPlus1" / "concat"
  * resultCallback = function(err, recordset)
@@ -239,7 +240,8 @@ function _getSelectItems(connection, params,resultCallback){                    
     }
     if(!params.sourceName) params.sourceName="m";
     if(params.sourceType=="query") querySource= "(\n"+querySource+"\n) "+params.sourceName;
-    var selectQuery="select "+queryFields+" from "+querySource;
+    if(!params.top)params.top="";else params.top+=" ";
+    var selectQuery="select "+params.top+queryFields+" from "+querySource;
     var joins="";
     if(params.joinedSources){
         for(var joinSourceName in params.joinedSources) {
