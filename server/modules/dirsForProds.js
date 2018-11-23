@@ -121,7 +121,6 @@ module.exports.init= function(app){
     app.get("/dirsProds/getProdDataByCRUniInput", function (req, res) {
         var conditions={}/*valule like UniInputMask*/,value=req.query["value"];
         conditions[value+" like UniInputMask"]=null;
-        //'2900000010055' LIKE UniInputMask ORDER BY UniInputCode
         r_CRUniInput.getDataItem(req.dbUC,{fields:["UniInputAction"], conditions:conditions},
             function(result){
                 if(!result||!result.item){
