@@ -4,12 +4,12 @@ var r_Prods= require(appDataModelPath+"r_Prods"),r_ProdMQ= require(appDataModelP
     r_ProdG1= require(appDataModelPath+"r_ProdG1"), r_ProdG2= require(appDataModelPath+"r_ProdG2"),
     r_ProdG3= require(appDataModelPath+"r_ProdG3"),
     ir_ProdColors= require(appDataModelPath+"ir_ProdColors"),ir_ProdSizes= require(appDataModelPath+"ir_ProdSizes"),
-    t_PInP=require(appDataModelPath+"t_PInP"),
-    r_DBIs=require(appDataModelPath+"r_DBIs");
+    t_PInP=require(appDataModelPath+"t_PInP"),r_DBIs=require(appDataModelPath+"r_DBIs"),
+    r_CRUniInput=require(appDataModelPath+"r_CRUniInput");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([r_Prods,r_ProdMQ,t_PInP,r_DBIs,
-            r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdColors,ir_ProdSizes], errs,
+    dataModel.initValidateDataModels([r_Prods,r_ProdMQ,r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdColors,ir_ProdSizes,
+            t_PInP,r_DBIs,r_CRUniInput], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -118,11 +118,28 @@ module.exports.init= function(app){
                 res.send(result);
             });
     });
-    app.get("/dirsProds/getProdDataByBarcode", function (req, res) {
-        var conditions=req.query;
-        r_Prods.getDataItemForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
+    app.get("/dirsProds/getProdDataByCRUniInput", function (req, res) {
+        var conditions={}/*valule like UniInputMask*/,value=req.query["value"];
+        conditions[value+" like UniInputMask"]=null;
+        //'2900000010055' LIKE UniInputMask ORDER BY UniInputCode
+        r_CRUniInput.getDataItem(req.dbUC,{fields:["UniInputAction"], conditions:conditions},
             function(result){
-                res.send(result);
+                if(!result||!result.item){
+                    var errMsg="Не удалось определить метод обработки значения!";
+                    if(result.error) errMsg+="<br>"+result.error;
+                    res.send({error:errMsg,userErrorMsg:errMsg});
+                    return;
+                }
+                var uniInputAction=result.item["UniInputAction"], findProdConditions={};
+                if(uniInputAction==1/*barcode*/){
+                    findProdConditions["Barcode="]=value;
+                } else /*result.item==2 ProdID*/{
+                    findProdConditions["r_Prods.ProdID="]=value;
+                }
+                r_Prods.getDataItemForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:findProdConditions},
+                    function(result){
+                        res.send(result);
+                    });
             });
     });
     /**
