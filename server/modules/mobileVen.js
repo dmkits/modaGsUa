@@ -127,4 +127,49 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
+
+    // t_VenA.findProdByCRUniInput=function(value,callback){
+    // };
+
+    app.post("/mobile/ven/storeProdDataByCRUniInput", function(req, res){
+        var conditions={}/*valule like UniInputMask*/,storeData=req.body, value=(storeData)?storeData["value"]:null;
+
+        r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
+            if(resultFindProd.error){
+                res.send(resultFindProd);
+                return;
+            }
+            res.send({resultItem:resultFindProd.prodData});
+        });
+
+        return;
+        if(prodID===undefined||prodID===null){
+            var prodData={"ProdName":storeData["ProdName"], "UM":storeData["UM"], "Article1":storeData["Article1"],
+                "Country":storeData["Country"], "Notes":storeData["ProdName"],
+                "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
+                "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
+                "ColorName":storeData["ColorName"],"SizeName":storeData["SizeName"],
+                "InRems":1};
+            r_Prods.storeNewProd(req.dbUC,prodData,req.dbUserParams,function(result){
+                if(!result.resultItem||result.error){
+                    res.send({error:"Failed crate new product! Reason:"+result.error,userErrorMsg:result.userErrorMsg});
+                    return;
+                }
+                prodID=result.resultItem["ProdID"];
+                storeData["ProdID"]=prodID; storeData["Barcode"]=result.resultItem["Barcode"];
+                t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
+                    res.send(result);
+                });
+            });
+            return;
+        }
+        var iProdID=parseInt(prodID);
+        if(isNaN(iProdID)){
+            res.send({error:"Non correct ProdID!",userErrorMsg:"Не корректный код товара!"});
+            return;
+        }
+        t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
+            res.send(result);
+        });
+    });
 };

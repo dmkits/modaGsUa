@@ -680,7 +680,7 @@ function _getDataItemForTable(connection, params, resultCallback){
                 continue;
             }
             tableDataItem.item=tableDataItems[0];
-        }
+        }                                                                                           //log.debug('_getDataItemForTable: getDataItemsForTable: tableDataItem:',tableDataItem,{});//test
         resultCallback(tableDataItem);
     });
 }

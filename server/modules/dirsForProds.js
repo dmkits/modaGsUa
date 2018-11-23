@@ -118,29 +118,43 @@ module.exports.init= function(app){
                 res.send(result);
             });
     });
-    app.get("/dirsProds/getProdDataByCRUniInput", function (req, res) {
-        var conditions={}/*valule like UniInputMask*/,value=req.query["value"];
+    /**
+     * value = Barcode or ProdID
+     * callback = function(result), result = { prodData, error,userErrorMsg }
+     */
+    r_Prods.findProdByCRUniInput= function (dbUC, value, callback) {//IT'S maked for get prod data from mobile invent
+        var conditions={}/*valule like UniInputMask*/;
         conditions[value+" like UniInputMask"]=null;
-        r_CRUniInput.getDataItem(req.dbUC,{fields:["UniInputAction"], conditions:conditions},
+        r_CRUniInput.getDataItem(dbUC,{fields:["UniInputAction"], conditions:conditions},
             function(result){
                 if(!result||!result.item){
-                    var errMsg="Не удалось определить метод обработки значения!";
-                    if(result.error) errMsg+="<br>"+result.error;
-                    res.send({error:errMsg,userErrorMsg:errMsg});
+                    var error="Cannot get CRUniInput UniInputAction value!",
+                        errMsg="Не удалось определить метод обработки значения для поиска товара!";
+                    if(result&&result.error) {
+                        error+="<br>"+result.error;errMsg+="<br>"+result.error;
+                    }
+                    callback({error:error,userErrorMsg:errMsg});
                     return;
                 }
                 var uniInputAction=result.item["UniInputAction"], findProdConditions={};
-                if(uniInputAction==1/*barcode*/){
-                    findProdConditions["Barcode="]=value;
-                } else /*result.item==2 ProdID*/{
-                    findProdConditions["r_Prods.ProdID="]=value;
-                }
-                r_Prods.getDataItemForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:findProdConditions},
-                    function(result){
-                        res.send(result);
+                if(uniInputAction==1/*barcode*/)findProdConditions["Barcode="]=value;
+                else/*result.item==2 ProdID*/findProdConditions["r_Prods.ProdID="]=value;
+                r_Prods.getDataItemForTable(dbUC,{tableColumns:prodsTableColumns, conditions:findProdConditions},
+                    function(result){                                                                   console.log('r_Prods.findProdByCRUniInput result',result);
+                        if(!result||!result.item){
+                            var error="Cannot get r_Prods prod data by "+(uniInputAction==1)?"Barcode=":"r_Prods.ProdID="+value+"!",
+                                errMsg="Не удалось найти товар по значению "+value+"!";
+                            if(result&&result.error) {
+                                error+="<br>"+result.error;errMsg+="<br>"+result.error;
+                            }                       console.log('r_Prods.findProdByCRUniInput result',{error:result.error,userErrorMsg:errMsg});
+                            callback({error:error,userErrorMsg:errMsg});
+                            return;
+                        }
+                        callback({prodData:result.item});
                     });
             });
-    });
+    };
+
     /**
      *
      * callback = function(error, prodData), error = {error,userErrorMsg}
