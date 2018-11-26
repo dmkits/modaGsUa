@@ -385,7 +385,12 @@ function _getDataItem(connection, params, resultCallback){
         var getDataItemResult={};
         if(result.error) getDataItemResult.error=result.error;
         if(result.errorCode!==undefined) getDataItemResult.errorCode=result.errorCode;
-        if(result.items) getDataItemResult.item=result.items[0];
+        if(result.items){
+            if(result.items.length>1)
+                result.error="Failed get data item! Reason: result contains more that one items!";
+            else
+                getDataItemResult.item=result.items[0];
+        }
         resultCallback(getDataItemResult);
     });
 }

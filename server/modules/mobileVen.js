@@ -127,48 +127,84 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
+    /**
+     * prodData = { ProdID, UM, Barcode, TNewQty }
+     */
+    t_VenA.storeVenAProdData= function(dbUC,parentChID,venAProdData,tNewQty,resultCallback){
+        if(!("ProdID" in venAProdData)&&!("TSrcPosID" in venAProdData)){
+            resultCallback({error:"Failed find prod in t_VenA!<br> No ProdID or TSrcPosID!",
+                userErrorMsg:"Не удалось найти товар в инвентаризации!<br> В данных нет кода товара или позиции товара!"});
+            return;
+        }
+        var conditions={"ChID=":parentChID};
+        if("ProdID" in venAProdData)conditions["ProdID="]=venAProdData["ProdID"];
+        if("TSrcPosID" in venAProdData)conditions["TSrcPosID="]=venAProdData["TSrcPosID"];
+        t_VenA.getDataItem(dbUC,{fields:["TSrcPosID","Barcode","ProdID","UM","TQty","TNewQty",
+                "TSumCC_nt","TTaxSum","TSumCC_wt","TNewSumCC_nt","TNewTaxSum","TNewSumCC_wt",
+                "Norma1","HandCorrected"],conditions:conditions},
+            function(result){
+                if(result.error){
+                    resultCallback({error:"Failed find prod in t_VenA!<br>"+result.error,
+                        userErrorMsg:"Не удалось найти товар в инвентаризации!<br>"+result.error});
+                    return;
+                }
+                var storeData=result.item;
+                if(!storeData){//insert
+                    storeData=venAProdData;
+                    if(!("ProdID" in storeData)){
+                        resultCallback({error:"Failed get prod data for insert into t_VenA!",
+                            userErrorMsg:"Не удалось получить данные товара для добавления в инвентаризацию!"});
+                        return;
+                    }
+                    storeData["TQty"]=0;storeData["TNewQty"]=1;
+                    storeData["TSumCC_nt"]=0;storeData["TTaxSum"]=0;storeData["TSumCC_wt"]=0;
+                    storeData["TNewSumCC_nt"]=0;storeData["TNewTaxSum"]=0;storeData["TNewSumCC_wt"]=0;
+                    storeData["Norma1"]=0;storeData["HandCorrected"]=0;
+                }else{//update by TSrcPosID
+                    if(tNewQty===undefined)storeData["TNewQty"]++; else storeData["TNewQty"]=tNewQty;
+                }
+                storeData["ChID"]=parentChID;
+                t_VenA.storeTableDataItem(dbUC,{tableColumns:tVenATableColumns, idFields:["ChID","TSrcPosID"],storeTableData:storeData,
+                        calcNewIDValue: function(params, callback){
+                            t_VenA.getDataItem(dbUC,{fields:["maxTSrcPosID"],
+                                    fieldsFunctions:{maxTSrcPosID:{function:"maxPlus1",sourceField:"TSrcPosID"}},conditions:{"ChID=":parentChID}},
+                                function(result){
+                                    if(result.error){
+                                        resultCallback({error:"Failed calc new TSrcPosID by prod in t_VenA!<br>"+result.error,
+                                            userErrorMsg:"Не удалось вычислить новый номер позиции для товара в инвентаризации!<br>"+result.error});
+                                        return;
+                                    }
+                                    if(!result.item)params.storeTableData["TSrcPosID"]=1;else params.storeTableData["TSrcPosID"]=result.item["maxTSrcPosID"];
+                                    callback(params);
+                                });
 
-    // t_VenA.findProdByCRUniInput=function(value,callback){
-    // };
-
+                        }},
+                    function(result){
+                        if(result.error) {
+                            if(result.error.indexOf("Cannot insert duplicate key row in object 'dbo.t_VenA' with unique index 'NoDuplicate'")>=0)
+                                result.userErrorMsg="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером.";
+                            else
+                                result.userErrorMsg="Ну удалось сохранить товар в инвентаризацию!<br>"+result.error;
+                        }
+                        resultCallback(result);
+                    });
+        });
+    };
     app.post("/mobile/ven/storeProdDataByCRUniInput", function(req, res){
-        var conditions={}/*valule like UniInputMask*/,storeData=req.body, value=(storeData)?storeData["value"]:null;
-
+        var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];
         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
             if(resultFindProd.error){
                 res.send(resultFindProd);
                 return;
             }
-            res.send({resultItem:resultFindProd.prodData});
+            t_VenA.storeVenAProdData(req.dbUC,parentChID,resultFindProd.prodData,storingData["TNewQty"],function (result){
+                res.send(result);
+            })
         });
-
-        return;
-        if(prodID===undefined||prodID===null){
-            var prodData={"ProdName":storeData["ProdName"], "UM":storeData["UM"], "Article1":storeData["Article1"],
-                "Country":storeData["Country"], "Notes":storeData["ProdName"],
-                "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
-                "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
-                "ColorName":storeData["ColorName"],"SizeName":storeData["SizeName"],
-                "InRems":1};
-            r_Prods.storeNewProd(req.dbUC,prodData,req.dbUserParams,function(result){
-                if(!result.resultItem||result.error){
-                    res.send({error:"Failed crate new product! Reason:"+result.error,userErrorMsg:result.userErrorMsg});
-                    return;
-                }
-                prodID=result.resultItem["ProdID"];
-                storeData["ProdID"]=prodID; storeData["Barcode"]=result.resultItem["Barcode"];
-                t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
-                    res.send(result);
-                });
-            });
-            return;
-        }
-        var iProdID=parseInt(prodID);
-        if(isNaN(iProdID)){
-            res.send({error:"Non correct ProdID!",userErrorMsg:"Не корректный код товара!"});
-            return;
-        }
-        t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
+    });
+    app.post("/mobile/ven/storeExistsPosProdData", function(req, res){
+        var storingData=req.body, parentChID=storingData["parentChID"],venAData={TSrcPosID:storingData["TSrcPosID"]};
+        t_VenA.storeVenAProdData(req.dbUC,parentChID,venAData,storingData["TNewQty"],function (result){
             res.send(result);
         });
     });

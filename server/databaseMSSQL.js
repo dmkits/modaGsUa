@@ -51,7 +51,7 @@ function createNewUserDBConnection(userData, callback){
                 connectionData.connection=null;
                 connectionData.user=userData.login;
             }
-            callback({error:err.message,userErrorMsg: "Авторизация неудалась!<br> Неправильное имя и/или пароль."});
+            callback({error:err.message,userErrorMsg: "Авторизация не удалась!<br> Неправильное имя и/или пароль."});
             return;
         }
         dbConnectError=null;

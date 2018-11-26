@@ -118,11 +118,29 @@ module.exports.init= function(app){
                 res.send(result);
             });
     });
-    /**
+    /** used in mobile inventory
+     * conditions = { <conditions> }
+     * callback = function(result), result = { prodData, error,userErrorMsg }
+     */
+    r_Prods.findProdByCondition= function (dbUC, conditions, callback) {//IT'S used for get prod data from mobile invent
+        r_Prods.getDataItemForTable(dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
+            function(result){
+                if(!result||!result.item){
+                    var error="Cannot find r_Prods prod data!",errMsg="Не удалось найти товар!";
+                    if(result&&result.error) {
+                        error+="<br>"+result.error;errMsg+="<br>"+result.error;
+                    }
+                    callback({error:error,userErrorMsg:errMsg});
+                    return;
+                }
+                callback({prodData:result.item});
+            });
+    };
+    /** used in mobile inventory
      * value = Barcode or ProdID
      * callback = function(result), result = { prodData, error,userErrorMsg }
      */
-    r_Prods.findProdByCRUniInput= function (dbUC, value, callback) {//IT'S maked for get prod data from mobile invent
+    r_Prods.findProdByCRUniInput= function (dbUC, value, callback) {//IT'S used for get prod data from mobile invent
         var conditions={}/*valule like UniInputMask*/;
         conditions[value+" like UniInputMask"]=null;
         r_CRUniInput.getDataItem(dbUC,{fields:["UniInputAction"], conditions:conditions},
@@ -139,19 +157,18 @@ module.exports.init= function(app){
                 var uniInputAction=result.item["UniInputAction"], findProdConditions={};
                 if(uniInputAction==1/*barcode*/)findProdConditions["Barcode="]=value;
                 else/*result.item==2 ProdID*/findProdConditions["r_Prods.ProdID="]=value;
-                r_Prods.getDataItemForTable(dbUC,{tableColumns:prodsTableColumns, conditions:findProdConditions},
-                    function(result){                                                                   console.log('r_Prods.findProdByCRUniInput result',result);
-                        if(!result||!result.item){
-                            var error="Cannot get r_Prods prod data by "+(uniInputAction==1)?"Barcode=":"r_Prods.ProdID="+value+"!",
-                                errMsg="Не удалось найти товар по значению "+value+"!";
-                            if(result&&result.error) {
-                                error+="<br>"+result.error;errMsg+="<br>"+result.error;
-                            }                       console.log('r_Prods.findProdByCRUniInput result',{error:result.error,userErrorMsg:errMsg});
-                            callback({error:error,userErrorMsg:errMsg});
-                            return;
+                r_Prods.findProdByCondition(dbUC,findProdConditions,function(resultFindProd){
+                    if(!resultFindProd||!resultFindProd.prodData){
+                        var error="Cannot find r_Prods prod data by "+(uniInputAction==1)?"Barcode=":"r_Prods.ProdID="+value+"!",
+                            errMsg="Не удалось найти товар по значению "+value+"!";
+                        if(resultFindProd&&resultFindProd.error) {
+                            error+="<br>"+resultFindProd.error;errMsg+="<br>"+resultFindProd.error;
                         }
-                        callback({prodData:result.item});
-                    });
+                        callback({error:error,userErrorMsg:errMsg});
+                        return;
+                    }
+                    callback({prodData:resultFindProd.prodData});
+                });
             });
     };
 
@@ -532,7 +549,7 @@ module.exports.init= function(app){
         var qty =prodPPData["Qty"];
         if(qty===undefined)qty=1;
         var insProdMQData={"ProdID":prodPPData["ProdID"],"UM":prodPPData["UM"],"Qty":qty,
-            "Weight":0.000,"Notes":null,"Barcode":prodPPData["Barcode"],"ProdBarCode":null,"PLID":0};
+            "Weight":0.000,"Notes":null,"Barcode":prodPPData["Barcode"],"ProdBarcode":null,"PLID":0};
         for(var fieldName in insProdMQData)
             if(prodPPData[fieldName]!==undefined) insProdMQData[fieldName]=prodPPData[fieldName];
         r_ProdMQ.insDataItem(connection,{insData:insProdMQData},
