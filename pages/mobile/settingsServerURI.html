@@ -1,0 +1,54 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page" id="settings-serverURI-view">
+    <div class="navbar">
+        <div class="navbar-inner sliding">
+            <div class="left">
+                <a href="#" class="link back">
+                    <i class="icon icon-back"></i>
+                    <span class="ios-only">Назад</span>
+                </a>
+            </div>
+            <div class="title">Сервер</div>
+        </div>
+    </div>
+    <div class="page-content">
+        <div class="list no-hairlines-md">
+            <ul>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Адрес сервера</div>
+                        <div class="item-input-wrap">
+                            <input id="settings-serverURI-input" type="text" placeholder="Адрес сервера">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div class="row">
+                <div class="col" style="width:0px"></div>
+                <button id="settings-serverURI-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
+                <div class="col" style="width:0px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        methods:{
+            buttonStoreClick:function(){
+                let srvURI=$$("#settings-serverURI-input").val();
+                if (typeof(Storage)!=="undefined"&&srvURI&&srvURI.toString().trim()!="") {
+                    localStorage.setItem("settings-serverURI",srvURI);
+                } else {// Sorry! No Web Storage support..
+                }
+                this.$app.data['serverURI']=srvURI;
+            }
+        },
+        on: {
+            pageAfterIn: function(e, page) {
+                $$("#settings-serverURI-input").val(this.$app.data['serverURI']);
+            }
+        }
+    }
+</script>

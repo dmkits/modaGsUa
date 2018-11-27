@@ -23,6 +23,19 @@ module.exports= function(app) {
             loginMsg: loginMsg
         });
     };
+    var renderIsMobile= function (req,res,next){
+        if(req.originalUrl.indexOf("/mobileInvent")==0){ next(); return true; }
+        var userAgent=req.headers["user-agent"];
+        if(!userAgent) return false;
+        else if(userAgent.indexOf("Android")>=0||userAgent.indexOf("Mobile")>=0) {
+            if(isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)){
+                next(); return true;
+            }
+            res.redirect('/mobileInvent');
+            return true;
+        }
+        return false;
+    };
     var renderToDbFailed= function (res,msg){
         var appConfig=getAppConfig();
         res.render(path.join(__dirname, "../pages/dbFailed.ejs"), {
@@ -77,8 +90,7 @@ module.exports= function(app) {
     app.use(function (req, res, next) {                                                         log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
         res.header("Access-Control-Allow-Headers","Content-Type,Content-Length, Accept, X-Requested-With, uuid");
         if(req.originalUrl.indexOf("/login")==0){
-            next();
-            return;
+            next(); return;
         }                                                                                       //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
         var uuid=('uuid' in req.cookies)?req.cookies.uuid:req.headers['uuid'];
         if(uuid===undefined||uuid===null){
@@ -89,6 +101,7 @@ module.exports= function(app) {
                 });
                 return;
             }
+            if(renderIsMobile(req,res,next))return;
             renderToLogin(res,"");
             return;
         }
@@ -117,6 +130,7 @@ module.exports= function(app) {
                 res.redirect('/sysadmin');
                 return;
             }
+            if(renderIsMobile(req,res,next))return;
             renderToDbFailed(res,msg);
             return;
         }
@@ -128,6 +142,7 @@ module.exports= function(app) {
                 });
                 return;
             }
+            if(renderIsMobile(req,res,next))return;
             renderToLogin(res,"<div>Время сессии истекло.<br> Необходима авторизация.</div>");
             return;
         }
@@ -153,6 +168,7 @@ module.exports= function(app) {
                     });
                     return;
                 }
+                if(renderIsMobile(req,res,next))return;
                 renderToDbFailed(res,errMsg);
                 return;
             }

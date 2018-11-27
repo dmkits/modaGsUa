@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+    -->
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline' gap: https://ssl.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">-->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:">
+    <meta charset=utf-8>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
+    <!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2196f3">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <link rel="stylesheet" type="text/css" href="/cssm/mobileIndex.css">
+    <link rel="stylesheet" href="/jslib/framework7/css/framework7.min.css">
+    <link rel="stylesheet" href="/cssm/mobileIcons.css">
+    <link rel="stylesheet" href="/cssm/mobileApp.css">
+    <title>Mobile Inventory</title>
+    <link rel="shortcut icon" href="/img/logo red-ico-32.jpg">
+</head>
+<body>
+<div id="app">
+    <div class="panel panel-left panel-cover" style="">
+        <div class="page">
+            <div class="page-content">
+                <div class="block-title">Настройки</div>
+                <div class="list links-list">
+                    <ul>
+                        <!--<li>-->
+                            <!--<a href="/settingsServerURI/" class="panel-close">Сервер</a>-->
+                        <!--</li>-->
+                        <li>
+                            <a href="/mobileInvent/home/" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>
+                        </li>
+                        <li>
+                            <a href="/mobileInvent/settingsInventory/" class="panel-close">Инвентаризации</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="view view-main">
+        <div class="page" data-name="home">
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only panel-open" data-panel="left">
+                            <i class="icon f7-icons">menu</i>
+                        </a>
+                    </div>
+                    <div class="title sliding">Мобильная инвентаризация</div>
+                </div>
+            </div>
+            <div class="page-content login-screen-content" id="mobInv-login-screen">
+                <div class="block main-logo">
+                </div>
+                <div class="login-screen-title">Авторизация</div>
+                <div class="list no-hairlines-md">
+                    <ul>
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-label">Имя пользователя</div>
+                                <div class="item-input-wrap">
+                                    <input id="login-username" type="text" placeholder="Имя пользователя">
+                                    <span class="input-clear-button"></span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-label">Пароль</div>
+                                <div class="item-input-wrap">
+                                    <input id="login-password" type="password" placeholder="Пароль">
+                                    <span class="input-clear-button"></span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="block">
+                    <div class="row">
+                        <div class="col" style="width:0px"></div>
+                        <button id="login-button" class="col button button-fill button-round" style="width:200px">ВОЙТИ</button>
+                        <div class="col" style="width:0px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/jslib/framework7/js/framework7.min.js"></script>
+<script>
+    let $$=Dom7, app7  = new Framework7({// Framework7 App main instance
+            root: '#app', // app7 root element
+            theme: 'auto', // Automatic theme detection
+            routes: [//-- App routes --
+                { path: '/mobileInvent/home/', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true}, },
+                // { path: '/settingsServerURI/', componentUrl: './settingsServerURI.html'},//,options:{reloadAll:true},
+                { path: '/mobileInvent/settingsInventory/', componentUrl: './mobileInvent/settingsInventory'},//,options:{reloadAll:true},
+                { path: '/mobileInvent/viewListInvents/', componentUrl: '/mobileInvent/viewListInvents'},
+                { path: '/mobileInvent/viewInvent/:inventChID', componentUrl: '/mobileInvent/viewInvent'},//,options:{reloadAll:true},
+                { path: '(.*)', url: './pages/404.html' }// Default route (404 page). MUST BE THE LAST
+            ],
+            workingDoc:null
+        }),
+        mainView = app7.views.create('.view-main', {url: '/',domCache:true, stackPages:true });//Init/Create main view
+
+    app7.data['inventoryListDocCount']=50;
+    if (typeof(Storage)!=="undefined") {
+        let username=localStorage.getItem("login-username");
+        if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
+        var inventoryListDocCount=localStorage.getItem("settings-inventory-listDocCount");
+        if(inventoryListDocCount&&!isNaN(parseInt(inventoryListDocCount)))app7.data['inventoryListDocCount']=parseInt(inventoryListDocCount);
+    } else {// Sorry! No Web Storage support..
+    }
+
+    $$('.view-main').on('page:afterin', '.page[data-name="home"]', function (e) {                       //console.log('page:init .page[data-name="home"]');
+        app7.data.viewListInvents=null; app7.data.viewInvent=null;
+        $$('#mobInv-login-screen #login-password').val("");
+        let username="";
+        if (typeof(Storage)!=="undefined") {
+            username=localStorage.getItem("login-username");
+            if(username)username=username.toString().trim();
+        } else {// Sorry! No Web Storage support..
+        }
+        $$('#mobInv-login-screen #login-username').val(username).focus();
+    });
+
+    app7.request.setup({ headers: { 'x-requested-with': 'application/json; charset=utf-8' } });
+    /**
+     * params = { url, conditions, timeout, showRequestErrorDialog, errorDialogMsg }
+     * default: params.showRequestErrorDialog = true
+     * resultCallback = function(result, error)
+     *  result = undefined if request failed
+     *  result = null if result is empty or result error (parameter error exists)
+     *  result = response result
+     */
+    app7.srvRequestJSON=function(params,callback){
+        if(!params)return;
+        let conditions={};
+        if(params.conditions&&typeof(params.conditions)=="string") conditions=params.conditions.replace('=','~');
+        else if(params.conditions)
+            for(var cName in params.conditions) conditions[cName.replace('=','~')]=params.conditions[cName];
+        this.request.json(params.url,conditions,
+            function(data){                                                                             console.log('app7.srvRequestJSON',params.url,'success data=',data);
+                if(data==undefined||data==null||data.error!==undefined){
+                    if(params.showRequestErrorDialog==false){
+                        callback(null,(data)?data.error:null);
+                        return;
+                    }
+                    let msg=(!params.errorDialogMsg)?'Не удалось получить данные с сервера!':params.errorDialogMsg;
+                    if(data&&data.error){
+                        if(data.userErrorMsg)msg+='<br>'+data.userErrorMsg;else msg+="<br>"+data.error;
+                    }
+                    if(app7.srvRequestJSONDialogErr){
+                        app7.srvRequestJSONDialogErr.open(); return;
+                    }
+                    app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
+                        app7.srvRequestJSONDialogErr=null;
+                        callback(null,(data)?data.error:null);
+                    });
+                    return;
+                }
+                callback(data);
+            },function(err,e){                                                                          console.log('app7.srvRequestJSON',params.url,'error err=',err);
+                if(params.showRequestErrorDialog==false){
+                    callback(undefined,err);
+                    return;
+                }
+                let state=err.status,
+                    msg=(!params.errorDialogMsg)?'Не удалось получить данные с сервера!':params.errorDialogMsg;
+                if(state===0){
+                    msg+="<br>Неправильный или недействительный адрес сервера"+
+                            "<br>или доступ по указанному адресу сервера запрещен.";
+                } else
+                    msg+="<br>Не удалось установить связь с сервером по указанному адресу.";
+                if(app7.srvRequestJSONDialogErr){
+                    app7.srvRequestJSONDialogErr.open(); return;
+                }
+                app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
+                    app7.srvRequestJSONDialogErr=null;
+                    callback(undefined,err);
+                });
+            });
+    };
+    /**
+     * params = { url, data, timeout, showRequestErrorDialog, userErrorMsg }
+     * default: params.showRequestErrorDialog = true
+     * resultCallback = function(result, errorMessage)
+     *  result = undefined if request failed
+     *  result = response result if request success
+     *  errorMessage exists if request failed or response result contains error
+     */
+    app7.srvPostRequestJSON=function(params,callback){
+        if(!params)return;
+        this.request.postJSON(params.url,params.data,
+            function(result){                                                                           console.log('app7.srvPostRequestJSON',params.url,'success data=',result);
+                if(result==undefined||result==null||result.error!==undefined){
+                    let errMsg=(!params.userErrorMsg)?'Не удалось получить результат операции с сервера!':params.userErrorMsg;
+                    if(result&&result.error){
+                        if(result.userErrorMsg)errMsg+='<br>'+result.userErrorMsg;else errMsg+="<br>"+result.error;
+                    }
+                    if(params.showRequestErrorDialog==false){
+                        callback(result,errMsg); return;
+                    }
+                    if(app7.srvRequestJSONDialogErr){
+                        app7.srvRequestJSONDialogErr.open(); return;
+                    }
+                    app7.srvRequestJSONDialogErr=app7.dialog.alert(errMsg,"Внимание",function(){
+                        app7.srvRequestJSONDialogErr=null;
+                        callback(null,errMsg);
+                    });
+                    return;
+                }
+                callback(result);
+            },function(err,e){                                                                          console.log('app7.srvPostRequestJSON',params.url,'error err=',err);
+                let state=err.status,
+                    errMsg=(!params.userErrorMsg)?'Не удалось получить результат операции с сервера!':params.userErrorMsg;
+                if(state===0){
+                    errMsg+="<br>Неправильный или недействительный адрес сервера"+
+                        "<br>или доступ по указанному адресу сервера запрещен.";
+                } else
+                    errMsg+="<br>Не удалось установить связь с сервером по указанному адресу.";
+                if(params.showRequestErrorDialog==false){
+                    callback(undefined,errMsg); return;
+                }
+                if(app7.srvRequestJSONDialogErr){
+                    app7.srvRequestJSONDialogErr.open(); return;
+                }
+                app7.srvRequestJSONDialogErr=app7.dialog.alert(errMsg,"Внимание",function(){
+                    app7.srvRequestJSONDialogErr=null;
+                    callback(undefined,errMsg);
+                });
+            });
+    };
+
+    app7.loginProcess=function(){
+        let username = $$('#mobInv-login-screen #login-username').val(),
+            password = $$('#mobInv-login-screen #login-password').val();
+        this.srvPostRequestJSON({url:'/login', data:{user:username,pswrd:password},userErrorMsg:"Вход на сервер не удался!"},
+            function(result,errmsg){
+                $$('#mobInv-login-screen #login-password').val("");
+                if(!result||!result.uuid){
+                    $$('#mobInv-login-screen #login-password').focus(); return;
+                }
+                $$('#mobInv-login-screen #login-username').val("");
+                app7.data.uuid=result.uuid;
+                app7.request.setup({ headers: {'uuid':result.uuid} });
+                mainView.router.navigate('/mobileInvent/viewListInvents/');
+                if (typeof(Storage)!=="undefined") {
+                    localStorage.setItem("login-username",username);
+                } else {// Sorry! No Web Storage support..
+                }
+            });
+    };
+    $$('#mobInv-login-screen #login-button').on('click', function () {
+        app7.loginProcess();
+    });
+    $$('#mobInv-login-screen #login-password').on('keypress', function (e) {
+        if(e.keyCode==13||e.key=='Enter')app7.loginProcess();
+    });
+</script>
+</body>
+</html>

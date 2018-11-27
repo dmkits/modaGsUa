@@ -15,9 +15,18 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/ven";
-module.exports.modulePagePath = "mobile/ven.html";
+module.exports.modulePageURL = "/mobileInvent";
+module.exports.modulePagePath = "mobile/index.html";
 module.exports.init = function(app){
+    app.get("/mobileInvent/settingsInventory", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/settingsInventory.html');
+    });
+    app.get("/mobileInvent/viewListInvents", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/viewListInvents.html');
+    });
+    app.get("/mobileInvent/viewInvent", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/viewInvent.html');
+    });
     var tVensListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Ven"},
         {data: "DocID", name: "Номер", width: 85, type: "text", align:"right", dataSource:"t_Ven"},
@@ -48,13 +57,15 @@ module.exports.init = function(app){
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Ven.StateCode" }
     ];
     app.get("/mobile/ven/getDataForVensList", function(req, res){
-        var conditions={};
-        for(var condItem in req.query) conditions["t_Ven."+condItem]=req.query[condItem];
+        var conditions={}, top="";
+        for(var condItem in req.query) {
+            if(condItem=="top")top="top "+req.query[condItem]; else conditions["t_Ven."+condItem]=req.query[condItem];
+        }
         r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
             function(result){
                 var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;
                 t_Ven.getDataItemsForTable(req.dbUC,{tableColumns:tVensListTableColumns, conditions:conditions,
-                        order:"DocDate desc, DocID desc", top:"top 50"},
+                        order:"DocDate desc, DocID desc", top:top},
                     function(result){
                         error+=(result.error)?result.error:'';
                         var outData={listStocks:listStocks,listInventsByStockID:(result)?result.items:null};
@@ -191,7 +202,7 @@ module.exports.init = function(app){
         });
     };
     app.post("/mobile/ven/storeProdDataByCRUniInput", function(req, res){
-        var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];
+        var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];  console.log('req.body',req.body);
         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
             if(resultFindProd.error){
                 res.send(resultFindProd);
@@ -203,7 +214,7 @@ module.exports.init = function(app){
         });
     });
     app.post("/mobile/ven/storeExistsPosProdData", function(req, res){
-        var storingData=req.body, parentChID=storingData["parentChID"],venAData={TSrcPosID:storingData["TSrcPosID"]};
+        var storingData=req.body, parentChID=storingData["parentChID"],venAData={TSrcPosID:storingData["TSrcPosID"]};   console.log('req.body',req.body);
         t_VenA.storeVenAProdData(req.dbUC,parentChID,venAData,storingData["TNewQty"],function (result){
             res.send(result);
         });
