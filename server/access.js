@@ -174,6 +174,7 @@ module.exports= function(app) {
             }
             req.dbUserParams=dbUserParameters;
             req.dbUserName=dbUserParameters.dbUserName;                                             log.info('ACCESS CONTROLLER: dbUserName=',req.dbUserName,'dbUserParams=',req.dbUserParams);
+            if(renderIsMobile(req,res,next))return;
             next();
         });
     });
