@@ -95,10 +95,14 @@ module.exports.init = function(app){
     var tProdsRemsTableColumns=[
         {data: "OurID", name: "OurID", width: 50, type: "text", visible:false, dataSource:"t_Rem"},
         {data: "StockID", name: "StockID", width: 50, type: "text", visible:false, dataSource:"t_Rem"},
+        {data: "PLID", name: "PLID", width: 50, type: "text", visible:false,
+            dataSource:"r_Stocks", sourceField:"PLID", linkCondition:"r_Stocks.StockID=t_Rem.StockID"},
         {data: "ProdChID", name: "ProdChID", width: 50, type: "text", visible:false,
             dataSource:"r_Prods", sourceField:"ChID", linkCondition:"r_Prods.ProdID=t_Rem.ProdID"},
-        // {data: "PCatName", name: "Бренд товара", width: 140, type: "text", visible:false,
-        //     dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
+        {data: "Article1", name: "Артикул1 товара", width: 200, type: "text",
+            dataSource:"r_Prods", sourceField:"Article1"},
+        {data: "PCatName", name: "Бренд товара", width: 140, type: "text", visible:true,
+            dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
         // {data: "PGrName", name: "Коллекция товара", width: 95, type: "text", visible:false,
         //     dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"},
         // {data: "PGrName2", name: "Тип товара", width: 140, type: "text", visible:false,
@@ -113,15 +117,15 @@ module.exports.init = function(app){
         //{data: "SizeName", name: "Размер товара", width: 70, type: "text",
         //    dataSource:"ir_ProdSizes", dataFunction:"CASE When ir_ProdSizes.ChID>100000001 Then ir_ProdSizes.SizeName Else '' END",
         //    linkCondition:"ir_ProdSizes.SizeName=r_Prods.SizeName"},
-        {data: "Article1", name: "Артикул1 товара", width: 200, type: "text",
-            dataSource:"r_Prods", sourceField:"Article1"},
         //{data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_Rem", visible:false},
         {data: "ProdID", name: "Код товара", width: 50, type: "text", align:"center", visible:true, dataSource:"t_Rem"},
         {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
             dataSource:"r_Prods", sourceField:"ProdName" },
-        {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"r_Prods", sourceField:"UM"},
+        {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", visible:false, dataSource:"r_Prods", sourceField:"UM"},
         {data: "TQty", name: "Кол-во", width: 50, type: "numeric",
-            dataFunction:{function:"sumIsNull", source:"t_Rem", sourceField:"Qty"}}
+            dataFunction:{function:"sumIsNull", source:"t_Rem", sourceField:"Qty"}},
+        {data: "PriceMC", name: "Цена", width: 65, type: "numeric2", visible:true,
+            dataSource:"r_ProdMP", sourceField:"PriceMC", linkCondition:"r_ProdMP.ProdID=t_Rem.ProdID and r_ProdMP.PLID=r_Stocks.PLID"}
     ];
     app.get("/reports/prodsRems/getProductsRems", function(req, res){
         var conditions={};

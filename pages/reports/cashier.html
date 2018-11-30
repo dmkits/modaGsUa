@@ -6,7 +6,7 @@
 </head>
 <body>
 <div id="reportsCashier_PageContainer" style="width:100%;height:100%;">
-    <div id="reportsCashier_ContentPaneLeft" style="width:165px;height:100%; margin:0;padding:0;">
+    <div id="reportsCashier_ContentPaneLeft" style="width:167px;height:100%; margin:0;padding:0;">
         <table>
             <tr><th>Отчеты</th></tr>
             <tr><td>
@@ -54,7 +54,7 @@
                     if (!btnProdsRems.report){
                         btnProdsRems.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsRems",
                             TDocSimpleTable, {titleText:"Текущие остатки товаров", dataURL:"/reports/prodsRems/getProductsRems",
-                                buttonPrint:true, buttonExportToExcel:false})
+                                buttonPrint:true, buttonExportToExcel:true})
                             .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
                                 loadDropDownURL:"/reports/cashier/getDirStocksForSelect",
                                 contentTableCondition:"StockID="/*, width:300*/})
@@ -62,7 +62,7 @@
                             .addCheckBtnCondition("Все",{width:85})
                             .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
                             .addTotalCountNumberBox("ИТОГО строк:", 140)
-                            .addTotalSumNumberTextBox("ИТОГО остаток:", 565, "TQty", {style:"font-weight:bold;"})
+                            .addTotalSumNumberTextBox("ИТОГО остаток:", 650, "TQty", {style:"font-weight:bold;"})
                             .startUp();
                     }
                     contentPaneDetailContainer.selectChild(btnProdsRems.report);
