@@ -21,11 +21,15 @@ module.exports.init = function(app){
             res.send({error:"Failed get routes! Reason: no database employee role!"});return;
         }
         if(req.dbEmpRole=="sysadmin"){
-            var modules=loadedModules(), saRoutes=[];
+            var modules=loadedModules(), saRoutes=[], lastRoute;
             for (var moduleName in modules) {
                 var moduleRoutes=modules[moduleName].routes;
                 if(!moduleRoutes)continue;
-                for (var j = 0; j < moduleRoutes.length; j++) saRoutes.unshift(new function(){ return moduleRoutes[j]; });
+                for (var j = 0; j < moduleRoutes.length; j++){
+                    var route=new function(){ return moduleRoutes[j]; };
+                    if(route&&route.path=="(.*)") lastRoute=route; else saRoutes.push(route);
+                }
+                if(lastRoute)saRoutes.push(lastRoute);
             }
             res.send(saRoutes);                                                                                 console.log("saRoutes",saRoutes);
             return;
