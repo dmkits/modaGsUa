@@ -24,26 +24,45 @@ module.exports= function(app) {
         });
     };
     var renderIsMobile= function (req,res,next){
-        if(req.originalUrl.indexOf("/mobileInvent")==0){ next(); return true; }
+        if(req.originalUrl.indexOf("/mobile")==0){ next(); return true; }
         var userAgent=req.headers["user-agent"];
         if(!userAgent) return false;
         else if(userAgent.indexOf("Android")>=0||userAgent.indexOf("Mobile")>=0) {
             if(isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)){
                 next(); return true;
             }
-            res.redirect('/mobileInvent');
+            res.redirect('/mobile');
             return true;
         }
         return false;
     };
-    var renderToDbFailed= function (res,msg){
+    var renderToAccessFailed= function (req,res,msg){
+        if(isReqInternalPage(req.method,req.headers)){
+            res.render(path.join(__dirname, "../pages/accessFailedInternal.ejs"), {
+                errorReason: msg
+            });
+            return;
+        }
         var appConfig=getAppConfig();
-        res.render(path.join(__dirname, "../pages/dbFailed.ejs"), {
+        res.render(path.join(__dirname, "../pages/accessFailed.ejs"), {
             title: (appConfig&&appConfig.title)?appConfig.title:"",
             bigImg: "imgs/girls_big.jpg",
             icon: "icons/profits32x32.jpg",
             errorReason: msg
         });
+    };
+    /**
+     *
+     * failResult = { error, userErrorMsg, pageMsg}
+     */
+    var accessFail= function (req,res,next,failResult) {
+        if(!failResult)failResult={error:"Access FAIL!", userErrorMsg:"Доступ не удался!", pageMsg:"Доступ не удался!"};
+        if(isReqJSON(req.method,req.headers)){
+            res.send({error:failResult.error,userErrorMsg:failResult.userErrorMsg}); return;
+        }
+        if(renderIsMobile(req,res,next))return;
+        if(isReqInternalPage(req.method,req.headers))renderToAccessFailed(req,res,failResult.pageMsg);
+        renderToLogin(res,failResult.pageMsg);
     };
     var readSysadminsUUIDList=function (){
         try{
@@ -94,15 +113,10 @@ module.exports= function(app) {
         }                                                                                       //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
         var uuid=('uuid' in req.cookies)?req.cookies.uuid:req.headers['uuid'];
         if(uuid===undefined||uuid===null){
-            if(isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)){
-                res.send({
-                    error: "Failed to get data! Reason: user is not authorized!",
-                    userErrorMsg: "Не удалось получить данные. Пользователь не авторизирован."
-                });
-                return;
-            }
-            if(renderIsMobile(req,res,next))return;
-            renderToLogin(res,"");
+            accessFail(req,res,next,{
+                error: "Failed to get data! Reason: user is not authorized!",
+                userErrorMsg: "Не удалось получить данные. Пользователь не авторизирован."
+            });
             return;
         }
         var userConnectionData=database.getUserConnectionData(uuid);
@@ -119,7 +133,7 @@ module.exports= function(app) {
         }
         if(database.getSystemConnectionErr()){
             var msg="Нет системного подключения к базе данных! <br>Обратитесь к системному администратору.";
-            if (isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)) {
+            if (isReqJSON(req.method,req.headers)) {
                 res.send({
                     error: "Failed to get data! Reason: failed get system connection to database!",
                     userErrorMsg: msg
@@ -127,41 +141,36 @@ module.exports= function(app) {
                 return;
             }
             if(sysadminName&&req.originalUrl!=="/sysadmin") {
-                res.redirect('/sysadmin');
-                return;
+                res.redirect('/sysadmin');return;
             }
             if(renderIsMobile(req,res,next))return;
-            renderToDbFailed(res,msg);
+            renderToAccessFailed(req,res,msg);
             return;
         }
         if(!userConnectionData||!userConnectionData.connection){
-            if (isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)) {
-                res.send({
-                    error: "Failed to get data! Reason:the session has expired!",
-                    userErrorMsg: "Не удалось получить данные. Время сессии истекло. Необходима авторизация."
-                });
-                return;
-            }
-            if(renderIsMobile(req,res,next))return;
-            renderToLogin(res,"<div>Время сессии истекло.<br> Необходима авторизация.</div>");
+            accessFail(req,res,next,{
+                error: "Failed to get data! Reason: user is not authorized!",
+                userErrorMsg: "Не удалось получить данные. Пользователь не авторизирован.",
+                pageMsg: "<div>Время сессии истекло.<br> Необходима авторизация.</div>"
+            });
             return;
         }
         if(!sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
             var errMsg="Невозможно получить данные! Пользователь не авторизироват как сисадмин!";
-            if (isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)) {
+            if (isReqJSON(req.method,req.headers)) {
                 res.send({
                     error: "Failed to get data! Reason: login user is not sysadmin!",
                     userErrorMsg: errMsg
                 });
                 return;
             }
-            renderToDbFailed(res,errMsg);
+            renderToAccessFailed(req,res,errMsg);
             return;
         }
         req.dbUC = userConnectionData.connection;
         getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
             if(errMsg){
-                if (isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)) {
+                if (isReqJSON(req.method,req.headers)) {
                     res.send({
                         error: "Failed to get data! Reason: failed to get login user data from database!",
                         userErrorMsg: errMsg
@@ -169,7 +178,7 @@ module.exports= function(app) {
                     return;
                 }
                 if(renderIsMobile(req,res,next))return;
-                renderToDbFailed(res,errMsg);
+                renderToAccessFailed(req,res,errMsg);
                 return;
             }
             req.dbUserParams=dbUserParameters;

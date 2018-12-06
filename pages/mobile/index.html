@@ -28,28 +28,36 @@
 </head>
 <body>
 <div id="app">
-    <div class="panel panel-left panel-cover" style="">
-        <div class="page">
-            <div class="page-content">
-                <div class="block-title">Настройки</div>
-                <div class="list links-list">
-                    <ul>
-                        <!--<li>-->
-                            <!--<a href="/settingsServerURI/" class="panel-close">Сервер</a>-->
-                        <!--</li>-->
-                        <li>
-                            <a href="/mobileInvent/home/" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>
-                        </li>
-                        <li>
-                            <a href="/mobileInvent/settingsInventory/" class="panel-close">Инвентаризации</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="view view-main">
         <div class="page" data-name="home">
+            <div class="panel panel-left panel-cover" data-panel="left1" style="">
+                <div class="page">
+                    <div class="page-content">
+                        <div class="block-title">Страницы</div>
+                        <div class="list links-list">
+                            <ul>
+                                <li>
+                                    <a href="/mobile/home/" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>
+                                </li>
+                                <li>
+                                    <a href="/mobile/home/" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="block-title">Настройки</div>
+                        <div class="list links-list">
+                            <ul>
+                                <!--<li>-->
+                                <!--<a href="/settingsServerURI/" class="panel-close">Сервер</a>-->
+                                <!--</li>-->
+                                <li>
+                                    <a href="/mobile/Invent/settingsInventory/" class="panel-close">Инвентаризации</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="navbar">
                 <div class="navbar-inner">
                     <div class="left">
@@ -99,16 +107,16 @@
 </div>
 <script src="/jslib/framework7/js/framework7.min.js"></script>
 <script>
-    let $$=Dom7, app7  = new Framework7({// Framework7 App main instance
+    var $$=Dom7, app7  = new Framework7({// Framework7 App main instance
             root: '#app', // app7 root element
             theme: 'auto', // Automatic theme detection
             routes: [//-- App routes --
-                { path: '/mobileInvent/home/', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true}, },
-                // { path: '/settingsServerURI/', componentUrl: './settingsServerURI.html'},//,options:{reloadAll:true},
-                { path: '/mobileInvent/settingsInventory/', componentUrl: './mobileInvent/settingsInventory'},//,options:{reloadAll:true},
-                { path: '/mobileInvent/viewListInvents/', componentUrl: '/mobileInvent/viewListInvents'},
-                { path: '/mobileInvent/viewInvent/:inventChID', componentUrl: '/mobileInvent/viewInvent'},//,options:{reloadAll:true},
-                { path: '(.*)', url: './pages/404.html' }// Default route (404 page). MUST BE THE LAST
+                { path: '/mobile/home/', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
+                // { path: '/settingsServerURI/', componentUrl: './settingsServerURI.html'},
+                { path: '/mobile/Invent/settingsInventory/', componentUrl: '/mobile/Invent/settingsInventory', options:{ignoreCache:true}},
+                { path: '/mobile/Invent/viewListInvents/', componentUrl: '/mobile/Invent/viewListInvents', options:{clearPreviousHistory:true,ignoreCache:true}},
+                { path: '/mobile/Invent/viewInvent/:inventChID', componentUrl: '/mobile/Invent/viewInvent', options:{ignoreCache:true}},
+                { path: '(.*)', url: './mobile/error.html' }// Default route (404 page). MUST BE THE LAST
             ],
             workingDoc:null
         }),
@@ -116,7 +124,7 @@
 
     app7.data['inventoryListDocCount']=50;
     if (typeof(Storage)!=="undefined") {
-        let username=localStorage.getItem("login-username");
+        var username=localStorage.getItem("login-username");
         if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
         var inventoryListDocCount=localStorage.getItem("settings-inventory-listDocCount");
         if(inventoryListDocCount&&!isNaN(parseInt(inventoryListDocCount)))app7.data['inventoryListDocCount']=parseInt(inventoryListDocCount);
@@ -126,7 +134,7 @@
     $$('.view-main').on('page:afterin', '.page[data-name="home"]', function (e) {                       //console.log('page:init .page[data-name="home"]');
         app7.data.viewListInvents=null; app7.data.viewInvent=null;
         $$('#mobInv-login-screen #login-password').val("");
-        let username="";
+        var username="";
         if (typeof(Storage)!=="undefined") {
             username=localStorage.getItem("login-username");
             if(username)username=username.toString().trim();
@@ -135,52 +143,66 @@
         $$('#mobInv-login-screen #login-username').val(username).focus();
     });
 
-    app7.request.setup({ headers: { 'x-requested-with': 'application/json; charset=utf-8' } });
+    //app7.request.setup({ headers: { 'x-requested-with': 'application/json; charset=utf-8' } });
     /**
-     * params = { url, conditions, timeout, showRequestErrorDialog, errorDialogMsg }
-     * default: params.showRequestErrorDialog = true
-     * resultCallback = function(result, error)
+     * params = { method, url, data/conditions, showRequestErrorDialog, errorDialogMsg }
+     * default: params.method="GET", params.showRequestErrorDialog = true
+     * resultCallback = function(result, errorMessage)
      *  result = undefined if request failed
-     *  result = null if result is empty or result error (parameter error exists)
-     *  result = response result
+     *  result = null if response result is empty or response result error (parameter errorMessage exists)
+     *  result = JSON response result if request success and response result is JSON
+     *  errorMessage exists if request failed or response result contains error
      */
     app7.srvRequestJSON=function(params,callback){
         if(!params)return;
-        let conditions={};
-        if(params.conditions&&typeof(params.conditions)=="string") conditions=params.conditions.replace('=','~');
+        if(!params.method)params.method="GET";
+        var requestData={};
+        if(params.data)requestData=params.data;
+        else if(params.conditions&&typeof(params.conditions)=="string") requestData=params.conditions.replace('=','~');
         else if(params.conditions)
-            for(var cName in params.conditions) conditions[cName.replace('=','~')]=params.conditions[cName];
-        this.request.json(params.url,conditions,
-            function(data){                                                                             console.log('app7.srvRequestJSON',params.url,'success data=',data);
-                if(data==undefined||data==null||data.error!==undefined){
-                    if(params.showRequestErrorDialog==false){
-                        callback(null,(data)?data.error:null);
-                        return;
+            for(var cName in params.conditions) requestData[cName.replace('=','~')]=params.conditions[cName];
+        this.request({method:params.method,url:params.url,data:requestData,headers:{ 'x-requested-with': 'application/json; charset=utf-8' },
+            success:function(data){                                                                             //console.log('srvRequestJSON app7.request',params.url,'success data=',data);
+                var errMsg;
+                if(!params.errorDialogMsg)params.errorDialogMsg='Не удалось получить данные с сервера!';
+                if(data==undefined||data==null) {
+                    if (params.showRequestErrorDialog == false) {
+                        callback(null, null);return;
                     }
-                    let msg=(!params.errorDialogMsg)?'Не удалось получить данные с сервера!':params.errorDialogMsg;
-                    if(data&&data.error){
-                        if(data.userErrorMsg)msg+='<br>'+data.userErrorMsg;else msg+="<br>"+data.error;
-                    }
-                    if(app7.srvRequestJSONDialogErr){
-                        app7.srvRequestJSONDialogErr.open(); return;
-                    }
-                    app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
-                        app7.srvRequestJSONDialogErr=null;
-                        callback(null,(data)?data.error:null);
+                    errMsg=params.errorDialogMsg;
+                }
+                var jsonData;
+                try{
+                    jsonData=JSON.parse(data);
+                }catch (e) {
+                    errMsg=params.errorDialogMsg+'<br>Данные некорректные!';
+                }
+                if(jsonData&&jsonData.error){
+                    if(jsonData.userErrorMsg)errMsg=params.errorDialogMsg+"<br>"+jsonData.userErrorMsg;else errMsg=params.errorDialogMsg+"<br>"+jsonData.error;
+                }
+                if(errMsg&&params.showRequestErrorDialog==false){
+                    callback(null, errMsg);return;
+                }
+                if(errMsg&&app7.srvRequestJSONDialogErr){
+                    app7.srvRequestJSONDialogErr.open(); return;
+                }else if(errMsg) {
+                    app7.srvRequestJSONDialogErr = app7.dialog.alert(errMsg, "Внимание", function () {
+                        app7.srvRequestJSONDialogErr = null;
+                        callback(null, errMsg);
                     });
                     return;
-                }
-                callback(data);
-            },function(err,e){                                                                          console.log('app7.srvRequestJSON',params.url,'error err=',err);
-                if(params.showRequestErrorDialog==false){
-                    callback(undefined,err);
-                    return;
-                }
-                let state=err.status,
+                }                                                                                           //console.log('srvRequestJSON app7.request',params.url,'success jsonData=',jsonData);
+                callback(jsonData);
+            },
+            error:function(xhr, status){                                                                    //console.log('srvRequestJSON app7.request',params.url,'error err=',xhr);
+                var state=status,
                     msg=(!params.errorDialogMsg)?'Не удалось получить данные с сервера!':params.errorDialogMsg;
+                if(params.showRequestErrorDialog==false){
+                    callback(undefined,msg+"<br>Статус="+state);return;
+                }
                 if(state===0){
                     msg+="<br>Неправильный или недействительный адрес сервера"+
-                            "<br>или доступ по указанному адресу сервера запрещен.";
+                        "<br>или доступ по указанному адресу сервера запрещен.";
                 } else
                     msg+="<br>Не удалось установить связь с сервером по указанному адресу.";
                 if(app7.srvRequestJSONDialogErr){
@@ -188,65 +210,31 @@
                 }
                 app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
                     app7.srvRequestJSONDialogErr=null;
-                    callback(undefined,err);
+                    callback(undefined,msg);
                 });
-            });
+            }
+        });
     };
     /**
-     * params = { url, data, timeout, showRequestErrorDialog, userErrorMsg }
+     * params = { url, data, showRequestErrorDialog, userErrorMsg }
      * default: params.showRequestErrorDialog = true
      * resultCallback = function(result, errorMessage)
      *  result = undefined if request failed
-     *  result = response result if request success
+     *  result = null if response result is empty or response result error (parameter errorMessage exists)
+     *  result = JSON response result if request success and response result is JSON
      *  errorMessage exists if request failed or response result contains error
      */
     app7.srvPostRequestJSON=function(params,callback){
         if(!params)return;
-        this.request.postJSON(params.url,params.data,
-            function(result){                                                                           console.log('app7.srvPostRequestJSON',params.url,'success data=',result);
-                if(result==undefined||result==null||result.error!==undefined){
-                    let errMsg=(!params.userErrorMsg)?'Не удалось получить результат операции с сервера!':params.userErrorMsg;
-                    if(result&&result.error){
-                        if(result.userErrorMsg)errMsg+='<br>'+result.userErrorMsg;else errMsg+="<br>"+result.error;
-                    }
-                    if(params.showRequestErrorDialog==false){
-                        callback(result,errMsg); return;
-                    }
-                    if(app7.srvRequestJSONDialogErr){
-                        app7.srvRequestJSONDialogErr.open(); return;
-                    }
-                    app7.srvRequestJSONDialogErr=app7.dialog.alert(errMsg,"Внимание",function(){
-                        app7.srvRequestJSONDialogErr=null;
-                        callback(null,errMsg);
-                    });
-                    return;
-                }
-                callback(result);
-            },function(err,e){                                                                          console.log('app7.srvPostRequestJSON',params.url,'error err=',err);
-                let state=err.status,
-                    errMsg=(!params.userErrorMsg)?'Не удалось получить результат операции с сервера!':params.userErrorMsg;
-                if(state===0){
-                    errMsg+="<br>Неправильный или недействительный адрес сервера"+
-                        "<br>или доступ по указанному адресу сервера запрещен.";
-                } else
-                    errMsg+="<br>Не удалось установить связь с сервером по указанному адресу.";
-                if(params.showRequestErrorDialog==false){
-                    callback(undefined,errMsg); return;
-                }
-                if(app7.srvRequestJSONDialogErr){
-                    app7.srvRequestJSONDialogErr.open(); return;
-                }
-                app7.srvRequestJSONDialogErr=app7.dialog.alert(errMsg,"Внимание",function(){
-                    app7.srvRequestJSONDialogErr=null;
-                    callback(undefined,errMsg);
-                });
-            });
+        params.method="POST";
+        if(!params.userErrorMsg)params.userErrorMsg="Не удалось получить результат операции с сервера!";
+        this.srvRequestJSON(params,callback);
     };
 
     app7.loginProcess=function(){
-        let username = $$('#mobInv-login-screen #login-username').val(),
+        var username = $$('#mobInv-login-screen #login-username').val(),
             password = $$('#mobInv-login-screen #login-password').val();
-        this.srvPostRequestJSON({url:'/login', data:{user:username,pswrd:password},userErrorMsg:"Вход на сервер не удался!"},
+        this.srvPostRequestJSON({url:'/login', data:{user:username,pswrd:password},userErrorMsg:"Вход на сервер неудался!"},
             function(result,errmsg){
                 $$('#mobInv-login-screen #login-password').val("");
                 if(!result||!result.uuid){
@@ -255,7 +243,9 @@
                 $$('#mobInv-login-screen #login-username').val("");
                 app7.data.uuid=result.uuid;
                 app7.request.setup({ headers: {'uuid':result.uuid} });
-                mainView.router.navigate('/mobileInvent/viewListInvents/');
+
+                mainView.router.navigate('/mobile/Invent/viewListInvents/');
+
                 if (typeof(Storage)!=="undefined") {
                     localStorage.setItem("login-username",username);
                 } else {// Sorry! No Web Storage support..

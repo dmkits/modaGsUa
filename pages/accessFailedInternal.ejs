@@ -1,0 +1,23 @@
+<body>
+<div style=" color: black; text-align: center; background: rgba(255, 255, 255, .9); border: 1px solid black; margin:200px; padding:60px;">
+<div style="font-size:30px; font-weight: 300; ">
+    <%-errorReason%>
+</div>
+<div id="auth_as_sysadmin"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["dijit/form/Button", "dojo/domReady!"],function (Button) {
+        moment.locale("uk");
+        var authAsAdminBtn = new Button({
+            id: "auth_as_sysadmin",
+            label: "Войти как админ",
+            style:"padding-top: 40px"
+        }, "auth_as_sysadmin");
+        authAsAdminBtn.startup();
+        authAsAdminBtn.onClick = function () {
+            window.location.replace("/login");
+        };
+    });
+</script>
+</html>

@@ -188,7 +188,7 @@
                 }
                 let cInstance=this, parentChID=this.item.ChID;                                          console.log('viewInvent.html storeInputValueToInvent inputValue=',inputValue, this);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/ven/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
+                app7.srvPostRequestJSON({url:'/mobile/Invent/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
                         userErrorMsg:"Не удалось добавить товар в инвентаризацию!"},
                     function(result,errmsg){
                         app7.preloader.hide();// Hide Preloader
@@ -202,7 +202,7 @@
             storeExistsToInvent:function(tSrcPosID,prodID,tNewQty,callback){
                 let cInstance=this, parentChID=this.item.ChID;                                          console.log('viewInvent.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/ven/storeExistsPosProdData',
+                app7.srvPostRequestJSON({url:'/mobile/Invent/storeExistsPosProdData',
                         data:{parentChID:parentChID,TSrcPosID:tSrcPosID,TNewQty:tNewQty},
                         userErrorMsg:"Не удалось сохранить данные на сервере!",showRequestErrorDialog:false},
                     function(result,errmsg){
@@ -250,7 +250,7 @@
                 let cInstance=this, app=this.$app;                                                      console.log('viewInvent.html loadInventData inventChID=',inventChID, this);
                 cInstance.disableInputProdBarcode();
                 app.preloader.show();
-                app.srvRequestJSON({url:'/mobile/ven/getDataForVenATable',conditions:{'ParentChID=':inventChID},
+                app.srvRequestJSON({url:'/mobile/Invent/getDataForVenATable',conditions:{'ParentChID=':inventChID},
                         errorDialogMsg:"Не удалось получить список товаров инвентаризации с сервера!"},
                     function(result,error){
                         app.preloader.hide();

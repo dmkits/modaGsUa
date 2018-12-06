@@ -1,6 +1,28 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
 <div class="page page-with-subnavbar" id="viewListInvents">
+    <!--<div class="panel panel-left panel-cover"  data-panel="left2" style="">-->
+        <!--<div class="page">-->
+            <!--<div class="page-content">-->
+                <!--<div class="block-title">Страницы</div>-->
+                <!--<div class="list links-list">-->
+                    <!--<ul>-->
+                        <!--<li>-->
+                            <!--<a href="/mobileInvent/home/" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>-->
+                        <!--</li>-->
+                    <!--</ul>-->
+                <!--</div>-->
+                <!--<div class="block-title">Настройки</div>-->
+                <!--<div class="list links-list">-->
+                    <!--<ul>-->
+                        <!--<li>-->
+                            <!--<a href="/mobileInvent/settingsInventory/" class="panel-close">Инвентаризации</a>-->
+                        <!--</li>-->
+                    <!--</ul>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -39,7 +61,7 @@
             <ul>
                 {{#each listInvents}}
                 <li>
-                    <a class="item-link item-content" href="/mobileInvent/viewInvent/{{ChID}}">
+                    <a class="item-link item-content" href="/mobile/Invent/viewInvent/{{ChID}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row">
                                 <div class="item-title" style="width:100%">
@@ -71,7 +93,7 @@
                 app7.preloader.show();
                 var conditions={top:app7.data['inventoryListDocCount']};
                 if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
-                app7.srvRequestJSON({url:'/mobile/ven/getDataForVensList',conditions:conditions,
+                app7.srvRequestJSON({url:'/mobile/Invent/getDataForVensList',conditions:conditions,
                         errorDialogMsg:"Не удалось получить список инвентаризаций с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
