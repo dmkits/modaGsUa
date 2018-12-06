@@ -126,7 +126,11 @@ module.exports= function(app) {
             req.dbUC = (userConnectionData)?userConnectionData.connection:null;
             getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
                 req.dbUserParams=dbUserParameters;
-                if(errMsg) req.dbUserName=sysadminName; else req.dbUserName=dbUserParameters.dbUserName;    //log.info('ACCESS CONTROLLER: dbUserName:',req.dbUserName,'dbUserParams:',req.dbUserParams);
+                if(errMsg){
+                    req.dbUserName=sysadminName;req.dbEmpRole="sysadmin";
+                } else {
+                    req.dbUserName=dbUserParameters.dbUserName;req.dbEmpRole=dbUserParameters["EmpRole"];
+                }                                                                               //log.info('ACCESS CONTROLLER: dbUserName:',req.dbUserName,'dbUserParams:',req.dbUserParams);
                 next();
             });
             return;
@@ -183,6 +187,7 @@ module.exports= function(app) {
             }
             req.dbUserParams=dbUserParameters;
             req.dbUserName=dbUserParameters.dbUserName;                                             log.info('ACCESS CONTROLLER: dbUserName=',req.dbUserName,'dbUserParams=',req.dbUserParams);
+            req.dbEmpRole=(dbUserParameters)?dbUserParameters["EmpRole"]:null;
             if(renderIsMobile(req,res,next))return;
             next();
         });

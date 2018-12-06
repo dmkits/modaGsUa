@@ -9,8 +9,7 @@ function setUserRoleMenu(outData, userRole, usersRolesConfig, appMenu){
     var userMenu=[];
     var userRoleItems=usersRolesConfig[userRole];
     if (!userRoleItems&&userRole=="sysadmin") {
-        outData.menuBar= appMenu;
-        return;
+        outData.menuBar= appMenu;return;
     }
     if (!userRoleItems) userRoleItems={menu:["menuBarItemHelpAbout","menuBarItemClose"]};
     var userRoleMenu=userRoleItems.menu;
@@ -26,16 +25,15 @@ function setUserRoleMenu(outData, userRole, usersRolesConfig, appMenu){
                 break;
             }
             var mainPopupMenu = appMenuItem.popupMenu;
-            if (mainPopupMenu){
-                for (var k in mainPopupMenu) {
-                    var popupMenuItem = mainPopupMenu[k];
-                    if (userRoleMenuItemName == popupMenuItem.menuItemName) {
-                        for (var l in userMenu) {
-                            var userMenuItem = userMenu[l];
-                            if (userMenuItem.menuItemName == appMenuItem.menuItemName) {
-                                if (!userMenuItem.popupMenu) userMenuItem.popupMenu= [];
-                                userMenuItem.popupMenu.push(popupMenuItem);
-                            }
+            if (!mainPopupMenu)continue;
+            for (var k in mainPopupMenu) {
+                var popupMenuItem = mainPopupMenu[k];
+                if (userRoleMenuItemName == popupMenuItem.menuItemName) {
+                    for (var l in userMenu) {
+                        var userMenuItem = userMenu[l];
+                        if (userMenuItem.menuItemName == appMenuItem.menuItemName) {
+                            if (!userMenuItem.popupMenu) userMenuItem.popupMenu= [];
+                            userMenuItem.popupMenu.push(popupMenuItem);
                         }
                     }
                 }
@@ -49,7 +47,6 @@ function setUserRoleMenu(outData, userRole, usersRolesConfig, appMenu){
 module.exports.modulePageURL = "/";
 module.exports.modulePagePath = "main.html";
 module.exports.init= function(app){
-
     app.get("/main/getMainData", function (req, res) {
         var outData= {};
         outData.mode= appParams.mode;
@@ -65,8 +62,7 @@ module.exports.init= function(app){
         outData.icon32x32=appConfig.icon32x32;
         outData.imageSmall=appConfig.imageSmall;
         outData.imageMain=appConfig.imageMain;
-        var empRole=(req.dbUserParams)?req.dbUserParams["EmpRole"]:null;
-        setUserRoleMenu(outData, empRole, appConfig.usersRoles, appConfig.appMenu);
+        setUserRoleMenu(outData, req.dbEmpRole, appConfig.usersRoles, appConfig.appMenu);
         var dbConErr=database.getDBConnectError();
         if (dbConErr) {
             outData.dbConnection= dbConErr;
@@ -76,7 +72,7 @@ module.exports.init= function(app){
         outData.dbConnection='Connected';
         res.send(outData);
     });
-    app.post("/main/exit", function(req, res){                                                                   log.info("app.post /  req.body=",req.body);
+    app.post("/main/exit", function(req, res){
         var outData={};
         var cookiesArr=Object.keys(req.cookies);
         for(var i in cookiesArr){
