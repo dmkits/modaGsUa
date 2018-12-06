@@ -15,15 +15,14 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile";
-module.exports.modulePagePath = "mobile/index.html";
+module.exports.modulePageURL = "/mobile/Invent/viewListInvents";
+module.exports.modulePagePath = "mobile/viewListInvents.html";
+module.exports.routes=[//-- App routes --
+    { path: '/settingsInvents', componentUrl: '/mobile/Invent/settingsInventory', options:{ignoreCache:true} },
+    { path: '/viewListInvents', componentUrl: '/mobile/Invent/viewListInvents', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
+    { path: '/viewInvent/:inventChID', componentUrl: '/mobile/Invent/viewInvent', options:{ignoreCache:true} }
+];
 module.exports.init = function(app){
-    app.get("/mobile/Invent/settingsInventory", function (req, res) {
-        res.sendFile(appViewsPath+'mobile/settingsInventory.html');
-    });
-    app.get("/mobile/Invent/viewListInvents", function (req, res) {
-        res.sendFile(appViewsPath+'mobile/viewListInvents.html');
-    });
     app.get("/mobile/Invent/viewInvent", function (req, res) {
         res.sendFile(appViewsPath+'mobile/viewInvent.html');
     });
@@ -83,7 +82,6 @@ module.exports.init = function(app){
     //             res.send(result);
     //         });
     // });
-
     var tVenATableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_VenA", identifier:true, readOnly:true, visible:false},
         {data: "TSrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_VenA", identifier:true },

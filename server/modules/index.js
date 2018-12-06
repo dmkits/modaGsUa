@@ -1,6 +1,7 @@
-var server= require("../server"), log= server.log, database= require("../databaseMSSQL");
+var server= require("../server"), log= server.log;
 var loadedModules= {};
 var validateError= null;
+module.exports.loadedModules= function(){ return loadedModules; };
 module.exports.getValidateError= function(){ return validateError; };
 
 var dataModel= require("../datamodel");

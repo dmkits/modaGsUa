@@ -14,7 +14,10 @@
     "rec",
     /*"mainPage",*/
     "reportsCashier",
-    "mobileVen"
+    "mobile",
+    "mobileVen",
+    "mobileRec",
+    "mobileReportsCashier"
   ],
   "appMenu":[
     { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },
@@ -25,19 +28,23 @@
   "usersRoles":{
     "admin":{
       "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":["menuBarItemRec"]
+      "autorun":["menuBarItemRec"],
+      "mobile":["mobileReportsCashier","mobileVen"]
     },
     "manager":{
       "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":["menuBarItemReportsCashier"]
+      "autorun":["menuBarItemReportsCashier"],
+      "mobile":["mobileVen","mobileRec","mobileReportsCashier"]
     },
     "operatorRec":{
       "menu":["menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":["menuBarItemRec"]
+      "autorun":["menuBarItemRec"],
+      "mobile":["mobileRec"]
     },
     "cashier":{
       "menu":["menuBarItemReportsCashier","menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":["menuBarItemReportsCashier"]
+      "autorun":["menuBarItemReportsCashier"],
+      "mobile":["mobileReportsCashier"]
     }
   }
 }
