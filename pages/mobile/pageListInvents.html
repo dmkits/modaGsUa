@@ -71,7 +71,7 @@
                 app7.preloader.show();
                 var conditions={top:app7.data['inventoryListDocCount']};
                 if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
-                app7.srvRequestJSON({url:'/mobile/Invent/getDataForVensList',conditions:conditions,
+                app7.srvRequestJSON({url:'/mobile/invent/getDataForVensList',conditions:conditions,
                         errorDialogMsg:"Не удалось получить список инвентаризаций с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
@@ -96,8 +96,15 @@
             }
         },
         on: {
-            pageAfterIn: function(e, page) {                                                             //console.log('pageListInvents.html pageAfterIn', page, this);
-                if(app7.data.pageListInvents) return;
+            pageAfterIn: function(e, page) {                                                             //console.log('pageListInvents.html pageAfterIn', app7.data.pageListInvents);
+                if(app7.data.pageListInvents) {
+                    this.$setState({
+                        listStocks:app7.data.pageListInvents.listStocks,
+                        stockIDFilter:app7.data.pageListInvents.stockIDFilter,
+                        listInvents:app7.data.pageListInvents.listInvents
+                    });
+                    return;
+                }
                 if(this.stockIDFilter===undefined)this.stockIDFilter="";
                 this.loadListInventsData();
             }
