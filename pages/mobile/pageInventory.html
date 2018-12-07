@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" data-name="viewInvent">
+<div class="page page-with-subnavbar" data-name="pageInventory">
     <div class="navbar" id="inventoryNavbar">
         <div class="navbar-inner">
             <div class="left">
@@ -49,8 +49,8 @@
 </template>
 <script>
     return {
-        data: function data() {                                                                         //console.log('viewInvent.html data',this.$route.params);
-            let inventData={},listInventsData=this.$app.data.viewListInvents.listInvents;
+        data: function data() {                                                                         //console.log('pageInventory.html data',this.$route.params);
+            let inventData={},listInventsData=this.$app.data.pageListInvents.listInvents;
             if(!this.$route.params) return inventData;
             let inventChID=this.$route.params.inventChID;
             if(!listInventsData||inventChID===null||inventChID===undefined) return inventData;
@@ -64,7 +64,7 @@
             return {item:inventData,items:[]};
         },
         methods: {
-            createTableRow: function(inventProdData){                                                   //console.log('viewInvent.html createTableRow inventProdData=',inventProdData, this);
+            createTableRow: function(inventProdData){                                                   //console.log('pageInventory.html createTableRow inventProdData=',inventProdData, this);
                 if(!inventProdData) inventProdData={};
                 let mainTable=document.getElementById('inventoryTable'),
                     trHigher=document.createElement('tr'),
@@ -186,7 +186,7 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                let cInstance=this, parentChID=this.item.ChID;                                          console.log('viewInvent.html storeInputValueToInvent inputValue=',inputValue, this);
+                let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageInventory.html storeInputValueToInvent inputValue=',inputValue, this);
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/Invent/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
                         userErrorMsg:"Не удалось добавить товар в инвентаризацию!"},
@@ -200,7 +200,7 @@
                     })
             },
             storeExistsToInvent:function(tSrcPosID,prodID,tNewQty,callback){
-                let cInstance=this, parentChID=this.item.ChID;                                          console.log('viewInvent.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
+                let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageInventory.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/Invent/storeExistsPosProdData',
                         data:{parentChID:parentChID,TSrcPosID:tSrcPosID,TNewQty:tNewQty},
@@ -244,10 +244,10 @@
                 if(e.keyCode==13||e.key=='Enter') this.barcodeInputEnter();
             },
 
-            loadInventData:function(){                                                                  console.log('viewInvent.html loadInventData inventData=',this.item);
+            loadInventData:function(){                                                                  console.log('pageInventory.html loadInventData inventData=',this.item);
                 let inventData=this.item, inventChID=inventData.ChID;
                 if(inventChID===null||inventChID===undefined) return;
-                let cInstance=this, app=this.$app;                                                      console.log('viewInvent.html loadInventData inventChID=',inventChID, this);
+                let cInstance=this, app=this.$app;                                                      console.log('pageInventory.html loadInventData inventChID=',inventChID, this);
                 cInstance.disableInputProdBarcode();
                 app.preloader.show();
                 app.srvRequestJSON({url:'/mobile/Invent/getDataForVenATable',conditions:{'ParentChID=':inventChID},
@@ -257,7 +257,7 @@
                         if(!result){
                             cInstance.disableInputProdBarcode(true); return;
                         }
-                        app.data.viewInvent={inventDataItems:result.items};                             console.log('viewInvent.html loadInventData items=',result.items);
+                        app.data.pageInventory={inventDataItems:result.items};                             console.log('pageInventory.html loadInventData items=',result.items);
                         cInstance.$setState({
                             item:inventData,items:result.items
                         });
@@ -297,22 +297,22 @@
             }
         },
         on: {
-            pageInit: function(e, page) {                                                               //console.log('viewInvent.html pageInit', page, this);
+            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
                 document.getElementById("totalDocQty").innerHTML=0;
                 document.getElementById("totalRealQty").innerHTML=0;
                 this.loadInventData();
             },
-            pageBeforeIn: function(e, page) {                                                           //console.log('viewInvent.html pageBeforeIn', page);
+            pageBeforeIn: function(e, page) {                                                           //console.log('pageInventory.html pageBeforeIn', page);
                 let maxWidth=document.getElementById("tableWithFixedHead").clientWidth+1+'px';
                 document.getElementById("inventoryTable").style.marginTop=(document.getElementById("tableFixedHeader").offsetHeight)  +'px';
                 document.getElementById("totalRowQty").style.width=(document.getElementById('num_td').offsetWidth-11) + "px";
                 document.getElementById("totalDocQty").style.width= (document.getElementById('doc_qty').offsetWidth-11) + "px";
                 document.getElementById("totalRealQty").style.width= (document.getElementById('real_qty').offsetWidth-11) + "px";
             },
-            pageAfterIn: function(e, page) {                                                            //console.log('viewInvent.html pageAfterIn', page);
+            pageAfterIn: function(e, page) {                                                            //console.log('pageInventory.html pageAfterIn', page);
                 $$("#barCodeInput").focus();
             },
-            pageAfterOut: function(e, page) {                                                           //console.log('viewInvent.html pageAfterOut', page);
+            pageAfterOut: function(e, page) {                                                           //console.log('pageInventory.html pageAfterOut', page);
                 if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl); //hide
             },
         }

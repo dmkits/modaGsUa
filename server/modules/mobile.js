@@ -29,9 +29,9 @@ module.exports.init = function(app){
                     var route=new function(){ return moduleRoutes[j]; };
                     if(route&&route.path=="(.*)") lastRoute=route; else saRoutes.push(route);
                 }
-                if(lastRoute)saRoutes.push(lastRoute);
             }
-            res.send(saRoutes);                                                                                 console.log("saRoutes",saRoutes);
+            if(lastRoute)saRoutes.push(lastRoute);
+            res.send(saRoutes);
             return;
         }
         if(!appConfig||!appConfig.usersRoles){
@@ -41,24 +41,13 @@ module.exports.init = function(app){
         if(!userRoleMobileConf||userRoleMobileConf.length===undefined){
             res.send({error:"Failed get routes! Reason: no app user role config for mobile!"});return;
         }
-        userRoleMobileConf.push("mobile");
         var modules=loadedModules(), userRoutes=[];
         for (var i = 0; i < userRoleMobileConf.length; i++) {
             var mModuleName=userRoleMobileConf[i],mModuleRoutes=modules[mModuleName].routes;
             if(!mModuleRoutes)continue;
             for (var j = 0; j < mModuleRoutes.length; j++) userRoutes.push(mModuleRoutes[j]);
         }
-
-        // var routes=[//-- App routes --
-        //     { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
-        //     // { path: '/settingsServerURI', componentUrl: './settingsServerURI.html' },
-        //     { path: '/settingsInvents', componentUrl: '/mobile/Invent/settingsInventory', options:{ignoreCache:true} },
-        //     { path: '/viewListInvents', componentUrl: '/mobile/Invent/viewListInvents', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
-        //     { path: '/viewInvent/:inventChID', componentUrl: '/mobile/Invent/viewInvent', options:{ignoreCache:true} },
-        //     { path: '/viewListRecs', componentUrl: '/mobile/Rec/viewListRecs', options:{clearPreviousHistory:true,ignoreCache:true} },
-        //     { path: '/viewCashierReports', componentUrl: '/mobile/reports/viewCashierReports', options:{clearPreviousHistory:true,ignoreCache:true} },
-        //     { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
-        // ], userRoutes;
+        userRoutes=userRoutes.concat(module.exports.routes);
         res.send(userRoutes);
     });
 

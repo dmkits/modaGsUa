@@ -1,28 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" id="viewListInvents">
-    <!--<div class="panel panel-left panel-cover"  data-panel="left2" style="">-->
-        <!--<div class="page">-->
-            <!--<div class="page-content">-->
-                <!--<div class="block-title">Страницы</div>-->
-                <!--<div class="list links-list">-->
-                    <!--<ul>-->
-                        <!--<li>-->
-                            <!--<a href="/mobileInvent/home/" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>-->
-                        <!--</li>-->
-                    <!--</ul>-->
-                <!--</div>-->
-                <!--<div class="block-title">Настройки</div>-->
-                <!--<div class="list links-list">-->
-                    <!--<ul>-->
-                        <!--<li>-->
-                            <!--<a href="/mobileInvent/settingsInventory/" class="panel-close">Инвентаризации</a>-->
-                        <!--</li>-->
-                    <!--</ul>-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-    <!--</div>-->
+<div class="page page-with-subnavbar" id="pageListRecs">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -30,14 +8,14 @@
                     <i class="icon f7-icons">menu</i>
                 </a>
             </div>
-            <div class="title sliding">Инвентаризации</div>
+            <div class="title sliding">Приходы товаров</div>
             <div class="subnavbar">
                 <div class="subnavbar-inner">
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" class="item-link smart-select" @smartselect:closed="viewListInventsStockClosed">
-                                    <select id="viewListInvents-stock">
+                                <a href="#" class="item-link smart-select" @smartselect:closed="pageListRecsStockClosed">
+                                    <select id="pageListRecs-stock">
                                         {{#each listStocks}}
                                         <option value={{StockID}}>{{StockName}}</option>
                                         {{/each}}
@@ -61,7 +39,7 @@
             <ul>
                 {{#each listInvents}}
                 <li>
-                    <a class="item-link item-content" href="/viewInvent/{{ChID}}">
+                    <a class="item-link item-content" href="/pageInventory/{{ChID}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row">
                                 <div class="item-title" style="width:100%">
@@ -98,11 +76,11 @@
                     function(result,error){
                         app7.preloader.hide();
                         if(!result)return;
-                        app7.data.viewListInvents={
+                        app7.data.pageListRecs={
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter,
                             listInvents:result.listInventsByStockID
-                        };                                                                              //console.log('viewListInvents.html pageAfterIn app.data.viewListInvents 2=',app.data.viewListInvents);
+                        };                                                                              //console.log('pageListRecs.html pageAfterIn app.data.pageListRecs 2=',app.data.pageListRecs);
                         cInstance.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter,
@@ -111,15 +89,15 @@
                     })
                 return;
             },
-            viewListInventsStockClosed:function(e){
-                this.stockIDFilter=$$('#viewListInvents-stock').val();
-                app7.data.viewListInvents.stockIDFilter=this.stockIDFilter;
+            pageListRecsStockClosed:function(e){
+                this.stockIDFilter=$$('#pageListRecs-stock').val();
+                app7.data.pageListRecs.stockIDFilter=this.stockIDFilter;
                 this.loadListInventsData();
             }
         },
         on: {
-            pageAfterIn: function(e, page) {                                                             //console.log('viewListInvents.html pageAfterIn', page, this);
-                if(app7.data.viewListInvents) return;
+            pageAfterIn: function(e, page) {                                                             //console.log('pageListRecs.html pageAfterIn', page, this);
+                if(app7.data.pageListRecs) return;
                 if(this.stockIDFilter===undefined)this.stockIDFilter="";
                 this.loadListInventsData();
             }

@@ -15,16 +15,19 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/Invent/viewListInvents";
-module.exports.modulePagePath = "mobile/viewListInvents.html";
+module.exports.modulePageURL = "/mobile/invent/pageListInvents";
+module.exports.modulePagePath = "mobile/pageListInvents.html";
 module.exports.routes=[//-- App routes --
-    { path: '/settingsInvents', componentUrl: '/mobile/Invent/settingsInventory', options:{ignoreCache:true} },
-    { path: '/viewListInvents', componentUrl: '/mobile/Invent/viewListInvents', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
-    { path: '/viewInvent/:inventChID', componentUrl: '/mobile/Invent/viewInvent', options:{ignoreCache:true} }
+    { path: '/pageListInvents', componentUrl: '/mobile/invent/pageListInvents', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
+    { path: '/pageInventory/:inventChID', componentUrl: '/mobile/invent/pageInventory', options:{ignoreCache:true} },
+    { path: '/pageSettingsInvents', componentUrl: '/mobile/invent/pageSettingsInvents', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
-    app.get("/mobile/Invent/viewInvent", function (req, res) {
-        res.sendFile(appViewsPath+'mobile/viewInvent.html');
+    app.get("/mobile/invent/pageSettingsInvents", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/pageSettingsInventory.html');
+    });
+    app.get("/mobile/invent/pageInventory", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/pageInventory.html');
     });
     var tVensListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Ven"},

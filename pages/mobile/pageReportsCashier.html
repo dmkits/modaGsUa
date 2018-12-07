@@ -1,0 +1,106 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page page-with-subnavbar" id="pageReportsCashier">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link icon-only panel-open" data-panel="left">
+                    <i class="icon f7-icons">menu</i>
+                </a>
+            </div>
+            <div class="title sliding">Отчеты кассира</div>
+            <div class="subnavbar">
+                <div class="subnavbar-inner">
+                    <div class="list" style="width:100%">
+                        <ul>
+                            <li>
+                                <a href="#" class="item-link smart-select" @smartselect:closed="pageReportsCashierStockClosed">
+                                    <select id="pageReportsCashier-stock">
+                                        {{#each listStocks}}
+                                        <option value={{StockID}}>{{StockName}}</option>
+                                        {{/each}}
+                                    </select>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">Склад</div>
+                                            <div class="item-after"></div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-content">
+        <div class="list media-list" style="margin:0">
+            <ul>
+                {{#each listInvents}}
+                <li>
+                    <a class="item-link item-content" href="/pageInventory/{{ChID}}">
+                        <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
+                            <div class="item-title-row">
+                                <div class="item-title" style="width:100%">
+                                    <div class="item-title">
+                                        <div class="item-header" style="display:inline-block;float:left">{{DocID}} от {{SDocDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:right">{{StateName}}</div>
+                                    </div>
+                                    <div class="item-title">{{StockName}}</div>
+                                </div>
+                                <div class="item-after" style="min-width:80px">
+                                    <div style="width:100%;text-align:right">{{TVenQty}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        methods:{
+            loadListInventsData:function(){
+                let cInstance=this,
+                    stockIDFilter=this.stockIDFilter;
+                app7.preloader.show();
+                var conditions={top:app7.data['inventoryListDocCount']};
+                if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
+                app7.srvRequestJSON({url:'/mobile/Invent/getDataForVensList',conditions:conditions,
+                        errorDialogMsg:"Не удалось получить список инвентаризаций с сервера!"},
+                    function(result,error){
+                        app7.preloader.hide();
+                        if(!result)return;
+                        app7.data.pageReportsCashier={
+                            listStocks:result.listStocks,
+                            stockIDFilter:stockIDFilter,
+                            listInvents:result.listInventsByStockID
+                        };                                                                              //console.log('pageReportsCashier.html pageAfterIn app.data.pageReportsCashier 2=',app.data.pageReportsCashier);
+                        cInstance.$setState({
+                            listStocks:result.listStocks,
+                            stockIDFilter:stockIDFilter,
+                            listInvents:result.listInventsByStockID
+                        });
+                    })
+                return;
+            },
+            pageReportsCashierStockClosed:function(e){
+                this.stockIDFilter=$$('#pageReportsCashier-stock').val();
+                app7.data.pageReportsCashier.stockIDFilter=this.stockIDFilter;
+                this.loadListInventsData();
+            }
+        },
+        on: {
+            pageAfterIn: function(e, page) {                                                             //console.log('pageReportsCashier.html pageAfterIn', page, this);
+                if(app7.data.pageReportsCashier) return;
+                if(this.stockIDFilter===undefined)this.stockIDFilter="";
+                this.loadListInventsData();
+            }
+        }
+    }
+</script>

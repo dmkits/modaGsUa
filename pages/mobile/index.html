@@ -33,30 +33,48 @@
             <div class="panel panel-left panel-cover" id="main-panel-left">
                 <div class="page">
                     <div class="page-content">
-                        <div class="block-title">Страницы</div>
-                        <div class="list links-list">
-                            <ul>
-                                <li>
-                                    <a href="/home" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>
-                                </li>
-                                <li>
-                                    <a href="/viewListRecs" class="panel-close" data-force="true" data-ignore-cache="true">Приход товара</a>
-                                </li>
-                                <li>
-                                    <a href="/viewListInvents" class="panel-close" data-force="true" data-ignore-cache="true">Инвентаризации</a>
-                                </li>
-                            </ul>
+                        <div class="block">
+                            <div class="list links-list">
+                                <ul>
+                                    <li>
+                                        <a href="/home" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                        <div class="block-title">Настройки</div>
-                        <div class="list links-list">
-                            <ul>
-                                <!--<li>-->
-                                <!--<a href="/settingsServerURI" class="panel-close">Сервер</a>-->
-                                <!--</li>-->
-                                <li>
-                                    <a href="/settingsInvents" class="panel-close">Инвентаризации</a>
-                                </li>
-                            </ul>
+                        <div class="block" id="main-panel-left-pages">
+                            <div class="block-title">Страницы</div>
+                            <div class="list links-list">
+                                <ul>
+                                    <li>
+                                        <a href="/pageListRecs" class="panel-close" data-force="true" data-ignore-cache="true">Приход товара</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pageListInvents" class="panel-close" data-force="true" data-ignore-cache="true">Инвентаризации</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pageReportsCashier" class="panel-close" data-force="true" data-ignore-cache="true">Отчеты кассира</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="block-title">Настройки страниц</div>
+                            <div class="list links-list">
+                                <ul>
+                                    <li>
+                                        <a href="/pageSettingsInvents" class="panel-close">Инвентаризации</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="block" id="main-panel-left-settings">
+                            <div class="block-title">Настройки</div>
+                            <div class="list links-list">
+                                <ul>
+                                    <li>
+                                    <a href="/settingsServerURI" class="panel-close">Сервер</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -68,7 +86,7 @@
                             <i class="icon f7-icons">menu</i>
                         </a>
                     </div>
-                    <div class="title sliding">Мобильная инвентаризация</div>
+                    <!--<div class="title sliding">Мобильная инвентаризация</div>-->
                 </div>
             </div>
             <div class="page-content login-screen-content" id="mobInv-login-screen">
@@ -124,19 +142,25 @@
         }),
         mainView = app7.views.create('.view-main', {domCache:true, stackPages:true });//Init/Create main view
 
-    app7.data['inventoryListDocCount']=50;
-    if (typeof(Storage)!=="undefined") {
-        var username=localStorage.getItem("login-username");
-        if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
-        var inventoryListDocCount=localStorage.getItem("settings-inventory-listDocCount");
-        if(inventoryListDocCount&&!isNaN(parseInt(inventoryListDocCount)))app7.data['inventoryListDocCount']=parseInt(inventoryListDocCount);
-    } else {// Sorry! No Web Storage support..
-    }
-
-    $$('.view-main').on('page:afterin', '.page[data-name="home"]', function (e) {                       console.log('page:init .page[data-name="home"] cookie=',document.cookie);
+    $$('#main-panel-left-settings').hide();//IT'S ONLY FOR MOBILE APP
+    $$('#main-panel-left-pages').hide();
+    app7.initData=function(){
+        app7.data={};
         app7.data.uuid="";document.cookie="uuid=0";
+        app7.data['inventoryListDocCount']=50;
+        if (typeof(Storage)!=="undefined") {
+            var username=localStorage.getItem("login-username");
+            if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
+            var inventoryListDocCount=localStorage.getItem("settings-inventory-listDocCount");
+            if(inventoryListDocCount&&!isNaN(parseInt(inventoryListDocCount)))app7.data['inventoryListDocCount']=parseInt(inventoryListDocCount);
+        } else {// Sorry! No Web Storage support..
+        }
+    };
+    app7.initData();
+    $$('.view-main').on('page:afterin', '.page[data-name="home"]', function (e) {                       console.log('page:init .page[data-name="home"] cookie=',document.cookie);
+        $$('#main-panel-left-pages').hide();
+        app7.initData();
         app7.request.setup({ headers: {'uuid':app7.data.uuid} });
-        app7.data.viewListInvents=null; app7.data.viewInvent=null;
         $$('#mobInv-login-screen #login-password').val("");
         var username="";
         if (typeof(Storage)!=="undefined") {
@@ -146,8 +170,6 @@
         }
         $$('#mobInv-login-screen #login-username').val(username).focus();
     });
-
-                                    console.log("app.panel.left",app7.panel.left);
 
     /**
      * params = { method, url, data/conditions, showRequestErrorDialog, errorDialogMsg }
@@ -267,18 +289,20 @@
                 if(!result){
                     mainView.router.navigate('/home');return;
                 }
-                mainView.router.routes=result;
+                mainView.router.routes=result;                                                         //console.log("userRoutes",result);
                 var userRoutes={}, definePath;
                 for (var i = 0; i < result.length; i++) {
                     var userRoutesItem=result[i];
                     userRoutes[userRoutesItem.path]=true;
-                    if(userRoutesItem&&userRoutesItem.define) definePath=userRoutesItem.path;
+                    if(!definePath&&userRoutesItem&&userRoutesItem.define) definePath=userRoutesItem.path;
                 }
-                var panelItems=$$("#main-panel-left li a");                                             //console.log("userRoutes",userRoutes,"panelItems",panelItems);
+                var panelItems=$$("#main-panel-left-pages li a"),hasVisible=false;
                 for (var i = 0; i < panelItems.length; i++) {
-                    var panelItem=panelItems[i];                                                        //console.log("panelItem",panelItem.getAttribute("href"));
-                    // panelItem.setAttribute("style",(!userRoutes[panelItem.getAttribute("href")])?"display:none":"display:inherit")
+                    var panelItem=panelItems[i], visible=userRoutes[panelItem.getAttribute("href")];
+                    if(visible)$$(panelItem).show();else $$(panelItem).hide();
+                    hasVisible=visible||hasVisible;
                 }
+                if(hasVisible)$$('#main-panel-left-pages').show();
                 if(!definePath)return;
                 mainView.router.navigate(definePath);
             });
