@@ -45,7 +45,7 @@ module.exports.init = function(app){
         for (var i = 0; i < userRoleMobileConf.length; i++) {
             var mModuleName=userRoleMobileConf[i],mModuleRoutes=modules[mModuleName].routes;
             if(!mModuleRoutes)continue;
-            for (var j = 0; j < mModuleRoutes.length; j++) userRoutes.push(mModuleRoutes[j]);
+            userRoutes=userRoutes.concat(mModuleRoutes);
         }
         userRoutes=userRoutes.concat(module.exports.routes);
         res.send(userRoutes);
