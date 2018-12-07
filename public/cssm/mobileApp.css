@@ -39,3 +39,36 @@ tfoot td{
 .blue-text{
     color:darkblue;
 }
+.md .toolbar {
+    /*height: 96px;*/
+}
+.md .list .item-content,
+.md .list .item-inner {
+    min-height:32px;
+}
+.md .list .item-inner {
+    padding-top:4px;
+    padding-bottom:4px;
+}
+.md .data-table td,
+.md .data-table th{
+    padding-left:5px;padding-right:5px;
+}
+.md .data-table th{
+    text-align: center;
+}
+.md .data-table td.label-cell,
+.md .data-table th.label-cell{
+    padding-left:5px;padding-right:5px
+}
+.md .data-table td:first-child,
+.md .data-table th:first-child{
+    padding-left:5px
+}
+.md .data-table td:last-child,
+.md .data-table th:last-child{
+    padding-right:5px
+}
+.data-table td.text-centered{
+    text-align: center;
+}

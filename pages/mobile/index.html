@@ -23,8 +23,9 @@
     <link rel="stylesheet" href="/jslib/framework7/css/framework7.min.css">
     <link rel="stylesheet" href="/cssm/mobileIcons.css">
     <link rel="stylesheet" href="/cssm/mobileApp.css">
-    <title>Mobile Inventory</title>
+    <script src="/jslib/moment/moment.js"></script>
     <link rel="shortcut icon" href="/img/logo red-ico-32.jpg">
+    <title>Mobile</title>
 </head>
 <body>
 <div id="app">
@@ -187,7 +188,7 @@
         if(params.data)requestData=params.data;
         else if(params.conditions&&typeof(params.conditions)=="string") requestData=params.conditions.replace('=','~');
         else if(params.conditions)
-            for(var cName in params.conditions) requestData[cName.replace('=','~')]=params.conditions[cName];
+            for(var cName in params.conditions) requestData[cName.replace('=','~')]=params.conditions[cName];   //console.log('srvRequestJSON app7.request',params.url,'requestData=',requestData);
         this.request({method:params.method,url:params.url,data:requestData,headers:{ 'x-requested-with': 'application/json; charset=utf-8' },
             success:function(data){                                                                             //console.log('srvRequestJSON app7.request',params.url,'success data=',data);
                 var errMsg;
