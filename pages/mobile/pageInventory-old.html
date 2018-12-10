@@ -31,28 +31,8 @@
                 <th id="real_qty" style="width:50px;">Факт.<br>кол-во</th>
             </tr>
             </thead>
-            <tbody style="display:none">
-            <tr>
-                <td rowSpan="2" style=""></td>
-                <td colSpan="4" style=""></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            </tbody>
         </table>
         <table id="inventoryTable" width="100%" style="margin-bottom: 32px;">
-            <tr style="display:none">
-                <th style="width:40px;">№<br>п/п</th>
-                <th>Наименование товара<br>Штрихкод</th>
-                <th style="width:50px;">Ед.<br>изм.</th>
-                <th style="width:50px;">Уч.<br>кол-во</th>
-                <th style="width:50px;">Факт.<br>кол-во</th>
-            </tr>
-
         </table>
         <table id="tableWithFixedFooter" width="100%" style="position:fixed; bottom:0px; z-index: 100">
             <tfoot>
@@ -85,48 +65,7 @@
         },
         methods: {
             createTableRow: function(inventProdData){                                                   //console.log('pageInventory.html createTableRow inventProdData=',inventProdData, this);
-                if(!this.dataTableHeader||!this.dataTableBody) return;
-                var dataTableHeaderRows=$$(this.dataTableHeader).children("tbody").children("tr");
-                if(!dataTableHeaderRows) return;
                 if(!inventProdData) inventProdData={};
-
-                var newTRs=[], dthTR1, dthTR2, newTR1,newTR2, td;
-                if(dthTR1=dataTableHeaderRows[0]) {
-                    newTRs.push(newTR1=dthTR1.cloneNode(true)); this.dataTableBody.appendChild(newTR1);
-                    if(td=newTR1.children[0]) td.innerText=inventProdData["TSrcPosID"].toString();
-                    if(td=newTR1.children[1]) td.innerText=inventProdData["ProdName"].toString();
-                }
-                if(dthTR2=dataTableHeaderRows[1]) {
-                    newTRs.push(newTR2=dthTR2.cloneNode(true));  this.dataTableBody.appendChild(newTR2);
-
-                    // tdBarCode.innerText=inventProdData["Barcode"].toString(); tdUm.innerText=inventProdData["UM"];
-                    // tdRef.innerText=inventProdData["TQty"].toString(); tdReal.innerText=inventProdData["TNewQty"].toString();
-                    // tdReal.ChID=inventProdData["ChID"].toString();
-                    // tdReal.TSrcPosID=inventProdData["TSrcPosID"].toString();tdReal.ProdID=inventProdData["ProdID"].toString();
-                    // tdReal.id=inventProdData["ChID"].toString()+'_'+inventProdData["TSrcPosID"].toString();
-                    // tdReal.TQty=inventProdData["TQty"].toString();
-                    // tdReal.trHigherOffsetTop=trHigher.offsetTop;
-
-                    if(td=newTR2.children[0]) td.innerText=inventProdData["Barcode"].toString();
-                    if(td=newTR2.children[1]) td.innerText=inventProdData["UM"].toString();
-                    if(td=newTR2.children[2]) td.innerText=inventProdData["TQty"].toString();
-                    if(td=newTR2.children[3]) {
-                        td.innerText=inventProdData["TNewQty"].toString();
-                        td.id=inventProdData["ChID"].toString()+'_'+inventProdData["TSrcPosID"].toString();
-                        td.ChID=inventProdData["ChID"].toString();
-                        td.TSrcPosID=inventProdData["TSrcPosID"].toString();td.ProdID=inventProdData["ProdID"].toString();
-                    }
-                }
-
-                this.setTotalInfo(inventProdData["TQty"],inventProdData["TNewQty"]);
-
-                return td;
-                // var newTR1 = document.getElementById('tableFixedHeaderRow1').cloneNode(true);
-                // document.getElementById('inventoryTable').appendChild(newTR1);
-                // var newTR2 = document.getElementById('tableFixedHeaderRow2').cloneNode(true);
-                // document.getElementById('inventoryTable').appendChild(newTR2);
-
-
                 let mainTable=document.getElementById('inventoryTable'),
                     trHigher=document.createElement('tr'),
                     tdRowNum=document.createElement('td'),tdProdName=document.createElement('td'),
@@ -134,30 +73,15 @@
                     tdBarCode=document.createElement('td'), tdUm=document.createElement('td'),
                     tdRef=document.createElement('td'), tdReal=document.createElement('td'),
                     thisInstance=this;
-
-
-
-                //trHigher.style.display="none";trLower.style.display="none";
-
                 tdRowNum.style.width=(document.getElementById('num_td').offsetWidth-11) + "px";tdRowNum.className='text-centered';
-                // tdRowNum.css("width",$$("#num_td").offset().width-11);tdRowNum.addClass('text-centered');
                 tdProdName.className="blue-text";
-                // tdProdName.addClass('blue-text');
                 trHigher.appendChild(tdRowNum); trHigher.appendChild(tdProdName);
-
                 tdUm.style.width=(document.getElementById('um_td').offsetWidth-11) + "px";tdUm.className='text-centered';
-                // tdUm.css("width",$$("#um_td").offset().width-11);tdUm.addClass('text-centered');
-
                 tdRef.style.width=(document.getElementById('doc_qty').offsetWidth-11) + "px"; tdRef.style.textAlign="center";tdRef.className='refQty';
-                // tdRef.css("width",$$("#doc_qty").offset().width-11);tdRef.addClass('refQty');tdRef.css("textAlign","center");
-
                 tdReal.style.width=(document.getElementById('real_qty').offsetWidth-11) + "px"; tdReal.style.textAlign="center";tdReal.className='realQty';
-                // tdReal.css("width",$$("#real_qty").offset().width-11);tdReal.addClass('realQty');tdReal.css("textAlign","center");
-
                 trLower.appendChild(tdBarCode); trLower.appendChild(tdUm); trLower.appendChild(tdRef); trLower.appendChild(tdReal);
                 mainTable.appendChild(trHigher); mainTable.appendChild(trLower);
                 tdRowNum.rowSpan='2'; tdProdName.colSpan='4';
-                // tdRowNum.attr("rowSpan",2);tdProdName.attr("colSpan",4);
                 tdRowNum.onclick=  function(){
                     $$('.clickedTableRow').removeClass('clickedTableRow');
                     trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
@@ -170,11 +94,8 @@
                     thisInstance.showRealQtyDialog(tdReal, tdProdName.innerText, tdReal.innerText.trim());
                 };
                 tdReal.onclick=tdRef.onclick;tdReal.doSelect=tdRowNum.onclick;
-
                 tdRowNum.innerText=inventProdData["TSrcPosID"].toString();
-                // tdRowNum.text(inventProdData["TSrcPosID"].toString());
                 tdProdName.innerText=inventProdData["ProdName"];
-                // tdProdName.text(inventProdData["ProdName"]);
                 tdBarCode.innerText=inventProdData["Barcode"].toString(); tdUm.innerText=inventProdData["UM"];
                 tdRef.innerText=inventProdData["TQty"].toString(); tdReal.innerText=inventProdData["TNewQty"].toString();
                 tdReal.ChID=inventProdData["ChID"].toString();
@@ -182,12 +103,9 @@
                 tdReal.id=inventProdData["ChID"].toString()+'_'+inventProdData["TSrcPosID"].toString();
                 tdReal.TQty=inventProdData["TQty"].toString();
                 tdReal.trHigherOffsetTop=trHigher.offsetTop;
-
-                // $$("#inventoryTable").append(trHigher).append(trLower);
-
                 $$('.clickedTableRow').removeClass('clickedTableRow');
                 trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
-                //$$('#pageContentInventory').scrollTop(tdReal.trHigherOffsetTop,100);
+                $$('#pageContentInventory').scrollTop(tdReal.trHigherOffsetTop,100);
                 this.setTotalInfo(inventProdData["TQty"],inventProdData["TNewQty"]);
                 return tdReal;
             },
@@ -354,21 +272,9 @@
                 var app=this.$app;
                 var progress = 0, progressStep=100/inventData.length;
                 this.progressBarEl = app.progressbar.show(progress, app.theme === 'md' ? 'yellow' : 'blue');
-
-                app.preloader.show();$$('#inventoryTable').hide();
-
                 this.fillInventTableProgress(0,inventData,this.progressBarEl,progress,progressStep,function(){
                     app.progressbar.hide(this.progressBarEl); //hide
-                    app.preloader.hide();$$('#inventoryTable').show();$$('#inventoryTable th').hide();
-
-                    setTimeout(function(){
-
-                        var lastTDReal=(inventData&&inventData.length>0)?inventData[inventData.length-1].tableTDReal:null;                                console.log("lastTDReal",lastTDReal);
-                        if(lastTDReal)$$('#pageContentInventory').scrollTop(lastTDReal.trHigherOffsetTop,100);
-                        if(finishedCallback) finishedCallback();
-
-                    },1000);
-
+                    if(finishedCallback)finishedCallback();
                 })
             },
             fillInventTableProgress: function(ind,inventData,progressBarEl,progress,progressStep,finishedCallback){
@@ -380,38 +286,18 @@
                 var self=this,app=this.$app;
                 setTimeout(function(){
                     if(!self.createTableRow){
-                        if(finishedCallback)finishedCallback();return;
+                        if(finishedCallback)finishedCallback();
+                        return;
                     }
-                    // inventDataItem.tableTDReal= self.createTableRow(inventDataItem);
-                    // progress += progressStep;
-                    var tdReal;
-                    for (var i = ind+1; i < ind+10; i++) {
-                        tdReal=self.createTableRow(inventDataItem);
-                        inventDataItem.tableTDReal= tdReal;
-                        progress += progressStep;
-                        inventDataItem=inventData[i];
-                        if(!inventDataItem)break;
-                        // app.progressbar.set(progressBarEl, progress);
-                        //this.fillInventTableProgress(i,inventData,progressBarEl,progress,progressStep,finishedCallback)
-                    }
-                    $$('#inventoryTable tr').show();
+                    inventDataItem.tableTDReal= self.createTableRow(inventDataItem);
+                    progress += progressStep;
                     app.progressbar.set(progressBarEl, progress);
-                    // if(tdReal)$$('#pageContentInventory').scrollTop(tdReal.trHigherOffsetTop,100);
-
-                    // self.fillInventTableProgress(ind+1,inventData,progressBarEl,progress,progressStep,finishedCallback)
-                    self.fillInventTableProgress(i,inventData,progressBarEl,progress,progressStep,finishedCallback)
-                },0/*20+Math.round(ind/100)*/)
+                    self.fillInventTableProgress(ind+1,inventData,progressBarEl,progress,progressStep,finishedCallback)
+                },20+Math.round(ind/100))
             }
         },
         on: {
-            pageInit: function(e, page) {                                                               console.log('pageInventory.html pageInit', page, this);
-                                                                                                    console.log("$$",$$(this.el).children(".page-content").children("table"));
-                var dataTables=$$(this.el).children(".page-content").children("table");
-
-                if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];                  console.log("this.dataTableHeader",this.dataTableHeader);
-                if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
-                if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
-
+            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
                 document.getElementById("totalDocQty").innerHTML=0;
                 document.getElementById("totalRealQty").innerHTML=0;
                 this.loadInventData();
