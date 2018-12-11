@@ -24,43 +24,34 @@
         <table id="tableWithFixedHead" width="100%" style="position:fixed; top:104px; z-index: 100">
             <thead>
             <tr id="tableFixedHeader">
-                <th id="num_td" style="width:40px;">№<br>п/п</th>
+                <th id="num_td" width="40px">№<br>п/п</th>
                 <th id="name_barcode_td">Наименование товара<br>Штрихкод</th>
-                <th id="um_td" style="width:50px;">Ед.<br>изм.</th>
-                <th id="doc_qty" style="width:50px;">Уч.<br>кол-во</th>
-                <th id="real_qty" style="width:50px;">Факт.<br>кол-во</th>
+                <th id="um_td" width="50px">Ед.<br>изм.</th>
+                <th id="doc_qty" width="50px">Уч.<br>кол-во</th>
+                <th id="real_qty" width="50px">Факт.<br>кол-во</th>
             </tr>
             </thead>
             <tbody style="display:none">
             <tr>
-                <td rowSpan="2" style=""></td>
-                <td colSpan="4" style=""></td>
+                <td rowSpan="2" width="40px" class="tdSrcPosID"></td>
+                <td colSpan="4" class="tdProdName"></td>
             </tr>
             <tr>
                 <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td width="50px" class="text-centered"></td>
+                <td width="50px" class="tdQty"></td>
+                <td width="50px" class="tdNewQty"></td>
             </tr>
             </tbody>
         </table>
-        <table id="inventoryTable" width="100%" style="margin-bottom: 32px;">
-            <tr style="display:none">
-                <th style="width:40px;">№<br>п/п</th>
-                <th>Наименование товара<br>Штрихкод</th>
-                <th style="width:50px;">Ед.<br>изм.</th>
-                <th style="width:50px;">Уч.<br>кол-во</th>
-                <th style="width:50px;">Факт.<br>кол-во</th>
-            </tr>
-
-        </table>
+        <table id="inventoryTable" width="100%" style="margin-bottom: 43px;"></table>
         <table id="tableWithFixedFooter" width="100%" style="position:fixed; bottom:0px; z-index: 100">
             <tfoot>
             <tr id="footTableFixedHeader">
-                <td id="totalRowQty">0</td>
+                <td id="totalRows" width="40px">0</td>
                 <td id="totalEmpty"></td>
-                <td id="totalDocQty" >0</td>
-                <td id="totalRealQty">0</td>
+                <td id="totalDocQty" width="50px">0</td>
+                <td id="totalRealQty" width="50px">0</td>
             </tr>
             </tfoot>
         </table>
@@ -89,107 +80,49 @@
                 var dataTableHeaderRows=$$(this.dataTableHeader).children("tbody").children("tr");
                 if(!dataTableHeaderRows) return;
                 if(!inventProdData) inventProdData={};
-
-                var newTRs=[], dthTR1, dthTR2, newTR1,newTR2, td;
+                var newTRs=[], dthTR1, dthTR2, newTR1,newTR2, td, tdOnClick;
                 if(dthTR1=dataTableHeaderRows[0]) {
                     newTRs.push(newTR1=dthTR1.cloneNode(true)); this.dataTableBody.appendChild(newTR1);
-                    if(td=newTR1.children[0]) td.innerText=inventProdData["TSrcPosID"].toString();
-                    if(td=newTR1.children[1]) td.innerText=inventProdData["ProdName"].toString();
+                    tdOnClick=  function(e){
+                        $$('.tdSelectedRow').removeClass('tdSelectedRow');
+                        for (var i = 0; i < newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
+                    };
+                    if(td=newTR1.children[0]) {
+                        td.innerText=inventProdData["TSrcPosID"].toString(); td.onclick=tdOnClick;
+                    }
+                    if(td=newTR1.children[1]) {
+                        td.innerText=inventProdData["ProdName"].toString(); td.onclick=tdOnClick;
+                    }
                 }
                 if(dthTR2=dataTableHeaderRows[1]) {
                     newTRs.push(newTR2=dthTR2.cloneNode(true));  this.dataTableBody.appendChild(newTR2);
-
-                    // tdBarCode.innerText=inventProdData["Barcode"].toString(); tdUm.innerText=inventProdData["UM"];
-                    // tdRef.innerText=inventProdData["TQty"].toString(); tdReal.innerText=inventProdData["TNewQty"].toString();
-                    // tdReal.ChID=inventProdData["ChID"].toString();
-                    // tdReal.TSrcPosID=inventProdData["TSrcPosID"].toString();tdReal.ProdID=inventProdData["ProdID"].toString();
-                    // tdReal.id=inventProdData["ChID"].toString()+'_'+inventProdData["TSrcPosID"].toString();
-                    // tdReal.TQty=inventProdData["TQty"].toString();
-                    // tdReal.trHigherOffsetTop=trHigher.offsetTop;
-
-                    if(td=newTR2.children[0]) td.innerText=inventProdData["Barcode"].toString();
-                    if(td=newTR2.children[1]) td.innerText=inventProdData["UM"].toString();
-                    if(td=newTR2.children[2]) td.innerText=inventProdData["TQty"].toString();
+                    if(td=newTR2.children[0]) {
+                        td.innerText=inventProdData["Barcode"].toString(); td.onclick=tdOnClick;
+                    }
+                    if(td=newTR2.children[1]) {
+                        td.innerText=inventProdData["UM"].toString(); td.onclick=tdOnClick;
+                    }
+                    if(td=newTR2.children[2]) {
+                        td.innerText=inventProdData["TQty"].toString(); td.onclick=tdOnClick;
+                    }
+                    var thisInstance=this;
                     if(td=newTR2.children[3]) {
                         td.innerText=inventProdData["TNewQty"].toString();
-                        td.id=inventProdData["ChID"].toString()+'_'+inventProdData["TSrcPosID"].toString();
-                        td.ChID=inventProdData["ChID"].toString();
-                        td.TSrcPosID=inventProdData["TSrcPosID"].toString();td.ProdID=inventProdData["ProdID"].toString();
+                        td.id="id_"+inventProdData["ChID"].toString()+'_'+inventProdData["TSrcPosID"].toString();
+                        td.ChID=inventProdData["ChID"].toString();td.TSrcPosID=inventProdData["TSrcPosID"].toString();
+                        td.ProdID=inventProdData["ProdID"].toString();td.ProdName=inventProdData["ProdName"].toString();
+                        td.TQty=inventProdData["TQty"].toString();
+                        td.tr1=dthTR1;
+                        td.doSelect=tdOnClick;
+                        td.onclick=  function(e){
+                            $$('.tdSelectedRow').removeClass('tdSelectedRow');
+                            for (var i = 0; i < newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
+                            thisInstance.showRealQtyDialog(e.target, e.target.ProdName, e.target.innerText.trim());
+                        };
                     }
+
                 }
-
-                this.setTotalInfo(inventProdData["TQty"],inventProdData["TNewQty"]);
-
                 return td;
-                // var newTR1 = document.getElementById('tableFixedHeaderRow1').cloneNode(true);
-                // document.getElementById('inventoryTable').appendChild(newTR1);
-                // var newTR2 = document.getElementById('tableFixedHeaderRow2').cloneNode(true);
-                // document.getElementById('inventoryTable').appendChild(newTR2);
-
-
-                let mainTable=document.getElementById('inventoryTable'),
-                    trHigher=document.createElement('tr'),
-                    tdRowNum=document.createElement('td'),tdProdName=document.createElement('td'),
-                    trLower=document.createElement('tr'),
-                    tdBarCode=document.createElement('td'), tdUm=document.createElement('td'),
-                    tdRef=document.createElement('td'), tdReal=document.createElement('td'),
-                    thisInstance=this;
-
-
-
-                //trHigher.style.display="none";trLower.style.display="none";
-
-                tdRowNum.style.width=(document.getElementById('num_td').offsetWidth-11) + "px";tdRowNum.className='text-centered';
-                // tdRowNum.css("width",$$("#num_td").offset().width-11);tdRowNum.addClass('text-centered');
-                tdProdName.className="blue-text";
-                // tdProdName.addClass('blue-text');
-                trHigher.appendChild(tdRowNum); trHigher.appendChild(tdProdName);
-
-                tdUm.style.width=(document.getElementById('um_td').offsetWidth-11) + "px";tdUm.className='text-centered';
-                // tdUm.css("width",$$("#um_td").offset().width-11);tdUm.addClass('text-centered');
-
-                tdRef.style.width=(document.getElementById('doc_qty').offsetWidth-11) + "px"; tdRef.style.textAlign="center";tdRef.className='refQty';
-                // tdRef.css("width",$$("#doc_qty").offset().width-11);tdRef.addClass('refQty');tdRef.css("textAlign","center");
-
-                tdReal.style.width=(document.getElementById('real_qty').offsetWidth-11) + "px"; tdReal.style.textAlign="center";tdReal.className='realQty';
-                // tdReal.css("width",$$("#real_qty").offset().width-11);tdReal.addClass('realQty');tdReal.css("textAlign","center");
-
-                trLower.appendChild(tdBarCode); trLower.appendChild(tdUm); trLower.appendChild(tdRef); trLower.appendChild(tdReal);
-                mainTable.appendChild(trHigher); mainTable.appendChild(trLower);
-                tdRowNum.rowSpan='2'; tdProdName.colSpan='4';
-                // tdRowNum.attr("rowSpan",2);tdProdName.attr("colSpan",4);
-                tdRowNum.onclick=  function(){
-                    $$('.clickedTableRow').removeClass('clickedTableRow');
-                    trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
-                };
-                tdProdName.onclick=tdRowNum.onclick;tdProdName.onclick=tdRowNum.onclick;
-                tdBarCode.onclick=tdRowNum.onclick;tdUm.onclick=tdRowNum.onclick;
-                tdRef.onclick=  function(){
-                    $$('.clickedTableRow').removeClass('clickedTableRow');
-                    trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
-                    thisInstance.showRealQtyDialog(tdReal, tdProdName.innerText, tdReal.innerText.trim());
-                };
-                tdReal.onclick=tdRef.onclick;tdReal.doSelect=tdRowNum.onclick;
-
-                tdRowNum.innerText=inventProdData["TSrcPosID"].toString();
-                // tdRowNum.text(inventProdData["TSrcPosID"].toString());
-                tdProdName.innerText=inventProdData["ProdName"];
-                // tdProdName.text(inventProdData["ProdName"]);
-                tdBarCode.innerText=inventProdData["Barcode"].toString(); tdUm.innerText=inventProdData["UM"];
-                tdRef.innerText=inventProdData["TQty"].toString(); tdReal.innerText=inventProdData["TNewQty"].toString();
-                tdReal.ChID=inventProdData["ChID"].toString();
-                tdReal.TSrcPosID=inventProdData["TSrcPosID"].toString();tdReal.ProdID=inventProdData["ProdID"].toString();
-                tdReal.id=inventProdData["ChID"].toString()+'_'+inventProdData["TSrcPosID"].toString();
-                tdReal.TQty=inventProdData["TQty"].toString();
-                tdReal.trHigherOffsetTop=trHigher.offsetTop;
-
-                // $$("#inventoryTable").append(trHigher).append(trLower);
-
-                $$('.clickedTableRow').removeClass('clickedTableRow');
-                trHigher.classList.add('clickedTableRow');trLower.classList.add('clickedTableRow');
-                //$$('#pageContentInventory').scrollTop(tdReal.trHigherOffsetTop,100);
-                this.setTotalInfo(inventProdData["TQty"],inventProdData["TNewQty"]);
-                return tdReal;
             },
             showRealQtyDialog: function(tdReal, prodName, displayedQty){
                 let thisInstance=this,
@@ -229,29 +162,38 @@
                             { text:"ОТМЕНА",close:true,keyCodes:[27],onClick:function(){ $$("#barCodeInput").focus(); } } ]
                     }).open().on("closed",function(){ $$("#barCodeInput").focus(); });
             },
-            setTotalInfo: function(tQty,tNewQty){
-                document.getElementById("totalRowQty").innerHTML=this.items.length;
+            setTotalInfo: function(tQty,tNewQty,tLoadedRows){
+                var tRows=this.items.length.toString();
+                if(tLoadedRows!==undefined) tRows=tLoadedRows.toString()+"/<br>"+tRows;
+                document.getElementById("totalRows").innerHTML=tRows;
                 document.getElementById("totalDocQty").innerHTML=
                     parseInt(document.getElementById("totalDocQty").innerHTML)+tQty;
                 document.getElementById("totalRealQty").innerHTML=
                     parseInt(document.getElementById("totalRealQty").innerHTML)+tNewQty;;
             },
+
             addProdToTable:function(prodData){
                 if(!prodData) prodData={TQty:0,TNewQty:0};
-                var existstdReal=document.getElementById(prodData["ChID"]+'_'+prodData["TSrcPosID"]);
+                var existstdReal=$$(this.dataTableBody).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["TSrcPosID"])[0];
                 if(existstdReal){
                     let oldTNewQty=parseInt(existstdReal.innerText), tNewQty=prodData["TNewQty"],
                         oldTQty=parseInt(existstdReal.TQty), tQty=prodData["TQty"];
                     existstdReal.innerText=tNewQty; existstdReal.TQty=tQty;
-                    $$('.clickedTableRow').removeClass('clickedTableRow');
                     existstdReal.doSelect();
-                    $$('#pageContentInventory').scrollTop(existstdReal.trHigherOffsetTop,10);
+                    this.setScroll(existstdReal);
                     this.setTotalInfo(tQty-oldTQty,tNewQty-oldTNewQty);
                     return;
                 }
-                prodData.tableTDReal= this.createTableRow(prodData);
+                var newTDReal=this.createTableRow(prodData); prodData.tableTDReal= newTDReal;
+                newTDReal.doSelect();
+                this.setTotalInfo(prodData["TQty"],prodData["TNewQty"]);
+                this.setScroll(newTDReal);
             },
-
+            setScroll: function(innerElem){
+                var page=$$('#pageContentInventory')[0],
+                    absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
+                page.scrollTo(0, absoluteElementTop - (page.clientHeight / 2));
+            },
             /**
              * callback = function(prodData,err)
              */
@@ -339,7 +281,7 @@
                         if(!result){
                             cInstance.disableInputProdBarcode(true); return;
                         }
-                        app.data.pageInventory={inventDataItems:result.items};                             console.log('pageInventory.html loadInventData items=',result.items);
+                        app.data.pageInventory={inventDataItems:result.items};                          console.log('pageInventory.html loadInventData items=',result.items);
                         cInstance.$setState({
                             item:inventData,items:result.items
                         });
@@ -351,77 +293,51 @@
                     })
             },
             fillInventTable: function(inventData,finishedCallback){
-                var app=this.$app;
                 var progress = 0, progressStep=100/inventData.length;
-                this.progressBarEl = app.progressbar.show(progress, app.theme === 'md' ? 'yellow' : 'blue');
-
-                app.preloader.show();$$('#inventoryTable').hide();
-
+                this.progressBarEl = app7.progressbar.show(progress, app7.theme === 'md' ? 'yellow' : 'blue');
+                app7.preloader.show();$$('#inventoryTable').hide();
+                var self=this;
                 this.fillInventTableProgress(0,inventData,this.progressBarEl,progress,progressStep,function(){
-                    app.progressbar.hide(this.progressBarEl); //hide
-                    app.preloader.hide();$$('#inventoryTable').show();$$('#inventoryTable th').hide();
-
-                    setTimeout(function(){
-
-                        var lastTDReal=(inventData&&inventData.length>0)?inventData[inventData.length-1].tableTDReal:null;                                console.log("lastTDReal",lastTDReal);
-                        if(lastTDReal)$$('#pageContentInventory').scrollTop(lastTDReal.trHigherOffsetTop,100);
-                        if(finishedCallback) finishedCallback();
-
-                    },1000);
-
+                    app7.progressbar.hide(this.progressBarEl); //hide
+                    app7.preloader.hide();$$('#inventoryTable').show();
+                    self.setTotalInfo(0,0);
+                    if(finishedCallback) finishedCallback();
                 })
             },
             fillInventTableProgress: function(ind,inventData,progressBarEl,progress,progressStep,finishedCallback){
-                var inventDataItem=inventData[ind];
+                var self=this, timeout=10+Math.round(ind/100);
+                var i=ind, inventDataItem, tdReal;
+                while(i<ind+10){
+                    inventDataItem=inventData[i];
+                    if(!inventDataItem)break;
+                    tdReal=this.createTableRow(inventDataItem);
+                    inventDataItem.tableTDReal= tdReal;
+                    this.setTotalInfo(inventDataItem["TQty"],inventDataItem["TNewQty"],i+1);
+                    progress += progressStep;
+                    i++;
+                }
+                app7.progressbar.set(progressBarEl, progress);
                 if(!inventDataItem) {
-                    finishedCallback();
+                    setTimeout(function(){
+                        if(finishedCallback)finishedCallback();
+                    },timeout);
                     return;
                 }
-                var self=this,app=this.$app;
                 setTimeout(function(){
-                    if(!self.createTableRow){
-                        if(finishedCallback)finishedCallback();return;
-                    }
-                    // inventDataItem.tableTDReal= self.createTableRow(inventDataItem);
-                    // progress += progressStep;
-                    var tdReal;
-                    for (var i = ind+1; i < ind+10; i++) {
-                        tdReal=self.createTableRow(inventDataItem);
-                        inventDataItem.tableTDReal= tdReal;
-                        progress += progressStep;
-                        inventDataItem=inventData[i];
-                        if(!inventDataItem)break;
-                        // app.progressbar.set(progressBarEl, progress);
-                        //this.fillInventTableProgress(i,inventData,progressBarEl,progress,progressStep,finishedCallback)
-                    }
-                    $$('#inventoryTable tr').show();
-                    app.progressbar.set(progressBarEl, progress);
-                    // if(tdReal)$$('#pageContentInventory').scrollTop(tdReal.trHigherOffsetTop,100);
-
-                    // self.fillInventTableProgress(ind+1,inventData,progressBarEl,progress,progressStep,finishedCallback)
                     self.fillInventTableProgress(i,inventData,progressBarEl,progress,progressStep,finishedCallback)
-                },0/*20+Math.round(ind/100)*/)
+                },timeout)
             }
         },
         on: {
-            pageInit: function(e, page) {                                                               console.log('pageInventory.html pageInit', page, this);
-                                                                                                    console.log("$$",$$(this.el).children(".page-content").children("table"));
+            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
                 var dataTables=$$(this.el).children(".page-content").children("table");
-
-                if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];                  console.log("this.dataTableHeader",this.dataTableHeader);
+                if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
                 if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
                 if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
-
-                document.getElementById("totalDocQty").innerHTML=0;
-                document.getElementById("totalRealQty").innerHTML=0;
                 this.loadInventData();
             },
             pageBeforeIn: function(e, page) {                                                           //console.log('pageInventory.html pageBeforeIn', page);
-                let maxWidth=document.getElementById("tableWithFixedHead").clientWidth+1+'px';
                 document.getElementById("inventoryTable").style.marginTop=(document.getElementById("tableFixedHeader").offsetHeight)  +'px';
-                document.getElementById("totalRowQty").style.width=(document.getElementById('num_td').offsetWidth-11) + "px";
-                document.getElementById("totalDocQty").style.width= (document.getElementById('doc_qty').offsetWidth-11) + "px";
-                document.getElementById("totalRealQty").style.width= (document.getElementById('real_qty').offsetWidth-11) + "px";
             },
             pageAfterIn: function(e, page) {                                                            //console.log('pageInventory.html pageAfterIn', page);
                 $$("#barCodeInput").focus();

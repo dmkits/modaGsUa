@@ -21,11 +21,9 @@ tfoot td{
     border: 1px solid black;
     background-color: lightblue;
     font-weight: bold;
-    padding: 5px 5px 5px 5px;
+    height: 42px;
+    padding: 0px 5px 0px 5px;
     text-align:center;
-}
-.clickedTableRow{
-    background-color:#cfd5da;
 }
 #login-button-div{
     text-align: center;
@@ -36,9 +34,22 @@ tfoot td{
 .text-right{
     text-align: right;
 }
-.blue-text{
+.tdSrcPosID{
+    text-align: center;
+}
+.tdProdName{
     color:darkblue;
 }
+.tdQty{
+    text-align: center;
+}
+.tdNewQty{
+    text-align: center;
+}
+.tdSelectedRow{
+    background-color:#cfd5da;
+}
+
 .md .toolbar {
     /*height: 96px;*/
 }
