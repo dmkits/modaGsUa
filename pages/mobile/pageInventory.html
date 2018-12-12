@@ -21,37 +21,38 @@
         </div>
     </div>
     <div class="page-content" id="pageContentInventory">
-        <table id="tableWithFixedHead" width="100%" style="position:fixed; top:104px; z-index: 100">
+        <table width="100%" style="position:fixed; top:104px; z-index: 100">
             <thead>
-            <tr id="tableFixedHeader">
-                <th id="num_td" width="40px">№<br>п/п</th>
-                <th id="name_barcode_td">Наименование товара<br>Штрихкод</th>
-                <th id="um_td" width="50px">Ед.<br>изм.</th>
-                <th id="doc_qty" width="50px">Уч.<br>кол-во</th>
-                <th id="real_qty" width="50px">Факт.<br>кол-во</th>
+            <tr>
+                <th width="40px">№<br>п/п</th>
+                <th>Наименование товара<br>Штрихкод</th>
+                <th width="50px">Ед.<br>изм.</th>
+                <th width="50px">Уч.<br>кол-во</th>
+                <th width="50px">Факт.<br>кол-во</th>
             </tr>
             </thead>
             <tbody style="display:none">
-            <tr>
-                <td rowSpan="2" width="40px" class="tdSrcPosID"></td>
-                <td colSpan="4" class="tdProdName"></td>
+            <tr rowSelecting="true">
+                <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="TSrcPosID"></td>
+                <td colSpan="4" class="tdProdName" dataItemName="ProdName"></td>
             </tr>
-            <tr>
-                <td></td>
-                <td width="50px" class="text-centered"></td>
-                <td width="50px" class="tdQty"></td>
-                <td width="50px" class="tdNewQty"></td>
+            <tr rowSelecting="true">
+                <td dataItemName="Barcode"></td>
+                <td width="50px" class="text-centered" dataItemName="UM"></td>
+                <td width="50px" class="tdQty" dataItemName="TQty"></td>
+                <td width="50px" class="tdNewQty" dataItemName="TNewQty"
+                    onCreated="inventoryTableTDNewQtyOnCreated" onClick="inventoryTableTDNewQtyOnClick"></td>
             </tr>
             </tbody>
         </table>
-        <table id="inventoryTable" width="100%" style="margin-bottom: 43px;"></table>
-        <table id="tableWithFixedFooter" width="100%" style="position:fixed; bottom:0px; z-index: 100">
+        <table width="100%" style="margin-top:43px; margin-bottom: 43px;"></table>
+        <table width="100%" style="position:fixed; bottom:0px; z-index: 100">
             <tfoot>
-            <tr id="footTableFixedHeader">
+            <tr>
                 <td id="totalRows" width="40px">0</td>
-                <td id="totalEmpty"></td>
-                <td id="totalDocQty" width="50px">0</td>
-                <td id="totalRealQty" width="50px">0</td>
+                <td></td>
+                <td id="totalQty" width="50px">0</td>
+                <td id="totalNewQty" width="50px">0</td>
             </tr>
             </tfoot>
         </table>
@@ -60,6 +61,21 @@
 </template>
 <script>
     return {
+        on: {
+            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
+                var dataTables=$$(this.el).children(".page-content").children("table");
+                if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
+                if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
+                if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
+                this.loadInventData();
+            },
+            pageAfterIn: function(e, page) {                                                            //console.log('pageInventory.html pageAfterIn', page);
+                $$("#barCodeInput").focus();
+            },
+            pageAfterOut: function(e, page) {                                                           //console.log('pageInventory.html pageAfterOut', page);
+                if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl);
+            },
+        },
         data: function data() {                                                                         //console.log('pageInventory.html data',this.$route.params);
             let inventData={},listInventsData=this.$app.data.pageListInvents.listInvents;
             if(!this.$route.params) return inventData;
@@ -75,58 +91,247 @@
             return {item:inventData,items:[]};
         },
         methods: {
-            createTableRow: function(inventProdData){                                                   //console.log('pageInventory.html createTableRow inventProdData=',inventProdData, this);
-                if(!this.dataTableHeader||!this.dataTableBody) return;
-                var dataTableHeaderRows=$$(this.dataTableHeader).children("tbody").children("tr");
+            /**
+             * dataTableHeader =
+             * <table width="100%" style="position:fixed; top:104px; z-index: 100">
+             *     <thead>
+             *         <tr>
+             *             <th width="40px">№<br>п/п</th>
+             *             <th>Наименование товара<br>Штрихкод</th>
+             *             <th width="50px">Ед.<br>изм.</th>
+             *             <th width="50px">Уч.<br>кол-во</th>
+             *             <th width="50px">Факт.<br>кол-во</th>
+             *         </tr>
+             *     </thead>
+             *     <tbody style="display:none">
+             *         <tr rowSelecting="true">
+             *             <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="TSrcPosID"></td>
+             *             <td colSpan="4" class="tdProdName" dataItemName="ProdName"></td>
+             *         </tr>
+             *         <tr rowSelecting="true">
+             *             <td dataItemName="Barcode"></td>
+             *             <td width="50px" class="text-centered" dataItemName="UM"></td>
+             *             <td width="50px" class="tdQty" dataItemName="TQty"></td>
+             *             <td width="50px" class="tdNewQty" dataItemName="TNewQty"
+             *                  onCreated="inventoryTableTDNewQtyOnCreated" onClick="inventoryTableTDNewQtyOnClick"></td>
+             *         </tr>
+             *     </tbody>
+             * </table>
+             *      tr rowSelecting - if row can be selected
+             *      td dataItemName - name of data table row data item value
+             *      td onCreated - name of function called after td has been created,
+             *          function(td,tableDataItem,methods), methods={ rowSelectingMethod, <onClick function name if exists> }
+             *      td onClick - name of function called after td click,
+             *          function(e,dataTableItemName,self), e-onclick event, self-component instatnce
+             * dataTableBody =
+             * <table width="100%" style="margin-bottom: 43px;"></table>
+             * totalTable =
+             * <table width="100%" style="position:fixed; bottom:0px; z-index: 100">
+             *     <tfoot>
+             *         <tr>
+             *             <td id="totalRows" width="40px">0</td>
+             *             <td></td>
+             *             <td id="totalQty" width="50px">0</td>
+             *             <td id="totalNewQty" width="50px">0</td>
+             *         </tr>
+             *     </tfoot>
+             * </table>
+             * totalTable updated in updateTotalTable function
+             */
+            createTableRow: function(dataTableHeader, dataTableBody, tableDataItem){                         //console.log('pageInventory.html createTableRow tableDataItem=',tableDataItem, this);
+                if(!dataTableHeader||!dataTableBody) return;
+                var dataTableHeaderRows=$$(dataTableHeader).children("tbody").children("tr");
                 if(!dataTableHeaderRows) return;
-                if(!inventProdData) inventProdData={};
-                var newTRs=[], dthTR1, dthTR2, newTR1,newTR2, td, tdOnClick;
-                if(dthTR1=dataTableHeaderRows[0]) {
-                    newTRs.push(newTR1=dthTR1.cloneNode(true)); this.dataTableBody.appendChild(newTR1);
-                    tdOnClick=  function(e){
-                        $$('.tdSelectedRow').removeClass('tdSelectedRow');
-                        for (var i = 0; i < newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
-                    };
-                    if(td=newTR1.children[0]) {
-                        td.innerText=inventProdData["TSrcPosID"].toString(); td.onclick=tdOnClick;
-                    }
-                    if(td=newTR1.children[1]) {
-                        td.innerText=inventProdData["ProdName"].toString(); td.onclick=tdOnClick;
-                    }
-                }
-                if(dthTR2=dataTableHeaderRows[1]) {
-                    newTRs.push(newTR2=dthTR2.cloneNode(true));  this.dataTableBody.appendChild(newTR2);
-                    if(td=newTR2.children[0]) {
-                        td.innerText=inventProdData["Barcode"].toString(); td.onclick=tdOnClick;
-                    }
-                    if(td=newTR2.children[1]) {
-                        td.innerText=inventProdData["UM"].toString(); td.onclick=tdOnClick;
-                    }
-                    if(td=newTR2.children[2]) {
-                        td.innerText=inventProdData["TQty"].toString(); td.onclick=tdOnClick;
-                    }
-                    var thisInstance=this;
-                    if(td=newTR2.children[3]) {
-                        td.innerText=inventProdData["TNewQty"].toString();
-                        td.id="id_"+inventProdData["ChID"].toString()+'_'+inventProdData["TSrcPosID"].toString();
-                        td.ChID=inventProdData["ChID"].toString();td.TSrcPosID=inventProdData["TSrcPosID"].toString();
-                        td.ProdID=inventProdData["ProdID"].toString();td.ProdName=inventProdData["ProdName"].toString();
-                        td.TQty=inventProdData["TQty"].toString();
-                        td.tr1=dthTR1;
-                        td.doSelect=tdOnClick;
-                        td.onclick=  function(e){
-                            $$('.tdSelectedRow').removeClass('tdSelectedRow');
+                if(!tableDataItem) tableDataItem={};
+                var newTRs=[];
+                for (var i = 0; i < dataTableHeaderRows.length; i++) {
+                    var dthTR=dataTableHeaderRows[i], newTR;
+                    newTRs.push(newTR=dthTR.cloneNode(true)); dataTableBody.appendChild(newTR);
+                    var rowSelecting=newTR.getAttribute("rowSelecting"),
+                        tdOnClick=function(e){
+                            $$(dataTableBody).children('.tdSelectedRow').removeClass('tdSelectedRow');
                             for (var i = 0; i < newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
-                            thisInstance.showRealQtyDialog(e.target, e.target.ProdName, e.target.innerText.trim());
                         };
+                    for (var j = 0; j < newTR.children.length; j++) {
+                        var newTD=newTR.children[j];
+                        var dataTableItemName=newTD.getAttribute("dataItemName"), val;
+                        if(dataTableItemName!==undefined)val=tableDataItem[dataTableItemName];
+                        newTD.innerText=(val==undefined||val==null)?"":val.toString();
+                        if(rowSelecting)newTD.onclick=tdOnClick;
+                        var onClickMethodName=newTD.getAttribute("onClick");
+                        if(onClickMethodName){
+                            var onClickMethod=this[onClickMethodName], self=this;
+                            newTD.onclick=function(e){
+                                tdOnClick(e);
+                                onClickMethod(e,tableDataItem,self);
+                            };
+                        }
+                        var onCreatedMethosName=newTD.getAttribute("onCreated");
+                        if(onCreatedMethosName){
+                            var methods={};
+                            if(rowSelecting)methods["rowSelectingMethod"]=tdOnClick;
+                            if(onClickMethodName)methods[onClickMethodName]=this[onClickMethodName];
+                            this[onCreatedMethosName](newTD,tableDataItem,methods);
+                        }
                     }
-
                 }
-                return td;
             },
+            /**
+             * dataTableFoot =
+             * <table width="100%" style="position:fixed; bottom:0px; z-index: 100">
+             *     <tfoot>
+             *         <tr>
+             *             <td id="totalRows" width="40px">0</td>
+             *             <td></td>
+             *             <td id="totalQty" width="50px">0</td>
+             *             <td id="totalNewQty" width="50px">0</td>
+             *         </tr>
+             *     </tfoot>
+             * </table>
+             * params = { <td id value>:<value>, .. }
+             */
+            updateTotalTable:function(dataTableFoot,params){
+                if(!params)return;
+                var dataTableFootTR=$$(dataTableFoot).find("tr");
+                for (var valueName in params)
+                    dataTableFootTR.find("td#"+valueName).html(params[valueName]);
+            },
+
+            inventoryTableTDNewQtyOnCreated:function(td,tableDataItem,methods){
+                td.id="id_"+tableDataItem["ChID"].toString()+'_'+tableDataItem["TSrcPosID"].toString();
+                td.ChID=tableDataItem["ChID"].toString();td.TSrcPosID=tableDataItem["TSrcPosID"].toString();
+                td.ProdID=tableDataItem["ProdID"].toString();td.ProdName=tableDataItem["ProdName"].toString();
+                td.TQty=tableDataItem["TQty"].toString();
+                td.doSelect=methods["rowSelectingMethod"];
+                tableDataItem.tableTDNewQty= td;
+            },
+            addProdToTable:function(prodData){
+                if(!prodData) prodData={TQty:0,TNewQty:0};
+                var existstdReal=$$(this.dataTableBody).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["TSrcPosID"])[0];
+                if(existstdReal){
+                    let oldTNewQty=parseInt(existstdReal.innerText), tNewQty=prodData["TNewQty"],
+                        oldTQty=parseInt(existstdReal.TQty), tQty=prodData["TQty"];
+                    existstdReal.innerText=tNewQty; existstdReal.TQty=tQty;
+                    existstdReal.doSelect();
+                    this.setScroll(existstdReal);
+                    this.setTotalInfo(tQty-oldTQty,tNewQty-oldTNewQty);
+                    return;
+                }
+                this.createTableRow(this.dataTableHeader,this.dataTableBody, prodData);
+                prodData.tableTDNewQty.doSelect();
+                this.setTotalInfo(prodData["TQty"],prodData["TNewQty"]);
+                this.setScroll(prodData.tableTDNewQty);
+            },
+            setTotalInfo: function(tQty,tNewQty,tLoadedRows){
+                var tRows=this.items.length.toString();
+                if(tLoadedRows!==undefined) tRows=tLoadedRows.toString()+"/<br>"+tRows;
+                var dataTableFootTR=$$(this.dataTableFoot).find("tr"),
+                    totalQty=parseInt(dataTableFootTR.find("td#totalQty").text())+tQty,
+                    totalNewQty=parseInt(dataTableFootTR.find("td#totalNewQty").text())+tNewQty;
+                this.updateTotalTable(this.dataTableFoot,{totalRows:tRows,totalQty:totalQty,totalNewQty:totalNewQty})
+            },
+            setScroll: function(innerElem){
+                var page=$$('#pageContentInventory')[0],
+                    absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
+                page.scrollTo(0, absoluteElementTop - (page.clientHeight / 2));
+            },
+
+            loadInventData:function(){                                                                  console.log('pageInventory.html loadInventData inventData=',this.item);
+                let inventData=this.item, inventChID=inventData.ChID;
+                if(inventChID===null||inventChID===undefined) return;
+                let cInstance=this, app=this.$app;                                                      console.log('pageInventory.html loadInventData inventChID=',inventChID, this);
+                cInstance.disableInputProdBarcode();
+                app.preloader.show();
+                app.srvRequestJSON({url:'/mobile/Invent/getDataForVenATable',conditions:{'ParentChID=':inventChID},
+                        errorDialogMsg:"Не удалось получить список товаров инвентаризации с сервера!"},
+                    function(result,error){
+                        app.preloader.hide();
+                        if(!result){
+                            cInstance.disableInputProdBarcode(true); return;
+                        }
+                        app.data.pageInventory={inventDataItems:result.items};                          console.log('pageInventory.html loadInventData items=',result.items);
+                        cInstance.$setState({
+                            item:inventData,items:result.items
+                        });
+                        cInstance.fillInventTable(result.items,function(){
+                            if(!cInstance.disableInputProdBarcode)return;
+                            cInstance.disableInputProdBarcode(false);
+                            $$("#barCodeInput").focus();
+                        });
+                    })
+            },
+            fillInventTable: function(inventData,finishedCallback){
+                var progress = 0, progressStep=100/inventData.length, dataTableBody=this.dataTableBody;
+                this.progressBarEl = app7.progressbar.show(progress, app7.theme === 'md' ? 'yellow' : 'blue');
+                app7.preloader.show();$$(dataTableBody).hide();
+                var self=this;
+                this.fillInventTableProgress(0,inventData,this.progressBarEl,progress,progressStep,function(){
+                    app7.progressbar.hide(this.progressBarEl); //hide
+                    app7.preloader.hide();$$(dataTableBody).show();
+                    self.setTotalInfo(0,0);
+                    if(finishedCallback) finishedCallback();
+                })
+            },
+            fillInventTableProgress: function(ind,inventData,progressBarEl,progress,progressStep,finishedCallback){
+                var self=this, timeout=10+Math.round(ind/100);
+                var i=ind, inventDataItem;
+                while(i<ind+10){
+                    inventDataItem=inventData[i];
+                    if(!inventDataItem)break;
+                    this.createTableRow(this.dataTableHeader,this.dataTableBody, inventDataItem);
+                    this.setTotalInfo(inventDataItem["TQty"],inventDataItem["TNewQty"],i+1);
+                    progress += progressStep;
+                    i++;
+                }
+                app7.progressbar.set(progressBarEl, progress);
+                if(!inventDataItem) {
+                    setTimeout(function(){
+                        if(finishedCallback)finishedCallback();
+                    },timeout);
+                    return;
+                }
+                setTimeout(function(){
+                    self.fillInventTableProgress(i,inventData,progressBarEl,progress,progressStep,finishedCallback)
+                },timeout)
+            },
+
+            barcodeInputEnter: function () {
+                this.disableInputProdBarcode();
+                var self=this;
+                this.storeInputValueToInvent($$("#barCodeInput").val(),function(inventProdData){
+                    if(!inventProdData){
+                        $$("#barCodeInput").val("");
+                        self.disableInputProdBarcode(false);
+                        $$("#barCodeInput").focus();
+                        return;
+                    }
+                    self.addProdToTable(inventProdData);
+                    $$("#barCodeInput").val("");
+                    self.disableInputProdBarcode(false);
+                    $$("#barCodeInput").focus();
+                });
+            },
+            barcodeInputKeypress: function (e) {
+                if(e.keyCode==13||e.key=='Enter') this.barcodeInputEnter();
+            },
+            disableInputProdBarcode:function(disable){
+                if(disable!==false){
+                    $$('#barCodeInput').attr('disabled',1);
+                    $$('#buttonBarcodeInputEnter').attr('disabled',1);
+                    return;
+                }
+                $$('#barCodeInput').removeAttr('disabled');
+                $$('#buttonBarcodeInputEnter').removeAttr('disabled');
+            },
+
+            inventoryTableTDNewQtyOnClick:function(e,dataTableItemName,self){
+                var td=e.target;
+                self.showRealQtyDialog(td, dataTableItemName["ProdName"], td.innerText.trim());
+            },
+
             showRealQtyDialog: function(tdReal, prodName, displayedQty){
                 let thisInstance=this,
-                    realQtyDialog=app7.dialog.create({ title: 'Фактический остаток', destroyOnClose:true, text:prodName,
+                    realQtyDialog=app7.dialog.create({ title:"Фактический остаток", destroyOnClose:true, text:prodName,
                         content:'<span id="storeRealQtyErrMsg" style="color:red;font-weight:bold;font-size:14px;line-height:1;"></span>'+
                             '<br><input id="inputRealQty" type="number" style="text-align:center;border:solid 1px grey;padding:5px"></<input>',
                         on:{
@@ -162,38 +367,7 @@
                             { text:"ОТМЕНА",close:true,keyCodes:[27],onClick:function(){ $$("#barCodeInput").focus(); } } ]
                     }).open().on("closed",function(){ $$("#barCodeInput").focus(); });
             },
-            setTotalInfo: function(tQty,tNewQty,tLoadedRows){
-                var tRows=this.items.length.toString();
-                if(tLoadedRows!==undefined) tRows=tLoadedRows.toString()+"/<br>"+tRows;
-                document.getElementById("totalRows").innerHTML=tRows;
-                document.getElementById("totalDocQty").innerHTML=
-                    parseInt(document.getElementById("totalDocQty").innerHTML)+tQty;
-                document.getElementById("totalRealQty").innerHTML=
-                    parseInt(document.getElementById("totalRealQty").innerHTML)+tNewQty;;
-            },
 
-            addProdToTable:function(prodData){
-                if(!prodData) prodData={TQty:0,TNewQty:0};
-                var existstdReal=$$(this.dataTableBody).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["TSrcPosID"])[0];
-                if(existstdReal){
-                    let oldTNewQty=parseInt(existstdReal.innerText), tNewQty=prodData["TNewQty"],
-                        oldTQty=parseInt(existstdReal.TQty), tQty=prodData["TQty"];
-                    existstdReal.innerText=tNewQty; existstdReal.TQty=tQty;
-                    existstdReal.doSelect();
-                    this.setScroll(existstdReal);
-                    this.setTotalInfo(tQty-oldTQty,tNewQty-oldTNewQty);
-                    return;
-                }
-                var newTDReal=this.createTableRow(prodData); prodData.tableTDReal= newTDReal;
-                newTDReal.doSelect();
-                this.setTotalInfo(prodData["TQty"],prodData["TNewQty"]);
-                this.setScroll(newTDReal);
-            },
-            setScroll: function(innerElem){
-                var page=$$('#pageContentInventory')[0],
-                    absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
-                page.scrollTo(0, absoluteElementTop - (page.clientHeight / 2));
-            },
             /**
              * callback = function(prodData,err)
              */
@@ -237,114 +411,7 @@
                         let inventProdData=result.resultItem;
                         callback(inventProdData);
                     })
-            },
-
-            disableInputProdBarcode:function(disable){
-                if(disable!==false){
-                    $$('#barCodeInput').attr('disabled',1);
-                    $$('#buttonBarcodeInputEnter').attr('disabled',1);
-                    return;
-                }
-                $$('#barCodeInput').removeAttr('disabled');
-                $$('#buttonBarcodeInputEnter').removeAttr('disabled');
-            },
-            barcodeInputEnter: function () {
-                this.disableInputProdBarcode();
-                var self=this;
-                this.storeInputValueToInvent($$("#barCodeInput").val(),function(inventProdData){
-                    if(!inventProdData){
-                        document.getElementById("barCodeInput").value='';
-                        self.disableInputProdBarcode(false);
-                        $$("#barCodeInput").focus();
-                        return;
-                    }
-                    self.addProdToTable(inventProdData);
-                    document.getElementById("barCodeInput").value='';
-                    self.disableInputProdBarcode(false);
-                    $$("#barCodeInput").focus();
-                });
-            },
-            barcodeInputKeypress: function (e) {
-                if(e.keyCode==13||e.key=='Enter') this.barcodeInputEnter();
-            },
-
-            loadInventData:function(){                                                                  console.log('pageInventory.html loadInventData inventData=',this.item);
-                let inventData=this.item, inventChID=inventData.ChID;
-                if(inventChID===null||inventChID===undefined) return;
-                let cInstance=this, app=this.$app;                                                      console.log('pageInventory.html loadInventData inventChID=',inventChID, this);
-                cInstance.disableInputProdBarcode();
-                app.preloader.show();
-                app.srvRequestJSON({url:'/mobile/Invent/getDataForVenATable',conditions:{'ParentChID=':inventChID},
-                        errorDialogMsg:"Не удалось получить список товаров инвентаризации с сервера!"},
-                    function(result,error){
-                        app.preloader.hide();
-                        if(!result){
-                            cInstance.disableInputProdBarcode(true); return;
-                        }
-                        app.data.pageInventory={inventDataItems:result.items};                          console.log('pageInventory.html loadInventData items=',result.items);
-                        cInstance.$setState({
-                            item:inventData,items:result.items
-                        });
-                        cInstance.fillInventTable(result.items,function(){
-                            if(!cInstance.disableInputProdBarcode)return;
-                            cInstance.disableInputProdBarcode(false);
-                            $$("#barCodeInput").focus();
-                        });
-                    })
-            },
-            fillInventTable: function(inventData,finishedCallback){
-                var progress = 0, progressStep=100/inventData.length;
-                this.progressBarEl = app7.progressbar.show(progress, app7.theme === 'md' ? 'yellow' : 'blue');
-                app7.preloader.show();$$('#inventoryTable').hide();
-                var self=this;
-                this.fillInventTableProgress(0,inventData,this.progressBarEl,progress,progressStep,function(){
-                    app7.progressbar.hide(this.progressBarEl); //hide
-                    app7.preloader.hide();$$('#inventoryTable').show();
-                    self.setTotalInfo(0,0);
-                    if(finishedCallback) finishedCallback();
-                })
-            },
-            fillInventTableProgress: function(ind,inventData,progressBarEl,progress,progressStep,finishedCallback){
-                var self=this, timeout=10+Math.round(ind/100);
-                var i=ind, inventDataItem, tdReal;
-                while(i<ind+10){
-                    inventDataItem=inventData[i];
-                    if(!inventDataItem)break;
-                    tdReal=this.createTableRow(inventDataItem);
-                    inventDataItem.tableTDReal= tdReal;
-                    this.setTotalInfo(inventDataItem["TQty"],inventDataItem["TNewQty"],i+1);
-                    progress += progressStep;
-                    i++;
-                }
-                app7.progressbar.set(progressBarEl, progress);
-                if(!inventDataItem) {
-                    setTimeout(function(){
-                        if(finishedCallback)finishedCallback();
-                    },timeout);
-                    return;
-                }
-                setTimeout(function(){
-                    self.fillInventTableProgress(i,inventData,progressBarEl,progress,progressStep,finishedCallback)
-                },timeout)
             }
-        },
-        on: {
-            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
-                var dataTables=$$(this.el).children(".page-content").children("table");
-                if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
-                if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
-                if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
-                this.loadInventData();
-            },
-            pageBeforeIn: function(e, page) {                                                           //console.log('pageInventory.html pageBeforeIn', page);
-                document.getElementById("inventoryTable").style.marginTop=(document.getElementById("tableFixedHeader").offsetHeight)  +'px';
-            },
-            pageAfterIn: function(e, page) {                                                            //console.log('pageInventory.html pageAfterIn', page);
-                $$("#barCodeInput").focus();
-            },
-            pageAfterOut: function(e, page) {                                                           //console.log('pageInventory.html pageAfterOut', page);
-                if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl); //hide
-            },
         }
     }
 </script>
