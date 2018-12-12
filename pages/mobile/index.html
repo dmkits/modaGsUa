@@ -136,6 +136,7 @@
             { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
         ],
         app7  = new Framework7({// Framework7 App main instance
+            id:'io.framework7.mobile.gabis',
             root: '#app', // app7 root element
             theme: 'auto', // Automatic theme detection
             routes: baseRoutes,
@@ -307,6 +308,112 @@
                 if(!definePath)return;
                 mainView.router.navigate(definePath);
             });
+    };
+
+    /** IT'S USED IN INNER PAGE TEMPLATES
+     * dataTableHeader =
+     * <table width="100%" style="position:fixed; top:104px; z-index: 100">
+     *     <thead>
+     *         <tr>
+     *             <th width="40px">№<br>п/п</th>
+     *             <th>Наименование товара<br>Штрихкод</th>
+     *             <th width="50px">Ед.<br>изм.</th>
+     *             <th width="50px">Уч.<br>кол-во</th>
+     *             <th width="50px">Факт.<br>кол-во</th>
+     *         </tr>
+     *     </thead>
+     *     <tbody style="display:none">
+     *         <tr rowSelecting="true">
+     *             <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="TSrcPosID"></td>
+     *             <td colSpan="4" class="tdProdName" dataItemName="ProdName"></td>
+     *         </tr>
+     *         <tr rowSelecting="true">
+     *             <td dataItemName="Barcode"></td>
+     *             <td width="50px" class="text-centered" dataItemName="UM"></td>
+     *             <td width="50px" class="tdQty" dataItemName="TQty"></td>
+     *             <td width="50px" class="tdNewQty" dataItemName="TNewQty"
+     *                  onCreated="inventoryTableTDNewQtyOnCreated" onClick="inventoryTableTDNewQtyOnClick"></td>
+     *         </tr>
+     *     </tbody>
+     * </table>
+     *      tr rowSelecting - if row can be selected
+     *      td dataItemName - name of data table row data item value
+     *      td onCreated - name of function called after td has been created,
+     *          function(td,tableDataItem,methods), methods={ rowSelectingMethod, <onClick function name if exists> }
+     *      td onClick - name of function called after td click,
+     *          function(e,dataTableItemName,self), e-onclick event, self-component instatnce
+     * dataTableBody =
+     * <table width="100%" style="margin-bottom: 43px;"></table>
+     * totalTable =
+     * <table width="100%" style="position:fixed; bottom:0px; z-index: 100">
+     *     <tfoot>
+     *         <tr>
+     *             <td id="totalRows" width="40px">0</td>
+     *             <td></td>
+     *             <td id="totalQty" width="50px">0</td>
+     *             <td id="totalNewQty" width="50px">0</td>
+     *         </tr>
+     *     </tfoot>
+     * </table>
+     * totalTable updated in innerPageUpdateTotalTable function
+     */
+    app7.innerPageCreateTableRow= function(dataTableHeader, dataTableBody, tableDataItem, self){             //console.log('app7 innerPageCreateTableRow tableDataItem=',tableDataItem, self);
+        if(!dataTableHeader||!dataTableBody) return;
+        var dataTableHeaderRows=$$(dataTableHeader).children("tbody").children("tr");
+        if(!dataTableHeaderRows) return;
+        if(!tableDataItem) tableDataItem={};
+        var newTRs=[];
+        for (var i = 0; i < dataTableHeaderRows.length; i++) {
+            var dthTR=dataTableHeaderRows[i], newTR;
+            newTRs.push(newTR=dthTR.cloneNode(true)); dataTableBody.appendChild(newTR);
+            var rowSelecting=newTR.getAttribute("rowSelecting"),
+                tdOnClick=function(e){
+                    $$(dataTableBody).children('.tdSelectedRow').removeClass('tdSelectedRow');
+                    for (var i = 0; i < newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
+                };
+            for (var j = 0; j < newTR.children.length; j++) {
+                var newTD=newTR.children[j];
+                var dataTableItemName=newTD.getAttribute("dataItemName"), val;
+                if(dataTableItemName!==undefined)val=tableDataItem[dataTableItemName];
+                newTD.innerText=(val==undefined||val==null)?"":val.toString();
+                if(rowSelecting)newTD.onclick=tdOnClick;
+                var onClickMethodName=newTD.getAttribute("onClick");
+                if(onClickMethodName){
+                    var onClickMethod=self[onClickMethodName];
+                    newTD.onclick=function(e){
+                        tdOnClick(e);
+                        onClickMethod(e,tableDataItem,self);
+                    };
+                }
+                var onCreatedMethodName=newTD.getAttribute("onCreated");
+                if(onCreatedMethodName){
+                    var methods={};
+                    if(rowSelecting)methods["rowSelectingMethod"]=tdOnClick;
+                    if(onClickMethodName)methods[onClickMethodName]=self[onClickMethodName];
+                    self[onCreatedMethodName](newTD,tableDataItem,methods);
+                }
+            }
+        }
+    };
+    /** IT'S USED IN INNER PAGE TEMPLATES
+     * dataTableFoot =
+     * <table width="100%" style="position:fixed; bottom:0px; z-index: 100">
+     *     <tfoot>
+     *         <tr>
+     *             <td id="totalRows" width="40px">0</td>
+     *             <td></td>
+     *             <td id="totalQty" width="50px">0</td>
+     *             <td id="totalNewQty" width="50px">0</td>
+     *         </tr>
+     *     </tfoot>
+     * </table>
+     * params = { <td id value>:<value>, .. }
+     */
+    app7.innerPageUpdateTotalTable=function(dataTableFoot, params){
+        if(!params)return;
+        var dataTableFootTR=$$(dataTableFoot).find("tr");
+        for (var valueName in params)
+            dataTableFootTR.find("td#"+valueName).html(params[valueName]);
     };
 </script>
 </body>
