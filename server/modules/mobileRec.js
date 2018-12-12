@@ -1,6 +1,6 @@
 var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
-var t_Ven= require(appDataModelPath+"t_Ven"), t_VenA= require(appDataModelPath+"t_VenA"),
+var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD"),
     // r_DBIs= require(appDataModelPath+"r_DBIs"),
     r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"),
@@ -9,7 +9,7 @@ var t_Ven= require(appDataModelPath+"t_Ven"), t_VenA= require(appDataModelPath+"
     r_Prods=require(appDataModelPath+"r_Prods");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([t_Ven,t_VenA,r_Ours,r_Stocks,r_Comps,r_States,r_Prods], errs,
+    dataModel.initValidateDataModels([t_Rec,t_RecD,r_Ours,r_Stocks,r_Comps,r_States,r_Prods], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -18,65 +18,64 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 module.exports.modulePageURL = "/mobile/rec/pageListRecs";
 module.exports.modulePagePath = "mobile/pageListRecs.html";
 module.exports.routes=[//-- App routes --
-    { path: '/pageListRecs', componentUrl: '/mobile/rec/pageListRecs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true }
-    // { path: '/settingsInvents', componentUrl: '/mobile/Invent/settingsInventory', options:{ignoreCache:true} },
-    // { path: '/pageListInvents', componentUrl: '/mobile/Invent/pageListInvents', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
-    // { path: '/pageInventory/:inventChID', componentUrl: '/mobile/invent/pageInventory', options:{ignoreCache:true} }
+    { path: '/pageListRecs', componentUrl: '/mobile/rec/pageListRecs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
+    // { path: '/pageRecData/:recChID', componentUrl: '/mobile/rec/pageRecData', options:{ignoreCache:true} },
+    { path: '/pageSettingsRecs', componentUrl: '/mobile/rec/pageSettingsRecs', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
-    // app.get("/mobile/Invent/settingsInventory", function (req, res) {
-    //     res.sendFile(appViewsPath+'mobile/pageSettingsInventory.html');
-    // });
-    // app.get("/mobile/invent/pageInventory", function (req, res) {
-    //     res.sendFile(appViewsPath+'mobile/pageInventory.html');
-    // });
-    // var tVensListTableColumns=[
-    //     {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Ven"},
-    //     {data: "DocID", name: "Номер", width: 85, type: "text", align:"right", dataSource:"t_Ven"},
-    //     {data: "IntDocID", name: "Вн. номер", width: 85, type: "text", align:"right", dataSource:"t_Ven"},
-    //     {data: "DocDate", name: "Дата", width: 60, type: "dateAsText",align:"center", dataSource:"t_Ven"},
-    //     {data: "SDocDate", name: "Дата", width: 60, type: "test",align:"center", dataFunction:"CONVERT(varchar(10),DocDate,104)" },
-    //     {data: "OurName", name: "Фирма", width: 150, type: "text",
-    //         dataSource:"r_Ours", sourceField:"OurName", linkCondition:"r_Ours.OurID=t_Ven.OurID" },
-    //     {data: "StockName", name: "Склад", width: 150, type: "text",
-    //         dataSource:"r_Stocks", sourceField:"StockName", linkCondition:"r_Stocks.StockID=t_Ven.StockID" },
-    //     {data: "CurrID", name: "Код валюты", width: 50, type: "text", align:"center", visible:false, dataSource:"t_Ven", sourceField:"CurrID"},
-    //     {data: "CurrName", name: "Валюта", width: 70, type: "text", align:"center", visible:false,
-    //         dataSource:"r_Currs", sourceField:"CurrName", linkCondition:"r_Currs.CurrID=t_Ven.CurrID" },
-    //     // {data: "KursMC", name: "Курс ОВ", width: 65, type: "numeric", dataSource:"t_Ven", visible:false },
-    //     {data: "TQty", name: "Уч. кол-во", width: 75, type: "numeric",
-    //         childDataSource:"t_VenA", childLinkField:"ChID", parentLinkField:"ChID",
-    //         dataFunction:{function:"sumIsNull", source:"t_VenA", sourceField:"TQty"} },
-    //     {data: "TNewQty", name: "Факт кол-во", width: 75, type: "numeric",
-    //         childDataSource:"t_VenA", childLinkField:"ChID", parentLinkField:"ChID",
-    //         dataFunction:{function:"sumIsNull", source:"t_VenA", sourceField:"TNewQty"} },
-    //     {data: "TVenQty", name: "Инвент. кол-во", width: 75, type: "numeric",
-    //         childDataSource:"t_VenA", childLinkField:"ChID", parentLinkField:"ChID",
-    //         dataFunction:{function:"sumIsNull", source:"t_VenA", sourceField:"TNewQty-TQty"} },
-    //     {data: "TSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Ven" },
-    //     {data: "TNewSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Ven" },
-    //     {data: "StateCode", name: "StateCode", width: 50, type: "text", readOnly:true, visible:false, dataSource:"t_Ven"},
-    //     {data: "StateName", name: "Статус", width: 250, type: "text",
-    //         dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Ven.StateCode" }
-    // ];
-    // app.get("/mobile/Invent/getDataForVensList", function(req, res){
-    //     var conditions={}, top="";
-    //     for(var condItem in req.query) {
-    //         if(condItem=="top")top="top "+req.query[condItem]; else conditions["t_Ven."+condItem]=req.query[condItem];
-    //     }
-    //     r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
-    //         function(result){
-    //             var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;
-    //             t_Ven.getDataItemsForTable(req.dbUC,{tableColumns:tVensListTableColumns, conditions:conditions,
-    //                     order:"DocDate desc, DocID desc", top:top},
-    //                 function(result){
-    //                     error+=(result.error)?result.error:'';
-    //                     var outData={listStocks:listStocks,listInventsByStockID:(result)?result.items:null};
-    //                     if(error!='')outData.error=error;
-    //                     res.send(outData);
-    //                 });
-    //         });
-    // });
+    app.get("/mobile/rec/pageSettingsRecs", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/pageSettingsRecs.html');
+    });
+    app.get("/mobile/rec/pageRecData", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/pageRecData.html');
+    });
+    var tRecsListTableColumns=[
+        {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "DocID", name: "Номер", width: 85, type: "text", align:"right", dataSource:"t_Rec"},
+        {data: "IntDocID", name: "Вн. номер", width: 85, type: "text", align:"right", dataSource:"t_Rec"},
+        {data: "DocDate", name: "Дата", width: 60, type: "dateAsText",align:"center", dataSource:"t_Rec"},
+        {data: "SDocDate", name: "Дата", width: 60, type: "test",align:"center", dataFunction:"CONVERT(varchar(10),DocDate,104)" },
+        {data: "OurName", name: "Фирма", width: 150, type: "text",
+            dataSource:"r_Ours", sourceField:"OurName", linkCondition:"r_Ours.OurID=t_Rec.OurID" },
+        {data: "StockName", name: "Склад", width: 150, type: "text",
+            dataSource:"r_Stocks", sourceField:"StockName", linkCondition:"r_Stocks.StockID=t_Rec.StockID" },
+        {data: "CurrID", name: "Код валюты", width: 50, type: "text", align:"center", visible:false, dataSource:"t_Rec", sourceField:"CurrID"},
+        {data: "CurrName", name: "Валюта", width: 70, type: "text", align:"center", visible:false,
+            dataSource:"r_Currs", sourceField:"CurrName", linkCondition:"r_Currs.CurrID=t_Rec.CurrID" },
+        // {data: "KursMC", name: "Курс ОВ", width: 65, type: "numeric", dataSource:"t_Ven", visible:false },
+        {data: "Qty", name: "Кол-во", width: 75, type: "numeric",
+            childDataSource:"t_RecD", childLinkField:"ChID", parentLinkField:"ChID",
+            dataFunction:{function:"sumIsNull", source:"t_RecD", sourceField:"Qty"} },
+        // {data: "TNewQty", name: "Факт кол-во", width: 75, type: "numeric",
+        //     childDataSource:"t_VenA", childLinkField:"ChID", parentLinkField:"ChID",
+        //     dataFunction:{function:"sumIsNull", source:"t_VenA", sourceField:"TNewQty"} },
+        // {data: "TVenQty", name: "Инвент. кол-во", width: 75, type: "numeric",
+        //     childDataSource:"t_VenA", childLinkField:"ChID", parentLinkField:"ChID",
+        //     dataFunction:{function:"sumIsNull", source:"t_VenA", sourceField:"TNewQty-TQty"} },
+        {data: "TSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Rec" },
+        // {data: "TNewSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Ven" },
+        {data: "StateCode", name: "StateCode", width: 50, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "StateName", name: "Статус", width: 250, type: "text",
+            dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" }
+    ];
+    app.get("/mobile/rec/getDataForRecsList", function(req, res){
+        var conditions={}, top="";
+        for(var condItem in req.query) {
+            if(condItem=="top")top="top "+req.query[condItem]; else conditions["t_Rec."+condItem]=req.query[condItem];
+        }
+        r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
+            function(result){
+                var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;
+                t_Rec.getDataItemsForTable(req.dbUC,{tableColumns:tRecsListTableColumns, conditions:conditions,
+                        order:"DocDate desc, DocID desc", top:top},
+                    function(result){
+                        error+=(result.error)?result.error:'';
+                        var outData={listStocks:listStocks,listRecsByStockID:(result)?result.items:null};
+                        if(error!='')outData.error=error;
+                        res.send(outData);
+                    });
+            });
+    });
     // app.get("/docs/rec/getRecData", function(req, res){
     //     var conditions={};
     //     for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];

@@ -23,7 +23,7 @@
                                     <div class="item-content">
                                         <div class="item-inner">
                                             <div class="item-title">Склад</div>
-                                            <div class="item-after"></div>
+                                            <div class="item-after" style="color:#212121"></div>
                                         </div>
                                     </div>
                                 </a>
@@ -37,9 +37,9 @@
     <div class="page-content">
         <div class="list media-list" style="margin:0">
             <ul>
-                {{#each listInvents}}
+                {{#each listRecs}}
                 <li>
-                    <a class="item-link item-content" href="/pageInventory/{{ChID}}">
+                    <a class="item-link item-content" href="/pageRecData/{{ChID}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row">
                                 <div class="item-title" style="width:100%">
@@ -50,7 +50,7 @@
                                     <div class="item-title">{{StockName}}</div>
                                 </div>
                                 <div class="item-after" style="min-width:80px">
-                                    <div style="width:100%;text-align:right">{{TVenQty}}</div>
+                                    <div style="width:100%;text-align:right">{{TSumCC_wt}}</div>
                                 </div>
                             </div>
                         </div>
@@ -64,27 +64,41 @@
 </template>
 <script>
     return {
+        on: {
+            pageAfterIn: function(e, page) {
+                if(app7.data.pageListRecs) {
+                    this.$setState({
+                        listStocks:app7.data.pageListRecs.listStocks,
+                        stockIDFilter:app7.data.pageListRecs.stockIDFilter,
+                        listRecs:app7.data.pageListRecs.listRecs
+                    });
+                    return;
+                }
+                if(this.stockIDFilter===undefined)this.stockIDFilter="";
+                this.loadListRecsData();
+            }
+        },
         methods:{
-            loadListInventsData:function(){
+            loadListRecsData:function(){
                 let cInstance=this,
                     stockIDFilter=this.stockIDFilter;
                 app7.preloader.show();
-                var conditions={top:app7.data['inventoryListDocCount']};
+                var conditions={top:app7.data['recsListDocCount']};
                 if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
-                app7.srvRequestJSON({url:'/mobile/Invent/getDataForVensList',conditions:conditions,
-                        errorDialogMsg:"Не удалось получить список инвентаризаций с сервера!"},
+                app7.srvRequestJSON({url:'/mobile/rec/getDataForRecsList',conditions:conditions,
+                        errorDialogMsg:"Не удалось получить список приходов товара с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
                         if(!result)return;
                         app7.data.pageListRecs={
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter,
-                            listInvents:result.listInventsByStockID
+                            listRecs:result.listRecsByStockID
                         };                                                                              //console.log('pageListRecs.html pageAfterIn app.data.pageListRecs 2=',app.data.pageListRecs);
                         cInstance.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter,
-                            listInvents:result.listInventsByStockID
+                            listRecs:result.listRecsByStockID
                         });
                     })
                 return;
@@ -92,14 +106,7 @@
             pageListRecsStockClosed:function(e){
                 this.stockIDFilter=$$('#pageListRecs-stock').val();
                 app7.data.pageListRecs.stockIDFilter=this.stockIDFilter;
-                this.loadListInventsData();
-            }
-        },
-        on: {
-            pageAfterIn: function(e, page) {                                                             //console.log('pageListRecs.html pageAfterIn', page, this);
-                if(app7.data.pageListRecs) return;
-                if(this.stockIDFilter===undefined)this.stockIDFilter="";
-                this.loadListInventsData();
+                this.loadListRecsData();
             }
         }
     }

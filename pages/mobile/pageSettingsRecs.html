@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page" id="settings-inventory-page">
+<div class="page" id="settings-recs-view">
     <div class="navbar">
         <div class="navbar-inner sliding">
             <div class="left">
@@ -9,7 +9,7 @@
                     <span class="ios-only">Назад</span>
                 </a>
             </div>
-            <div class="title">Инвентаризации</div>
+            <div class="title">Приходы товара</div>
         </div>
     </div>
     <div class="page-content">
@@ -19,14 +19,14 @@
                     <div class="item-inner">
                         <div class="item-title item-label">Кол-во документов в списке</div>
                         <div class="item-input-wrap">
-                            <input id="settings-inventory-input" type="text" placeholder="Кол-во документов в списке">
+                            <input id="settings-recs-input" type="text" placeholder="Кол-во документов в списке">
                         </div>
                     </div>
                 </li>
             </ul>
             <div class="row">
                 <div class="col" style="width:0px"></div>
-                <button id="settings-inventory-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
+                <button id="settings-recs-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
                 <div class="col" style="width:0px"></div>
             </div>
         </div>
@@ -37,18 +37,18 @@
     return {
         on: {
             pageAfterIn: function(e, page) {
-                $$("#settings-inventory-input").val(this.$app.data['inventoryListDocCount']);
+                $$("#settings-recs-input").val(this.$app.data['recsListDocCount']);
             }
         },
         methods:{
             buttonStoreClick:function(){
-                let inventoryListDocCount=$$("#settings-inventory-input").val();
-                if (typeof(Storage)!=="undefined"&&inventoryListDocCount&&inventoryListDocCount.toString().trim()!="") {
-                    localStorage.setItem("settings-inventory-listDocCount",inventoryListDocCount);
+                let recsListDocCount=$$("#settings-recs-input").val();
+                if (typeof(Storage)!=="undefined"&&recsListDocCount&&recsListDocCount.toString().trim()!="") {
+                    localStorage.setItem("settings-recs-listDocCount",recsListDocCount);
                 } else {// Sorry! No Web Storage support..
                 }
-                this.$app.data['inventoryListDocCount']=inventoryListDocCount;
-                app7.data.pageListInvents=null;
+                this.$app.data['recsListDocCount']=recsListDocCount;
+                app7.data.pageListRecs=null;
             }
         }
     }

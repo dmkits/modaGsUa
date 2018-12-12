@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" data-name="pageInventory">
+<div class="page page-with-subnavbar" data-name="pageRecData">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -9,18 +9,18 @@
                     <span class="ios-only">Назад</span>
                 </a>
             </div>
-            <div class="title sliding">Инвентаризация {{item.DocID}} от {{item.SDocDate}}<br>{{item.StockName}}</div>
-            <div class="subnavbar">
-                <div class="subnavbar-inner">
-                    <div class="row">
-                        <input type="number" class="col" style="height:36px;min-width:200px;" id="barCodeInput" placeholder="ШК или код товара" @keypress="barcodeInputKeypress">
-                        <button class="col button button-outline button-round" id="buttonBarcodeInputEnter" style="width:80px;" @click="barcodeInputEnter">ВВОД</button>
-                    </div>
-                </div>
-            </div>
+            <div class="title sliding">Приход товара {{item.DocID}} от {{item.SDocDate}}<br>{{item.StockName}}</div>
+            <!--<div class="subnavbar">-->
+                <!--<div class="subnavbar-inner">-->
+                    <!--<div class="row">-->
+                        <!--<input type="number" class="col" style="height:36px;min-width:200px;" id="barCodeInput" placeholder="ШК или код товара" @keypress="barcodeInputKeypress">-->
+                        <!--<button class="col button button-outline button-round" id="buttonBarcodeInputEnter" style="width:80px;" @click="barcodeInputEnter">ВВОД</button>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
         </div>
     </div>
-    <div class="page-content" id="pageContentInventory">
+    <div class="page-content" id="pageContentRecData">
         <table width="100%" style="position:fixed; top:104px; z-index: 100">
             <thead>
             <tr>
@@ -62,33 +62,33 @@
 <script>
     return {
         on: {
-            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
+            pageInit: function(e, page) {                                                               //console.log('pageRecData.html pageInit', page, this);
                 var dataTables=$$(this.el).children(".page-content").children("table");
                 if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
                 if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
                 if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
-                this.loadInventData();
+                this.loadRecData();
             },
-            pageAfterIn: function(e, page) {                                                            //console.log('pageInventory.html pageAfterIn', page);
-                $$("#barCodeInput").focus();
-            },
-            pageAfterOut: function(e, page) {                                                           //console.log('pageInventory.html pageAfterOut', page);
+            // pageAfterIn: function(e, page) {                                                            //console.log('pageRecData.html pageAfterIn', page);
+            //     $$("#barCodeInput").focus();
+            // },
+            pageAfterOut: function(e, page) {                                                           //console.log('pageRecData.html pageAfterOut', page);
                 if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl);
             },
         },
-        data: function data() {                                                                         //console.log('pageInventory.html data',this.$route.params);
-            let inventData={},listInventsData=this.$app.data.pageListInvents.listInvents;
-            if(!this.$route.params) return inventData;
-            let inventChID=this.$route.params.inventChID;
-            if(!listInventsData||inventChID===null||inventChID===undefined) return inventData;
-            for(let ind in listInventsData){
-                let itemInventData=listInventsData[ind];
-                if(itemInventData&&itemInventData.ChID==inventChID){
-                    inventData=itemInventData;
+        data: function data() {                                                                         //console.log('pageRecData.html data',this.$route.params);
+            let recData={},listRecsData=this.$app.data.pageListRecs.listRecs;
+            if(!this.$route.params) return recData;
+            let recChID=this.$route.params.recChID;
+            if(!listRecsData||recChID===null||recChID===undefined) return recData;
+            for(let ind in listRecsData){
+                let itemRecData=listRecsData[ind];
+                if(itemRecData&&itemRecData.ChID==recChID){
+                    recData=itemRecData;
                     break;
                 }
             }
-            return {item:inventData,items:[]};
+            return {item:recData,items:[]};
         },
         methods: {
             inventoryTableTDNewQtyOnCreated:function(td,tableDataItem,methods){
@@ -125,36 +125,36 @@
                 app7.innerPageUpdateTotalTable(this.dataTableFoot,{totalRows:tRows,totalQty:totalQty,totalNewQty:totalNewQty})
             },
             setScroll: function(innerElem){
-                var page=$$('#pageContentInventory')[0],
+                var page=$$('#pageContentRecData')[0],
                     absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
                 page.scrollTo(0, absoluteElementTop - (page.clientHeight / 2));
             },
 
-            loadInventData:function(){                                                                  console.log('pageInventory.html loadInventData inventData=',this.item);
-                let inventData=this.item, inventChID=inventData.ChID;
-                if(inventChID===null||inventChID===undefined) return;
-                let cInstance=this, app=this.$app;                                                      console.log('pageInventory.html loadInventData inventChID=',inventChID, this);
+            loadRecData:function(){                                                                  console.log('pageRecData.html loadRecData inventData=',this.item);
+                let recData=this.item, recChID=recData.ChID;
+                if(recChID===null||recChID===undefined) return;
+                let cInstance=this, app=this.$app;                                                      console.log('pageRecData.html loadRecData inventChID=',recChID, this);
                 cInstance.disableInputProdBarcode();
                 app.preloader.show();
-                app.srvRequestJSON({url:'/mobile/Invent/getDataForVenATable',conditions:{'ParentChID=':inventChID},
-                        errorDialogMsg:"Не удалось получить список товаров инвентаризации с сервера!"},
+                app.srvRequestJSON({url:'/mobile/rec/getDataForRecDTable',conditions:{'ParentChID=':recChID},
+                        errorDialogMsg:"Не удалось получить список товаров прихода товара с сервера!"},
                     function(result,error){
                         app.preloader.hide();
                         if(!result){
                             cInstance.disableInputProdBarcode(true); return;
                         }
-                        app.data.pageInventory={inventDataItems:result.items};                          console.log('pageInventory.html loadInventData items=',result.items);
+                        app.data.pageRecData={inventDataItems:result.items};                          console.log('pageRecData.html loadRecData items=',result.items);
                         cInstance.$setState({
-                            item:inventData,items:result.items
+                            item:recData,items:result.items
                         });
-                        cInstance.fillInventTable(result.items,function(){
+                        cInstance.fillRecDTable(result.items,function(){
                             if(!cInstance.disableInputProdBarcode)return;
                             cInstance.disableInputProdBarcode(false);
-                            $$("#barCodeInput").focus();
+                            // $$("#barCodeInput").focus();
                         });
                     })
             },
-            fillInventTable: function(inventData,finishedCallback){
+            fillRecDTable: function(inventData,finishedCallback){
                 var self=this,
                     params={ dataTableHeader:this.dataTableHeader, dataTableBody:this.dataTableBody,
                         progressAction:function(tableData, ind,tableDataItem){
@@ -167,33 +167,33 @@
                 app7.innerPageFillTableData(this, inventData, params, finishedCallback)
             },
 
-            barcodeInputEnter: function () {
-                this.disableInputProdBarcode();
-                var self=this;
-                this.storeInputValueToInvent($$("#barCodeInput").val(),function(inventProdData){
-                    if(!inventProdData){
-                        $$("#barCodeInput").val("");
-                        self.disableInputProdBarcode(false);
-                        $$("#barCodeInput").focus();
-                        return;
-                    }
-                    self.addProdToTable(inventProdData);
-                    $$("#barCodeInput").val("");
-                    self.disableInputProdBarcode(false);
-                    $$("#barCodeInput").focus();
-                });
-            },
-            barcodeInputKeypress: function (e) {
-                if(e.keyCode==13||e.key=='Enter') this.barcodeInputEnter();
-            },
+            // barcodeInputEnter: function () {
+            //     this.disableInputProdBarcode();
+            //     var self=this;
+            //     this.storeInputValueToInvent($$("#barCodeInput").val(),function(inventProdData){
+            //         if(!inventProdData){
+            //             $$("#barCodeInput").val("");
+            //             self.disableInputProdBarcode(false);
+            //             $$("#barCodeInput").focus();
+            //             return;
+            //         }
+            //         self.addProdToTable(inventProdData);
+            //         $$("#barCodeInput").val("");
+            //         self.disableInputProdBarcode(false);
+            //         $$("#barCodeInput").focus();
+            //     });
+            // },
+            // barcodeInputKeypress: function (e) {
+            //     if(e.keyCode==13||e.key=='Enter') this.barcodeInputEnter();
+            // },
             disableInputProdBarcode:function(disable){
-                if(disable!==false){
-                    $$('#barCodeInput').attr('disabled',1);
-                    $$('#buttonBarcodeInputEnter').attr('disabled',1);
-                    return;
-                }
-                $$('#barCodeInput').removeAttr('disabled');
-                $$('#buttonBarcodeInputEnter').removeAttr('disabled');
+                // if(disable!==false){
+                //     $$('#barCodeInput').attr('disabled',1);
+                //     $$('#buttonBarcodeInputEnter').attr('disabled',1);
+                //     return;
+                // }
+                // $$('#barCodeInput').removeAttr('disabled');
+                // $$('#buttonBarcodeInputEnter').removeAttr('disabled');
             },
 
             inventoryTableTDNewQtyOnClick:function(e,dataTableItemName,self){
@@ -256,7 +256,7 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageInventory.html storeInputValueToInvent inputValue=',inputValue, this);
+                let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageRecData.html storeInputValueToInvent inputValue=',inputValue, this);
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/Invent/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
                         userErrorMsg:"Не удалось добавить товар в инвентаризацию!"},
@@ -270,7 +270,7 @@
                     })
             },
             storeExistsToInvent:function(tSrcPosID,prodID,tNewQty,callback){
-                let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageInventory.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
+                let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageRecData.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/Invent/storeExistsPosProdData',
                         data:{parentChID:parentChID,TSrcPosID:tSrcPosID,TNewQty:tNewQty},

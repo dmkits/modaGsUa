@@ -64,6 +64,9 @@
                                     <li>
                                         <a href="/pageSettingsInvents" class="panel-close">Инвентаризации</a>
                                     </li>
+                                    <li>
+                                        <a href="/pageSettingsRecs" class="panel-close">Приходы товара</a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -150,11 +153,14 @@
         app7.data={};
         app7.data.uuid="";document.cookie="uuid=0";
         app7.data['inventoryListDocCount']=50;
+        app7.data['recsListDocCount']=50;
         if (typeof(Storage)!=="undefined") {
             var username=localStorage.getItem("login-username");
             if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
             var inventoryListDocCount=localStorage.getItem("settings-inventory-listDocCount");
             if(inventoryListDocCount&&!isNaN(parseInt(inventoryListDocCount)))app7.data['inventoryListDocCount']=parseInt(inventoryListDocCount);
+            var recsListDocCount=localStorage.getItem("settings-recs-listDocCount");
+            if(recsListDocCount&&!isNaN(parseInt(recsListDocCount)))app7.data['recsListDocCount']=parseInt(recsListDocCount);
         } else {// Sorry! No Web Storage support..
         }
     };
