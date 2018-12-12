@@ -155,38 +155,16 @@
                     })
             },
             fillInventTable: function(inventData,finishedCallback){
-                var progress = 0, progressStep=100/inventData.length, dataTableBody=this.dataTableBody;
-                this.progressBarEl = app7.progressbar.show(progress, app7.theme === 'md' ? 'yellow' : 'blue');
-                app7.preloader.show();$$(dataTableBody).hide();
-                var self=this;
-                this.fillInventTableProgress(0,inventData,this.progressBarEl,progress,progressStep,function(){
-                    app7.progressbar.hide(this.progressBarEl); //hide
-                    app7.preloader.hide();$$(dataTableBody).show();
-                    self.setTotalInfo(0,0);
-                    if(finishedCallback) finishedCallback();
-                })
-            },
-            fillInventTableProgress: function(ind,inventData,progressBarEl,progress,progressStep,finishedCallback){
-                var self=this, timeout=10+Math.round(ind/100);
-                var i=ind, inventDataItem;
-                while(i<ind+10){
-                    inventDataItem=inventData[i];
-                    if(!inventDataItem)break;
-                    app7.innerPageCreateTableRow(this.dataTableHeader,this.dataTableBody, inventDataItem, this);
-                    this.setTotalInfo(inventDataItem["TQty"],inventDataItem["TNewQty"],i+1);
-                    progress += progressStep;
-                    i++;
-                }
-                app7.progressbar.set(progressBarEl, progress);
-                if(!inventDataItem) {
-                    setTimeout(function(){
-                        if(finishedCallback)finishedCallback();
-                    },timeout);
-                    return;
-                }
-                setTimeout(function(){
-                    self.fillInventTableProgress(i,inventData,progressBarEl,progress,progressStep,finishedCallback)
-                },timeout)
+                var self=this,
+                    params={ dataTableHeader:this.dataTableHeader, dataTableBody:this.dataTableBody,
+                        progressAction:function(tableData, ind,tableDataItem){
+                            if(!tableDataItem){
+                                self.setTotalInfo(0,0); return;
+                            }
+                            self.setTotalInfo(tableDataItem["TQty"],tableDataItem["TNewQty"],ind+1);
+                        }
+                    };
+                app7.innerPageFillTableData(this, inventData, params, finishedCallback)
             },
 
             barcodeInputEnter: function () {

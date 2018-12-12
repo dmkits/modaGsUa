@@ -356,6 +356,7 @@
      *     </tfoot>
      * </table>
      * totalTable updated in innerPageUpdateTotalTable function
+     * self = component instance
      */
     app7.innerPageCreateTableRow= function(dataTableHeader, dataTableBody, tableDataItem, self){             //console.log('app7 innerPageCreateTableRow tableDataItem=',tableDataItem, self);
         if(!dataTableHeader||!dataTableBody) return;
@@ -414,6 +415,52 @@
         var dataTableFootTR=$$(dataTableFoot).find("tr");
         for (var valueName in params)
             dataTableFootTR.find("td#"+valueName).html(params[valueName]);
+    };
+    /** IT'S USED IN INNER PAGE TEMPLATES
+     * self = component instance
+     * params = { dataTableHeader, dataTableBody, progressAction }
+     *      progressAction = function(tableData,ind,tableDataItem), if no ind and no tableDataItem, do last progressAction
+     * finishedCallback = function(tableData)
+     */
+    app7.innerPageFillTableData= function(self, tableData, params, finishedCallback){
+        var progress = 0, progressStep=100/tableData.length;
+        params.progressBarEl = app7.progressbar.show(progress, app7.theme === 'md' ? 'yellow' : 'blue');
+        app7.preloader.show();$$(params.dataTableBody).hide();
+        params.progressBarEl=params.progressBarEl; params.progress=progress; params.progressStep=progressStep;
+        app7.fillInnerPageTableDataProgress(self, 0,tableData,params, function(){
+            app7.progressbar.hide(params.progressBarEl);
+            app7.preloader.hide();$$(params.dataTableBody).show();
+            if(params.progressAction)params.progressAction(tableData);
+            if(finishedCallback) finishedCallback(tableData);
+        });
+    };
+    /** IT'S USED IN INNER PAGE TEMPLATES
+     * self = component instance
+     * params = { dataTableHeader, dataTableBody, progressBarEl,progress,progressStep, progressAction }
+     *      progressAction = function(tableData,ind,tableDataItem)
+     * finishedCallback = function(tableData)
+     */
+    app7.fillInnerPageTableDataProgress= function(self, ind,tableData, params, finishedCallback){
+        var timeout=10+Math.round(ind/100);
+        var i=ind, tableDataItem;
+        while(i<ind+10){
+            tableDataItem=tableData[i];
+            if(!tableDataItem)break;
+            app7.innerPageCreateTableRow(params.dataTableHeader,params.dataTableBody, tableDataItem, self);
+            if(params.progressAction)params.progressAction(tableData, ind,tableDataItem);
+            params.progress += params.progressStep;
+            i++;
+        }
+        app7.progressbar.set(params.progressBarEl, params.progress);
+        if(!tableDataItem) {
+            setTimeout(function(){
+                if(finishedCallback)finishedCallback(tableData);
+            },timeout);
+            return;
+        }
+        setTimeout(function(){
+            app7.fillInnerPageTableDataProgress(self, i,tableData, params, finishedCallback)
+        },timeout)
     };
 </script>
 </body>

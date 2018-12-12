@@ -1,0 +1,145 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page page-with-subnavbar" id="pageReportsCashier">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link icon-only panel-open" data-panel="left">
+                    <i class="icon f7-icons">menu</i>
+                </a>
+            </div>
+            <div class="title sliding">Отчеты кассира</div>
+        </div>
+    </div>
+    <div class="toolbar" style="height:78px">
+        <div class="toolbar-inner">
+            <div class="list" style="width:100%">
+                <ul>
+                    <li>
+                        <a href="#" class="item-link smart-select" @smartselect:closed="pageReportsCashierStockClosed">
+                            <select id="pageReportsCashier-stock">
+                                {{#each listStocks}}
+                                <option value={{StockID}}>{{StockName}}</option>
+                                {{/each}}
+                            </select>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">Склад</div>
+                                    <div class="item-after"></div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-input-wrap">
+                                    <input type="text" placeholder="Период дат" readonly id="pageReportsCashierDatesRange" @calendar:closed="pageReportsCashierDatesRangeClosed"/>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="page-content" style="padding-top:134px">
+        <div class="data-table">
+            <table>
+                <thead>
+                <tr>
+                    <th class="label-cell" style="min-width:80px">Дата<br>время<br>чека</th>
+                    <th class="numeric-cell" >Номер<br>чека</th>
+                    <th class="label-cell" style="min-width:200px">Товар</th>
+                    <th class="numeric-cell" style="min-width:55px">Кол-во</th>
+                    <th class="numeric-cell" style="min-width:60px">Цена</th>
+                    <th class="numeric-cell" style="min-width:70px">Сумма</th>
+                    <th class="numeric-cell" style="min-width:50px">Скидка,%</th>
+                    <!--<th class="tablet-only" style="min-width:200px">Comment</th>-->
+                </tr>
+                </thead>
+                <tbody>
+                {{#each salesForCashier}}
+                <tr>
+                    <td class="label-cell text-centered">{{SDocTime}}</td>
+                    <td class="numeric-cell">{{DocID}}</td>
+                    <td class="label-cell">{{ProdName}}</td>
+                    <td class="numeric-cell text-centered">{{Qty}}</td>
+                    <td class="numeric-cell">{{RealPrice}}</td>
+                    <td class="numeric-cell">{{RealSum}}</td>
+                    <td class="numeric-cell text-centered">{{DiscountP}}</td>
+                    <!--<td class="tablet-only">I like it!</td>-->
+                </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        methods:{
+            loadSalesForCashierData:function(){
+                let cInstance=this,
+                    stockIDFilter=this.stockIDFilter;
+                app7.preloader.show();
+                var conditions={}, sdates=$$("#pageReportsCashierDatesRange").val();                   //console.log("sdates=",sdates);
+                if(sdates){
+                    var dates=sdates.split("-");
+                    if(dates.length==1)conditions["DocDate="]=moment(dates[0],"DD.MM.YYYY").format("YYYY-MM-DD");
+                    else
+                        for (var i = 0; i < dates.length; i++) {
+                            var val=dates[i];
+                            if(i==0)conditions["DocDate>="]=moment(val,"DD.MM.YYYY").format("YYYY-MM-DD");
+                            else if(i==dates.length-1)conditions["DocDate<="]=moment(val,"DD.MM.YYYY").format("YYYY-MM-DD");
+                        }
+                }                                                                                       console.log("conditions",conditions);
+
+                //return;
+
+                //if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
+                app7.srvRequestJSON({url:'/mobile/reports/getSalesForCashier',conditions:conditions,
+                        errorDialogMsg:"Не удалось получить продажи с сервера!"},
+                    function(result,error){
+                        app7.preloader.hide();
+                        if(!result)return;
+                        app7.data.pageReportsCashier={
+                            listStocks:result.listStocks,
+                            stockIDFilter:stockIDFilter,
+                            salesForCashier:result.items
+                        };                                                            console.log('pageReportsCashier.html pageAfterIn app.data.pageReportsCashier 2=',app7.data.pageReportsCashier);
+                        cInstance.$setState({
+                            listStocks:result.listStocks,
+                            stockIDFilter:stockIDFilter,
+                            salesForCashier:result.items
+                        });
+                    })
+                return;
+            },
+            pageReportsCashierStockClosed:function(e){
+                this.stockIDFilter=$$('#pageReportsCashier-stock').val();
+                app7.data.pageReportsCashier.stockIDFilter=this.stockIDFilter;
+                this.loadSalesForCashierData();
+            },
+            pageReportsCashierDatesRangeClosed:function(e){
+                this.loadSalesForCashierData();
+                // var sdates=$$("#pageReportsCashierDatesRange").prop("value");                                console.log("sdates=",sdates,moment(sdates,"DD.MM.YYYY").toDate());
+                // var dates=sdates.split("-");                                console.log("sdates=",dates);
+            }
+        },
+        on: {
+            pageAfterIn: function(e, page) {                                                             console.log('pageReportsCashier.html pageAfterIn', page, this);
+                if(app7.data.pageReportsCashier) return;
+                if(this.stockIDFilter===undefined)this.stockIDFilter="";
+                var calendarRange = app7.calendar.create({
+                    inputEl: '#pageReportsCashierDatesRange',
+                    dateFormat: 'dd.mm.yyyy',
+                    rangePicker: true,
+                    value: [new Date()]
+                });                                                                                     //console.log("calendarRange",calendarRange);
+                this.loadSalesForCashierData();
+            }
+        }
+    }
+</script>
