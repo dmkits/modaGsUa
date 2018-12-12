@@ -16,16 +16,16 @@
             <div class="list" style="width:100%">
                 <ul>
                     <li>
-                        <a href="#" class="item-link smart-select" @smartselect:closed="pageReportsCashierStockClosed">
-                            <select id="pageReportsCashier-stock">
-                                {{#each listStocks}}
-                                <option value={{StockID}}>{{StockName}}</option>
+                        <a href="#" id="pageReportsCashier-cr" class="item-link smart-select" @smartselect:closed="pageReportsCashierCRClosed">
+                            <select id="pageReportsCashier-cr-select">
+                                {{#each listCRs}}
+                                <option value={{value}}>{{label}}</option>
                                 {{/each}}
                             </select>
                             <div class="item-content">
                                 <div class="item-inner">
-                                    <div class="item-title">Склад</div>
-                                    <div class="item-after"></div>
+                                    <div class="item-title">Касса</div>
+                                    <div id="pageReportsCashier-cr-label" class="item-after" style="color:#212121"></div>
                                 </div>
                             </div>
                         </a>
@@ -44,47 +44,114 @@
         </div>
     </div>
     <div class="page-content" style="padding-top:134px">
-        <div class="data-table">
-            <table>
-                <thead>
-                <tr>
-                    <th class="label-cell" style="min-width:80px">Дата<br>время<br>чека</th>
-                    <th class="numeric-cell" >Номер<br>чека</th>
-                    <th class="label-cell" style="min-width:200px">Товар</th>
-                    <th class="numeric-cell" style="min-width:55px">Кол-во</th>
-                    <th class="numeric-cell" style="min-width:60px">Цена</th>
-                    <th class="numeric-cell" style="min-width:70px">Сумма</th>
-                    <th class="numeric-cell" style="min-width:50px">Скидка,%</th>
-                    <!--<th class="tablet-only" style="min-width:200px">Comment</th>-->
-                </tr>
-                </thead>
-                <tbody>
-                {{#each salesForCashier}}
-                <tr>
-                    <td class="label-cell text-centered">{{SDocTime}}</td>
-                    <td class="numeric-cell">{{DocID}}</td>
-                    <td class="label-cell">{{ProdName}}</td>
-                    <td class="numeric-cell text-centered">{{Qty}}</td>
-                    <td class="numeric-cell">{{RealPrice}}</td>
-                    <td class="numeric-cell">{{RealSum}}</td>
-                    <td class="numeric-cell text-centered">{{DiscountP}}</td>
-                    <!--<td class="tablet-only">I like it!</td>-->
-                </tr>
-                {{/each}}
-                </tbody>
-            </table>
-        </div>
+        <table width="100%" style="position:fixed; z-index: 100;" class="tableReport tableReportCashierSales">
+            <thead>
+            <tr>
+                <th rowspan="2" width="65px" class="datetime-cell">Дата<br>время<br>чека</th>
+                <!--<th width="80px">Номер<br>чека</th>-->
+                <th colspan="5">Товар</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th width="45px">Кол-во</th>
+                <th width="50px">Цена</th>
+                <th width="60px">Сумма</th>
+                <th width="50px">Скидка,<br>%</th>
+            </tr>
+            </thead>
+            <tbody style="display:none">
+            <tr rowSelecting="true">
+                <td width="65px" rowspan="2" class="datetime-cell" dataItemName="SDocTime">1</td>
+                <td colspan="5" class="tdProdName" dataItemName="ProdName">2</td>
+                <!--<td width="80px" class="numeric-cell" dataItemName="DocID"></td>-->
+            </tr>
+            <tr rowSelecting="true">
+                <td></td>
+                <td width="45px" class="text-centered" dataItemName="Qty">3</td>
+                <td width="50px" class="numeric-cell" dataItemName="RealPrice">4</td>
+                <td width="60px" class="numeric-cell" dataItemName="RealSum">5</td>
+                <td width="50px" class="text-centered" dataItemName="DiscountP">6</td>
+            </tr>
+            </tbody>
+        </table>
+        <table width="100%" style="margin-top:55px; margin-bottom: 43px;" class="tableReport tableReportCashierSales"></table>
+        <table width="100%" style="position:fixed; bottom:0px; z-index: 100" class="tableReport tableReportCashierSales">
+            <tfoot>
+            <tr>
+                <td id="totalRows" width="65px" class="datetime-cell">0</td>
+                <td></td>
+                <td id="totalQty" width="45px">0</td>
+                <td width="50px"></td>
+                <td id="totalRealSum" width="60px">0</td>
+                <td width="50px"></td>
+            </tr>
+            </tfoot>
+        </table>
     </div>
 </div>
 </template>
 <script>
     return {
+        on: {
+            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
+                var dataTables=$$(this.el).children(".page-content").children("table");
+                if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
+                if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
+                if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
+                if(this.crIDFilter===undefined)this.crIDFilter="";
+                var calendarRange = app7.calendar.create({
+                    inputEl: '#pageReportsCashierDatesRange',
+                    dateFormat: 'dd.mm.yyyy',
+                    rangePicker: true,
+                    value: [new Date()]
+                });
+                var self=this;
+                this.loadStocksForCashierData(function(listCRs){
+                    if(!listCRs||listCRs.length==0) return;
+                    var listCRsItem=listCRs[0];
+                    $$('#pageReportsCashier-cr-select').val(listCRsItem.value); self.crIDFilter=listCRsItem.value;
+                    $$('#pageReportsCashier-cr').find("#pageReportsCashier-cr-label").text(listCRsItem.label);
+                    self.loadSalesForCashierData();
+                });
+            }
+        },
         methods:{
+            pageReportsCashierCRClosed:function(e){
+                this.crIDFilter=$$('#pageReportsCashier-cr-select').val();
+                app7.data.pageReportsCashier.crIDFilter=this.crIDFilter;
+                this.loadSalesForCashierData();
+            },
+            pageReportsCashierDatesRangeClosed:function(e){
+                this.loadSalesForCashierData();
+            },
+
+            loadStocksForCashierData:function(callback){
+                let cInstance=this;
+                app7.srvRequestJSON({url:'/reports/cashier/getDirCRsForSelect',
+                        errorDialogMsg:"Не удалось получить список складов для кассира с сервера!"},
+                    function(result,error){                                                             //console.log('pageReportsCashier.html loadStocksForCashierData result=',result);
+                        app7.preloader.hide();
+                        if(!result){
+                            if(callback)callback(); return;
+                        }
+                        app7.data.pageReportsCashier={
+                            listCRs:result.items,
+                            crIDFilter:cInstance.crIDFilter,
+                            items:null
+                        };
+                        cInstance.$setState({
+                            listCRs:result.items,
+                            crIDFilter:cInstance.crIDFilter,
+                            items:null
+                        });
+                        if(callback)callback(result.items);
+                    })
+            },
             loadSalesForCashierData:function(){
                 let cInstance=this,
-                    stockIDFilter=this.stockIDFilter;
+                    crIDFilter=this.crIDFilter;
                 app7.preloader.show();
-                var conditions={}, sdates=$$("#pageReportsCashierDatesRange").val();                   //console.log("sdates=",sdates);
+                var conditions={}, sdates=$$("#pageReportsCashierDatesRange").val();
                 if(sdates){
                     var dates=sdates.split("-");
                     if(dates.length==1)conditions["DocDate="]=moment(dates[0],"DD.MM.YYYY").format("YYYY-MM-DD");
@@ -94,51 +161,46 @@
                             if(i==0)conditions["DocDate>="]=moment(val,"DD.MM.YYYY").format("YYYY-MM-DD");
                             else if(i==dates.length-1)conditions["DocDate<="]=moment(val,"DD.MM.YYYY").format("YYYY-MM-DD");
                         }
-                }                                                                                       console.log("conditions",conditions);
-
-                //return;
-
-                //if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
+                }
+                if(crIDFilter=='')conditions['CRID is NULL']="null"; else conditions['CRID=']=crIDFilter;
                 app7.srvRequestJSON({url:'/mobile/reports/getSalesForCashier',conditions:conditions,
                         errorDialogMsg:"Не удалось получить продажи с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
                         if(!result)return;
                         app7.data.pageReportsCashier={
-                            listStocks:result.listStocks,
-                            stockIDFilter:stockIDFilter,
-                            salesForCashier:result.items
-                        };                                                            console.log('pageReportsCashier.html pageAfterIn app.data.pageReportsCashier 2=',app7.data.pageReportsCashier);
+                            listCRs:cInstance.listCRs,
+                            crIDFilter:crIDFilter,
+                            items:result.items
+                        };
                         cInstance.$setState({
-                            listStocks:result.listStocks,
-                            stockIDFilter:stockIDFilter,
-                            salesForCashier:result.items
+                            listCRs:cInstance.listCRs,
+                            crIDFilter:crIDFilter,
+                            items:result.items
                         });
+                        cInstance.fillCashierReportTable(result.items);
                     })
-                return;
             },
-            pageReportsCashierStockClosed:function(e){
-                this.stockIDFilter=$$('#pageReportsCashier-stock').val();
-                app7.data.pageReportsCashier.stockIDFilter=this.stockIDFilter;
-                this.loadSalesForCashierData();
+            fillCashierReportTable: function(reportData,finishedCallback){
+                app7.innerPageUpdateTotalTable(this.dataTableFoot,{totalRows:0,totalQty:0,totalRealSum:0});
+                var self=this,
+                    params={ dataTableHeader:this.dataTableHeader, dataTableBody:this.dataTableBody,
+                        progressAction:function(tableData, ind,tableDataItem){
+                            if(!tableDataItem){
+                                self.setTotalInfo(0,0); return;
+                            }
+                            self.setTotalInfo(tableDataItem["Qty"],tableDataItem["RealSum"],ind+1);
+                        }
+                    };
+                app7.innerPageFillTableData(this, reportData, params, finishedCallback)
             },
-            pageReportsCashierDatesRangeClosed:function(e){
-                this.loadSalesForCashierData();
-                // var sdates=$$("#pageReportsCashierDatesRange").prop("value");                                console.log("sdates=",sdates,moment(sdates,"DD.MM.YYYY").toDate());
-                // var dates=sdates.split("-");                                console.log("sdates=",dates);
-            }
-        },
-        on: {
-            pageAfterIn: function(e, page) {                                                             console.log('pageReportsCashier.html pageAfterIn', page, this);
-                if(app7.data.pageReportsCashier) return;
-                if(this.stockIDFilter===undefined)this.stockIDFilter="";
-                var calendarRange = app7.calendar.create({
-                    inputEl: '#pageReportsCashierDatesRange',
-                    dateFormat: 'dd.mm.yyyy',
-                    rangePicker: true,
-                    value: [new Date()]
-                });                                                                                     //console.log("calendarRange",calendarRange);
-                this.loadSalesForCashierData();
+            setTotalInfo: function(qty,realSum,tLoadedRows){
+                var tRows=this.items.length.toString();
+                if(tLoadedRows!==undefined) tRows=tLoadedRows.toString()+"/<br>"+tRows;
+                var dataTableFootTR=$$(this.dataTableFoot).find("tr"),
+                    totalQty=parseInt(dataTableFootTR.find("td#totalQty").text())+qty,
+                    totalRealSum=parseInt(dataTableFootTR.find("td#totalRealSum").text())+realSum;
+                app7.innerPageUpdateTotalTable(this.dataTableFoot,{totalRows:tRows,totalQty:totalQty,totalRealSum:totalRealSum});
             }
         }
     }

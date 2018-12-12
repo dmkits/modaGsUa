@@ -426,6 +426,7 @@
         var progress = 0, progressStep=100/tableData.length;
         params.progressBarEl = app7.progressbar.show(progress, app7.theme === 'md' ? 'yellow' : 'blue');
         app7.preloader.show();$$(params.dataTableBody).hide();
+        $$(params.dataTableBody).children("tr").remove();
         params.progressBarEl=params.progressBarEl; params.progress=progress; params.progressStep=progressStep;
         app7.fillInnerPageTableDataProgress(self, 0,tableData,params, function(){
             app7.progressbar.hide(params.progressBarEl);

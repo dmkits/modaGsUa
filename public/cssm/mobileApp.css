@@ -50,6 +50,28 @@ tfoot td{
     background-color:#cfd5da;
 }
 
+.tableReport{
+    line-height: 1.5;
+    font-size: 12px;
+}
+.tableReportCashierSales{
+    min-width:350px;
+}
+.tableReport th{
+    text-align: center;
+}
+.tableReport .text-centered{
+    text-align: center;
+}
+.tableReport .datetime-cell{
+    padding-left:2px;
+    padding-right:2px;
+    text-align: center;
+}
+.tableReport .numeric-cell{
+    text-align: right;
+}
+
 .md .toolbar {
     /*height: 96px;*/
 }
@@ -60,26 +82,4 @@ tfoot td{
 .md .list .item-inner {
     padding-top:4px;
     padding-bottom:4px;
-}
-.md .data-table td,
-.md .data-table th{
-    padding-left:5px;padding-right:5px;
-}
-.md .data-table th{
-    text-align: center;
-}
-.md .data-table td.label-cell,
-.md .data-table th.label-cell{
-    padding-left:5px;padding-right:5px
-}
-.md .data-table td:first-child,
-.md .data-table th:first-child{
-    padding-left:5px
-}
-.md .data-table td:last-child,
-.md .data-table th:last-child{
-    padding-right:5px
-}
-.data-table td.text-centered{
-    text-align: center;
 }

@@ -23,7 +23,7 @@
                                     <div class="item-content">
                                         <div class="item-inner">
                                             <div class="item-title">Склад</div>
-                                            <div class="item-after"></div>
+                                            <div class="item-after" style="color:#212121"></div>
                                         </div>
                                     </div>
                                 </a>
@@ -64,6 +64,20 @@
 </template>
 <script>
     return {
+        on: {
+            pageAfterIn: function(e, page) {                                                             //console.log('pageListInvents.html pageAfterIn', app7.data.pageListInvents);
+                if(app7.data.pageListInvents) {
+                    this.$setState({
+                        listStocks:app7.data.pageListInvents.listStocks,
+                        stockIDFilter:app7.data.pageListInvents.stockIDFilter,
+                        listInvents:app7.data.pageListInvents.listInvents
+                    });
+                    return;
+                }
+                if(this.stockIDFilter===undefined)this.stockIDFilter="";
+                this.loadListInventsData();
+            }
+        },
         methods:{
             loadListInventsData:function(){
                 let cInstance=this,
@@ -87,25 +101,10 @@
                             listInvents:result.listInventsByStockID
                         });
                     })
-                return;
             },
             pageListInventsStockClosed:function(e){
                 this.stockIDFilter=$$('#pageListInvents-stock').val();
                 app7.data.pageListInvents.stockIDFilter=this.stockIDFilter;
-                this.loadListInventsData();
-            }
-        },
-        on: {
-            pageAfterIn: function(e, page) {                                                             //console.log('pageListInvents.html pageAfterIn', app7.data.pageListInvents);
-                if(app7.data.pageListInvents) {
-                    this.$setState({
-                        listStocks:app7.data.pageListInvents.listStocks,
-                        stockIDFilter:app7.data.pageListInvents.stockIDFilter,
-                        listInvents:app7.data.pageListInvents.listInvents
-                    });
-                    return;
-                }
-                if(this.stockIDFilter===undefined)this.stockIDFilter="";
                 this.loadListInventsData();
             }
         }
