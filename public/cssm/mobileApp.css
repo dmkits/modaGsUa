@@ -49,6 +49,16 @@ tfoot td{
 .tdSelectedRow{
     background-color:#cfd5da;
 }
+.tdSumCC{
+    text-align: right;
+}
+
+.docsListStockName{
+    font-size:14px;
+}
+.docHeaderTitle{
+    font-size:16px;
+}
 
 .tableReport{
     line-height: 1.5;

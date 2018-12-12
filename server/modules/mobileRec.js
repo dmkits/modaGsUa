@@ -19,7 +19,7 @@ module.exports.modulePageURL = "/mobile/rec/pageListRecs";
 module.exports.modulePagePath = "mobile/pageListRecs.html";
 module.exports.routes=[//-- App routes --
     { path: '/pageListRecs', componentUrl: '/mobile/rec/pageListRecs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
-    // { path: '/pageRecData/:recChID', componentUrl: '/mobile/rec/pageRecData', options:{ignoreCache:true} },
+    { path: '/pageRecData/:recChID', componentUrl: '/mobile/rec/pageRecData', options:{ignoreCache:true} },
     { path: '/pageSettingsRecs', componentUrl: '/mobile/rec/pageSettingsRecs', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
@@ -86,9 +86,9 @@ module.exports.init = function(app){
     //         });
     // });
 
-    var tVenATableColumns=[
-        {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_VenA", identifier:true, readOnly:true, visible:false},
-        {data: "TSrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_VenA", identifier:true },
+    var tRecDTableColumns=[
+        {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_RecD", identifier:true, readOnly:true, visible:false},
+        {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_RecD", identifier:true },
         // {data: "Article1", name: "Артикул1 товара", width: 200,
         //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForArticle1Combobox",
         //     dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID"},
@@ -115,31 +115,29 @@ module.exports.init = function(app){
         //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForSizeNameCombobox",
         //     dataSource:"ir_ProdSizes", dataFunction:"CASE When ir_ProdSizes.ChID>100000001 Then ir_ProdSizes.SizeName Else '' END",
         //     linkCondition:"ir_ProdSizes.SizeName=r_Prods.SizeName"},
-        {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"t_VenA", visible:true},
-        {data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_VenA", visible:false},
+        {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"t_RecD", visible:true},
+        {data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_RecD", visible:false},
         {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
-            dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_VenA.ProdID" },
-        {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"t_VenA", sourceField:"UM"},
-        {data: "TQty", name: "Уч. кол-во", width: 50, type: "numeric", dataSource:"t_VenA"},
-        {data: "TNewQty", name: "Факт. кол-во", width: 50, type: "numeric", dataSource:"t_VenA"},
+            dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
+        {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"t_RecD", sourceField:"UM"},
+        {data: "Qty", name: "Кол-во", width: 50, type: "numeric", dataSource:"t_RecD"},
         // {data: "PPID", name: "Партия", width: 60, type: "numeric", visible:false},
         // {data: "PriceCC_wt", name: "Цена", width: 65, type: "numeric2", dataSource:"t_RecD"},
-        {data: "TSumCC_wt", name: "Уч. сумма", width: 75, type: "numeric2", dataSource:"t_VenA"},
-        {data: "TNewSumCC_wt", name: "Факт. сумма", width: 75, type: "numeric2", dataSource:"t_VenA"}
-        // {data: "Extra", name: "% наценки", width: 55, type: "numeric", format:"#,###,###,##0.00", dataSource:"t_RecD"},
-        // {data: "PriceCC", name: "Цена продажи", width: 65, type: "numeric2", dataSource:"t_RecD"}
+        {data: "SumCC_wt", name: "Сумма", width: 75, type: "numeric2", dataSource:"t_RecD"},
+        {data: "Extra", name: "% наценки", width: 55, type: "numeric", format:"#,###,###,##0.00", dataSource:"t_RecD"},
+        {data: "PriceCC", name: "Цена продажи", width: 65, type: "numeric2", dataSource:"t_RecD"}
         //{data: "PRICELIST_PRICE", name: "Цена по прайс-листу", width: 75, type: "numeric2"},
     ];
-    // app.get("/mobile/Invent/getDataForVenATable", function(req, res){
-    //     var conditions={};
-    //     for(var condItem in req.query)
-    //         if(condItem.indexOf("ParentChID")==0) conditions["t_VenA.ChID="]=req.query[condItem];
-    //         else conditions["t_VenA."+condItem]=req.query[condItem];
-    //     t_VenA.getDataItemsForTable(req.dbUC,{tableColumns:tVenATableColumns, conditions:conditions, order:"TSrcPosID"},
-    //         function(result){
-    //             res.send(result);
-    //         });
-    // });
+    app.get("/mobile/rec/getDataForRecDTable", function(req, res){
+        var conditions={};
+        for(var condItem in req.query)
+            if(condItem.indexOf("ParentChID")==0) conditions["t_RecD.ChID="]=req.query[condItem];
+            else conditions["t_RecD."+condItem]=req.query[condItem];
+        t_RecD.getDataItemsForTable(req.dbUC,{tableColumns:tRecDTableColumns, conditions:conditions, order:"SrcPosID"},
+            function(result){
+                res.send(result);
+            });
+    });
     // /**
     //  * prodData = { ProdID, UM, Barcode, TNewQty }
     //  */

@@ -14,8 +14,8 @@
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" class="item-link smart-select" @smartselect:closed="pageListInventsStockClosed">
-                                    <select id="pageListInvents-stock">
+                                <a href="#" id="pageListInvents-stock" class="item-link smart-select" @smartselect:close="pageListInventsStockClose">
+                                    <select id="pageListInvents-stock-select">
                                         {{#each listStocks}}
                                         <option value={{StockID}}>{{StockName}}</option>
                                         {{/each}}
@@ -23,7 +23,7 @@
                                     <div class="item-content">
                                         <div class="item-inner">
                                             <div class="item-title">Склад</div>
-                                            <div class="item-after" style="color:#212121"></div>
+                                            <div id="pageListInvents-stock-label" class="item-after" style="color:#212121"></div>
                                         </div>
                                     </div>
                                 </a>
@@ -47,7 +47,7 @@
                                         <div class="item-header" style="display:inline-block;float:left">{{DocID}} от {{SDocDate}}</div>
                                         <div class="item-header" style="display:inline-block;float:right">{{StateName}}</div>
                                     </div>
-                                    <div class="item-title">{{StockName}}</div>
+                                    <div class="item-title docsListStockName">{{StockName}}</div>
                                 </div>
                                 <div class="item-after" style="min-width:80px">
                                     <div style="width:100%;text-align:right">{{TVenQty}}</div>
@@ -67,21 +67,26 @@
         on: {
             pageAfterIn: function(e, page) {                                                             //console.log('pageListInvents.html pageAfterIn', app7.data.pageListInvents);
                 if(app7.data.pageListInvents) {
+                    this.stockIDFilter=app7.data.pageListInvents.stockIDFilter;
+                    this.stockNameFilter=app7.data.pageListInvents.stockNameFilter;
+                    if(this.stockIDFilter!==undefined) $$('#pageListInvents-stock-select').val(this.stockIDFilter);
+                    if(this.stockNameFilter) $$('#pageListInvents-stock').find("#pageListInvents-stock-label").text(this.stockNameFilter);
                     this.$setState({
                         listStocks:app7.data.pageListInvents.listStocks,
-                        stockIDFilter:app7.data.pageListInvents.stockIDFilter,
+                        stockIDFilter:this.stockIDFilter,stockNameFilter:this.stockNameFilter,
                         listInvents:app7.data.pageListInvents.listInvents
                     });
                     return;
                 }
                 if(this.stockIDFilter===undefined)this.stockIDFilter="";
+                if(this.stockNameFilter===undefined)this.stockNameFilter="";
                 this.loadListInventsData();
             }
         },
         methods:{
             loadListInventsData:function(){
                 let cInstance=this,
-                    stockIDFilter=this.stockIDFilter;
+                    stockIDFilter=this.stockIDFilter, stockNameFilter=this.stockNameFilter;
                 app7.preloader.show();
                 var conditions={top:app7.data['inventoryListDocCount']};
                 if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
@@ -92,20 +97,20 @@
                         if(!result)return;
                         app7.data.pageListInvents={
                             listStocks:result.listStocks,
-                            stockIDFilter:stockIDFilter,
+                            stockIDFilter:stockIDFilter,stockNameFilter:stockNameFilter,
                             listInvents:result.listInventsByStockID
                         };                                                                              //console.log('pageListInvents.html pageAfterIn app.data.pageListInvents 2=',app.data.pageListInvents);
                         cInstance.$setState({
                             listStocks:result.listStocks,
-                            stockIDFilter:stockIDFilter,
+                            stockIDFilter:stockIDFilter,stockNameFilter:stockNameFilter,
                             listInvents:result.listInventsByStockID
                         });
                     })
             },
-            pageListInventsStockClosed:function(e){
-                this.stockIDFilter=$$('#pageListInvents-stock').val();
-                app7.data.pageListInvents.stockIDFilter=this.stockIDFilter;
-                this.loadListInventsData();
+            pageListInventsStockClose:function(e){
+                this.stockIDFilter=$$('#pageListInvents-stock-select').val();
+                this.stockNameFilter=$$('#pageListInvents-stock-label').text();
+                app7.data.pageListInvents=null;
             }
         }
     }

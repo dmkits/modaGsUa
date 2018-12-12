@@ -14,8 +14,8 @@
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" class="item-link smart-select" @smartselect:closed="pageListRecsStockClosed">
-                                    <select id="pageListRecs-stock">
+                                <a href="#" id="pageListRecs-stock" class="item-link smart-select" @smartselect:close="pageListRecsStockClose">
+                                    <select id="pageListRecs-stock-select">
                                         {{#each listStocks}}
                                         <option value={{StockID}}>{{StockName}}</option>
                                         {{/each}}
@@ -23,7 +23,7 @@
                                     <div class="item-content">
                                         <div class="item-inner">
                                             <div class="item-title">Склад</div>
-                                            <div class="item-after" style="color:#212121"></div>
+                                            <div id="pageListRecs-stock-label" class="item-after" style="color:#212121"></div>
                                         </div>
                                     </div>
                                 </a>
@@ -47,7 +47,7 @@
                                         <div class="item-header" style="display:inline-block;float:left">{{DocID}} от {{SDocDate}}</div>
                                         <div class="item-header" style="display:inline-block;float:right">{{StateName}}</div>
                                     </div>
-                                    <div class="item-title">{{StockName}}</div>
+                                    <div class="item-title docsListStockName">{{StockName}}</div>
                                 </div>
                                 <div class="item-after" style="min-width:80px">
                                     <div style="width:100%;text-align:right">{{TSumCC_wt}}</div>
@@ -65,23 +65,28 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e, page) {
+            pageAfterIn: function(e, page) {                                                            //console.log("app7.data.pageListRecs",app7.data.pageListRecs);
                 if(app7.data.pageListRecs) {
+                    this.stockIDFilter=app7.data.pageListRecs.stockIDFilter;
+                    this.stockNameFilter=app7.data.pageListRecs.stockNameFilter;
+                    if(this.stockIDFilter!==undefined) $$('#pageListRecs-stock-select').val(this.stockIDFilter);
+                    if(this.stockNameFilter) $$('#pageListRecs-stock').find("#pageListRecs-stock-label").text(this.stockNameFilter);
                     this.$setState({
                         listStocks:app7.data.pageListRecs.listStocks,
-                        stockIDFilter:app7.data.pageListRecs.stockIDFilter,
+                        stockIDFilter:this.stockIDFilter, stockNameFilter:this.stockNameFilter,
                         listRecs:app7.data.pageListRecs.listRecs
                     });
                     return;
                 }
                 if(this.stockIDFilter===undefined)this.stockIDFilter="";
+                if(this.stockNameFilter===undefined)this.stockNameFilter="";
                 this.loadListRecsData();
             }
         },
         methods:{
             loadListRecsData:function(){
                 let cInstance=this,
-                    stockIDFilter=this.stockIDFilter;
+                    stockIDFilter=this.stockIDFilter,stockNameFilter=this.stockNameFilter;
                 app7.preloader.show();
                 var conditions={top:app7.data['recsListDocCount']};
                 if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
@@ -92,21 +97,21 @@
                         if(!result)return;
                         app7.data.pageListRecs={
                             listStocks:result.listStocks,
-                            stockIDFilter:stockIDFilter,
+                            stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
                             listRecs:result.listRecsByStockID
                         };                                                                              //console.log('pageListRecs.html pageAfterIn app.data.pageListRecs 2=',app.data.pageListRecs);
                         cInstance.$setState({
                             listStocks:result.listStocks,
-                            stockIDFilter:stockIDFilter,
+                            stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
                             listRecs:result.listRecsByStockID
                         });
                     })
                 return;
             },
-            pageListRecsStockClosed:function(e){
-                this.stockIDFilter=$$('#pageListRecs-stock').val();
-                app7.data.pageListRecs.stockIDFilter=this.stockIDFilter;
-                this.loadListRecsData();
+            pageListRecsStockClose:function(e){
+                this.stockIDFilter=$$('#pageListRecs-stock-select').val();
+                this.stockNameFilter=$$('#pageListRecs-stock-label').text();
+                app7.data.pageListRecs=null;
             }
         }
     }
