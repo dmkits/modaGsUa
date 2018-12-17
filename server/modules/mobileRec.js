@@ -55,6 +55,14 @@ module.exports.init = function(app){
         {data: "TSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Rec" },
         // {data: "TNewSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Ven" },
         {data: "StateCode", name: "StateCode", width: 50, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "IsStateWork", name: "В работе", width: 50, type: "text", readOnly:true, visible:false,
+            dataFunction:"CASE When t_Rec.StateCode=0 Then 1 Else 0 END" },
+        {data: "IsStateOnConfirmation", name: "На подтверждении", width: 50, type: "text", readOnly:true, visible:false,
+            dataFunction:"CASE When t_Rec.StateCode in (50,56,60) Then 1 Else 0 END" },
+        {data: "IsStateReturned", name: "Возвращен", width: 50, type: "text", readOnly:true, visible:false,
+            dataFunction:"CASE When t_Rec.StateCode in (52,58,62) Then 1 Else 0 END" },
+        {data: "IsClosedStateconfirmed", name: "Закрыт/Подтвержден", width: 50, type: "text", readOnly:true, visible:false,
+            dataFunction:"CASE When t_Rec.StateCode in (145,51,57,61) Then 1 Else 0 END" },
         {data: "StateName", name: "Статус", width: 250, type: "text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" }
     ];

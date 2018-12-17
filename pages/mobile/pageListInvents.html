@@ -39,17 +39,18 @@
             <ul>
                 {{#each listInvents}}
                 <li>
-                    <a class="item-link item-content" href="/pageInventory/{{ChID}}">
+                    <a class="item-link item-content" href="/pageInventory/{{ChID}}"
+                            style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsClosedStateconfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row">
                                 <div class="item-title" style="width:100%">
                                     <div class="item-title">
-                                        <div class="item-header" style="display:inline-block;float:left">{{DocID}} от {{SDocDate}}</div>
-                                        <div class="item-header" style="display:inline-block;float:right;{{#if StateCode}}font-weight:bold;{{else}}color:green;{{/if}}">{{StateName}}</div>
+                                        <div class="item-header" style="display:inline-block;float:left;{{#if IsClosedStateconfirmed}};font-weight:bold{{/if}}">{{DocID}} от {{SDocDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:right;{{#if IsClosedStateconfirmed}};font-weight:bold{{/if}}">{{StateName}}</div>
                                     </div>
                                     <div class="item-title docsListStockName">{{StockName}}</div>
                                 </div>
-                                <div class="item-after" style="min-width:80px">
+                                <div class="item-after" style="min-width:70px">
                                     <div style="width:100%;text-align:right">{{TVenQty}}</div>
                                 </div>
                             </div>

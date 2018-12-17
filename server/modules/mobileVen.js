@@ -55,6 +55,10 @@ module.exports.init = function(app){
         {data: "TSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Ven" },
         {data: "TNewSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Ven" },
         {data: "StateCode", name: "StateCode", width: 50, type: "text", readOnly:true, visible:false, dataSource:"t_Ven"},
+        {data: "IsStateWork", name: "В работе", width: 50, type: "text", readOnly:true, visible:false,
+            dataFunction:"CASE When t_Ven.StateCode=0 Then 1 Else 0 END" },
+        {data: "IsClosedStateconfirmed", name: "Закрыт/Подтвержден", width: 50, type: "text", readOnly:true, visible:false,
+            dataFunction:"CASE When t_Ven.StateCode in (145,51,57,61) Then 1 Else 0 END" },
         {data: "StateName", name: "Статус", width: 250, type: "text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Ven.StateCode" }
     ];
