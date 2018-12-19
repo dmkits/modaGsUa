@@ -27,8 +27,8 @@ module.exports.init = function(app){
                 groupedFields:["r_CRs.CRID","r_CRs.CRName"],
                 conditions:{"r_CRs.CRID>":0,"r_Opers.EmpID=":empID},
                 order: "CRName" },
-            function (result) {                                console.log("getDirCRsForSelect",result);
-                if(req.dbEmpRole=="cashier"){
+            function (result) {
+                if(req.dbEmpRole=="cashier"||req.isMobile){
                     res.send(result);return;
                 }
                 if(result.items)result.items=[{value:-1, label:'Все кассы'}].concat(result.items);
@@ -66,7 +66,7 @@ module.exports.init = function(app){
         for(var condItem in req.query) {
             var val=req.query[condItem];
             if(condItem.indexOf("DiscountP")==0) conditions[condItem.replace("DiscountP","(PurPriceCC_wt-RealPrice)")]=val;
-            else if(condItem.indexOf("CRID")==0&&val=="-1"&&req.dbEmpRole!=="cashier") {//ALL
+            else if(condItem.indexOf("CRID")==0&&val=="-1"&&req.dbEmpRole!=="cashier"&&!req.isMobile) {//ALL
                 conditions["1=1"]=null; allItems=true;
             }else{
                 var newCondItem=condItem;

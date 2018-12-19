@@ -24,14 +24,14 @@ module.exports= function(app) {
         });
     };
     var renderIsMobile= function (req,res,next){
-        if(req.originalUrl.indexOf("/mobile")==0){ next(); return true; }
+        if(req.originalUrl.indexOf("/mobile")==0){ req.isMobile=true; next(); return true; }
         var userAgent=req.headers["user-agent"];
         if(!userAgent) return false;
         else if(userAgent.indexOf("Android")>=0||userAgent.indexOf("Mobile")>=0) {
             if(isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)){
-                next(); return true;
+                req.isMobile=true; next(); return true;
             }
-            res.redirect('/mobile');
+            req.isMobile=true; res.redirect('/mobile');
             return true;
         }
         return false;
