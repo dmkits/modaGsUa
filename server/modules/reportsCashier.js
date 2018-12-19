@@ -27,7 +27,11 @@ module.exports.init = function(app){
                 groupedFields:["r_CRs.CRID","r_CRs.CRName"],
                 conditions:{"r_CRs.CRID>":0,"r_Opers.EmpID=":empID},
                 order: "CRName" },
-            function (result) {
+            function (result) {                                console.log("getDirCRsForSelect",result);
+                if(req.dbEmpRole=="cashier"){
+                    res.send(result);return;
+                }
+                if(result.items)result.items=[{value:-1, label:'Все кассы'}].concat(result.items);
                 res.send(result);
             });
     });
@@ -37,7 +41,7 @@ module.exports.init = function(app){
             dataSource:"t_Sale", sourceField:"DocID", linkCondition:"t_Sale.ChID=t_SaleD.ChID"},
         {data: "StockID", name: "StockID", width: 50, type: "text", visible:false, dataSource:"t_Sale"},
         {data: "CRID", name: "CRID", width: 50, type: "text", visible:false, dataSource:"t_Sale"},
-        {data: "CRName", name: "Касса", width: 200, type: "text", visible:false,
+        {data: "CRName", name: "Касса", width: 250, type: "text", visible:false,
             dataSource:"r_CRs", sourceField:"CRName", linkCondition:"r_CRs.CRID=t_Sale.CRID"},
         {data: "DocID", name: "Номер чека", width: 70, type: "text", align:"center", visible:false, dataSource:"t_Sale"},
         {data: "DocDate", name: "Дата чека", width: 55, type: "dateAsText", visible:true, dataSource:"t_Sale"},
@@ -58,16 +62,27 @@ module.exports.init = function(app){
         {data: "DiscountSum", name: "Сумма скидки", width: 65, type: "numeric2",dataFunction:"(PurPriceCC_wt-RealPrice)*Qty" }
     ];
     app.get("/reports/prodsSales/getProductsSales", function(req, res){
-        var conditions={};
+        var conditions={}, allItems=false;//
         for(var condItem in req.query) {
-            if(condItem.indexOf("DiscountP")==0) conditions[condItem.replace("DiscountP","(PurPriceCC_wt-RealPrice)")]=req.query[condItem];
-            else {
+            var val=req.query[condItem];
+            if(condItem.indexOf("DiscountP")==0) conditions[condItem.replace("DiscountP","(PurPriceCC_wt-RealPrice)")]=val;
+            else if(condItem.indexOf("CRID")==0&&val=="-1"&&req.dbEmpRole!=="cashier") {//ALL
+                conditions["1=1"]=null; allItems=true;
+            }else{
                 var newCondItem=condItem;
                 for(var cInd in tProdsSalesTableColumns){
                     var colData=tProdsSalesTableColumns[cInd];
-                    if(colData&&colData.data&&condItem.indexOf(colData.data)==0&&colData.dataSource)newCondItem=colData.dataSource+"."+condItem;
+                    if(colData&&colData.data&&condItem.indexOf(colData.data)==0&&colData.dataSource){
+                        newCondItem=colData.dataSource+"."+condItem; break;
+                    }
                 }
-                conditions[newCondItem]=req.query[condItem];
+                conditions[newCondItem]=val;
+            }
+        }
+        for (var i = 0; i < tProdsSalesTableColumns.length; i++) {
+            var tColData=tProdsSalesTableColumns[i];
+            if(tColData.data=="CRName"){
+                tColData.visible=allItems; break;
             }
         }
         t_SaleD.getDataForTable(req.dbUC,{tableColumns:tProdsSalesTableColumns, identifier:tProdsSalesTableColumns[0].data,
