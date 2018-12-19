@@ -10,14 +10,18 @@
                 </a>
             </div>
             <div class="title sliding docHeaderTitle">Инвентаризация {{item.DocID}} от {{item.SDocDate}}<br>{{item.StockName}}</div>
-        </div>
-    </div>
-    <div class="toolbar" id="pageInventoryToolbar" style="">
-        <div class="toolbar-inner">
-            <div class="row" style="padding-left:16px;padding-right:16px;">
-                <input type="number" class="col" style="height:36px;min-width:200px;" id="pageInventoryBarCodeInput" placeholder="ШК или код товара">
-                <button class="col button button-outline button-round" id="pageInventoryBtnBarcodeInputEnter" style="width:80px;">ВВОД</button>
-                <span id="pageInventoryState" style="color:black;font-weight:bold;display:none"></span>
+            <div class="subnavbar">
+                <div class="subnavbar-inner">
+                    <div class="row">
+                        {{#if item.IsStateWork}}
+                        <input type="number" class="col" style="height:36px;min-width:200px;" id="barCodeInput" placeholder="ШК или код товара" keypress="barcodeInputKeypress">
+                        <button class="col button button-outline button-round" id="buttonBarcodeInputEnter" style="width:80px;" click="barcodeInputEnter">ВВОД</button>
+                        {{else}}
+                        <span style="color:black;">{{item.StateInfo}}</span>
+                        {{/if}}
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -63,30 +67,21 @@
 <script>
     return {
         on: {
-            pageInit: function(e,page){
-                this.pageContentInventory=$$(this.el).children("#pageContentInventory");
-                if(!this.pageContentInventory)return;
-                var dataTables=this.pageContentInventory.children("table");
+            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
+                var dataTables=$$(this.el).children(".page-content").children("table");
                 if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
                 if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
                 if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
-                if(!this.item||(this.item&&this.item["StateCode"]!==0)) {
-                    this.loadInventData(); return;
-                }
-                var self=this;
-                $$('#pageInventoryToolbar #pageInventoryBtnBarcodeInputEnter').on('click',function(){
-                    self.barcodeInputEnter();
-                });
-                $$('#pageInventoryToolbar #pageInventoryBarCodeInput').on('keypress',function(e){
-                    if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
-                });
                 this.loadInventData();
             },
-            pageAfterOut: function(e,page){
+            pageAfterIn: function(e, page) {                                                            //console.log('pageInventory.html pageAfterIn', page);
+                $$("#barCodeInput").focus();
+            },
+            pageAfterOut: function(e, page) {                                                           //console.log('pageInventory.html pageAfterOut', page);
                 if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl);
             },
         },
-        data: function data(){
+        data: function data() {                                                                         //console.log('pageInventory.html data',this.$route.params);
             let inventData={},listInventsData=this.$app.data.pageListInvents.listInvents;
             if(!this.$route.params) return inventData;
             let inventChID=this.$route.params.inventChID;
@@ -135,28 +130,32 @@
                 app7.innerPageUpdateTotalTable(this.dataTableFoot,{totalRows:tRows,totalQty:totalQty,totalNewQty:totalNewQty})
             },
             setScroll: function(innerElem){
-                var page=this.pageContentInventory[0],
+                var page=$$('#pageContentInventory')[0],
                     absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
                 page.scrollTo(0, absoluteElementTop - (page.clientHeight / 2));
             },
 
-            loadInventData:function(){                                                                  //console.log('pageInventory.html loadInventData inventData=',this.item);
+            loadInventData:function(){                                                                  console.log('pageInventory.html loadInventData inventData=',this.item);
                 let inventData=this.item, inventChID=inventData.ChID;
                 if(inventChID===null||inventChID===undefined) return;
-                let cInstance=this;                                                                     //console.log('pageInventory.html loadInventData inventChID=',inventChID, this);
-                cInstance.setInputProdBarcodeByState({focus:true,enable:false});
-                app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/Invent/getDataForVenATable',conditions:{'ParentChID=':inventChID},
+                let cInstance=this, app=this.$app;                                                      console.log('pageInventory.html loadInventData inventChID=',inventChID, this);
+                cInstance.disableInputProdBarcode();
+                app.preloader.show();
+                app.srvRequestJSON({url:'/mobile/Invent/getDataForVenATable',conditions:{'ParentChID=':inventChID},
                         errorDialogMsg:"Не удалось получить список товаров инвентаризации с сервера!"},
                     function(result,error){
-                        app7.preloader.hide();
+                        app.preloader.hide();
                         if(!result){
-                            cInstance.setInputProdBarcodeByState({focus:true,disable:true});
+                            cInstance.disableInputProdBarcode(true); return;
                         }
-                        cInstance.items=result.items;
-                        app7.data.pageInventory={inventDataItems:result.items};                          console.log('pageInventory.html loadInventData items=',result.items);
+                        app.data.pageInventory={inventDataItems:result.items};                          console.log('pageInventory.html loadInventData items=',result.items);
+                        cInstance.$setState({
+                            item:inventData,items:result.items
+                        });
                         cInstance.fillInventTable(result.items,function(){
-                            cInstance.setInputProdBarcodeByState({focus:true,enable:true});
+                            if(!cInstance.disableInputProdBarcode)return;
+                            cInstance.disableInputProdBarcode(false);
+                            $$("#barCodeInput").focus();
                         });
                     })
             },
@@ -172,53 +171,37 @@
                     };
                 app7.innerPageFillTableData(this, inventData, params, finishedCallback)
             },
+
             barcodeInputEnter: function () {
-                this.setInputProdBarcodeByState({disable:true});
-                app7.preloader.show();
+                this.disableInputProdBarcode();
                 var self=this;
-                this.storeInputValueToInvent($$("#pageInventoryToolbar #pageInventoryBarCodeInput").val(),function(inventProdData){
-                    app7.preloader.hide();
+                this.storeInputValueToInvent($$("#barCodeInput").val(),function(inventProdData){
                     if(!inventProdData){
-                        self.setInputProdBarcodeByState({enable:true,focus:true});
+                        $$("#barCodeInput").val("");
+                        self.disableInputProdBarcode(false);
+                        $$("#barCodeInput").focus();
                         return;
                     }
                     self.addProdToTable(inventProdData);
-                    self.setInputProdBarcodeByState({enable:true,focus:true,val:""});
+                    $$("#barCodeInput").val("");
+                    self.disableInputProdBarcode(false);
+                    $$("#barCodeInput").focus();
                 });
             },
-            /**
-             * opts = { enable, disable, focus, val }
-             */
-            setInputProdBarcodeByState:function(opts){
-                if(!opts)return;
-                var pageInventoryBarCodeInput=$$("#pageInventoryToolbar #pageInventoryBarCodeInput"),
-                    pageInventoryBtnBarcodeInputEnter=$$('#pageInventoryToolbar #pageInventoryBtnBarcodeInputEnter'),
-                    pageInventoryState=$$('#pageInventoryToolbar #pageInventoryState');
-                pageInventoryBarCodeInput.show();pageInventoryBtnBarcodeInputEnter.show();pageInventoryState.hide();
-                if(opts.val!==undefined){
-                    pageInventoryBarCodeInput.val(opts.val);
+            barcodeInputKeypress: function (e) {
+                if(e.keyCode==13||e.key=='Enter') this.barcodeInputEnter();
+            },
+            disableInputProdBarcode:function(disable){
+                if(disable!==false){
+                    $$('#barCodeInput').attr('disabled',1);
+                    $$('#buttonBarcodeInputEnter').attr('disabled',1);
+                    return;
                 }
-                if(opts.enable==true||opts.disable==false){
-                    pageInventoryBarCodeInput.removeAttr('disabled');
-                    pageInventoryBtnBarcodeInputEnter.removeAttr('disabled');
-                    if(opts.focus==true) pageInventoryBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
-                } else if(opts.disable==true||opts.enable==false){
-                    if(opts.focus==true) pageInventoryBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
-                    pageInventoryBarCodeInput.attr('disabled',1);
-                    pageInventoryBtnBarcodeInputEnter.attr('disabled',1);
-                } else if(opts.focus==true) {
-                    pageInventoryBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
-                }
-                if(this.item&&this.item["StateCode"]!==0){
-                    pageInventoryBarCodeInput.attr('disabled',1);
-                    pageInventoryBtnBarcodeInputEnter.attr('disabled',1);
-                    pageInventoryBarCodeInput.hide();pageInventoryBtnBarcodeInputEnter.hide();
-                    pageInventoryState.show();pageInventoryState.text(this.item["StateInfo"]);
-                }
+                $$('#barCodeInput').removeAttr('disabled');
+                $$('#buttonBarcodeInputEnter').removeAttr('disabled');
             },
 
             inventoryTableTDNewQtyOnClick:function(e,dataTableItemName,self){
-                if(this.item&&this.item["StateCode"]!==0)return;
                 var td=e.target;
                 self.showRealQtyDialog(td, dataTableItemName["ProdName"], td.innerText.trim());
             },
@@ -258,8 +241,8 @@
                                         realQtyDialog.close();
                                     })
                             } },
-                            { text:"ОТМЕНА",close:true,keyCodes:[27] } ]
-                    }).open().on("closed",function(){ thisInstance.setInputProdBarcodeByState({focus:true}); });
+                            { text:"ОТМЕНА",close:true,keyCodes:[27],onClick:function(){ $$("#barCodeInput").focus(); } } ]
+                    }).open().on("closed",function(){ $$("#barCodeInput").focus(); });
             },
 
             /**
@@ -278,7 +261,7 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                let cInstance=this, parentChID=this.item.ChID;                                          //console.log('pageInventory.html storeInputValueToInvent inputValue=',inputValue, this);
+                let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageInventory.html storeInputValueToInvent inputValue=',inputValue, this);
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/Invent/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
                         userErrorMsg:"Не удалось добавить товар в инвентаризацию!"},
@@ -292,7 +275,7 @@
                     })
             },
             storeExistsToInvent:function(tSrcPosID,prodID,tNewQty,callback){
-                let cInstance=this, parentChID=this.item.ChID;                                          //console.log('pageInventory.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
+                let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageInventory.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/Invent/storeExistsPosProdData',
                         data:{parentChID:parentChID,TSrcPosID:tSrcPosID,TNewQty:tNewQty},

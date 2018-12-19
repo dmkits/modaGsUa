@@ -90,6 +90,7 @@
                             <i class="icon f7-icons">menu</i>
                         </a>
                     </div>
+                    <!--<div class="title sliding">Мобильная инвентаризация</div>-->
                 </div>
             </div>
             <div class="page-content login-screen-content" id="mobInv-login-screen">
@@ -157,8 +158,7 @@
             var username=localStorage.getItem("login-username");
             if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
             var inventoryListDocCount=localStorage.getItem("settings-inventory-listDocCount");
-            if(inventoryListDocCount&&!isNaN(parseInt(inventoryListDocCount)))
-                app7.data['inventoryListDocCount']=parseInt(inventoryListDocCount);
+            if(inventoryListDocCount&&!isNaN(parseInt(inventoryListDocCount)))app7.data['inventoryListDocCount']=parseInt(inventoryListDocCount);
             var recsListDocCount=localStorage.getItem("settings-recs-listDocCount");
             if(recsListDocCount&&!isNaN(parseInt(recsListDocCount)))app7.data['recsListDocCount']=parseInt(recsListDocCount);
         } else {// Sorry! No Web Storage support..
@@ -188,7 +188,7 @@
     app7.loginProcess=function(){
         var username = $$('#mobInv-login-screen #login-username').val(),
             password = $$('#mobInv-login-screen #login-password').val();
-        this.srvPostRequestJSON({url:'/login',data:{user:username,pswrd:password},errorDialogMsg:"Вход на сервер неудался!"},
+        this.srvPostRequestJSON({url:'/login', data:{user:username,pswrd:password},errorDialogMsg:"Вход на сервер неудался!"},
             function(result,errmsg){
                 $$('#mobInv-login-screen #login-password').val("");
                 if(!result||!result.uuid){
@@ -246,8 +246,7 @@
         else if(params.conditions&&typeof(params.conditions)=="string") requestData=params.conditions.replace('=','~');
         else if(params.conditions)
             for(var cName in params.conditions) requestData[cName.replace('=','~')]=params.conditions[cName];   //console.log('srvRequestJSON app7.request',params.url,'requestData=',requestData);
-        this.request({method:params.method,url:params.url,data:requestData,
-                headers:{ 'x-requested-with': 'application/json; charset=utf-8' },
+        this.request({method:params.method,url:params.url,data:requestData,headers:{ 'x-requested-with': 'application/json; charset=utf-8' },
             success:function(data){                                                                             //console.log('srvRequestJSON app7.request',params.url,'success data=',data);
                 var errMsg;
                 if(!params.errorDialogMsg)params.errorDialogMsg='Не удалось получить данные с сервера!';
@@ -264,8 +263,7 @@
                     errMsg=params.errorDialogMsg+'<br>Данные некорректные!';
                 }
                 if(jsonData&&jsonData.error){
-                    if(jsonData.userErrorMsg)errMsg=params.errorDialogMsg+"<br>"+jsonData.userErrorMsg;
-                    else errMsg=params.errorDialogMsg+"<br>"+jsonData.error;
+                    if(jsonData.userErrorMsg)errMsg=params.errorDialogMsg+"<br>"+jsonData.userErrorMsg;else errMsg=params.errorDialogMsg+"<br>"+jsonData.error;
                 }
                 if(errMsg&&params.showRequestErrorDialog==false){
                     callback(null, errMsg);return;

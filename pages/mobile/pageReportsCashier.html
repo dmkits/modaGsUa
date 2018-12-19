@@ -93,7 +93,7 @@
 <script>
     return {
         on: {
-            pageInit: function(e, page) {                                                               //console.log('pageInventory.html pageInit', page, this);
+            pageInit: function(e,page){
                 var dataTables=$$(this.el).children(".page-content").children("table");
                 if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
                 if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];

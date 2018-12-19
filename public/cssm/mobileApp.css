@@ -45,6 +45,7 @@ tfoot td{
 }
 .tdNewQty{
     text-align: center;
+    font-weight: bold;
 }
 .tdSelectedRow{
     background-color:#cfd5da;

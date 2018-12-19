@@ -61,7 +61,7 @@ module.exports.init = function(app){
             dataFunction:"CASE When t_Rec.StateCode in (50,56,60) Then 1 Else 0 END" },
         {data: "IsStateReturned", name: "Возвращен", width: 50, type: "text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Rec.StateCode in (52,58,62) Then 1 Else 0 END" },
-        {data: "IsClosedStateconfirmed", name: "Закрыт/Подтвержден", width: 50, type: "text", readOnly:true, visible:false,
+        {data: "IsStateClosedOrConfirmed", name: "Закрыт/Подтвержден", width: 50, type: "text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Rec.StateCode in (145,51,57,61) Then 1 Else 0 END" },
         {data: "StateName", name: "Статус", width: 250, type: "text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" }

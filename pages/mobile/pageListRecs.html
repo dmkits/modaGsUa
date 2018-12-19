@@ -40,13 +40,13 @@
                 {{#each listRecs}}
                 <li>
                     <a class="item-link item-content" href="/pageRecData/{{ChID}}"
-                            style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsClosedStateconfirmed}};font-weight:bold{{/if}}">
+                            style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row" style="padding-right:16px">
                                 <div class="item-title" style="width:100%">
                                     <div class="item-title">
-                                        <div class="item-header" style="display:inline-block;float:left;{{#if IsClosedStateconfirmed}};font-weight:bold{{/if}}">{{DocID}} от {{SDocDate}}</div>
-                                        <div class="item-header" style="display:inline-block;float:right;{{#if IsClosedStateconfirmed}};font-weight:bold{{/if}}">{{StateName}}</div>
+                                        <div class="item-header" style="display:inline-block;float:left;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{DocID}} от {{SDocDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:right;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{StateName}}</div>
                                     </div>
                                     <div class="item-title docsListStockName">{{StockName}}</div>
                                 </div>
