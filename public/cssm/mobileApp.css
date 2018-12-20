@@ -25,8 +25,34 @@ tfoot td{
     padding: 0px 5px 0px 5px;
     text-align:center;
 }
+@media (min-width:768px){
+    .md .navbar {
+        height: 56px;
+    }
+    .md .navbar+.toolbar:not(.toolbar-bottom-md):not(.messagebar) {
+        top: 56px;
+    }
+    .md .navbar+.toolbar:not(.toolbar-bottom-md):not(.messagebar)~* .page-content, .md .navbar+.toolbar:not(.toolbar-bottom-md):not(.messagebar)~.page-content {
+        padding-top: 104px;
+    }
+    .md .navbar~.subnavbar~* .page-content, .md .navbar~.subnavbar~.page-content, .md .page-with-subnavbar .navbar~* .page-content, .md .page-with-subnavbar .navbar~.page-content {
+        padding-top: 104px;
+    }
+}
 #login-button-div{
     text-align: center;
+}
+
+.large-size{
+    display:none;
+}
+@media (min-width:768px){
+    .small-size{
+        display:none;
+    }
+    .large-size{
+        display:table-row;
+    }
 }
 .text-centered{
     text-align: center;

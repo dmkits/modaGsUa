@@ -11,78 +11,98 @@
             <div class="title sliding">Отчеты кассира</div>
         </div>
     </div>
-    <div class="toolbar" style="height:78px">
-        <div class="toolbar-inner">
-            <div class="list" style="width:100%">
-                <ul>
-                    <li>
-                        <a href="#" id="pageReportsCashier-cr" class="item-link smart-select" @smartselect:closed="pageReportsCashierCRClosed">
-                            <select id="pageReportsCashier-cr-select">
-                                {{#each listCRs}}
-                                <option value={{value}}>{{label}}</option>
-                                {{/each}}
-                            </select>
-                            <div class="item-content">
-                                <div class="item-inner">
-                                    <div class="item-title">Касса</div>
-                                    <div id="pageReportsCashier-cr-label" class="item-after" style="color:#212121"></div>
-                                </div>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <div class="item-content item-input">
-                            <div class="item-inner">
-                                <div class="item-input-wrap">
-                                    <input type="text" placeholder="Период дат" readonly id="pageReportsCashierDatesRange" @calendar:closed="pageReportsCashierDatesRangeClosed"/>
-                                </div>
-                            </div>
+    <div class="toolbar" style="height:48px">
+        <div class="toolbar-inner" style="padding-left:5px;padding-right:5px">
+            <div class="row" style="width:100%">
+                <a href="#" id="pageReportsCashier-cr" class="col item-link smart-select" style="width:450px;" @smartselect:closed="pageReportsCashierCRClosed">
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title" style="display: contents">Касса</div>
+                            <div id="pageReportsCashier-cr-label" class="item-after" style="display:contents; color:#212121"></div>
                         </div>
-                    </li>
-                </ul>
+                    </div>
+                    <select id="pageReportsCashier-cr-select">
+                        {{#each listCRs}}
+                        <option value={{value}}>{{label}}</option>
+                        {{/each}}
+                    </select>
+                </a>
+                <div class="col item-content item-input" style="width:auto">
+                    <div class="item-inner">
+                        <div class="item-input-wrap" style="min-height:auto;padding-top:5px;padding-bottom:5px">
+                            <input type="text" placeholder="Период дат" readonly id="pageReportsCashierDatesRange" @calendar:closed="pageReportsCashierDatesRangeClosed"/>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="page-content" style="padding-top:134px">
+    <div class="page-content" style="padding-top:104px">
         <table width="100%" style="position:fixed; z-index: 100;" class="tableReport tableReportCashierSales">
             <thead>
-            <tr>
+            <tr class="small-size">
                 <th rowspan="2" width="65px" class="datetime-cell">Дата<br>время<br>чека</th>
-                <!--<th width="80px">Номер<br>чека</th>-->
                 <th colspan="5">Товар</th>
             </tr>
-            <tr>
+            <tr class="small-size">
                 <th></th>
                 <th width="45px">Кол-во</th>
                 <th width="50px">Цена</th>
                 <th width="60px">Сумма</th>
                 <th width="50px">Скидка,<br>%</th>
             </tr>
+            <tr class="large-size">
+                <th width="65px" class="datetime-cell">Дата<br>время<br>чека</th>
+                <th width="80px">Номер<br>чека</th>
+                <th width="50px">Код товара</th>
+                <th>Наименование товара</th>
+                <th width="45px">Кол-во</th>
+                <th width="55px">Цена</th>
+                <th width="70px">Сумма</th>
+                <th width="50px">Скидка,<br>%</th>
+            </tr>
             </thead>
             <tbody style="display:none">
-            <tr rowSelecting="true">
+            <tr class="small-size" rowSelecting="true">
                 <td width="65px" rowspan="2" class="datetime-cell" dataItemName="SDocTime">1</td>
                 <td colspan="5" class="tdProdName" dataItemName="ProdName">2</td>
-                <!--<td width="80px" class="numeric-cell" dataItemName="DocID"></td>-->
             </tr>
-            <tr rowSelecting="true">
+            <tr class="small-size" rowSelecting="true">
                 <td></td>
                 <td width="45px" class="text-centered" dataItemName="Qty">3</td>
                 <td width="50px" class="numeric-cell" dataItemName="RealPrice">4</td>
                 <td width="60px" class="numeric-cell" dataItemName="RealSum">5</td>
                 <td width="50px" class="text-centered" dataItemName="DiscountP">6</td>
             </tr>
+            <tr class="large-size" rowSelecting="true">
+                <td width="65px" class="datetime-cell" dataItemName="SDocTime">1</td>
+                <td width="80px" class="text-centered" dataItemName="DocID">2</td>
+                <td width="50px" class="text-centered" dataItemName="ProdID">3</td>
+                <td class="tdProdName" dataItemName="ProdName">4</td>
+                <td width="45px" class="text-centered" dataItemName="Qty">5</td>
+                <td width="55px" class="numeric-cell" dataItemName="RealPrice">6</td>
+                <td width="70px" class="numeric-cell" dataItemName="RealSum">7</td>
+                <td width="50px" class="text-centered" dataItemName="DiscountP">8</td>
+            </tr>
             </tbody>
         </table>
         <table width="100%" style="margin-top:55px; margin-bottom: 43px;" class="tableReport tableReportCashierSales"></table>
         <table width="100%" style="position:fixed; bottom:0px; z-index: 100" class="tableReport tableReportCashierSales">
             <tfoot>
-            <tr>
+            <tr class="small-size">
                 <td id="totalRows" width="65px" class="datetime-cell">0</td>
                 <td></td>
                 <td id="totalQty" width="45px">0</td>
                 <td width="50px"></td>
                 <td id="totalRealSum" width="60px">0</td>
+                <td width="50px"></td>
+            </tr>
+            <tr class="large-size">
+                <td id="totalRows" width="65px" class="datetime-cell">0</td>
+                <td></td>
+                <td id="totalQty" width="45px">0</td>
+                <td width="55px"></td>
+                <td id="totalRealSum" width="70px">0</td>
                 <td width="50px"></td>
             </tr>
             </tfoot>
