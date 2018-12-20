@@ -132,8 +132,8 @@
                 if(!prodData) prodData={TQty:0,TNewQty:0};
                 var existstdReal=$$(this.dataTableBody).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["TSrcPosID"])[0];
                 if(existstdReal){
-                    let oldTNewQty=parseInt(existstdReal.innerText), tNewQty=prodData["TNewQty"],
-                        oldTQty=parseInt(existstdReal.TQty), tQty=prodData["TQty"];
+                    let oldTNewQty=parseFloat(existstdReal.innerText), tNewQty=prodData["TNewQty"],
+                        oldTQty=parseFloat(existstdReal.TQty), tQty=prodData["TQty"];
                     existstdReal.innerText=tNewQty; existstdReal.TQty=tQty;
                     existstdReal.doSelect();
                     this.setScroll(existstdReal);
@@ -149,8 +149,8 @@
                 var tRows=this.items.length.toString();
                 if(tLoadedRows!==undefined) tRows=tLoadedRows.toString()+"/<br>"+tRows;
                 var dataTableFootTR=$$(this.dataTableFoot).find("tr"),
-                    totalQty=parseInt(dataTableFootTR.find("td#totalQty").text())+tQty,
-                    totalNewQty=parseInt(dataTableFootTR.find("td#totalNewQty").text())+tNewQty;
+                    totalQty=parseFloat(dataTableFootTR.find("td#totalQty").text())+tQty,
+                    totalNewQty=parseFloat(dataTableFootTR.find("td#totalNewQty").text())+tNewQty;
                 app7.innerPageUpdateTotalTable(this.dataTableFoot,{totalRows:tRows,totalQty:totalQty,totalNewQty:totalNewQty})
             },
             setScroll: function(innerElem){
@@ -259,7 +259,7 @@
                         },
                         buttons:[
                             { text:"ВВОД",close:false,keyCodes:[13],onClick:function(){
-                                let val=parseInt($$("#inputRealQty").val());
+                                let val=parseFloat($$("#inputRealQty").val());
                                 if(isNaN(val)){
                                     $$("#storeRealQtyErrMsg").html("Неверное значение количества!");
                                     $$("#inputRealQty").focus();document.getElementById("inputRealQty").select();
@@ -273,7 +273,7 @@
                                             return;
                                         }
                                         tdReal.innerText=val;
-                                        thisInstance.setTotalInfo(0,val-parseInt(displayedQty));
+                                        thisInstance.setTotalInfo(0,val-parseFloat(displayedQty));
                                         realQtyDialog.close();
                                     })
                             } },

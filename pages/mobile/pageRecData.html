@@ -23,24 +23,43 @@
     <div class="page-content" id="pageContentRecData">
         <table width="100%" style="position:fixed; top:104px; z-index: 100">
             <thead>
-            <tr>
+            <tr class="small-size">
                 <th width="40px">№<br>п/п</th>
                 <th>Наименование товара<br>Штрихкод</th>
                 <th width="50px">Ед.<br>изм.</th>
                 <th width="50px">Кол-во</th>
-                <th width="50px">Сумма</th>
+                <th width="70px">Сумма</th>
+            </tr>
+            <tr class="large-size">
+                <th width="40px">№<br>п/п</th>
+                <th width="110px">Штрихкод</th>
+                <th width="50px">Код товара</th>
+                <th>Наименование товара</th>
+                <th width="50px">Ед.<br>изм.</th>
+                <th width="50px">Кол-во</th>
+                <th width="70px">Сумма</th>
             </tr>
             </thead>
             <tbody style="display:none">
-            <tr rowSelecting="true">
+            <tr class="small-size" rowSelecting="true">
                 <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"></td>
                 <td colSpan="4" class="tdProdName" dataItemName="ProdName"></td>
             </tr>
-            <tr rowSelecting="true">
+            <tr class="small-size" rowSelecting="true">
                 <td dataItemName="Barcode"></td>
                 <td width="50px" class="text-centered" dataItemName="UM"></td>
                 <td width="50px" class="tdQty" dataItemName="Qty"></td>
-                <td width="50px" class="tdSumCC" dataItemName="SumCC_wt"
+                <td width="70px" class="tdSumCC" dataItemName="SumCC_wt"
+                    onCreated="recTableTDSumCCOnCreated" onClick="recTableTDNewQtyOnClick"></td>
+            </tr>
+            <tr class="large-size" rowSelecting="true">
+                <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"></td>
+                <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"></td>
+                <td width="50px" class="text-centered" dataItemName="ProdID"></td>
+                <td class="tdProdName" dataItemName="ProdName"></td>
+                <td width="50px" class="text-centered" dataItemName="UM"></td>
+                <td width="50px" class="tdQty" dataItemName="Qty"></td>
+                <td width="70px" class="tdSumCC" dataItemName="SumCC_wt"
                     onCreated="recTableTDSumCCOnCreated" onClick="recTableTDNewQtyOnClick"></td>
             </tr>
             </tbody>
@@ -52,7 +71,7 @@
                 <td id="totalRows" width="40px">0</td>
                 <td></td>
                 <td id="totalQty" width="50px">0</td>
-                <td id="totalSumCC_wt" width="50px">0</td>
+                <td id="totalSumCC_wt" width="70px">0</td>
             </tr>
             </tfoot>
         </table>
@@ -103,8 +122,8 @@
                 if(!prodData) prodData={TQty:0,TNewQty:0};
                 var existstTD=$$(this.dataTableBody).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["SrcPosID"])[0];
                 if(existstTD){
-                    let oldQty=parseInt(existstTD.Qty), dataQty=prodData["Qty"],
-                        oldSumCC_wt=parseInt(existstTD.innerText), dataSumCC_wt=prodData["SumCC_wt"];
+                    let oldQty=parseFloat(existstTD.Qty), dataQty=prodData["Qty"],
+                        oldSumCC_wt=parseFloat(existstTD.innerText), dataSumCC_wt=prodData["SumCC_wt"];
                     existstTD.innerText=dataSumCC_wt; existstTD.Qty=dataQty;
                     existstTD.doSelect();
                     this.setScroll(existstTD);
@@ -120,8 +139,8 @@
                 var tRows=this.items.length.toString();
                 if(tLoadedRows!==undefined) tRows=tLoadedRows.toString()+"/<br>"+tRows;
                 var dataTableFootTR=$$(this.dataTableFoot).find("tr"),
-                    totalQty=parseInt(dataTableFootTR.find("td#totalQty").text())+tQty,
-                    totalSumCC_wt=parseInt(dataTableFootTR.find("td#totalSumCC_wt").text())+tSumCC_wt;
+                    totalQty=parseFloat(dataTableFootTR.find("td#totalQty").text())+tQty,
+                    totalSumCC_wt=parseFloat(dataTableFootTR.find("td#totalSumCC_wt").text())+tSumCC_wt;
                 app7.innerPageUpdateTotalTable(this.dataTableFoot,{totalRows:tRows,totalQty:totalQty,totalSumCC_wt:totalSumCC_wt})
             },
             setScroll: function(innerElem){
@@ -218,7 +237,7 @@
                         },
                         buttons:[
                             { text:"ВВОД",close:false,keyCodes:[13],onClick:function(){
-                                let val=parseInt($$("#inputRealQty").val());
+                                let val=parseFloat($$("#inputRealQty").val());
                                 if(isNaN(val)){
                                     $$("#storeRealQtyErrMsg").html("Неверное значение количества!");
                                     $$("#inputRealQty").focus();document.getElementById("inputRealQty").select();
@@ -232,7 +251,7 @@
                                             return;
                                         }
                                         tdReal.innerText=val;
-                                        thisInstance.setTotalInfo(0,val-parseInt(displayedQty));
+                                        thisInstance.setTotalInfo(0,val-parseFloat(displayedQty));
                                         realQtyDialog.close();
                                     })
                             } },
