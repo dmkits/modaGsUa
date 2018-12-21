@@ -20,6 +20,7 @@ module.exports.modulePagePath = "mobile/pageListRecs.html";
 module.exports.routes=[//-- App routes --
     { path: '/pageListRecs', componentUrl: '/mobile/rec/pageListRecs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
     { path: '/pageRecData/:recChID', componentUrl: '/mobile/rec/pageRecData', options:{ignoreCache:true} },
+    { path: '/pageRecPosData/:recChID/:action/:srcPosID', componentUrl: '/mobile/rec/pageRecPosData', options:{ignoreCache:true} },
     { path: '/pageSettingsRecs', componentUrl: '/mobile/rec/pageSettingsRecs', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
@@ -28,6 +29,9 @@ module.exports.init = function(app){
     });
     app.get("/mobile/rec/pageRecData", function (req, res) {
         res.sendFile(appViewsPath+'mobile/pageRecData.html');
+    });
+    app.get("/mobile/rec/pageRecPosData", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/pageRecPosData.html');
     });
     var tRecsListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
