@@ -497,7 +497,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 }
                 return rowData;
             },
-            updateRowsActionDialog: function(actionParams,progressMaximum){                                            console.log("updateRowsActionDialog",actionParams,actionParams.progressDialogContentHeight);
+            updateRowsActionDialog: function(actionParams,progressMaximum){
                 return Dialogs.showProgress({id:this.id + "_progressBarForDialog", title:"Выполнение операции",
                     width:530, contentHeight:actionParams.progressDialogContentHeight,
                     btnOkLabel:"Закрыть", btnStopLabel:"Остановить", progressMaximum:progressMaximum});
@@ -512,7 +512,8 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
              * actionParams.progressDialog - dialog of action progress
              * actionParams.progressDialogContentHeight - messages content height in process dialog
              * actionParams.progressDialog.start({ title, contentHeight, progressMaximum, message }) - start process dialog
-             * actionParams.progressDialog.addMsg(msg,contentHeight) - added message to dialog, contentHeight if exists set dialog content height
+             * actionParams.progressDialog.addMsgLine(msg,{contentHeight,textStyle}) - added new message line to dialog, contentHeight if exists set dialog content height
+             * actionParams.progressDialog.addMsg(msg,{contentHeight,textStyle}) - added message to dialog, contentHeight if exists set dialog content height
              * actionParams.progressDialog.setMsg(msg) - set last message in dialog
              * actionParams.progressCounter - operation counter
              */

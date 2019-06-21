@@ -104,13 +104,13 @@ define(["dojo/request", "app/base","app/dialogs"],
                         self.doRequestFailDialog({title:"Внимание",content:msg+" <br>Причина: "+reason});
                     };
                 if(!error&&hasResult&&!respJSON.error){
-                    resultCallback(respJSON);
+                    resultCallback(result);
                     return;
                 }else if(!error&&respJSON&&respJSON.error){// response contain error
                     var respErr=respJSON.error, respErrObj=(typeof(respErr)=="object")?respErr:null,
                         errMsg=(respErrObj)?(respErrObj.message||"UNKNOWN"):respErr,
                         resErr={message:errMsg, errorMessage:errMsg};
-                    if(respErrObj&&respErrObj.userMessage) {
+                    if(respErrObj&&respErrObj.userMessage){
                         errMsg=respErrObj.userMessage;
                         resErr.message=respErr.userMessage; resErr.userMessage=respErr.userMessage;
                     }

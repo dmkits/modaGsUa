@@ -91,26 +91,40 @@ define(["app/base", "dijit/Dialog", "dijit/form/Button", "dijit/ProgressBar", "d
                     this.setContentHeight(params.contentHeight);
                     if(params.progressMaximum>=0)this.progressBarForDialog.set("maximum", params.progressMaximum);
                     this.progressBarForDialog.set("value",0);
-                    if(params.message){ this.addMsg(params.message);return; }
+                    if(params.message){ this.addMsgLine(params.message);return; }
                     this.progress();
                 };
-                if(!dlg.addMsg) dlg.addMsg=function(msg,contentHeight){
-                    this.setContentHeight(contentHeight);
+                if(!dlg.addMsgLine) dlg.addMsgLine=function(msg,params){
+                    if(params&&params.contentHeight) this.setContentHeight(params.contentHeight);
                     this.progress();
                     this.messagesContent.domNode.appendChild(this.lastMessage=document.createElement("div"));
-                    this.lastMessage.innerHTML=msg;
+                    if(params&&params.textStyle)
+                        this.lastMessage.innerHTML='<span style="'+params.textStyle+'">'+msg+'</span>';
+                    else
+                        this.lastMessage.innerHTML=msg;
                     this.lastMessage.scrollIntoView(false);
                 };
-                if(!dlg.setMsg) dlg.setMsg=function(msg){
+                if(!dlg.addMsg) dlg.addMsg=function(msg,params){
+                    this.progress();
+                    if(params&&params.textStyle)
+                        this.lastMessage.innerHTML+='<span style="'+params.textStyle+'">'+msg+'</span>';
+                    else
+                        this.lastMessage.innerHTML+=msg;
+                    this.lastMessage.scrollIntoView(false);
+                };
+                if(!dlg.setMsg) dlg.setMsg=function(msg,params){
                     this.progress();
                     if(!this.lastMessage)this.messagesContent.domNode.appendChild(this.lastMessage=document.createElement("div"));
-                    this.lastMessage.innerHTML=msg;
+                    if(params&&params.textStyle)
+                        this.lastMessage.innerHTML='<span style="'+params.textStyle+'">'+msg+'</span>';
+                    else
+                        this.lastMessage.innerHTML=msg;
                     this.lastMessage.scrollIntoView(false);
                 };
-                if(!dlg.setProgress) dlg.setProgress=function(progress,msg){
+                if(!dlg.setProgress) dlg.setProgress=function(progress,msgLine){
                     this.progress();
                     if(progress>=0)this.progressBarForDialog.set("value",progress);
-                    if(msg)this.addMsg(msg);
+                    if(msgLine)this.addMsgLine(msgLine);
                 };
                 if(params.onlyCreate!==true)dlg.show();
                 return dlg;

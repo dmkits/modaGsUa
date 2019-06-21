@@ -589,14 +589,14 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 if(!storeParams.progressDialogStoreRowMessageSuccess)storeParams.progressDialogStoreRowMessageSuccess="Данные сохранены.";
                 if(!storeParams.progressDialogStoreRowMessageFail)storeParams.progressDialogStoreRowMessageFail="Не удалось сохранить данные!";
                 if(!storeParams.progressDialog)storeParams.progressDialog=this.updateRowsActionDialog(storeParams,storingRowData.length);
-                storeParams.progressDialog.addMsg(storeParams.progressDialogStartMessage);
+                storeParams.progressDialog.addMsgLine(storeParams.progressDialogStartMessage);
                 storeParams.progressStopped=false;storeParams.progressFinished=false;
                 var finalCallUpdateContent=storeParams.callUpdateContent;
                 storeParams.callUpdateContent=false; storeParams.showErrorDialog=false;
                 var htableInstance=this;
                 this._storeRowsDataByURLProcess(this,storingRowData,0,storeParams,/*finishedAction*/function(storingRowData,storeParams){
-                    if(storeParams.progressStopped)storeParams.progressDialog.addMsg(storeParams.progressDialogStoppedMessage);
-                    else storeParams.progressDialog.addMsg(storeParams.progressDialogFinishedMessage);
+                    if(storeParams.progressStopped)storeParams.progressDialog.addMsgLine(storeParams.progressDialogStoppedMessage);
+                    else storeParams.progressDialog.addMsgLine(storeParams.progressDialogFinishedMessage);
                     if(finalCallUpdateContent!==false)htableInstance.onUpdateContent({updatedRows:storingRowData});
                 });
             },
@@ -612,7 +612,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
                 htableInstance.setSelectedRow(storeParams.rowData);
                 storeParams.progressCounter=rowInd+1; storeParams.progressDialog.setProgress(storeParams.progressCounter);
-                storeParams.progressDialog.addMsg(storeParams.progressCounter+": "+storeParams.progressDialogStoreRowMessage+" ...");
+                storeParams.progressDialog.addMsgLine(storeParams.progressCounter+": "+storeParams.progressDialogStoreRowMessage+" ...");
                 htableInstance.storeRowDataByURL(storeParams,/*postCallback*/function(result,error,rowData,errorMsg){
                     if(errorMsg) storeParams.progressDialog.setMsg(storeParams.progressCounter+": "+storeParams.progressDialogStoreRowMessageFail+" "+errorMsg);
                     else storeParams.progressDialog.setMsg(storeParams.progressCounter+": "+storeParams.progressDialogStoreRowMessageSuccess);

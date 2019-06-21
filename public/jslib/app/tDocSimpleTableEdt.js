@@ -24,7 +24,7 @@ define(["dojo/_base/declare", "app/tDocsFunctions", "app/base", "app/tDocSimpleT
             /**
              * params { title:"<pane title>"
              *          buttons:{ insertTableRow:"<button title>", allowEditTableSelectedRow:"<button title>",
-             *                    storeTableSelectedRow:"<button title>",deleteTableSelectedRow:"<button title>" }
+             *                    storeTableSelectedRow:"<button title>", deleteTableSelectedRow:"<button title>" }
              * }
              */
             addToolPaneWHTableActionBtns: function(params){
@@ -54,7 +54,7 @@ define(["dojo/_base/declare", "app/tDocsFunctions", "app/base", "app/tDocSimpleT
              */
             addToolPaneTableActionButton: function(label, actionParams){
                 if(!this.rightContainer) {
-                    console.log("WARNING! Failed addToolPaneTableActionButton! Reason: no rightContainer!");
+                    console.error("WARNING! Failed addToolPaneTableActionButton! Reason: no rightContainer!");
                     return this;
                 }
                 if (!this.toolPanes||this.toolPanes.length==0) this.addToolPane();
