@@ -1,208 +1,196 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru-ua">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" lang="ru" Accept-Language="ru"/>
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
-    <![endif]-->
-
-    <!--<link rel="icon" type="image/gif" id="favicon_id"/>-->
-
-    <!--<link rel="icon" type="image/gif" href="/icons/moda32x32.ico"/>-->
-    <!--[if IE]>
-    <!---link rel="stylesheet" type="text/css" href="/css/main_ie.css"--!>
-    <!--<link rel="shortcut icon" href="icons/moda32x32.ico" />-->
-    <!--<![endif]&ndash;&gt;-->
-    <!--[if !IE]><!-->
-    <!--link rel="stylesheet" type="text/css" href="/css/main_nie.css"--!>
-    <!--<![endif]-->
-
-    <script src="/jslib/handsontable-0.29.1/handsontable.full.min.js"></script>
-    <link rel="stylesheet" media="screen" href="/jslib/handsontable-0.29.1/handsontable.full.min.css">
-    <script src="/jslib/handsontable-0.29.1/numbro/languages/ru-RU.min.js"></script>
-    <script src="/jslib/handsontable-0.29.1/moment/moment.js"></script>
-    <script src="/jslib/handsontable-0.29.1/moment/locale/ru.js"></script>
-
-    <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
-    <!--<link rel="stylesheet" href="/jslib/dijit/themes/soria/soria.css" media="screen">-->
-    <!--<link rel="stylesheet" href="/jslib/dijit/themes/nihilo/nihilo.css" media="screen">-->
-    <!--<link rel="stylesheet" href="/jslib/dijit/themes/tundra/tundra.css" media="screen">-->
-    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:true"></script>
-
-    <link rel="stylesheet" href="/css/htable.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/css/main_ie.css">
+    <[endif]-->
+    <!--[if !IE]
+    <link rel="stylesheet" type="text/css" href="/css/main_nie.css">
+    <[endif]-->
+    <script type="text/javascript" src="/jslib/dojoApp.js" handsontable="handsontable-0.29.1" htableStyle="/css/htable.css"></script></head>
     <link rel="stylesheet" type="text/css" href="/css/main.css" media="screen">
+    <!--<script src="/jslib/handsontable-0.29.1/numbro/languages/ru-RU.min.js"></script>-->
+    <!--<script src="/jslib/handsontable-0.29.1/moment/moment.js"></script>-->
+    <!--<script src="/jslib/handsontable-0.29.1/moment/locale/ru.js"></script>-->
     <link rel="stylesheet" type="text/css" href="/css/contentController.css" media="screen">
     <script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
+    <title>MAIN</title>
 </head>
-<body class="claro">
-<!--<page id="main_Page">-->
-    <!--<BorderContainer id="main_PageTop" region="top" design="sidebar" class="mainTopContent" gutters="true">-->
-        <!--<ContentPane id="main_TopImg" region="left" class="mainTopContent"></ContentPane>-->
-        <!--<MenuBar id="main_MainMenu" region="top" class="mainTopContent"></MenuBar>-->
-        <!--<ContentPane id="main_TopInfoPane" region="bottom" class="mainTopContent">-->
-            <!--<div id="main_configName"  style="display:inline;margin-left:10px;"></div>-->
-            <!--<div id="main_dbUsername" style="display:inline;margin-left:10px;"></div>-->
-            <!--<div id="main_dbEmpName" style="display:inline;margin-left:10px;"></div>-->
-        <!--</ContentPane>-->
-    <!--</BorderContainer>-->
-    <!--<TabContainer id="main_Tabs" region="center" tabPosition="top" class="mainContent"></TabContainer>-->
-<!--</page>-->
+<body class="claro"><!--soria,nihilo,tundra-->
+<page id="main_page" design="headline">
+    <BorderContainer id="main_pageTop" region="top" design="sidebar" class="mainTopContent" gutters="true">
+        <ContentPane id="main_topImg" region="left" class="mainTopContent"></ContentPane>
+        <MenuBar id="main_mainMenu" region="top" class="mainTopContent"></MenuBar>
+        <ContentPane id="main_topInfoPane" region="bottom" class="mainTopContent">
+            <span id="main_stateFail"></span>
+            <span id="main_modeName" style="margin-left:10px;"></span>
+            <span id="main_configName" style="margin-left:10px;"></span>
+            <span id="sysadmin_appUser" style="margin-left:10px;"></span>
+            <span id="main_dbEmpName" style="margin-left:10px;"></span>
 
-    <div id="main_MainContainer">
-        <div id="main_TopContainer">
-            <div id="main_TopImg"></div>
-            <div id="main_MainMenu"></div>
-            <div id="main_TopInfoPane">
-                <div id="main_configName"  style="display:inline;margin-left:10px;"></div>
-                <div id="main_dbUsername" style="display:inline;margin-left:10px;"></div>
-                <div id="main_dbEmpName" style="display:inline;margin-left:10px;"></div>
-            </div>
-        </div>
-        <div id="main_ContentContainer"></div>
-    </div>
+        </ContentPane>
+    </BorderContainer>
+    <TabContainer id="main_tabs" region="center" tabPosition="top" class="mainContent"></TabContainer>
+</page>
 </body>
-<!--<script type="text/javascript" src="/jslib/app.js"></script>-->
-<script type="text/javascript">
-//    $$("main_Page").pageInit({design: "headline"});
-
-
-    require(["app/app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane",
-                "dijit/MenuBar", "dijit/MenuBarItem", "dijit/PopupMenuBarItem", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator",
-                "dijit/form/ToggleButton", "dojox/layout/ContentPane",
-                "app/dialogs", "app/request", "dojo/domReady!"],
-            function (APP, BorderContainer, LayoutContainer, TabContainer, ContentPane,
-                      MenuBar, MenuBarItem, PopupMenuBarItem, Menu, MenuItem, MenuSeparator,
-                      ToggleButton, XContentPane, dialogs, Request) {                                               console.log("START MAIN PAGE...");//!!!IT'S FOR TESTING!!!
-
-                var main_MainContainer = APP.instanceForID("main_MainContainer", BorderContainer, {design: "headline"});
-                var main_TopContainer = APP.instanceForID("main_TopContainer", BorderContainer, {region: "top", design: "sidebar", class: "mainTopContent", gutters: true});
-                var main_TopImg = APP.instanceForID("main_TopImg", ContentPane, {region: "left", class: "mainTopContent"});
-                var main_MainMenu = APP.instanceForID("main_MainMenu", MenuBar, {region:"top", class: "mainTopContent"});
-                var main_TopInfoPane = APP.instanceForID("main_TopInfoPane", ContentPane, {region: "bottom", class: "mainTopContent"});
-                var main_ContentContainer = APP.instanceForID("main_ContentContainer", TabContainer, {region: "center", tabPosition: "top", class: "mainContent"});
-                main_MainContainer.startup();
-
-                main_MainContainer.getMainData = function(postaction){//getting main json data from server and run action parameter function
-                    Request.getJSONData({url:"/main/getMainData", consoleLog:true},
-                            function(result){                                                       console.log("main_MainContainer.getMainData result=",result); //title,icon32x32,imageSmall,imageMain
-                                if(result===undefined||result==null) result = [];
-                                main_MainContainer.mainContentData = result;
-                                main_ContentContainer.mainData=result;
-                                var eConfigName = document.getElementById("main_configName");
-                                if(result.title)document.title=result.title;
-                                if(result.icon32x32) changeFavicon(result.icon32x32);
-                                if(result.imageSmall)main_TopImg.set("style","background-image: url(\""+result.imageSmall+"\")");
-                                if(result.mode && result.mode.indexOf("production")<0) {
-                                    var mode_str = result.mode_str;
-                                    if (!mode_str) mode_str= result.mode;
-                                    if (mode_str.toLocaleLowerCase().indexOf("test")>=0) eConfigName.innerHTML="<b style='color:red'>"+mode_str+"</b>";
-                                    else eConfigName.innerHTML="<b>"+mode_str+"</b>";
-                                } else if (!result.mode) eConfigName.innerHTML= eConfigName.innerHTML+"<b>UNKNOWN MODE!!!</b>";
-                                if(result.dbUserName) document.getElementById("main_dbUsername").innerHTML =  "<b>"+result.dbUserName+"</b>";
-                                if(result.EmpName) document.getElementById("main_dbEmpName").innerHTML =  "<b>"+result.EmpName+"</b>";
-                                if(postaction)postaction();
-                            });
-                };
-                main_MainContainer.createMainMenu = function(){
-                    var mainMenu = main_MainContainer.mainContentData.menuBar;
-                    for(var i in mainMenu) {// create and add main menu items
-                        var mainMenuItem=mainMenu[i];
-                        if (mainMenuItem.popupMenu == null || mainMenuItem.popupMenu.length == 0) {
-                            var mainMenuBarItem = APP.childFor(main_MainMenu, mainMenuItem.menuItemName, MenuBarItem, {label:mainMenuItem.menuTitle, itemData:mainMenuItem});
-                            mainMenuBarItem.onClick = function () { main_MainContainer.runMainAction(this.itemData); }
-                        } else {// make sub-menu
-                            var mainPopupMenuBarItem = APP.childFor(null, mainMenuItem.menuItemName, PopupMenuBarItem, {label: mainMenuItem.menuTitle});
-                            var popupMenu = new Menu({id: mainMenuItem.menuItemName + "_menu"});
-                            mainPopupMenuBarItem.set("popup", popupMenu); main_MainMenu.addChild(mainPopupMenuBarItem);
-                            for(var pi in mainMenuItem.popupMenu) {
-                                var popupMenuItem=mainMenuItem.popupMenu[pi];
-                                var popupMenuItemName = popupMenuItem.menuItemName;
-                                if (popupMenuItemName.indexOf("separator")==0) {
-                                    var popupMenuItem = APP.childFor(popupMenu, popupMenuItemName, MenuSeparator, {});
-                                } else {
-                                    var popupMenuItem = APP.childFor(popupMenu, popupMenuItemName, MenuItem, {label:popupMenuItem.menuTitle, itemData:popupMenuItem});
-                                    popupMenuItem.onClick = function () { main_MainContainer.runMainAction(this.itemData); };
-                                }
-                            }
-                            popupMenu.startup();
-                        }
-                    }
-                };
-
-                main_MainContainer.runMainAction = function(actionData) {                                       console.log("main_MainContainer.runMainAction: actionData=",actionData);//!!!IT'S FOR TESTING!!!
-                    if (actionData.action=="close") {
-                        main_MainMenu.destroy();
-                        main_ContentContainer.destroy();
-                     //   location.reload();
-                        Request.postJSONData({url:"/main/exit"},
-                                function(result){
-                                    var resultContent;
-                                    if (result&&result.actionResult=="successful"){
-                                            resultContent= "<div>Вы закрыли все окна и вышли из рабочей сессии. <a href='/login'>Войти</a></div>";
-                                        main_MainContainer.addChild(new ContentPane({id:"finish", title:"finish", region:"center",content:resultContent}) );
-                                        return;
-                                    }
-                                    var cookies = document.cookie.split(";");
-                                    for (var i = 0; i < cookies.length; i++) {
-                                        var cookie = cookies[i];
-                                        var eqPos = cookie.indexOf("=");
-                                        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                                        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-                                    }
-                                    resultContent= "<div>Вы закрыли все окна.</div>";
-                                    main_MainContainer.addChild(new ContentPane({id:"finish", title:"finish", region:"center",content:resultContent}) );
-                                });
-                    } else if (actionData.action=="help_about") {
-                        dialogs.mainAboutDialog();
-                    } else if (actionData.action=="open") {
-                        var pageContentPane =
-                                APP.childFor(main_ContentContainer, "PageContentPane_"+actionData.pageId,
-                                        XContentPane, {title:actionData.pageTitle, closable:actionData.closable, parseOnLoad:false, style:"margin:0;padding:0;"});
-                        main_ContentContainer.selectChild(pageContentPane);
-                        pageContentPane.set("content","");
-                        pageContentPane.set("href",actionData.contentHref);
-
-                    } else {
-                        console.log("main_MainContainer.runMainAction: unknown action:\""+actionData.action+"\"!!! do nothing!!!");
-                    }
-                };
-
-                main_MainContainer.runAutorunActions = function() {
-                    if(!main_MainContainer.mainContentData||!main_MainContainer.mainContentData.autorun) return;
-                    var autorunActions = main_MainContainer.mainContentData.autorun;
-                    for(var autorunIndex in autorunActions){
-                        var autorunMenuItemName = autorunActions[autorunIndex];
-                        var mainMenu = main_MainContainer.mainContentData.menuBar;
-                        for(var i in mainMenu) {// create and add main menu items
-                            var item=mainMenu[i];
-                            if (item.popupMenu == null || item.popupMenu.length == 0) {
-                                if(item.menuItemName==autorunMenuItemName) main_MainContainer.runMainAction(item);
-                            } else {
-                                for(var pi in item.popupMenu) {
-                                    var pitem = item.popupMenu[pi];
-                                    if(pitem.menuItemName==autorunMenuItemName) main_MainContainer.runMainAction(pitem);
-                                }
-                            }
-                        }
-                    }
-                };
-                function changeFavicon(src) {
-                    document.head = document.head || document.getElementsByTagName('head')[0];
-                    var link = document.createElement('link'),
-                            oldLink = document.getElementById('dynamic-favicon');
-                    link.id = 'dynamic-favicon';
-                    link.rel = 'shortcut icon';
-                    link.href = src;
-                    if (oldLink) {
-                        document.head.removeChild(oldLink);
-                    }
-                    document.head.appendChild(link);
+<script type="text/javascript"> $app.dev=true;
+    $app.startup("#main_page",function(){                                                                   console.log("START MAIN PAGE...",$$);//!!!IT'S FOR TESTING!!!
+        function setBrending(appConfig){
+            if(appConfig.title) document.title=appConfig.title;
+            if(appConfig.icon32x32)changeFavicon(appConfig.icon32x32);
+            if(appConfig.imageSmall)$$.main_topImg.set("style","background-image: url(\""+appConfig.imageSmall+"\")");
+        }
+        function changeFavicon(src){
+            document.head = document.head || document.getElementsByTagName('head')[0];
+            var link = document.createElement('link'),
+                    oldLink = document.getElementById('dynamic-favicon');
+            link.id = 'dynamic-favicon';link.rel = 'shortcut icon';link.href = src;
+            if(oldLink)document.head.removeChild(oldLink);
+            document.head.appendChild(link);
+        }
+        var updateMainState = function(result,error){
+            $$.main_stateFail.innerHTML="";
+            if(error){
+                $$.main_page.mainContentData = {error:error};
+                $$.main_stateFail.innerHTML='<b>FAILED: </b><span style="color:red">'+error.message+'</span>';
+            }
+            if(result){
+                $$.main_page.mainContentData = result;
+                $$.main_modeName.innerHTML = "<b>Режим приложения:</b> ";
+                if(result.mode){
+                    var sMode=result.mode.toString().toLocaleLowerCase();
+                    if(sMode.indexOf("test")>=0||sMode.indexOf("debug")>=0)
+                        $$.main_modeName.innerHTML+= "<b style='color:red'>"+result.mode+"</b>";
+                    else
+                        $$.main_modeName.innerHTML+= "<b style='color:dimgrey'>"+result.mode+"</b>";
+                    $$.main_modeName.setAttribute("title",result.mode);
+                }else {
+                    $$.main_modeName.innerHTML += "<b>UNKNOWN!!!</b>";
+                    $$.main_modeName.setAttribute("title","UNKNOWN!");
                 }
-                main_MainContainer.getMainData(
-                    /*postaction*/function(){
-                            main_MainContainer.createMainMenu();
-                            main_MainContainer.runAutorunActions();
-                    });
+                $$.sysadmin_appUser.innerHTML="<b>Пользователь: <span style='color:dimgrey'>"+result.dbUserName;
+                $$.sysadmin_appUser.setAttribute("title",result.dbUserName);
+                if(!result.sysConfig)result.sysConfig={};
+                var dbSysConnState=(result.dbSysConnErr)
+                        ?'<span style="color:red">'+result.dbSysConnErr+'</span>'
+                        :'<span style="color:dimgrey">Connected</span>';
+//                $$.sysadmin_dbConnectionState.innerHTML ='<b>DB SYSTEM CONNECTION STATE: '+dbSysConnState+'</b>';
+//                $$.sysadmin_dbConnectionState.setAttribute("title",result.dbSysConnErr||"Connected");
+                var dbValidState=(result.dbValidationErr)
+                        ?'<span style="color:red">'+result.dbValidationErr+'</span>'
+                        :'<span style="color:dimgrey">'+result.dbValidation+'</span>';
+//                $$.sysadmin_dbValidateState.innerHTML ='<b>DB VALIDATION STATE: '+dbValidState+'</b>';
+//                $$.sysadmin_dbValidateState.setAttribute("title",result.dbValidationErr||result.dbValidation);
+                setBrending(result.appConfig);
+            }
+        };
+        var closeAction= function(menuItemData){
+            $$.main_mainMenu.destroy();
+            $$.main_tabs.destroy();
+            //   location.reload();
+            $$.request.postJSONData({url:"/exit"},function(result){
+                var exitContent;
+                if(result&&result.actionResult=="successful"){
+                    exitContent= "<div>Вы закрыли все окна и вышли из рабочей сессии. <a href='/login'>Войти</a></div>";
+                    $$.main_page.$.addInnerPage({region:"center", title:menuItemData.menuTitle, closable:false, style:"margin:0;padding:0;",content:exitContent});
+                    return;
+                }
+                var cookies = document.cookie.split(";");
+                for(var i = 0; i < cookies.length; i++){
+                    var cookie = cookies[i], eqPos = cookie.indexOf("="),
+                            name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                }
+                exitContent= "<div>Вы закрыли все окна.</div>";
+                $$.main_page.$.addInnerPage({region:"center", title:menuItemData.menuTitle, closable:false, style:"margin:0;padding:0;",content:exitContent});
             });
+        };
+        var aboutAction= function(menuItemData){
+            $$.dialogs.showSimple({title:"О программе",
+                content:"Система учета <b>MODA.GS.UA</b>. <br>Разработчики: dmkits, ianagez<br> 2017-2019",
+                btnOkLabel:"Закрыть"
+            });
+        };
+        var createMainMenu = function(mainMenuData){                                            console.log("mainMenuData",mainMenuData);
+            var mainMenu=$$.main_mainMenu, mainTabs=$$.main_tabs;                                           console.log("mainTabs=",mainTabs);
+            var menuClickAddInnerPage=function(menuItem,e){                                                 console.log(menuItem.id+" "+menuItem.label+" click",menuItem,e);
+
+                if(menuItem.itemData.action=="close"){ closeAction(menuItem.itemData); return; }
+                else if(menuItem.itemData.action=="help_about"){ aboutAction(menuItem.itemData); return; }
+
+                var iPageName="innerPage_"+menuItem.id, iPageInstance=mainTabs.$.cid(iPageName);            console.log(menuItem.id+" "+menuItem.label+" click iPageInstance=",iPageInstance);
+
+                if(!iPageInstance){
+                    mainTabs.$.addInnerPage({id:iPageName, title:menuItem.pageTitle, region:"center",style:"margin:0;padding:0;",
+                                closable:menuItem.closable, href:menuItem.pageHref
+                            },
+                            function(innerPage){
+                                iPageInstance=mainTabs[iPageName]=innerPage;
+                            });
+                }
+                var ch=mainTabs.selectChild(iPageName);
+            };
+            for(var i in mainMenuData) {
+                var mainMenuDataItem=mainMenuData[i];
+                if(!mainMenuDataItem.popupMenu||mainMenuDataItem.popupMenu.length==0){                     //console.log("mainMenuDataItem",mainMenuDataItem);
+                    mainMenu.$.addMenu("MenuBarItem", {id:mainMenuDataItem.menuItemName,label:mainMenuDataItem.menuTitle, itemData:mainMenuDataItem,
+                        pageTitle:mainMenuDataItem.pageTitle,closable:mainMenuDataItem.closable,pageHref:mainMenuDataItem.pageHref,
+                        click:menuClickAddInnerPage
+                    });
+                    continue;
+                }
+                // make sub-menu
+                mainMenu.$.addMenu("PopupMenuBarItem", {id:mainMenuDataItem.menuItemName, label: mainMenuDataItem.menuTitle},
+                        function(menuBar){                                                                 //console.log("menuBar=",menuBar);
+                            for(var pi in mainMenuDataItem.popupMenu){
+                                var popupMenuItem=mainMenuDataItem.popupMenu[pi];
+                                var popupMenuItemName = popupMenuItem.menuItemName;
+                                if(popupMenuItemName&&popupMenuItemName.indexOf("separator")==0){
+                                    menuBar.$.addMenu("MenuSeparator", {id:popupMenuItem.menuItemName});
+                                    continue;
+                                }
+                                menuBar.$.addMenu("MenuItem", {id:popupMenuItem.menuItemName,label:popupMenuItem.menuTitle, itemData:popupMenuItem,
+                                    pageTitle:popupMenuItem.pageTitle,closable:popupMenuItem.closable,pageHref:popupMenuItem.pageHref,
+                                    click:menuClickAddInnerPage
+                                });
+                            }
+                        });
+            }
+        };
+
+        $$.getMainData = function(){
+            $$.request.getJSONData({url:"/getMainData"},function(result,error){                                       console.log("getJSONData /getMainData",result,error);
+                if(error){
+                    updateMainState(result,error);
+                    return;
+                }
+//                if(result.mainMenu){
+//                    result.mainMenu.push({
+//                        "menuItemName":"menuBarItemTDocSimpleTable1", "menuTitle":"tDocSimpleTable1", "pageTitle":"tDocSimpleTable1", pageHref:"/test/tDocSimpleTable1", "closable":true
+//                    });
+//                    result.mainMenu.push({
+//                        "menuItemName":"menuBarItemTDocSimpleTable2wActions", "menuTitle":"tDocSimpleTable2wActions", "pageTitle":"tDocSimpleTable2wActions", pageHref:"/test/tDocSimpleTable2wActions", "closable":true
+//                    });
+//                }
+                updateMainState(result);
+                createMainMenu(result.menuBar);
+
+//        mainTabs.$.addInnerPage({region:"center", title:"Template Doc Simple Table 1", closable:true, style:"margin:0;padding:0;",href:"/test/tDocSimpleTable1"});
+//                if($$.menuBarItemTDocSimpleTable1)$$.menuBarItemTDocSimpleTable1.click($$.menuBarItemTDocSimpleTable1);
+//                if($$.menuBarItemTDocSimpleTable2wActions)$$.menuBarItemTDocSimpleTable2wActions.click($$.menuBarItemTDocSimpleTable2wActions);
+            });
+        };
+        $$.getMainData();
+//        $$("#main_Page").$.addInnerPage({region:"center", title:"innerPage_1", closable:true, style:"margin:0;padding:0;",href:"/ipage1"});
+//        mainTabs.$.addInnerPage({region:"center", title:"innerPage_1", closable:false, style:"margin:0;padding:0;",href:"/ipage1"});
+
+//        mainTabs.$.addInnerPage({region:"center", id:"reportsCashier", title:"Отчеты кассира", closable:true, style:"margin:0;padding:0;",href:"/reports/cashier"},
+//                function(innerPage){
+//                    mainTabs.selectChild(mainTabs["reportsCashier"]=innerPage);
+//                });
+        console.log("MAIN PAGE STARTED! $$=",$$);//!!!IT'S FOR TESTING!!!
+    });
 </script>
 </html>

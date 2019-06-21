@@ -59,12 +59,11 @@ input {
     font-family : Tahoma,Arial,Helvetica;
 }
 
-#main_MainContainer{
+#main_page{
     position: absolute; left: 0; top: 0; right: 0; bottom: 0;
     margin: 1px; padding: 0;
 }
-
-#main_TopContainer{
+#main_pageTop{
     height: 54px;
     margin: 0; padding: 0;
 }
@@ -72,13 +71,13 @@ input {
     background: #eee;
     /*border: solid 1px;*/
 }
-#main_TopImg{
+#main_topImg{
     margin: 0; padding: 0;
     width: 130px;
    /* background-image: url("/imgs/moda_small.jpg");*/
     background-repeat: no-repeat;
 }
-#main_MainMenu{
+#main_mainMenu{
     margin: 0; padding: 1px;
     height: 25px;
     margin-left: -5px;
@@ -86,7 +85,7 @@ input {
     border-left: none;
     text-align: right;
 }
-#main_TopInfoPane {
+#main_topInfoPane {
     margin: 0; padding: 5px;
     margin-left: -5px;
     height: 14px;
@@ -94,7 +93,7 @@ input {
     border-left: none;
 }
 
-#main_ContentContainer{
+#main_tabs{
     margin: 0; padding: 0;
 }
 .mainContent{
