@@ -2,10 +2,9 @@
 <html lang="ru-ua">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" lang="ru" Accept-Language="ru"/>
-    <!--<link rel="icon" type="image/gif" href="/icons/moda32x32.ico"/>-->
     <!--[if IE]>
-    <!--<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">-->
-    <![endif]-->
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+    <[endif]-->
     <script type="text/javascript" src="/jslib/dojoApp.js" handsontable="handsontable-0.29.1" htableStyle="/css/htable.css"></script></head>
     <link rel="stylesheet" type="text/css" href="/css/sysadmin.css" media="screen">
     <title>SYSADMIN</title>
@@ -38,8 +37,7 @@
     </StackContainer>
 </page>
 </body>
-<script type="text/javascript">
-    $app.dev=true;
+<script type="text/javascript"> //$app.dev=true;
     $app.startup("#sysadmin_page",function(){                                                               //log("START SYSADMIN PAGE...",this,$$);//!!!IT'S FOR TESTING!!!
         $$.sysadmin_btnLogout.onClick=function(){
             $$.request.postJSONData({url:"/",data:{action:"exit"},consoleLog:true},function(result){
@@ -69,7 +67,7 @@
             document.head.appendChild(link);
         }
         $$.sysadmin_page.updateSysState = function(){
-            $$.request.getJSONData({url:"/sysadmin/sysState",consoleLog: true},function(result,error){
+            $$.request.getJSONData({url:"/sysadmin/sysState",consoleLog:true},function(result,error){
                 $$.sysadmin_getStateFail.innerHTML="";
                 if(error){
                     $$.sysadmin_page.mainContentData = {error:error};
