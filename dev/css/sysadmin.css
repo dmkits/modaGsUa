@@ -56,36 +56,45 @@ th {
     background: #EFEFEF;
     color : black;
 }
+/*td{*/
+    /*margin:0;*/
+    /*padding:0*/
+/*}*/
+/*tr{*/
+    /*margin:0;*/
+    /*padding:0*/
+/*}*/
 input {
     font-size : 11px;
     font-family : Tahoma,Arial,Helvetica;
 }
 
-#sysadmin_page{
+#sysadmin_MainContainer{
     position: absolute; left: 0; top: 0; right: 0; bottom: 0;
     margin: 1px; padding: 0;
 }
 
 .sysadmin_TopContent{
     background: #eee;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /*border: solid 1px;*/
 }
 #sysadmin_TopContainer{
     margin: 0; padding: 0;
     height: 63px;
+    /*height: 75px;*/
 }
 #sysadmin_TopImg{
+    /*/!*background: #eee;*!/*/
     margin: 0; padding: 0;
     width: 130px;
-    /*background-image: url("/imgs/.jpg");*/
+    /*background-image: url("/imgs/moda_small.jpg");*/
     background-repeat: no-repeat;
 }
 #sysadmin_TopStateInfo{
     margin: 0;
     margin-left: -5px;
     padding: 5px;
+    height: 100%;
     background: none;
     border-left: none;
     text-align: left;
@@ -98,7 +107,11 @@ input {
     border-left: none;
     padding:3px;
 }
+
+.sysadmin_Content{
+}
 #sysadmin_ContentContainer{
     margin: 0; padding: 0;
-    /*background-image: image("/imgs/.jpg");*/
+    /*background-image: image("/imgs/bata.jpg");*/
+
 }

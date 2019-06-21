@@ -32,11 +32,11 @@ module.exports.getStartupParams = function() {
 };
 
 module.exports.loadConfig=function(fileName){
-    var stringConfig = fs.readFileSync(serverConfigPath+fileName);
+    var stringConfig = fs.readFileSync(sysConfigPath+fileName);
     return JSON.parse(stringConfig);
 };
 module.exports.saveConfig=function(fileName,dbConfig,callback) {
-    fs.writeFile(serverConfigPath+fileName, JSON.stringify(dbConfig), function (err, success) {
+    fs.writeFile(sysConfigPath+fileName, JSON.stringify(dbConfig), function (err, success) {
         callback(err,success);
     })
 };

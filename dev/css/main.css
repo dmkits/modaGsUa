@@ -45,8 +45,6 @@ table {
     border-collapse: collapse;
     font-size : 11px;
     font-family : Tahoma,Arial,Helvetica;
-    /*margin:0;*/
-    /*padding:0;*/
 }
 th {
     font-family : Tahoma,Arial,Helvetica;
@@ -61,44 +59,43 @@ input {
     font-family : Tahoma,Arial,Helvetica;
 }
 
-#sysadmin_page{
+#main_MainContainer{
     position: absolute; left: 0; top: 0; right: 0; bottom: 0;
     margin: 1px; padding: 0;
 }
 
-.sysadmin_TopContent{
-    background: #eee;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-#sysadmin_TopContainer{
+#main_TopContainer{
+    height: 54px;
     margin: 0; padding: 0;
-    height: 63px;
 }
-#sysadmin_TopImg{
+.mainTopContent{
+    background: #eee;
+    /*border: solid 1px;*/
+}
+#main_TopImg{
     margin: 0; padding: 0;
     width: 130px;
-    /*background-image: url("/imgs/.jpg");*/
+   /* background-image: url("/imgs/moda_small.jpg");*/
     background-repeat: no-repeat;
 }
-#sysadmin_TopStateInfo{
-    margin: 0;
+#main_MainMenu{
+    margin: 0; padding: 1px;
+    height: 25px;
     margin-left: -5px;
-    padding: 5px;
     background: none;
     border-left: none;
-    text-align: left;
+    text-align: right;
 }
-#sysadmin_TopActions {
-    margin:0;
+#main_TopInfoPane {
+    margin: 0; padding: 5px;
     margin-left: -5px;
-    height: 30px;
+    height: 14px;
     background: none;
     border-left: none;
-    padding:3px;
 }
-#sysadmin_ContentContainer{
+
+#main_ContentContainer{
     margin: 0; padding: 0;
-    /*background-image: image("/imgs/.jpg");*/
+}
+.mainContent{
 }

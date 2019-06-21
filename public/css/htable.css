@@ -1,6 +1,10 @@
 .handsontable table thead th {
     white-space: pre-line;
 }
+.ht_clone_top {
+}
+.wtHolder {
+}
 
 .hTableCurrentRow {
     background-color: #E7E8EF !important;
@@ -58,7 +62,9 @@
 }
 
 /*header filter*/
-.changeTypeLbl {
+.addedHeaderTH{
+}
+.addedHeaderGlobalFilterLbl {
     color: black;
     background: #eee;
     border-radius: 2px;
@@ -71,10 +77,10 @@
     margin-top: 3px;
     z-index: 100;
 }
-.changeTypeAccent {
+.addedHeaderGlobalFilterInUse {
     font-weight: bold;
 }
-.changeTypeC {
+.addedHeaderGlobalFilter {
     border: 1px solid #bbb;
     color: black;
     background: #eee;
@@ -88,15 +94,15 @@
     margin-top: 3px;
     z-index: 100;
 }
-.changeTypeC:hover {
+.addedHeaderGlobalFilter:hover {
     border: 1px solid #777;
     color: black;
     cursor: pointer;
 }
-.changeTypeC.pressed {
+.addedHeaderGlobalFilter.pressed {
     background-color: #999;
 }
-.changeType {
+.hTableColFilterBtn {
     border: 1px solid #bbb;
     color: #bbb;
     background: #eee;
@@ -109,15 +115,15 @@
     margin: 3px 3px 0 0;
     z-index: 100;
 }
-.changeType:hover {
+.hTableColFilterBtn:hover {
     border: 1px solid #777;
     color: #777;
     cursor: pointer;
 }
-.changeType.pressed {
+.hTableColFilterBtn.pressed {
     background-color: #999;
 }
-.changeTypeMenu {
+.hTableColFilterMenu {
     position: absolute;
     border: 1px solid #ccc;
     margin-top: 18px;
@@ -127,18 +133,18 @@
     display: none;
     z-index: 1000;
 }
-.changeTypeMenu li {
+.hTableColFilterMenu li {
     text-align: left;
     list-style: none;
     padding: 2px 20px;
     cursor: pointer;
     margin-bottom: 0;
 }
-.changeTypeMenu li.active:before {
+.hTableColFilterMenu li.active:before {
     content: "\2714";
     margin-left: -15px;
     margin-right: 3px;
 }
-.changeTypeMenu li:hover {
+.hTableColFilterMenu li:hover {
     background: #eee;
 }

@@ -63,13 +63,12 @@ module.exports.init= function(app){
         outData.imageSmall=appConfig.imageSmall;
         outData.imageMain=appConfig.imageMain;
         setUserRoleMenu(outData, req.dbEmpRole, appConfig.usersRoles, appConfig.appMenu);
-        var dbConErr=database.getDBConnectError();
-        if (dbConErr) {
-            outData.dbConnection= dbConErr;
+        var dbSysConnErr=database.getSystemConnectionErr();
+        if(dbSysConnErr){
+            outData.dbSysConnErr= dbSysConnErr;
             res.send(outData);
             return;
         }
-        outData.dbConnection='Connected';
         res.send(outData);
     });
     app.post("/main/exit", function(req, res){

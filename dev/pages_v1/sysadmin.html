@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--<link rel="icon" type="image/gif" href="/icons/moda32x32.ico"/>-->
+    <![endif]-->
+    <script src="/jslib/handsontable-0.29.1/handsontable.full.min.js"></script>
+    <link rel="stylesheet" media="screen" href="/jslib/handsontable-0.29.1/handsontable.full.min.css">
+    <script src="/jslib/handsontable-0.29.1/numbro/languages/ru-RU.min.js"></script>
+    <script src="/jslib/numeral/languages/ru.js"></script>
+    <script src="/jslib/moment/moment-with-locales.js"></script>
+    <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:false"></script>
+    <link rel="stylesheet" href="/css/htable.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/css/sysadmin.css" media="screen">
+</head>
+<body class="claro" style="display:none">
+<div id="sysadmin_MainContainer">
+    <div id="sysadmin_TopContainer" style="height:63px; margin:0; padding:0">
+        <div id="sysadmin_TopImg"></div>
+        <div id="sysadmin_TopStateInfo">
+            <!--<div id="sysadmin_app_user" style="display:inline;"></div>-->
+            <div id="sysadmin_app_mode" style="display:inline;inline;margin-left:20px;"></div>
+            <div id="sysadmin_ConnUserName" style="display:inline;;margin-left:20px;"></div>
+            <div id="sysadmin_app_port" style="display:inline; margin-left:20px;"></div>
+            <div id="sysadmin_dbName" style="display:inline;;margin-left:20px;"></div>
+            <div id="sysadmin_db_sysadmin_name" style="display:inline;;margin-left:20px;"></div>
+            <div id="sysadmin_connectToDBState" style="display:inline;margin-left:20px;"></div>
+            <div id="sysadmin_modulesFailures" style="display:inline;margin-left:20px;"></div>
+            <div id="sysadmin_dbValidateState" style="display:inline;margin-left:20px;"></div>
+        </div>
+        <div id="sysadmin_TopActions">
+            <table>
+                <tr>
+                    <td><button id="sysadmin_btnStartupConfig">Startup configuration</button></td>
+                    <td><button id="sysadmin_btnDatabase">Database</button></td>
+                    <!--<td><button id="sysadmin_btnAppModelSettings">AppModelSettings</button></td>-->
+                    <!--<td><button id="sysadmin_btnSynchronization">Synchronization</button></td>-->
+                    <td><button id="sysadmin_btnLogins">Logins</button></td>
+                    <td><button id="sysadmin_btnLogs">Logs</button></td>
+                    <td width="500px"></td>
+                    <td><button id="btnLogout">Logout</button></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="sysadmin_ContentContainer"></div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["app/app", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/ToggleButton", "dojox/layout/ContentPane", "dijit/form/Button",  "app/request", "dojo/domReady!"],
+            function (APP, BorderContainer, StackContainer, ContentPane, ToggleButton, XContentPane, Button, Request) {     console.log("STARTING SYSADMIN PAGE...");//!!!IT'S FOR TESTING!!!
+                moment.locale("uk");
+                var mainContainer = APP.instanceForID("sysadmin_MainContainer", BorderContainer, {design: "headline"});
+                var topContainer = APP.instanceForID("sysadmin_TopContainer",
+                    BorderContainer, { region: "top", design: "sidebar", class: "sysadmin_TopContent", gutters: true });
+                var topImg = APP.instanceForID("sysadmin_TopImg",ContentPane, { region: "left", class: "sysadmin_TopContent" });
+                var topStateInfo = APP.instanceForID("sysadmin_TopStateInfo",ContentPane, { region: "top", class: "sysadmin_TopContent" });
+                var topActions = APP.instanceForID("sysadmin_TopActions",ContentPane, { region: "bottom", class: "sysadmin_TopContent" });
+                var functionalButtons=[];
+                var btnStartupConfig = new ToggleButton({id:"sysadmin_btnStartupConfig",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnStartupConfig");
+                functionalButtons.push(btnStartupConfig);
+                var sysadmin_btnDatabase = new ToggleButton({id:"sysadmin_btnDatabase",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnDatabase");
+                functionalButtons.push(sysadmin_btnDatabase);
+//                var sysadmin_btnAppModelSettings = new ToggleButton({id:"sysadmin_btnAppModelSettings",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnAppModelSettings");
+//                functionalButtons.push(sysadmin_btnAppModelSettings);
+//                var sysadmin_btnSynchronization=new ToggleButton({id:"sysadmin_btnSynchronization",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnSynchronization" );
+//                functionalButtons.push(sysadmin_btnSynchronization);
+                var btnLogins=new ToggleButton({id:"sysadmin_btnLogins",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogins" );
+                functionalButtons.push(btnLogins);
+                var btnLogs=new ToggleButton({id:"sysadmin_btnLogs",iconClass:'dijitCheckBoxIcon'},"sysadmin_btnLogs" );
+                functionalButtons.push(btnLogs);
+                var btnLogout = new ToggleButton({id:"btnLogout"},"btnLogout");
+                var contentContainer = APP.instanceForID("sysadmin_ContentContainer",StackContainer, {region: "center", tabPosition: "top", class: "sysadmin_Content"});
+                document.body.style.display = "";
+                mainContainer.startup();
+                /** getting main json data from server and run action parameter function
+                 * params = { revalidate:true/false }
+                 */
+                mainContainer.updateDBState = function (params) {
+                    var condition;
+                    if(params&&params.revalidate) condition={"REVALIDATE":true};
+                    Request.getJSONData({url: "/sysadmin/serverState", condition:condition, consoleLog: true},
+                            function (result) {       console.log("sysadmin_MainContainer.updateDBState result=",result);
+                                if(!result){
+                                    document.getElementById("sysadmin_connectToDBState").innerHTML =
+                                            "<b>DB CONNECTION STATE:<span id='dbConnection_color' style='color:red'>UNKNOWN</span></b>";
+                                    mainContainer.mainContentData = [];
+                                    return;
+                                }
+                                if(result.error){
+                                    mainContainer.mainContentData["error"] = result.error;
+                                    return;
+                                }
+                                mainContainer.mainContentData = result;
+                                var eAppMode = document.getElementById("sysadmin_app_mode");
+                                var eAppPort = document.getElementById("sysadmin_app_port");
+                                eAppMode.innerHTML = "<b>MODE:</b>";
+                                eAppPort.innerHTML = "<b>PORT:</b>";
+                                if(result.config) setBrending(result.config);
+                                if (result.mode) {
+                                    if (result.mode.toString().toLocaleLowerCase().indexOf("production") < 0)
+                                        eAppMode.innerHTML = eAppMode.innerHTML + "<b style='color:red'>" + result.mode + "</b>";
+                                    else
+                                        eAppMode.innerHTML = eAppMode.innerHTML + "<b style='color:dimgrey'>" + result.mode + "</b>";
+                                } else
+                                    eAppMode.innerHTML = eAppMode.innerHTML + "<b>UNKNOWN!!!</b>";
+                                if(result.port)
+                                    eAppPort.innerHTML=eAppPort.innerHTML+"<b style='color:dimgrey'>"+ result.port+"</b>";
+                                else
+                                    eAppPort.innerHTML=eAppPort.innerHTML+"<b style='color:dimgrey'>UNKNOWN</b>";
+                                if(result.configuration && result.configuration.database){
+                                    document.getElementById("sysadmin_dbName").innerHTML =
+                                            "<b>DB NAME:<span style='color:dimgrey'>" + result.configuration.database + "</span></b>";
+                                } else {
+                                    document.getElementById("sysadmin_dbName").innerHTML =
+                                            "<b>DB NAME:<span style='color:dimgrey'>UNKNOWN</span></b>";
+                                }
+                                if(result.configuration && result.configuration.user){
+                                    document.getElementById("sysadmin_db_sysadmin_name").innerHTML =
+                                            "<b>DB SYSADMIN USER:<b style='color:dimgrey'>" + result.configuration.user + "</b>";
+                                }else {
+                                    document.getElementById("sysadmin_db_sysadmin_name").innerHTML =
+                                            "<b>DB CONNECTION USER:<span style='color:dimgrey'>UNKNOWN</span></b>";
+                                }
+                                if(result.dbUserName){
+                                    document.getElementById("sysadmin_ConnUserName").innerHTML =
+                                            "<b>DB CONNECTION USER:<b style='color:dimgrey'>" + result.dbUserName + "</b>";
+                                }else {
+                                    document.getElementById("sysadmin_ConnUserName").innerHTML =
+                                            "<b>DB CONNECTION USER:<span style='color:dimgrey'>UNKNOWN</span></b>";
+                                }
+
+                                if (result.systemConnectionErr) {
+                                    document.getElementById("sysadmin_connectToDBState").innerHTML =
+                                            "<b>DB CONNECTION STATE:<span id ='dbConnection_color'>" + result.systemConnectionErr + "</span></b>";
+                                    var dbConnection_color = document.getElementById("dbConnection_color");
+                                    if (result.systemConnectionErr == "Connected") {
+                                        dbConnection_color.setAttribute("style", "color:dimgrey");
+                                        topContainer.set("style","height:63px; margin:0; padding:0");
+                                    }else {
+                                        dbConnection_color.setAttribute("style", "color:red");
+                                        topContainer.set("style","height:75px; margin:0; padding:0");
+                                    }
+                                } else {
+                                    document.getElementById("sysadmin_connectToDBState").innerHTML =
+                                            "<b>DB CONNECTION STATE:<span id ='dbConnection_color'>UNKNOWN</span></b>";
+                                }
+                                var modulesFailures=document.getElementById("sysadmin_modulesFailures");
+                                if (result.modulesFailures)
+                                    modulesFailures.innerHTML = "<b style='color:red'>MODULES FAILS:" + result.modulesFailures + "</b>";
+                                else
+                                    modulesFailures.setAttribute("style","display:none");
+                                var sysadmin_dbValidateState=document.getElementById("sysadmin_dbValidateState");
+                                if (result.dbValidation) {
+                                    sysadmin_dbValidateState.innerHTML =
+                                            "<b>DB VALIDATION STATE:<span id ='dbValidationcolor'>" + result.dbValidation + "</span></b>";
+                                    var dbValidationColor = document.getElementById("dbValidationcolor");
+                                    if (result.dbValidation == "success") {
+                                        dbValidationColor.setAttribute("style", "color:dimgrey");
+                                        topContainer.set("style","height:63px; margin:0; padding:0");
+                                    }else {
+                                        dbValidationColor.setAttribute("style", "color:red");
+                                        topContainer.set("style","height:75px; margin:0; padding:0");
+                                    }
+                                } else
+                                    sysadmin_dbValidateState.innerHTML ="UNKNOWN";
+                                topContainer.resize();
+                                mainContainer.layout();
+                            }
+                    )
+                };
+                mainContainer.runSysadminContentPage = function (owner, id, title, closable, contentURL) {     console.log("sysadmin_MainContainer.runSysadminContentPage: ", contentURL);//!!!IT'S FOR TESTING!!!
+                    if(!owner.pageContentPane){
+                        owner.pageContentPane=
+                                APP.childFor(contentContainer, "PageContentPane_" + id,
+                                        XContentPane, {title: title, closable: closable,parseOnLoad: false,style: "margin:0;padding:0;"});
+                        owner.pageContentPane.set("content", "");
+                        owner.pageContentPane.set("href", contentURL);
+                        owner.pageContentPane.updateDBState = mainContainer.updateDBState;
+                    }
+                    contentContainer.selectChild(owner.pageContentPane);
+                };
+
+                var checkButton= function(button){
+                    button.set("checked", true);
+                    for(var i in functionalButtons){
+                        var anotherBtn=functionalButtons[i];
+                        if(anotherBtn!=button){
+                            anotherBtn.set("checked", false);
+                        }
+                    }
+                };
+                btnStartupConfig.onClick=function() {
+                   mainContainer.runSysadminContentPage(btnStartupConfig, "sysadmin_ServerConfig",
+                           "Server configuration", false, "/sysadmin/serverConfig");
+                    checkButton(this);
+                };
+                sysadmin_btnDatabase.onClick=function(){
+                    mainContainer.runSysadminContentPage(sysadmin_btnDatabase, "sysadmin_btnDatabase",
+                            "Database", false, "/sysadmin/database");
+                    checkButton(this);
+                };
+//                sysadmin_btnAppModelSettings.onClick=function(){
+//                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnAppModelSettings, "sysadmin_btnAppModelSettings",
+//                            "Application model settings", false, "/sysadmin/appModelSettings");
+//                    checkButton(this);
+//                };
+//                sysadmin_btnSynchronization.onClick=function(){
+//                    sysadmin_MainContainer.runSysadminContentPage(sysadmin_btnSynchronization, "sysadmin_btnSynchronization",
+//                            "Synchronization", false, "/system/synchronization");
+//                    checkButton(this);
+//                };
+                btnLogins.onClick=function(){
+                    mainContainer.runSysadminContentPage(btnLogins, "sysadmin_btnLogins",
+                            "Logins", false, "/sysadmin/logins");
+                    checkButton(this);
+                };
+                btnLogs.onClick=function(){
+                    mainContainer.runSysadminContentPage(btnLogs, "sysadmin_btnLogs",
+                            "Logs", false, "/sysadmin/logs");
+                    checkButton(this);
+                };
+
+                btnLogout.onClick=function(){
+                    Request.postJSONData({url:"/" /*"/clean_cookie"*/ ,data:{action:"exit"},consoleLog:true},
+                            function(result){
+                                if (result&&result.actionResult=="successful"){
+                                    window.location.replace(window.location.href);
+                                    return;
+                                }
+                                var cookies = document.cookie.split(";");
+                                for (var i = 0; i < cookies.length; i++) {
+                                    var cookie = cookies[i];
+                                    var eqPos = cookie.indexOf("=");
+                                    var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                                }
+                                window.location.replace(window.location.href);
+                            });
+                };
+                function setBrending(config){
+                    if(config.title) document.title=config.title;
+                    if(config.icon32x32)changeFavicon(config.icon32x32);
+                    if(config.imageSmall)topImg.set("style","background-image: url(\""+config.imageSmall+"\")");
+                }
+                function changeFavicon(src) {
+                    document.head = document.head || document.getElementsByTagName('head')[0];
+                    var link = document.createElement('link'),
+                            oldLink = document.getElementById('dynamic-favicon');
+                    link.id = 'dynamic-favicon';
+                    link.rel = 'shortcut icon';
+                    link.href = src;
+                    if (oldLink) {
+                        document.head.removeChild(oldLink);
+                    }
+                    document.head.appendChild(link);
+                }
+                mainContainer.updateDBState();
+                btnStartupConfig.onClick();
+            });
+</script>
+</html>

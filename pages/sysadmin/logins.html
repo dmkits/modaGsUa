@@ -1,55 +1,34 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-<div id="logins_PageContainer" style="width: 100%; height: 100%;">
-    <div id="logins_ContentContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
-</div>
-</body>
-<script type="text/javascript">
-    require(["app/app", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "app/tDocSimpleTableEdt"],
-        function (APP, BorderContainer, StackContainer, TDocSimpleTableEdt) {
-            var logins_PageContainer= APP.instanceForID("logins_PageContainer", BorderContainer, {});
-            var logins_ContentContainer= APP.instanceForID("logins_ContentContainer", StackContainer, {region:'center'});
-
-            logins_ContentContainer.document =
-                APP.childFor(logins_ContentContainer, "loginsTable",
-                        TDocSimpleTableEdt, {titleText:"Database logins",
-                        buttonExportToExcel:false,
-                        rightPane:{width:300},
-                        rightToolPane:{title:"Actions",
-                            buttons:{ allowEditTableSelectedRow:"Change", storeTableSelectedRow:"Store"}},
-                        dataURL:"/sysadmin/logins/getLoginsDataForTable", dataStoreURL:"/sysadmin/logins/storeLoginsTableData"
-                    })
-                    .addToolPane({title:"info",
-                        contentTableAction:function(params){
-                            var infoContent="";
-                            if(params.contentTableSelectedRow){
-                                infoContent="<b>UserID</b>:"+params.contentTableSelectedRow["UserID"]+
-                                        "<br><b>UserName</b>:"+params.contentTableSelectedRow["UserName"]+
-                                        "<br><b>EmpID</b>:"+params.contentTableSelectedRow["EmpID"]+
-                                        "<br><b>EmpName</b>:"+params.contentTableSelectedRow["EmpName"]+
-                                        "<br><b>dbUserName</b>:"+params.contentTableSelectedRow["suname"]+
-                                        "<br><b>PswrdNote</b>:"+(params.contentTableSelectedRow["PswrdNote"]||"");
-                            }
-                            params.thisToolPane.set("content",infoContent);
-                        }})
-                    .addContentTableRowChangeCallback(function(crd/*changedRowData*/, contentTable, params, nextCallback){
-                            if (crd.item("ShiftPostName").isChanged()){
-                                var shiftPostID=
-                                        contentTable.getAutocompleteColumnValueForItem("ShiftPostName",crd.item("ShiftPostName").getValue(),"ShiftPostID");
-                                crd.item("ShiftPostID").setValue(shiftPostID);
-                            }
-                            nextCallback();
-                    })
-                    .addTotalCountNumberBox("ИТОГО строк:", 150, {style:"font-weight:bold;",inputStyle:"width:50px"})
-                    .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
-                    .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
-                    .startUp();
-            logins_PageContainer.layout();
-        })
+<LayoutContainer id="sa_logins_PageContainer" style="width:100%;height:100%;margin:0px;padding:0;">
+    <StackContainer id="sa_logins_ContentContainer" region="center" tabPosition="top" style="width:100%;height:100%; margin:5px;padding:0;">
+        <TDocSimpleTableEdt id="sa_logins_TDocDBLogins" title="Database logins" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTableEdt>
+    </StackContainer>
+</LayoutContainer>
+<script type="text/javascript">                                                                             //log("sysadmin logins $$",$$);//!!!IT'S FOR TESTING!!!
+    $$.sa_logins_TDocDBLogins
+            .init({titleText: "Database logins", dataURL:'/sysadmin/logins/getLoginsDataForTable', buttonPrint:false,
+                rightPane:{width:300},
+                dataStoreURL:"/sysadmin/logins/storeLoginsTableData"
+            })
+            .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:40px;"})
+            .addToolPane({title:"Database login info",
+                contentTableAction:function(params){
+                    var info="";
+                    if(params.contentHTableSelectedRow){
+                        info="<b>UserID</b>:"+params.contentHTableSelectedRow["UserID"]
+                                +"<br><b>UserName</b>:"+params.contentHTableSelectedRow["UserName"]
+                                +"<br><b>EmpID</b>:"+params.contentHTableSelectedRow["EmpID"]
+                                +"<br><b>EmpName</b>:"+params.contentHTableSelectedRow["EmpName"]
+                                +"<br><b>dbUserName</b>:"+params.contentHTableSelectedRow["suname"]
+                                +"<br><b>PswrdNote</b>:"+(params.contentHTableSelectedRow["PswrdNote"]||"");
+                    }
+                    params.thisToolPane.set("content",info);
+                }
+            })
+            .addToolPaneWHTableActionBtns({title:"Database login actions",buttons:{allowEditTableSelectedRow:"Change", storeTableSelectedRow:"Store"}})
+            .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+            .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"});
+    $$.sa_logins_TDocDBLogins.onShow= function(){
+        if(!$$.sa_logins_TDocDBLogins.startedUp)$$.sa_logins_TDocDBLogins.startupDoc();
+    };
+    $$.sa_logins_TDocDBLogins.onShow();
 </script>
-</html>

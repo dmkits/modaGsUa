@@ -1,6 +1,6 @@
 var path=require('path'), fs=require('fs');
 var log=require("./server").log,
-    server=require("./server"), getStartupConfig=server.getStartupConfig,getAppConfig=server.getAppConfig,
+    server=require("./server"), getSysConfig=server.getSysConfig,getAppConfig=server.getAppConfig,
     database=require("./databaseMSSQL"),
     common=require("./common");
 
@@ -58,7 +58,7 @@ module.exports= function(app) {
     var accessFail= function (req,res,next,failResult) {
         if(!failResult)failResult={error:"Access FAIL!", userErrorMsg:"Доступ не удался!", pageMsg:"Доступ не удался!"};
         if(isReqJSON(req.method,req.headers)){
-            res.send({error:failResult.error,userErrorMsg:failResult.userErrorMsg}); return;
+            res.send({error:{error:failResult.error,userMessage:failResult.userErrorMsg}}); return;
         }
         if(renderIsMobile(req,res,next))return;
         if(isReqInternalPage(req.method,req.headers))renderToAccessFailed(req,res,failResult.pageMsg);
@@ -138,10 +138,7 @@ module.exports= function(app) {
         if(database.getSystemConnectionErr()){
             var msg="Нет системного подключения к базе данных! <br>Обратитесь к системному администратору.";
             if (isReqJSON(req.method,req.headers)) {
-                res.send({
-                    error: "Failed to get data! Reason: failed get system connection to database!",
-                    userErrorMsg: msg
-                });
+                res.send({ error:{error:"Failed to get data! Reason: failed get system connection to database!",userMessage:msg} });
                 return;
             }
             if(sysadminName&&req.originalUrl!=="/sysadmin") {
@@ -162,10 +159,7 @@ module.exports= function(app) {
         if(!sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
             var errMsg="Невозможно получить данные! Пользователь не авторизироват как сисадмин!";
             if (isReqJSON(req.method,req.headers)) {
-                res.send({
-                    error: "Failed to get data! Reason: login user is not sysadmin!",
-                    userErrorMsg: errMsg
-                });
+                res.send({ error:{error:"Failed to get data! Reason: login user is not sysadmin!",userMessage:errMsg} });
                 return;
             }
             renderToAccessFailed(req,res,errMsg);
@@ -175,10 +169,7 @@ module.exports= function(app) {
         getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
             if(errMsg){
                 if (isReqJSON(req.method,req.headers)) {
-                    res.send({
-                        error: "Failed to get data! Reason: failed to get login user data from database!",
-                        userErrorMsg: errMsg
-                    });
+                    res.send({ error:{error:"Failed to get data! Reason: failed to get login user data from database!",userMessage:errMsg} });
                     return;
                 }
                 if(renderIsMobile(req,res,next))return;
@@ -210,13 +201,13 @@ module.exports= function(app) {
     app.post("/login", function (req, res) {                                                        log.info("ACCESS CONTROLLER: post /login user=",req.body.user,'pswrd=',req.body.pswrd);
         var userName=req.body.user, userPswrd=req.body.pswrd;
         if(!userName ||!userPswrd ){
-            res.send({error:"Authorisation failed! No login or password!", userErrorMsg:"Пожалуйста введите имя и пароль."});
+            res.send({ error:{error:"Authorisation failed! No login or password!",userMessage:"Пожалуйста введите имя и пароль."} });
             return;
         }
         var uuid = common.getUIDNumber();
         database.createNewUserDBConnection({uuid:uuid,login:userName,password:userPswrd}, function(err,result){
-            var  isSysadmin=false, serverConfig=getStartupConfig();
-            if(serverConfig && userName==serverConfig.user && userPswrd==serverConfig.password) isSysadmin=true;
+            var isSysadmin=false, sysConfig=getSysConfig();
+            if(sysConfig && userName==sysConfig.dbUser && userPswrd==sysConfig.dbUserPass) isSysadmin=true;
             if(err){
                 if(isSysadmin){
                     storeSysadminUUID({uuid:uuid,userName:userName},function(){
@@ -225,7 +216,7 @@ module.exports= function(app) {
                     });
                     return;
                 }
-                res.send({error:err.error,userErrorMsg:err.userErrorMsg});
+                res.send({ error:{error:err.error,userMessage:err.userMessage} });
                 return;
             }
             if(isSysadmin) storeSysadminUUID({uuid:uuid,userName:userName});

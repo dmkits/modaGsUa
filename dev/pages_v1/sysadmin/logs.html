@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="sysadmin_logsPageContainer" style="width:100%;height:100%;display:none">
+    <div id="sysadmin_logsContentPaneHeader" style="width:100%;height:30px; margin:0;padding:0;">
+        <table>
+            <tr>
+                <td>
+                    <button id="sysadmin_logs_getLogsBtn"></button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="sysadmin_logsContentPaneDetailContainer" style="width:100%;height:auto; margin:0;padding:0;">
+    </div>
+</div>
+</body>
+<script> type="text/javascript">
+    require(["app/app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/ToggleButton", "app/tDocSimpleTable"],
+
+            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, ToggleButton, TDocSimpleTable) {
+
+                var sysadmin_logsPageContainer =
+                        APP.instanceForID("sysadmin_logsPageContainer", BorderContainer, {});
+
+                var sysadmin_logsContentPaneHeader =
+                        APP.instanceForID("sysadmin_logsContentPaneHeader", ContentPane, {region: 'top', splitter: false});
+                var sysadmin_logs_getLogsBtn = APP.instanceForID("sysadmin_logs_getLogsBtn",
+                        ToggleButton, {showLabel: true, checked: true, label: "Get logs", iconClass: 'dijitCheckBoxIcon'});
+                domStyle.set("sysadmin_logs_getLogsBtn", "width", "150px");
+
+                var sysadmin_logsContentPaneDetailContainer =
+                        APP.instanceForID("sysadmin_logsContentPaneDetailContainer", StackContainer, {region: 'center'});
+                sysadmin_logsPageContainer.domNode.style.display = "";
+                sysadmin_logsPageContainer.startup();
+
+                sysadmin_logs_getLogsBtn.onClick = function () {
+                    this.set("checked", true);
+
+                    if (sysadmin_logs_getLogsBtn.document) {
+                        sysadmin_logsContentPaneDetailContainer.selectChild(sysadmin_logs_getLogsBtn.document);
+                        return;
+                    }
+                    sysadmin_logs_getLogsBtn.document =
+                            APP.childFor(sysadmin_logsContentPaneDetailContainer, "sysadmin_logs_TableErrorsLog",
+                                    TDocSimpleTable, {titleText: "Logs", dataURL: '/sysadmin/logs/getDataForTable', dataURLCondition: {"1~": 1}, buttonPrint: false})
+                                    .addHeaderDateBox("",{initValueDate:"curDate", contentTableCondition:"DATE"})
+                                    .addTotalCountNumberBox("ИТОГО строк:", 140, { style: "font-weight:bold;", inputStyle: "width:40px;" })
+                                    .startUp();
+                    sysadmin_logsContentPaneDetailContainer.selectChild(sysadmin_logs_getLogsBtn.document);
+                };
+                sysadmin_logs_getLogsBtn.onClick();
+                sysadmin_logsPageContainer.layout();
+            });
+</script>
+</html>

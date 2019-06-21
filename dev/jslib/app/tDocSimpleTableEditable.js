@@ -1,47 +1,53 @@
 /**
  * Created by dmkits on 12.07.17.
  */
-define(["dojo/_base/declare", "app/tDocsFunctions", "app/base", "app/tDocSimpleTable", "app/hTableEditable"],
-    function(declare, TDocsFunctions, Base, TDocSimpleTable, HTableEditable) {
-        var $TDF=TDocsFunctions;
-        return declare("TDocSimpleTableEdt", [TDocSimpleTable], {
+define(["dojo/_base/declare", "app/app", "app/tDocSimpleTable", "app/hTableEditable"],
+    function(declare, APP, TDocSimpleTable, HTableEditable) {
+        return declare("TDocSimpleTableEditable", [TDocSimpleTable], {
             /**
              * added args: { dataNewURL, dataStoreURL, dataDeleteURL },
+             * rightToolPane:{title:"<title>", width:<width>
+             *               buttons:{ insertTableRow:"<title>", allowEditTableSelectedRow:"<title>",
+             *                         storeTableSelectedRow:"<title>",deleteTableSelectedRow:"<title>"} }
+             * default:
+             * rightToolPane.width=150
              */
             constructor: function(args,parentName){
                 this.dataNewURL= null;
                 this.dataStoreURL= null;
                 this.dataDeleteURL= null;
                 declare.safeMixin(this,args);
-                if(args.rightPane&& typeof(args.rightPane)=="object") this.rightContainerParams=args.rightPane;
+                if(args.rightToolPane&& typeof(args.rightToolPane)=="object"){
+                    this.rightToolPaneParams= args.rightToolPane;
+                    if(!this.rightContainerParams) this.rightContainerParams= {};
+                    if(!this.rightContainerParams.style) this.rightContainerParams.style="margin:0;padding:0;";
+                    if(!this.rightContainerParams.width&&this.rightToolPaneParams.width)
+                        this.rightContainerParams.width=this.rightToolPaneParams.width;
+                    else if(!this.rightContainerParams.width&&!this.rightToolPaneParams.width)
+                        this.rightContainerParams.width=150;
+                }
             },
             postCreate: function(){
                 this.createTopContent();
                 this.createContentTable(HTableEditable, {readOnly:false,allowFillHandle:true});
                 this.createRightContent();
-                this.startup();
-            },
-            /**
-             * params { title:"<pane title>"
-             *          buttons:{ insertTableRow:"<button title>", allowEditTableSelectedRow:"<button title>",
-             *                    storeTableSelectedRow:"<button title>",deleteTableSelectedRow:"<button title>" }
-             * }
-             */
-            addToolPaneWHTableActionBtns: function(params){
-                if(!params)params={};
-                this.addToolPane({title:params.title});
-                var rightPaneWidth=this.rightContainerParams.width;
-                for (var btnActionName in params.buttons) {
-                    var btn= params.buttons[btnActionName];
-                    this.addToolPaneTableActionButton(btn, {btnStyle:"width:"+(rightPaneWidth-35)+"px;", actionName:btnActionName})
+                if(this.rightToolPaneParams){
+                    if(this.rightToolPaneParams){
+                        this.addToolPane({title:this.rightToolPaneParams.title});
+                    }
+                    var rightPaneWidth=this.rightContainerParams.width;
+                    for (var btnActionName in this.rightToolPaneParams.buttons) {
+                        var btn= this.rightToolPaneParams.buttons[btnActionName];
+                        this.addToolPaneTableActionButton(btn, {btnStyle:"width:"+(rightPaneWidth-35)+"px;", actionName:btnActionName})
+                    }
                 }
-                return this;
             },
-            /**
+
+            /*
              * callback(changedRowData, contentTableInstance, params, nextCallback)
              */
-            addContentTableOnChangeRowAction: function(callback){
-                this.contentHTable.addOnChangeRowAction(callback);
+            addContentTableRowChangeCallback: function(callback){
+                this.contentTable.addRowChangeCallback(callback);
                 return this;
             },
 
@@ -58,15 +64,15 @@ define(["dojo/_base/declare", "app/tDocsFunctions", "app/base", "app/tDocSimpleT
                     return this;
                 }
                 if (!this.toolPanes||this.toolPanes.length==0) this.addToolPane();
-                var actionsTableRow= $TDF.addRowToTable(this.toolPanes[this.toolPanes.length-1].containerNode.lastChild);
+                var actionsTableRow= this.addRowToTable(this.toolPanes[this.toolPanes.length-1].containerNode.lastChild);
                 if(!actionParams) actionParams={};
-                var actionButton= $TDF.addTableCellButtonTo(actionsTableRow, {labelText:label, cellWidth:0,
+                var actionButton= this.addTableCellButtonTo(actionsTableRow, {labelText:label, cellWidth:0,
                     btnStyle:actionParams.btnStyle, btnParameters:actionParams.btnParams});
                 if (!this.toolPanesActionButtons) this.toolPanesActionButtons={};
                 this.toolPanesActionButtons[actionParams.action]= actionButton;
                 if(actionParams.actionFunction) {
                     actionButton.onClick=actionParams.actionFunction;
-                    actionButton.contentHTable= this.contentHTable;
+                    actionButton.contentTable= this.contentTable;
                 } else {
                     actionButton.onClick= this.getOnClickButtonTableAction(actionParams);
                 //    actionButton.setState= this.getSetStateAction(actionParams.action);
@@ -77,22 +83,22 @@ define(["dojo/_base/declare", "app/tDocsFunctions", "app/base", "app/tDocSimpleT
                 var actionFunction, thisInstance=this;
                 if (actionParams&&actionParams.actionName=="insertTableRow"){
                     actionFunction= function(){
-                        thisInstance.contentHTable.insertRowAfterSelected();
+                        thisInstance.contentTable.insertRowAfterSelected();
                         if (thisInstance.dataNewURL)
-                            thisInstance.contentHTable.getRowDataFromURL({url:thisInstance.dataNewURL, condition:null,
-                                rowData:thisInstance.contentHTable.getSelectedRow(), consoleLog:true, callUpdateContent:false});
+                            thisInstance.contentTable.getRowDataFromURL({url:thisInstance.dataNewURL, condition:null,
+                                rowData:thisInstance.contentTable.getSelectedRow(), consoleLog:true, callUpdateContent:false});
                     };
                 } else if (actionParams&&actionParams.actionName=="allowEditTableSelectedRow"){
                     actionFunction= function(){
-                        thisInstance.contentHTable.allowEditSelectedRow();
+                        thisInstance.contentTable.allowEditSelectedRow();
                     };
                 } else if (actionParams&&actionParams.actionName=="storeTableSelectedRow"){
                     actionFunction= function(){
-                        thisInstance.contentHTable.storeSelectedRowDataByURL({url:thisInstance.dataStoreURL, condition:null});
+                        thisInstance.contentTable.storeSelectedRowDataByURL({url:thisInstance.dataStoreURL, condition:null});
                     };
                 } else if (actionParams&&actionParams.actionName=="deleteTableSelectedRow"){
                     actionFunction= function(){
-                        thisInstance.contentHTable.deleteSelectedRowDataByURL({url:thisInstance.dataDeleteURL, condition:null});
+                        thisInstance.contentTable.deleteSelectedRowDataByURL({url:thisInstance.dataDeleteURL, condition:null});
                     };
                 }
                 return actionFunction;
@@ -109,21 +115,21 @@ define(["dojo/_base/declare", "app/tDocsFunctions", "app/base", "app/tDocSimpleT
                         var count=0;
                         if(selRowsData.length>0) {
                             for (var rowIndex in selRowsData) count++;
-                            thisInstance.contentHTable.insertRowsAfterSelected(count);
+                            thisInstance.contentTable.insertRowsAfterSelected(count);
                         } else
-                            thisInstance.contentHTable.insertRowAfterSelected();
+                            thisInstance.contentTable.insertRowAfterSelected();
                     }
                 } else if (actionParams.actionName==="allowEditTableSelectedRows"){
                     menuItemCallback= function(selRowsData){
-                        thisInstance.contentHTable.allowEditRows(selRowsData);
+                        thisInstance.contentTable.allowEditRows(selRowsData);
                     }
                 } else if (actionParams.actionName==="storeTableSelectedRows"){
                     menuItemCallback= function(selRowsData){
-                        thisInstance.contentHTable.storeRowsDataByURL({url:thisInstance.dataStoreURL, rowsData:selRowsData, condition:null});
+                        thisInstance.contentTable.storeRowsDataByURL({url:thisInstance.dataStoreURL, rowsData:selRowsData, condition:null});
                     }
                 }
                 if (menuItemCallback)
-                    this.contentHTable.setMenuItem(itemName, {}, menuItemCallback);
+                    this.contentTable.setMenuItem(itemName, {}, menuItemCallback);
                 return this;
             }
         });

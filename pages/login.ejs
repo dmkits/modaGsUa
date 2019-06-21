@@ -39,8 +39,8 @@
                 loginDialog.onExecute  = function () {
                     var user=document.getElementById("user_name").value.trim(), pswrd=document.getElementById("user_password").value.trim();
                     Request.postJSON({url:  "/login", data: {user:user, pswrd:pswrd}, consoleLog: true},
-                            function (sucsess,result) {
-                                if(!sucsess){
+                            function (result,error) {
+                                if(error){
                                     document.getElementById("loginDialogDiv").innerHTML='<div style="color:red; padding:4px; width: 240px;">Не удалось связаться с сервером</div>';
                                     loginDialog.reset();
                                     return;
@@ -54,6 +54,9 @@
                                 if(result && result.uuid && result.uuid.toString().trim()!="") {
                                     if(window.location.href.indexOf("/login")>=0)window.location.replace("/");
                                     else window.location.replace(window.location.href);
+                                }else{
+                                    document.getElementById("loginDialogDiv").innerHTML='<div style="color:red; padding:4px; width: 240px;">Авторизация не удалась.<br>Попробуйте снова.</div>';
+                                    loginDialog.reset();
                                 }
                             });
                 };

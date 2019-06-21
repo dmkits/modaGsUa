@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+
+.portal-navigator img, .portlet-button img {
+	opacity : 0.8;
+}
+.portal-navigator:hover img, 
+.portal-navigator-hover img, 
+.portlet-button:hover img,
+.portlet-button-hover img {
+	opacity : 1.0;
+}
+
+.portal-vcard-icons {
+	opacity : 0.5;
+}
+.portal-vcard-icons:hover, 
+.portal-vcard-icons-hover {
+	opacity : 1.0;
+}
+.portlet-container {  /* it's table */
+	vertical-align : top;
+}
+.portlet-container-maximized {
+	min-height : 300pt;
+}

@@ -15,16 +15,16 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
         setHandsonTableFilterSettings: function () {
             if(this.useFilters!==true) return;
             var lblGlobalFilter= document.createElement("label"); this.globalFilter.label=lblGlobalFilter;
-            lblGlobalFilter.id="inputGlobalFilterLabel"; lblGlobalFilter.innerHTML="Фильтр по таблице:"; lblGlobalFilter.className = "htHeaderGlobalFilter htHeaderGlobalFilterLbl";
+            lblGlobalFilter.innerHTML="Фильтр по таблице:"; lblGlobalFilter.className = "changeTypeLbl";
             var inputGlobalFilter = document.createElement("input"); this.globalFilter.input=inputGlobalFilter;
-            inputGlobalFilter.id = "inputGlobalFilter"; inputGlobalFilter.className = "htHeaderGlobalFilter htHeaderGlobalFilterInput";
+            inputGlobalFilter.id = "inputGlobalFilter"; inputGlobalFilter.className = "changeTypeC";
             this.globalFilter.setGlobalFilter=function(value){
                 if(value!==null&&value.length>0){
                     this.value= value.trim();
-                    this.input.classList.add("htHeaderGlobalFilterHighlighted"); this.label.classList.add("htHeaderGlobalFilterHighlighted");
+                    this.input.classList.add("changeTypeAccent"); this.label.classList.add("changeTypeAccent");
                 } else {
                     this.value= null; this.input.value=null;
-                    this.input.classList.remove("htHeaderGlobalFilterHighlighted"); this.label.classList.remove("htHeaderGlobalFilterHighlighted");
+                    this.input.classList.remove("changeTypeAccent"); this.label.classList.remove("changeTypeAccent");
                 }
             };
             var thisGlobalFilter= this.globalFilter;
@@ -38,23 +38,17 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                 }
             };
             var clearAllFiltersButton = document.createElement('BUTTON'); clearAllFiltersButton.id = "clearAllFiltersButton";
-            clearAllFiltersButton.innerHTML = "\u2612 Снять фильтры"; clearAllFiltersButton.className = "htHeaderGlobalFilter htHeaderClearGlobalFilterBtn";
+            clearAllFiltersButton.innerHTML = "\u2612 Снять фильтры"; clearAllFiltersButton.className = "changeTypeC";
             this.setAddingHeaderRow({"label":lblGlobalFilter, "input":inputGlobalFilter, "button":clearAllFiltersButton});
-            var handsontableSettings= this.handsonTable.getSettings(), parent= this;
+            var handsontableSettings= this.handsonTable.getSettings();
+            var parent= this;
             handsontableSettings.colHeadersFilterButton= function (colIndex) {
                 if(parent.useFilters!=true) return "";
-                if(!parent.htVisibleColumns) return "";
-                var colData=parent.htVisibleColumns[colIndex];
-                if(!colData||colData.useFilter===false) return "";
-                var filterButton =  colData.filterButton;
-                if (!filterButton) {
-                    filterButton= document.createElement('BUTTON');
-                    filterButton.id = "filter_button_for_col_"+colIndex; filterButton.innerHTML = "\u25BC"; filterButton.className = "htColFilterBtn";
-                    filterButton.setAttribute("colIndex",colIndex);
-                    filterButton.setAttribute("colDataName",colData["data"]);
-                    colData.filterButton= filterButton;
-                }
-                if (colData.filtered==true) filterButton.style.color = 'black'; else filterButton.style.color = '#bbb';
+                if(parent.htVisibleColumns&&parent.htVisibleColumns[colIndex]&&parent.htVisibleColumns[colIndex].useFilter===false) return "";
+                var filterButton = document.createElement('BUTTON');
+                filterButton.id = "filter_button_for_col_"+colIndex; filterButton.innerHTML = "\u25BC"; filterButton.className = "changeType";
+                if (this.columns[colIndex]["filtered"]==true) filterButton.style.color = 'black'; else filterButton.style.color = '#bbb';
+                filterButton.setAttribute("colindex",colIndex);
                 return filterButton.outerHTML;
             };
             handsontableSettings.colHeaders= function(colIndex){
@@ -71,25 +65,23 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                 beforeOnCellMouseDown:function(event, coords, element) {
                     if(event.target.id.indexOf("filter_menu")<0)/*filter menu closed if filter button focusout*/
                         parent.handsonTable.hideFilterMenu();
-                    //if(event.target.id.indexOf("addingHeaderRow")>=0
-                    //    ||event.target.id.indexOf("inputGlobalFilter")>=0||event.target.id=="clearAllFiltersButton"
-                    //    ||event.target.id.indexOf("filter_button_for_")>=0)
-                    // if(...){ event.stopImmediatePropagation(); }//disable column header click event
+                    if(element.tagName==="TH") { event.stopImmediatePropagation(); }//disable column header click event
                 }
             });
             Handsontable.Dom.addEvent(document, 'focusin', function (event) {                                           //console.log("HTableSimpleFiltered document focus target=", event.target);
                 if(event.target.id.indexOf("filter_menu_")<0)/*filter menu closed if filter menu item element focusout*/
                     parent.handsonTable.hideFilterMenu();
             });
-            Handsontable.Dom.addEvent(document, 'mousedown', function (event) {                                         //console.log("HTableSimpleFiltered document mousedown target=",event.target,event.target.id);
+            Handsontable.Dom.addEvent(document, 'mousedown', function (event) {                                         //console.log("HTableSimpleFiltered document mousedown target=",event.target);
+                if(event.target.id.indexOf("filter_button_for_")>=0) event.stopPropagation();
                 if(event.target.id.indexOf("filter_menu_")<0)/*filter menu closed if filter button focusout*/
                     parent.handsonTable.hideFilterMenu();
             });
             var thisGlobalFilter=this.globalFilter;
             Handsontable.Dom.addEvent(this.handsonTable.rootElement, 'mouseup', function (event) {                      //console.log("HTableSimpleFiltered mouseup ",event);
                 if(event.target.id.indexOf("filter_button_for_")>=0){
-                    var filterButton= event.target;
-                    parent.handsonTable.showFilterMenu(filterButton);
+                    var button= event.target;
+                    parent.handsonTable.showFilterMenu(button);
                 }
                 if(event.target.id.indexOf("clearAllFiltersButton")>=0) {
                     thisGlobalFilter.setGlobalFilter(null);
@@ -97,13 +89,14 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                     parent.onUpdateContent({filtered:parent.filterContentData()});
                 }
             });
-            this.handsonTable.showFilterMenu= function (filterButton) {                                         //console.log("HTableSimpleFiltered.handsonTable.showFilterMenu ",filterButton);
+            this.handsonTable.showFilterMenu= function (button) {                                                       //console.log("HTableSimpleFiltered.handsonTable.showFilterMenu ",this);
                 var filterMenu = this.filterMenu;
                 //if(filterMenu&&filterMenu.isOpen==true&&filterMenu.colProp==colProp){//close filter menu
                 //    this.hideFilterMenu(); return;
                 //}
-                var colDataName=filterButton.getAttribute("colDataName"), colData= this.getDataAtProp(colDataName),
-                    colIndex = filterButton.getAttribute("colIndex"), colProps = this.getSettings().columns[colIndex];
+                var colIndex = button.getAttribute("colindex");
+                var colProp= this.colToProp(colIndex), colData= this.getDataAtCol(colIndex);
+                var colProps = this.getSettings().columns[colIndex];
                 var colType= colProps["type"], filterValue = colProps["filterValue"], filterValues = colProps["filterValues"];
                 var filterItemsMap={};
                 for(var i in colData){ var filterItemValue= colData[i]; if(filterItemValue==null)filterItemValue=""; filterItemsMap[filterItemValue]=true; }
@@ -118,7 +111,7 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                 if(!filterMenu) {
                     filterMenu = document.createElement('UL');
                     filterMenu.id = "filter_menu"; filterMenu.className = "changeTypeMenu";
-                    this.filterMenu = filterMenu; filterMenu.filterButton=filterButton;
+                    this.filterMenu = filterMenu; filterMenu.filterButton=button;
                     document.body.appendChild(filterMenu);
                     var menuBtnOkOnClick= function(filterMenu){
                         if(!filterMenu) return;
@@ -201,19 +194,19 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                         if(event.key=='Escape'&&event.code=='Escape')parent.handsonTable.hideFilterMenu();
                     };
                 }
-                filterButton.onkeyup=function(event){
+                button.onkeyup=function(event){
                     if(event.key=='Escape'&&event.code=='Escape')parent.handsonTable.hideFilterMenu();
                 };
                 filterMenu.style.display = 'block'; filterMenu.isOpen = true;
-                var position = filterButton.getBoundingClientRect();
+                var position = button.getBoundingClientRect();
                 filterMenu.style.top = (position.top + (window.scrollY || window.pageYOffset)) + 2 + 'px';
                 filterMenu.style.left = (position.left) + 'px';
-                filterMenu.colDataName = colDataName; filterMenu.colType = colType; filterMenu.colProps = colProps;
+                filterMenu.colProp = colProp; filterMenu.colType = colType; filterMenu.colProps = colProps;
                 while(filterMenu.firstChild) filterMenu.removeChild(filterMenu.firstChild);
-                filterMenu.valueType = (colType="autocomplete")?"text":colType;
+                filterMenu.valueType = (colType=="autocomplete")?"text":colType;
                 filterMenu.valueEdit = null; filterMenu.valueItems = [];
 
-                filterItems = filterItems.sort();                                                                       //console.log("HTableSimpleFiltered.handsonTable.showFilterMenu filterItems",filterItems);
+                filterItems = filterItems.sort();                                                               //console.log("HTableSimpleFiltered.handsonTable.showFilterMenu filterItems",filterItems);
                 var createMenuItem = function(filterMenu,idPostfix,itemType, filterMenuItemData){
                     var filterMenuItem = document.createElement("LI");
                     filterMenuItem["id"]= "filter_menu_item_"+idPostfix; filterMenuItem["filterMenu"] = filterMenu;
@@ -224,7 +217,7 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                         filterMenuElem = document.createElement("input"); filterMenuElem.type = "button"; filterMenuElem.id = "filter_menu_item_elem_"+idPostfix;
                         filterMenuElem.value = filterMenuItemData.label;
                         filterMenuElem.style.width = "120px";
-                        filterMenuElem.filterButton = filterButton; filterMenuElem.filterMenu = filterMenu;
+                        filterMenuElem.filterButton = button; filterMenuElem.filterMenu = filterMenu;
                         filterMenuItem.appendChild(filterMenuElem);
                     } else if(itemType=="edit") {
                         filterMenuElem = document.createElement("input"); filterMenuElem.type = "text"; filterMenuElem.id = "filter_menu_item_elem_"+idPostfix;
@@ -255,15 +248,15 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                     }
                     return filterMenuItem;
                 };
-                createMenuItem(filterMenu,colDataName+"_buttonCancel","button", {label:"Снять фильтр"});
+                createMenuItem(filterMenu,colProp+"_buttonCancel","button", {label:"Снять фильтр"});
                 if(colType=="text"||colType=="autocomplete"){
-                    createMenuItem(filterMenu,colDataName+"_buttonClear","button",{label:"Очистить значение"});
+                    createMenuItem(filterMenu,colProp+"_buttonClear","button",{label:"Очистить значение"});
                     if(!filterValue)filterValue="";
-                    createMenuItem(filterMenu,colDataName+"_edit","edit",{label:"Значение: ",value:filterValue});
-                    createMenuItem(filterMenu,colDataName+"_buttonClearAll","button",{label:"Снять все отметки"});
-                    createMenuItem(filterMenu,colDataName+"_checkboxlist","checkboxlist",{values:filterItems,isValueChecked:filterValues});
+                    createMenuItem(filterMenu,colProp+"_edit","edit",{label:"Значение: ",value:filterValue});
+                    createMenuItem(filterMenu,colProp+"_buttonClearAll","button",{label:"Снять все отметки"});
+                    createMenuItem(filterMenu,colProp+"_checkboxlist","checkboxlist",{values:filterItems,isValueChecked:filterValues});
                 } else if(colType=="numeric"){
-                    createMenuItem(filterMenu,colDataName+"_buttonClear","button",{label:"Очистить значение"});
+                    createMenuItem(filterMenu,colProp+"_buttonClear","button",{label:"Очистить значение"});
                     var filterEditValue = "";
                     for(var filterMenuItem in filterValues){
                         var filterValue= filterValues[filterMenuItem];
@@ -274,9 +267,9 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                             } else filterEditValue= filterEditValue+filterValue;
                         }
                     }
-                    createMenuItem(filterMenu,colDataName+"edit","edit",{label:"Значение: ",value:filterEditValue});
+                    createMenuItem(filterMenu,colProp+"edit","edit",{label:"Значение: ",value:filterEditValue});
                 }
-                createMenuItem(filterMenu,colDataName+"_buttonOK","button",{label:"Применить фильтр"});
+                createMenuItem(filterMenu,colProp+"_buttonOK","button",{label:"Применить фильтр"});
             };
             this.handsonTable.hideFilterMenu= function () {//close filter menu
                 var filterMenu = this.filterMenu;

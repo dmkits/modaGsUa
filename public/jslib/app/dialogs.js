@@ -1,251 +1,119 @@
 /**
  * Created by dmkits on 30.12.16.
  */
-define(["app/app", "dijit/ConfirmDialog","dojox/widget/DialogSimple", "dijit/form/Button", "dijit/form/TextBox", "dojo/domReady!"],
-    function(APP, ConfirmDialog,DialogSimple, Button, TextBox) {
+define(["app/base", "dijit/Dialog", "dijit/form/Button", "dijit/ProgressBar", "dojox/layout/ContentPane", "dijit/form/TextBox"],
+    function(base, Dialog, Button, ProgressBar, ContentPane, TextBox) {
         return {
             /**
-             * DMKITS 2016-02-25
-             * @param params
-             * params = {title, content, style, btnOkLabel, btnCancelLabel}
-             * @param onExecute
-             * @param onCancel
-             * calls onCancel(Dialog) or onExecute(Dialog)
-             */
-            doDialogMsg: function(params, onExecute, onCancel) {
-                var dialogStyle="";
-                var myDialog = APP.instance("ConfirmDialog", ConfirmDialog, {});
-                if(params.width)dialogStyle=dialogStyle+'width:'+params.width+'; ';
-                if (params.title) myDialog.set("title", params.title); else myDialog.set("title", "");
-                if (params.content) myDialog.set("content", params.content); else myDialog.set("content", "");
-                if (params.style) myDialog.set("style", dialogStyle+params.style); else myDialog.set("style", dialogStyle);
-                if (params.btnOkLabel) myDialog.set("buttonOk", params.btnOkLabel);
-                if (params.btnCancelLabel) myDialog.set("buttonCancel", params.btnCancelLabel);
-                if (onCancel != null) myDialog.onCancel = function () {
-                    onCancel(myDialog);
-                };
-                if (onExecute != null) myDialog.onExecute = function () {
-                    onExecute(myDialog);
-                };
-                myDialog.show();
-                myDialog.startup();
-            },
-            /**
              * IANAGEZ 20.10.2017
-             * @param params = {title, content, btnOkLabel, style, width, dialogID}
+             * @param params = {title, content, btnOkLabel, style, width, height, id, actionBarTemplate}
              */
-            doSimpleDialog: function(params) {
+            _doSimpleDialog: function(params){
                 if(!params) params={};
-                if(!params.dialogID) params.dialogID="DialogSimple";
-                var dialogStyle="text-align:center; ";
-                var myDialog = APP.instance(params.dialogID, DialogSimple, {});
+                if(!params.id) params.id="DialogSimple";
+                var dialogStyle="text-align:center;",
+                    btnOKID=params.id+"_btnOK",
+                    actionBarTemplate=params.actionBarTemplate||'<div class="dijitDialogPaneActionBar" style="text-align:center"><button id="'+btnOKID+'"></button></div>';
+                var dlg = base.instance(params.id, Dialog, {actionBarTemplate:actionBarTemplate});
                 if(params.width)dialogStyle=dialogStyle+'width:'+params.width+'px; ';
-                if (!params.title) params.title="";
-                myDialog.set("title", params.title);
-                if (!params.content) params.content="";
-                myDialog.set("content", params.content+"<br>");
-                if (params.style) myDialog.set("style", dialogStyle+params.style); else myDialog.set("style", dialogStyle);
-                var okBtn=new Button({"label":"Ok", style:"margin-top:10px;", onClick:function(){myDialog.hide(); }});
-                okBtn.startup();
-                myDialog.addChild(okBtn);
-                if (params.btnOkLabel)okBtn.set("label",params.btnOkLabel );
-                myDialog.startup();
-                myDialog.show();
-            },
-            doRequestFailDialog: function(params) {
-                if(!params) params={};
-                params.dialogID="requestFailDialog";
-                params.width=350;
-                params.btnOkLabel="Закрыть";
-                var instance= APP.getInstanceByID(params.dialogID);
-                if(instance&&instance.open){
-                    return;
+                if(params.height)dialogStyle=dialogStyle+'height:'+params.height+'px; ';
+                if(params.style) dlg.set("style", dialogStyle+params.style); else dlg.set("style", dialogStyle);
+                if(!params.title) params.title="";
+                dlg.set("title", params.title);
+                if(params.content)dlg.set("content", params.content);
+                if(!dlg.btnOK){
+                    dlg.btnOK=new Button({"label":"Ok", style:"margin:5px;margin-right:10px;", onClick:function(){ dlg.hide(); } },btnOKID);
+                    dlg.btnOK.focusNode.style.width="80px";
+                    dlg.btnOK.startup();
                 }
-                this.doSimpleDialog(params);
+                if(params.btnOkLabel)dlg.btnOK.set("label",params.btnOkLabel);
+                dlg.startup();
+                return dlg;
             },
-            mainAboutDialog: function (){
-                this.doDialogMsg({title:"О программе",
-                    content:"Система учета <b>MODA.GS.UA</b>. <br>Разработчики: dmkits, ianagez<br> 2017-2018",
-                    btnOkLabel:"OK", btnCancelLabel:"Закрыть"});
+            showSimple: function(params){
+                if(!params.content) params.content="";
+                if(params.content)params.content+="<br>";
+                var dlg=this._doSimpleDialog(params); dlg.show();
+                return dlg;
             },
-            printTagsDialog: function(callback) {
-                this.doDialogMsg({title:"Напечать все ценники?",content:"<div align='center'>Вы хотите напечатать<br>более 100 ценников?</div>",
-                    btnOkLabel:"Да", btnCancelLabel:"Нет",width:"220px"},function(dialog){
-                    callback();
-                    dialog.hide();
-                    });
-            },
-            impossibleToPrintTagsDialog: function() {
-                this.doSimpleDialog({title:"Превышение количества!", width:"220px;", content:"<div align='center'>Максимальное количество -<br>1000шт. </div>"});
-            },
-
-            //doDialog1: function (title, content, style, onExecute, onCancel) {
-            //    require(["dijit/Dialog", "dijit/form/Button", "dojo/domReady!"], function(Dialog,Button){
-            //    var myDialog = new Dialog({title: title, content: content, style: style});
-            //    myDialog.onCancel = function() { onCancel(); }
-            //    myDialog.onExecute = function() { onExecute(); }
-            //    myDialog.addChild(new Button({type:"submit",title:"OK",label:"OK",onClick:function(){ myDialog.execute(); }}));
-            //    myDialog.show()
-            //    });
-            //}
             /**
-             * DMKITS 2016.02.29 v.1.1
-             * @param params = {title, style, btnOkLabel, btnCancelLabel, content}
-             * content = [{type:textbox ,label, width, disabled, value},{...},}, {...}, {...}, ...]
-             *  or content = {item1:{type:textbox ,label, width, disabled, value}, item2:{...}, item3:{...}, ...}
-             * on execute (click OK button) call onExecute(Dialog, content), content parameter contains value: content = {item1:{...,value}, ...}
-             * @param onExecute
-             * @param onCancel
+             * @param params = {title, content, btnOkLabel, style, width, contentHeight, id, progressMaximum, btnStop,btnStopLabel, onlyCreate}
+             * default: onlyCreate!=true
+             * if params.onlyCreate = true, dialog dont show
              */
-            doDialogSimpleTextBox: function(params, onExecute, onCancel) {
-                var myDialog = APP.instance("DialogSimpleTextBox", ConfirmDialog, {});
-                if (params.title) myDialog.set("title", params.title);
-                if (params.style) myDialog.set("style", params.style);
-                if (params.btnOkLabel) myDialog.set("buttonOk", params.btnOkLabel);
-                if (params.btnCancelLabel) myDialog.set("buttonCancel", params.btnCancelLabel);
-                var content = params.content;
-                var dlgСontent = "<table>";
-                for (var item in content) {
-                    dlgСontent = dlgСontent + "<tr><td>";
-                    if (content[item].type == "textbox") {
-                        var contentname = "DialogSimpleTextBox_textbox" + item;
-                        content[item].name = contentname;
-                        dlgСontent = dlgСontent + "<label for=\"" + contentname + "\">" + content[item].label + "</label>";
-                    }
-                    dlgСontent = dlgСontent + "</td><td>";
-                    if (content[item].type == "textbox") {
-                        var contentname = content[item].name;
-                        dlgСontent = dlgСontent + "<input type=\"text\" id=\"" + contentname + "\"/>";
-                    }
-                    dlgСontent = dlgСontent + "</td></tr>";
+            showProgress: function(params){
+                if(!params)params={};
+                if(!params.id)params.id="progressDialog";
+                params.height=null;
+                var dlg=this._doSimpleDialog(params);
+                if(!params.btnOkLabel)params.btnOkLabel="Close";
+                dlg.btnOK.set("label",params.btnOkLabel);dlg.btnOK.set("disabled",true);
+                if((params.btnStop||params.btnStopLabel)&&!dlg.btnStop){
+                    dlg.btnStop=new Button({"label":"Stop", style:"margin:5px;margin-left:10px;",
+                        onClick:function(){ dlg.progress(false); } });
+                    dlg.btnStop.focusNode.style.width="80px";
+                    dlg.btnOK.domNode.parentNode.appendChild(dlg.btnStop.domNode);
+                    dlg.btnStop.startup();
                 }
-                dlgСontent = dlgСontent + "</table>";
-                myDialog.set("content", dlgСontent);
-                for (var item in content) {
-                    if (content[item].type == "textbox") {
-
-                        var dialogtextbox = APP.instanceForID(content[item].name, content[item].name, TextBox, {type: "text"});
-                        if (content[item].value) dialogtextbox.set("value", content[item].value);
-                        if (content[item].disabled) dialogtextbox.set("disabled", true); else dialogtextbox.set("disabled", false);
-                        var width = content[item].width;
-                        if (width) dialogtextbox.set("style", "width:" + width+"px;");
-                        content[item].textbox = dialogtextbox;
-                    }
+                if(params.btnStopLabel)dlg.btnStop.set("label",params.btnStopLabel);
+                if(dlg.btnStop)dlg.btnStop.set("disabled",false);
+                if(!dlg.progressBarForDialog){
+                    dlg.progressBarForDialog= new ProgressBar({id:dlg.id+"_progressBar",style:"width: 100%"});
+                    dlg.addChild(dlg.progressBarForDialog);
                 }
-                if (onCancel != null) myDialog.onCancel = function () {
-                    onCancel(myDialog);
+                dlg.progressBarForDialog.set("maximum", params.progressMaximum);dlg.progressBarForDialog.set("value",0);
+                if(!dlg.messagesContent){
+                    dlg.messagesContent= new ContentPane({id:dlg.id+"_messagesContent",style:"padding:0;width:100%;text-align:left"});
+                    dlg.addChild(dlg.messagesContent);
+                }
+                if(!dlg.setContentHeight) dlg.setContentHeight=function(contentHeight){
+                    if(contentHeight!==undefined)this.messagesContent.domNode.style.height=contentHeight+"px";
                 };
-                if (onExecute != null) myDialog.onExecute = function () {
-                    var content = params.content;
-                    for (var item in content) {
-                        if (content[item].type == "textbox") {
-                            content[item].value = content[item].textbox.value;
-                        }
-                    }
-                    onExecute(myDialog, content);
+                dlg.setContentHeight(params.contentHeight);
+                dlg.messagesContent.set("content","");
+                dlg.progressStopped=false;dlg.progressFinished=false;
+                if(!dlg.progress) dlg.progress=function(process){
+                    if(!this.open)this.show();
+                    if(process!==undefined)this.progressStopped=process===false;
+                    dlg.btnOK.set("disabled",!(this.progressStopped||this.progressFinished));
+                    if(dlg.btnStop)dlg.btnStop.set("disabled",this.progressStopped||this.progressFinished);
                 };
-                myDialog.show()
-            },
-
-            /**
-             * DMKITS 20160229
-             * select value from tree
-             * params = { title, style, btnOkLabel, btnCancelLabel, label, treedataurl, treestyle }
-             * on execute (click OK button) call onExecute(Dialog, content), content parameter contains selected item data object
-             * @param params
-             * @param onExecute
-             * @param onCancel
-             */
-            doDialogSimpleTree: function (params, onExecute, onCancel) {
-                //require(["dijit/registry", "dijit/ConfirmDialog", "dojo/data/ItemFileReadStore", "dijit/tree/ObjectStoreModel", "dojo/store/DataStore",
-                //    "dijit/layout/ContentPane", "dijit/layout/BorderContainer", "dijit/Tree", "dojo/domReady!"],
-                //function (registry, ConfirmDialog, ItemFileReadStore, ObjectStoreModel, DataStore, ContentPane, BorderContainer, Tree) {
-                //    var myDialog = initElem(registry, "DialogSimpleTree", null, ConfirmDialog, {});
-                //
-                //    if (params.title) myDialog.set("title", params.title);
-                //    //myDialog.set("content", dlgСontent);
-                //    if (params.style) myDialog.set("style", params.style);
-                //    if (params.btnOkLabel) myDialog.set("buttonOk", params.btnOkLabel);
-                //    if (params.btnCancelLabel) myDialog.set("buttonCancel", params.btnCancelLabel);
-                //
-                //    var treestore = myDialog.treestore;
-                //    if (treestore==null) {
-                //        treestore = new ItemFileReadStore({clearOnClose:true });
-                //        myDialog.treestore = treestore;
-                //    }
-                //    treestore._jsonFileUrl = params.treedataurl;
-                //    treestore.close();
-                //    treestore.fetch();
-                //    var datastore = myDialog.datastore;
-                //    if (datastore==null) {
-                //        datastore = new DataStore({ store:treestore, getChildren: function(object){ return this.query({parent: object.id}); } });
-                //        myDialog.datastore = datastore;
-                //    }
-                //    var treemodel = myDialog.treemodel;
-                //    if (treemodel==null) {
-                //        treemodel = new ObjectStoreModel({ store: datastore, query: {id: 'root'} });
-                //        myDialog.treemodel = treemodel;
-                //    }
-                //    var dlgTreeLabel = initChild(registry, "DialogSimpleTree_treelabel", myDialog, ContentPane, {style:"margin:0;padding:0;padding-bottom:5px"});
-                //    dlgTreeLabel.set("content",params.label);
-                //    var dlgTreePane = initChild(registry, "DialogSimpleTree_treepane", myDialog, BorderContainer, {style:params.treestyle});
-                //    var dlgTree = initChild(registry, "DialogSimpleTree_tree", dlgTreePane, Tree, {region:"center", model:treemodel, autoExpand: true});
-                //
-                //    if (onCancel != null) myDialog.onCancel = function () {
-                //        onCancel(myDialog);
-                //    };
-                //    if (onExecute != null) myDialog.onExecute = function () {
-                //        var treeItem = dlgTree.get("selectedItem");
-                //        onExecute(myDialog, treeItem);
-                //    };
-                //    myDialog.show()
-                //});
-            },
-
-            /**
-             * DMKITS 20161121
-             * select value from list
-             * params = { title, style, btnOkLabel, btnCancelLabel, label, , treestyle }
-             * on execute (click OK button) call onExecute(Dialog, content), content parameter contains selected item data object
-             * @param params
-             * @param onExecute
-             * @param onCancel
-             */
-            doDialogSimpleList: function (params, onInit, onExecute, onCancel) {
-                //require(["dijit/registry", "dijit/ConfirmDialog",
-                //    "dijit/layout/ContentPane", "dijit/layout/BorderContainer", "dojo/domReady!"],
-                //function (registry, ConfirmDialog, ContentPane, BorderContainer) {
-                //    var simpleListDialog = initElem(registry, "DialogSimpleList", null, ConfirmDialog, {});
-                //
-                //    if (params.title) simpleListDialog.set("title", params.title);
-                //    //myDialog.set("content", dlgСontent);
-                //    if (params.style) simpleListDialog.set("style", params.style);
-                //    if (params.btnOkLabel) simpleListDialog.set("buttonOk", params.btnOkLabel);
-                //    if (params.btnCancelLabel) simpleListDialog.set("buttonCancel", params.btnCancelLabel);
-                //
-                //    //var dlgMainContentPane = initChild(registry, "DialogSimpleList_MainContentPane", simpleListDialog, BorderContainer, {}); //style:params.liststyle
-                //    //dlgMainContentPane.set("content","XCCDKLM<>VM><MLMFNLFNLDSMKLMDMFKM");
-                //
-                //
-                //    var dlgMainContentTopPane =
-                //        initChild(registry, "DialogSimpleList_MainContentTopPane", simpleListDialog,
-                //            ContentPane, {region:'top', style:"height:100px;margin:0;padding:0;padding-bottom:5px"});
-                //    simpleListDialog.mainContentPane = dlgMainContentTopPane;
-                //
-                //    //dlgMainContentTopPane.set("content","sdkfl;jsadcmksrjltmijerjhmtgkwcdnfg");
-                //    //dlgMainContentTopPane.set("content",params.label);
-                //
-                //    var dlgHTable; //= initChild(registry, "DialogSimpleList_HTable", dlgMainContentPane,
-                //    //    HTable, {region:'center', readOnly:true, useFilters:false, allowFillHandle:false,htaddRows:0, postChanges:true, enableComments:false});
-                //    if (onInit) onInit(simpleListDialog);
-                //    if (onCancel) simpleListDialog.onCancel = function () {
-                //        onCancel(simpleListDialog);
-                //    };
-                //    if (onExecute) simpleListDialog.onExecute = function () {
-                //        onExecute(simpleListDialog, dlgHTable);
-                //    };
-                //    simpleListDialog.show()
-                //});
+                if(!dlg.setFinished) dlg.setFinished=function(){
+                    this.progressFinished=true;
+                    this.progress();
+                };
+                /**
+                 * params = { title, contentHeight, progressMaximum, message }
+                 */
+                if(!dlg.start) dlg.start=function(params){
+                    this.progressStopped=false;this.progressFinished=false;
+                    if(params.title)this.set("title", params.title);
+                    this.setContentHeight(params.contentHeight);
+                    if(params.progressMaximum>=0)this.progressBarForDialog.set("maximum", params.progressMaximum);
+                    this.progressBarForDialog.set("value",0);
+                    if(params.message){ this.addMsg(params.message);return; }
+                    this.progress();
+                };
+                if(!dlg.addMsg) dlg.addMsg=function(msg,contentHeight){
+                    this.setContentHeight(contentHeight);
+                    this.progress();
+                    this.messagesContent.domNode.appendChild(this.lastMessage=document.createElement("div"));
+                    this.lastMessage.innerHTML=msg;
+                    this.lastMessage.scrollIntoView(false);
+                };
+                if(!dlg.setMsg) dlg.setMsg=function(msg){
+                    this.progress();
+                    if(!this.lastMessage)this.messagesContent.domNode.appendChild(this.lastMessage=document.createElement("div"));
+                    this.lastMessage.innerHTML=msg;
+                    this.lastMessage.scrollIntoView(false);
+                };
+                if(!dlg.setProgress) dlg.setProgress=function(progress,msg){
+                    this.progress();
+                    if(progress>=0)this.progressBarForDialog.set("value",progress);
+                    if(msg)this.addMsg(msg);
+                };
+                if(params.onlyCreate!==true)dlg.show();
+                return dlg;
             }
         };
     });

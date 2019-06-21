@@ -2,10 +2,10 @@ var path = require('path'), fs = require('fs'),
     moment=require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron')*/;
 var server=require('../server'), getLoadInitModulesError=server.getLoadInitModulesError, log = server.log,
     appParams=server.getAppStartupParams(),
-    getStartupConfig=server.getStartupConfig, setStartupConfig=server.setStartupConfig,loadStartupConfig=server.loadStartupConfig,
+    getSysConfig=server.getSysConfig, setSysConfig=server.setSysConfig,loadSysConfig=server.loadSysConfig,
     getAppConfig=server.getAppConfig;
 var common=require('../common'), database=require('../databaseMSSQL');
-var appModules=require(appModulesPath), getValidateError=appModules.getValidateError,
+var appModules=require(appModulesPath), getDBValidateError=appModules.getValidateError,
     dataModel=require('../datamodel'),
     changeLog= require(appDataModelPath+"change_log"),
     r_Users= require(appDataModelPath+"r_Users"),ir_UserData= require(appDataModelPath+"ir_UserData"),
@@ -22,60 +22,59 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 module.exports.modulePageURL = "/sysadmin";
 module.exports.modulePagePath = "sysadmin.html";
 module.exports.init = function(app){
-    app.get("/sysadmin/serverState", function(req, res){
+    app.get("/sysadmin/sysState",function(req,res){
         var revalidateModules= false;
         if (req.query&&req.query["REVALIDATE"]) revalidateModules= true;
         var outData= {};
         outData.mode= appParams.mode;
         outData.port=appParams.port;
         outData.dbUserName=req.dbUserName;
-        var startupConfig=getStartupConfig();
-        if (!startupConfig||startupConfig.error) {
-            outData.error= (startupConfig&&startupConfig.error)?startupConfig.error:"unknown";
+        var sysConfig=getSysConfig();
+        if (!sysConfig||sysConfig.error){
+            outData.error= (sysConfig&&sysConfig.error)?sysConfig.error:"unknown";
             res.send(outData);
             return;
         }
-        outData.configuration= startupConfig;
-        var systemConnectionErr= database.getSystemConnectionErr();
-        if (systemConnectionErr) {
-            outData.systemConnectionErr= systemConnectionErr;
-            outData.dbValidation = "Validation failed! Reason:No database system connection!";
+        outData.sysConfig= sysConfig;
+        outData.appConfig=getAppConfig();
+        var dbSysConnErr= database.getSystemConnectionErr();
+        if(dbSysConnErr){
+            outData.dbSysConnErr= dbSysConnErr;
+            outData.dbValidationErr = "Validation failed! Reason:No database system connection!";
             res.send(outData);
             return
         }
-        outData.systemConnectionErr = 'Connected';
         var loadInitModulesError=getLoadInitModulesError();
         if(loadInitModulesError) outData.modulesFailures = loadInitModulesError;
-        if (revalidateModules) {
+        if(revalidateModules){
             appModules.validateModules(function(errs, errMessage){
                 if(errMessage) outData.dbValidation = errMessage; else outData.dbValidation = "success";
                 res.send(outData);
             });
             return;
         }
-        outData.config=getAppConfig();
-        var validateError=getValidateError();
-        if(validateError) outData.dbValidation=validateError; else outData.dbValidation = "success";
+        var dbValidateErr=getDBValidateError();
+        if(dbValidateErr) outData.dbValidationErr=dbValidateErr; else outData.dbValidation = "success";
         res.send(outData);
     });
 
-    app.get("/sysadmin/serverConfig", function (req, res) {
-        res.sendFile(appViewsPath+'sysadmin/startupConfig.html');
+    app.get("/sysadmin/sysConfig",function(req,res){
+        res.sendFile(appViewsPath+'sysadmin/sysConfig.html');
     });
-
-    app.get("/sysadmin/server/getStartupConfig", function (req, res) {
-        var startupConfig=getStartupConfig();
-        if (!startupConfig||startupConfig.error) {
-            res.send({error:(startupConfig&&startupConfig.error)?startupConfig.error:"unknown"});
+    app.get("/sysadmin/sysConfig/getSysConfig",function(req,res){
+        var sysConfig=getSysConfig();
+        if(!sysConfig||sysConfig.error){
+            res.send({error:(sysConfig&&sysConfig.error)?sysConfig.error:"unknown"});
             return;
         }
-        res.send(startupConfig);
+        res.send(sysConfig);
     });
-    app.get("/sysadmin/server/getDBList", function (req, res) {
+    app.get("/sysadmin/sysConfig/getDBList",function(req,res){
         database.selectQuery(database.getDBSystemConnection(),
             "select	name "+
             "from sys.databases "+
-            "where name not in ('master','tempdb','model','msdb') and is_distributor = 0 and source_database_id is null",
+            "where name not in ('master','tempdb','model','msdb') and is_distributor = 0 and source_database_id is null "+
+            "order by name",
             function(err,recordset){
                 if(err){
                     res.send({error:err.message});
@@ -84,50 +83,47 @@ module.exports.init = function(app){
                 res.send({dbList:recordset});
         });
     });
-
-    app.get("/sysadmin/server/loadServerConfig", function (req, res) {
-        loadStartupConfig();
-        var startupConfig=getStartupConfig();                                                         log.info("serverConfig=",startupConfig);
-        if (!startupConfig) {
+    app.get("/sysadmin/sysConfig/loadSysConfig",function(req,res){
+        loadSysConfig();
+        var sysConfig=getSysConfig();
+        if(!sysConfig){
             res.send({error: "Failed load server config!"});
             return;
         }
-        res.send(startupConfig);
+        res.send(sysConfig);
     });
-
-    app.post("/sysadmin/serverConfig/storeServerConfigAndReconnect", function (req, res) {
-        var newStartupConfig = req.body;
-        var currentDbName=server.getStartupConfig().database;
-        var currentDbHost=server.getStartupConfig().host;
-        common.saveConfig(appParams.mode+".cfg", newStartupConfig,
-            function (err) {
+    app.post("/sysadmin/sysConfig/storeSysConfigAndReconnectToDB",function(req,res){
+        var newSysConfig = req.body,
+            currentDbName=server.getSysConfig().database, currentDbHost=server.getSysConfig().host;
+        common.saveConfig(appParams.mode+".cfg", newSysConfig,
+            function(err){
                 var outData = {};
-                if (err) {
-                    outData.error = "Failed to save config. Reason: "+err;
+                if(err){
+                    outData.error = "Failed to store system config. Reason: "+err+". New system config not applied!";
                     res.send(outData);
                     return;
                 }
-                if(!(currentDbName==newStartupConfig.database) || !(currentDbHost==newStartupConfig.host)){
-                    database.cleanConnectionPool();
-                }
-                setStartupConfig(newStartupConfig);
-                database.setDBSystemConnection(newStartupConfig, function (err,result) {
-                    if (err) {
-                        outData.DBConnectError = err.error;
-                        outData.error="'\n Не удалось подключиться к базе данных!\n"+(err.userErrorMsg)?err.userErrorMsg:err.error;
+                if(!(currentDbName==newSysConfig.database) || !(currentDbHost==newSysConfig.host)) database.cleanConnectionPool();
+                setSysConfig(newSysConfig);
+                database.setDBSystemConnection(newSysConfig, function(err,result){
+                    if(err){
+                        outData.message="System config stored and applied.";
+                        outData.dbSysConnErr = "Failed connect to database! Reason: "+err.error;
+                        res.send(outData);
+                        return;
                     }
-                    appModules.validateModules(function (errs, errMessage) {
-                        if (errMessage) outData.dbValidation = errMessage;
+                    outData.message="System config stored and system reconnect to database with new system config.";
+                    appModules.validateModules(function (errs, errMessage){
+                        if(errMessage) outData.dbValidation = errMessage;
                         res.send(outData);
                     });
                 });
             });
     });
 
-    app.get("/sysadmin/database", function (req, res) {
+    app.get("/sysadmin/database",function(req,res){
         res.sendFile(appViewsPath+'sysadmin/database.html');
     });
-
     /**
      * resultCallback = function(result={ item, error, errorCode })
      */
@@ -173,7 +169,6 @@ module.exports.init = function(app){
             }
         });
     };
-
     var changesTableColumns=[
         {data: "changeID", name: "changeID", width: 200, type: "text"},
         {data: "changeDatetime", name: "changeDatetime", width: 120, type:"text", datetimeFormat:"YYYY-MM-DD HH:mm:ss"},
@@ -182,7 +177,7 @@ module.exports.init = function(app){
         {data: "type", name: "type", width: 100, type: "text"},
         {data: "message", name: "message", width: 200, type: "text"}
     ];
-    app.get("/sysadmin/database/getCurrentChanges", function (req, res) {
+    app.get("/sysadmin/database/getCurrentChanges",function(req,res){
         var outData = { columns:changesTableColumns, identifier:changesTableColumns[0].data, items:[] };
         checkIfChangeLogExists(function(tableData) {
             if (tableData.error&&  tableData.error.indexOf("Invalid object name")>=0) {  log.info("668   checkIfChangeLogExists resultCallback tableData.error:",tableData.error,tableData);
@@ -216,7 +211,6 @@ module.exports.init = function(app){
     var checkIfChangeLogExists= function(resultCallback) {
         changeLog.getDataItems(database.getDBSystemConnection(), {conditions:{"ID IS NULL":null}}, resultCallback);
     };
-
     var changeLogTableColumns=[
         {data: "ID", name: "changeID", width: 200, type: "text"},
         {data: "CHANGE_DATETIME", name: "changeDatetime", width: 120, type: "text", datetimeFormat:"YYYY-MM-DD HH:mm:ss", align:"center"},
@@ -230,7 +224,7 @@ module.exports.init = function(app){
     var insertToChangeLog= function(itemData, resultCallback) {
         changeLog.insTableDataItem(database.getDBSystemConnection(),{tableColumns:changeLogTableColumns,idFieldName:"ID", insTableData:itemData}, resultCallback);
     };
-    app.post("/sysadmin/database/applyChange", function (req, res) {
+    app.post("/sysadmin/database/applyChange",function(req,res){
         var outData={};
         var ID=req.body.CHANGE_ID, appliedDatetime=req.body.appliedDatetime;
         var CHANGE_VAL;
@@ -310,7 +304,7 @@ module.exports.init = function(app){
             })
         });
     });
-    app.get("/sysadmin/database/getChangeLog", function (req, res) {
+    app.get("/sysadmin/database/getChangeLog",function(req,res){
         changeLog.getDataForTable(database.getDBSystemConnection(),
             {tableColumns:changeLogTableColumns, identifier:changeLogTableColumns[0].data, conditions:req.query,
                 order:"CHANGE_DATETIME, CHANGE_OBJ, ID"}, function(result){
@@ -318,7 +312,7 @@ module.exports.init = function(app){
         });
     });
 
-    app.get("/sysadmin/logins", function (req, res) {
+    app.get("/sysadmin/logins",function(req,res){
         res.sendFile(appViewsPath+'sysadmin/logins.html');
     });
     var userVisiblePass="****************",
@@ -346,7 +340,7 @@ module.exports.init = function(app){
             {data: "is_disabled", name: "Disabled", width: 75, type: "checkboxMSSQL",
                 dataSource:"sys.server_principals", sourceField:"is_disabled"}
     ];
-    app.get('/sysadmin/logins/getLoginsDataForTable', function (req, res) {
+    app.get('/sysadmin/logins/getLoginsDataForTable',function(req,res){
         r_Users.getDataForTable(req.dbUC,{tableColumns:loginsTableColumns, identifier:loginsTableColumns[0].data,
                 conditions:{"1=1":null}, order:"UserID"},
             function(result){
@@ -546,7 +540,7 @@ module.exports.init = function(app){
             });
         });
     };
-    app.post("/sysadmin/logins/storeLoginsTableData", function(req, res){
+    app.post("/sysadmin/logins/storeLoginsTableData",function(req,res){
         var tLoginData=req.body;
         r_Users.checkLoginPassDBUser(req.dbUC,tLoginData,function(result,login,lpass,suname){
             if(result.error){
@@ -590,16 +584,15 @@ module.exports.init = function(app){
         });
     });
 
-    app.get("/sysadmin/logs", function (req, res) {
+    app.get("/sysadmin/logs",function(req,res){
         res.sendFile(appViewsPath+'sysadmin/logs.html');
     });
-
     var sysLogsTableColumns=[
         {data: "level", name: "Level", width: 100, type: "text"},
         {data: "message", name: "Message", width: 700, type: "text"},
         {data: "timestamp", name: "Timestamp", width: 220, type: "text", datetimeFormat:"DD.MM.YY HH:mm:ss"}
     ];
-    app.get('/sysadmin/logs/getDataForTable', function (req, res) {
+    app.get('/sysadmin/logs/getDataForTable',function(req,res){
         var fileDate = req.query.DATE;
         var outData = {};
         outData.columns = sysLogsTableColumns;

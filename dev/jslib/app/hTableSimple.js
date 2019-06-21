@@ -147,17 +147,16 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                     allowInsertRow:false,
                     fillHandle: { autoInsertRow: false, direction: 'vertical' },//it's for use fillHandle in childrens
                     startRows: 1,
-                        fixedColumnsLeft: 0, fixedRowsTop: 0,
+                    fixedColumnsLeft: 0, fixedRowsTop: 0,
                     manualColumnResize: true, manualRowResize: false,
-                        manualColumnMove: true,
                     persistentState: parent.persistentState,
                     readOnly: parent.readOnly,
                     wordWrap: parent.wordWrap, trimWhitespace:false,
                     enterMoves:{row:0,col:1}, tabMoves:{row:0,col:1},
                     multiSelect: true,
-                    //beforeOnCellMouseDown: function(event, coords, element) {
-                    //    if(element.tagName==="TH") { event.stopImmediatePropagation(); }//disable column header click event
-                    //},
+                    beforeOnCellMouseDown: function(event, coords, element) {
+                        if(element.tagName==="TH") { event.stopImmediatePropagation(); }//disable column header click event
+                    },
                     cellValueRenderer:function (instance, td, row, col, prop, value, cellProperties) {
                         if(cellProperties["html"]){
                             Handsontable.renderers.HtmlRenderer.apply(this, arguments);
@@ -231,153 +230,26 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 if (addingHeaderElements) this.tableHeaderAddedElements=addingHeaderElements;
                 var hInstance= this.getHandsonTable();
                 hInstance.updateSettings({
-                    beforeRender: function () {                                                                  //console.log("HTableSimple beforeRender1 ",hInstance.rootElement);
-                        var theads=[];
-                        var htMasterDIVs=this.rootElement.getElementsByClassName('ht_master handsontable');
-                        if(htMasterDIVs) {
-                            var htMasterDIV=htMasterDIVs[0], htMasterDIVtheads;
-                            if(htMasterDIV) htMasterDIVtheads=htMasterDIV.getElementsByTagName('thead');
-                            if(htMasterDIVtheads) theads.push(htMasterDIVtheads[0]);
-                        }
-                        var htCloneTopDIVs=this.rootElement.getElementsByClassName('ht_clone_top handsontable');
-                        if(htCloneTopDIVs) {
-                            var htCloneTopDIV=htCloneTopDIVs[0], htCloneTopDIVtheads;
-                            if(htCloneTopDIV) htCloneTopDIVtheads=htCloneTopDIV.getElementsByTagName('thead');
-                            if(htCloneTopDIVtheads) theads.push(htCloneTopDIVtheads[0]);
-                        }
+                    afterRender: function () {
+                        var theads=hInstance.rootElement.getElementsByTagName('thead');                     //console.log("HTableSimple afterRender theads=",theads);
+                        var div= document.createElement("div");
                         for(var theadInd=0;theadInd<theads.length;theadInd++){
-                            var thead= theads[theadInd], trs=thead.getElementsByTagName('tr');         //console.log("HTableSimple beforeRender thead=",thead.childNodes.length);
-                            if(!trs) continue;
-                            var tr0= trs[0];
-                            if(!tr0) continue;
-                            if(tr0.getAttribute('id')=="htAddedTableHeader") {                          //console.log("HTableSimple beforeRender tr0=",tr0);
-                                tr0.remove();
+                            var thead= theads[theadInd];
+                            var newTR = document.createElement("tr");
+                            var newTH=document.createElement("th");
+                            newTR.appendChild(newTH);
+                            var tr=thead.getElementsByTagName('tr')[0];
+                            if(theadInd<=1) {
+                                thead.insertBefore(newTR, tr);
+                                newTH.setAttribute("colspan", tr.childNodes.length.toString());
+                                if(theadInd==1)newTH.appendChild(div);
+                                if (tr.firstChild) tr.firstChild.removeAttribute("colspan");
                             }
                         }
+                        for(var eName in addingHeaderElements)
+                            div.appendChild(addingHeaderElements[eName]);
                     }
                 });
-                hInstance.updateSettings({
-                    afterRender: function () {                                                                  //console.log("HTableSimple afterRender1 ",this,this.rootElement);
-                        var theads=[];
-                        var htMasterDIVs=this.rootElement.getElementsByClassName('ht_master handsontable');
-                        if(htMasterDIVs) {
-                            var htMasterDIV=htMasterDIVs[0], htMasterDIVtheads;
-                            if(htMasterDIV) htMasterDIVtheads=htMasterDIV.getElementsByTagName('thead');
-                            if(htMasterDIVtheads) theads.push(htMasterDIVtheads[0]);
-                        }
-                        var htCloneTopDIVs=this.rootElement.getElementsByClassName('ht_clone_top handsontable');
-                        if(htCloneTopDIVs) {
-                            var htCloneTopDIV=htCloneTopDIVs[0], htCloneTopDIVtheads;
-                            if(htCloneTopDIV) htCloneTopDIVtheads=htCloneTopDIV.getElementsByTagName('thead');
-                            if(htCloneTopDIVtheads) theads.push(htCloneTopDIVtheads[0]);
-                        }
-
-                        //if(!this.htAddedTableHeader)this.htAddedTableHeader={thATHTRs:[]};
-                        //var htAddedTableHeader=this.htAddedTableHeader;
-
-                        for(var theadInd=0;theadInd<theads.length;theadInd++){
-                            if (theadInd>1) break;
-                            var thead= theads[theadInd], trs=thead.getElementsByTagName('tr');
-                            if(!trs) continue;
-                            var tr0= trs[0];
-                            if(!tr0) continue;
-                            if(tr0.getAttribute('id')!="htAddedTableHeader"){                               //console.log("HTableSimple afterRender htAddedTableHeader");
-                                var thATHTR = document.createElement("tr"); thATHTR.setAttribute("id","htAddedTableHeader");
-                                var thATHTH=document.createElement("th"); thATHTR.appendChild(thATHTH);
-                                thead.insertBefore(thATHTR, tr0);
-                                thATHTR.firstChild.setAttribute("colspan", tr0.childNodes.length.toString());
-                                if (tr0.firstChild) tr0.firstChild.removeAttribute("colspan");
-                                if(theadInd==1){
-                                    var div= document.createElement("div");
-                                    thATHTR.appendChild(div);
-                                }
-                            }
-                        }
-                        //for(var eName in addingHeaderElements)
-                        //    div.appendChild(addingHeaderElements[eName]);
-
-
-                        //var thead=hInstance.view.THEAD;                                                         console.log("HTableSimple afterRender1 view=",hInstance.view);
-                        //var topTableTR=document.createElement("tr");
-                        ////thead.appendChild(topTableTR);
-                        //thead.insertBefore(topTableTR,thead.firstChild);
-                        //var topTableTH=document.createElement("th"); topTableTR.appendChild(topTableTH);
-
-                        //var wtHiders=hInstance.rootElement.getElementsByClassName('wtHider');                   //console.log("HTableSimple afterRender1 ",wtHiders);
-                        //for(var ind=0;ind<wtHiders.length;ind++) {
-                        //    if(ind>1) break;
-                        //    var wtHider=wtHiders[ind];                                                          //console.log("HTableSimple afterRender1 ",wtHider);
-                        //    if(wtHider.firstChild&&wtHider.firstChild.id!="tableTopHeader"){
-                        //        var tableTopHeader=document.createElement("div");tableTopHeader.id="tableTopHeader";
-                        //        //hInstance.tableAddedHeader=tableTopHeader;
-                        //        tableTopHeader.setAttribute("class","wtSpreader");
-                        //        tableTopHeader.setAttribute("style","width:100%");//height:30px;;border:none position:relative
-                        //        wtHider.insertBefore(tableTopHeader,wtHider.firstChild);
-                        //
-                        //        var topTable=document.createElement("table"); tableTopHeader.appendChild(topTable);
-                        //        topTable.setAttribute("class","thCore");//topTable.setAttribute("style","border:none");
-                        //        topTable.setAttribute("height","100%");
-                        //        topTable.setAttribute("width","100%");
-                        //
-                        //        //var topTableH=document.createElement("thead"); topTable.appendChild(topTableH);
-                        //
-                        //        var topTableTR=document.createElement("tr"); topTable.appendChild(topTableTR);
-                        //        var topTableTH=document.createElement("th"); topTableTR.appendChild(topTableTH);
-                        //        var topTableTHdiv=document.createElement("div"); topTableTH.appendChild(topTableTHdiv);
-                        //        //topTableTHdiv.setAttribute("class","relative");
-                        //        //topTableTHdiv.setAttribute("style","height:30px");
-                        //        //if(ind==1) {
-                        //        //    for(var eName in addingHeaderElements)
-                        //        //        topTableTHdiv.appendChild(addingHeaderElements[eName]);
-                        //        //}
-                        //    }
-                        //}
-
-                    }
-                });
-                //hInstance.updateSettings({
-                //    afterGetColHeader: function() {                                                 console.log("HTableSimple afterGetColHeader",this);
-                //        var theads=[];
-                //        var htMasterDIVs=this.rootElement.getElementsByClassName('ht_master handsontable');
-                //        if(htMasterDIVs) {
-                //            var htMasterDIV=htMasterDIVs[0], htMasterDIVtheads;
-                //            if(htMasterDIV) htMasterDIVtheads=htMasterDIV.getElementsByTagName('thead');
-                //            if(htMasterDIVtheads) theads.push(htMasterDIVtheads[0]);
-                //        }
-                //        var htCloneTopDIVs=this.rootElement.getElementsByClassName('ht_clone_top handsontable');
-                //        if(htCloneTopDIVs) {
-                //            var htCloneTopDIV=htCloneTopDIVs[0], htCloneTopDIVtheads;
-                //            if(htCloneTopDIV) htCloneTopDIVtheads=htCloneTopDIV.getElementsByTagName('thead');
-                //            if(htCloneTopDIVtheads) theads.push(htCloneTopDIVtheads[0]);
-                //        }                                                                               console.log("HTableSimple afterGetColHeader theads=",theads);
-                //        //for(var theadInd=0;theadInd<theads.length;theadInd++){
-                //        //    var thead= theads[theadInd], trs=thead.getElementsByTagName('tr');         //console.log("HTableSimple beforeRender thead=",thead.childNodes.length);
-                //        //    if(!trs) continue;
-                //        //    var tr0= trs[0];
-                //        //    if(!tr0) continue;
-                //        //    if(tr0.getAttribute('id')=="htAddedTableHeader") {                          //console.log("HTableSimple beforeRender tr0=",tr0);
-                //        //        tr0.remove();
-                //        //    }
-                //        //
-                //        //}
-                //
-                //        //while ($('.ht_clone_top.handsontable #header-grouping th').size() > 0)
-                //        //    $('.ht_clone_top.handsontable #header-grouping th').remove();
-                //    }
-                //});
-                                                                                                            console.log("HTableSimple hInstance=",hInstance);
-                //hInstance.updateSettings({
-                //    getColumnHeaderHeight: function () {                                                     console.log("HTableSimple getColumnHeaderHeight ",hInstance);
-                //                            //console.log("outerHeight",hInstance.tableAddedHeader,hInstance.tableAddedHeader.offsetHeight);
-                //        return hInstance.tableAddedHeader.offsetHeight;
-                //    }
-                //});
-                //hInstance.updateSettings({
-                //    modifyColumnHeaderHeight: function () {                                                     console.log("HTableSimple modifyColumnHeaderHeight ",this);
-                //        //    console.log("outerHeight",hInstance.tableAddedHeader,hInstance.tableAddedHeader.offsetHeight);
-                //        //    return hInstance.tableAddedHeader.offsetHeight;
-                //    }
-                //});
             },
             resizeAll: function(changeSize,resultSize){
                 if(!changeSize) return;

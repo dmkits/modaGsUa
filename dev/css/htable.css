@@ -58,71 +58,63 @@
 }
 
 /*header filter*/
-.htHeaderGlobalFilter {
-    margin-left: 3px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    float: left;
+.changeTypeLbl {
     color: black;
     background: #eee;
     border-radius: 2px;
-    font-size: 12px;
+    padding-top: 4px;
+    font-size: 10px;
+
+    float: left;
     line-height: 10px;
+    margin-left: 3px;
+    margin-top: 3px;
     z-index: 100;
-    padding: 2px;
 }
-.htHeaderGlobalFilterHighlighted {
+.changeTypeAccent {
     font-weight: bold;
 }
-.htHeaderGlobalFilterLbl {
-    padding-top: 4px;
-}
-.htHeaderGlobalFilterInput {
-    margin-left: 3px;
-    margin-top: 2px;
-    margin-bottom: 2px;
+.changeTypeC {
     border: 1px solid #bbb;
+    color: black;
+    background: #eee;
+    border-radius: 2px;
     padding: 2px;
+    font-size: 10px;
+
+    float: left;
+    line-height: 10px;
+    margin-left: 3px;
+    margin-top: 3px;
+    z-index: 100;
 }
-.htHeaderGlobalFilterInput:hover {
+.changeTypeC:hover {
     border: 1px solid #777;
     color: black;
     cursor: pointer;
 }
-.htHeaderGlobalFilterInput.pressed {
+.changeTypeC.pressed {
     background-color: #999;
 }
-.htHeaderClearGlobalFilterBtn {
-    border: 1px solid #bbb;
-    padding: 3px;
-}
-.htHeaderClearGlobalFilterBtn:hover {
-    border: 1px solid #777;
-    color: black;
-    cursor: pointer;
-}
-.htHeaderClearGlobalFilterBtn.pressed {
-    background-color: #999;
-}
-.htColFilterBtn {
+.changeType {
     border: 1px solid #bbb;
     color: #bbb;
     background: #eee;
     border-radius: 2px;
     padding: 2px;
-    font-size: 12px;
+    font-size: 9px;
 
     float: right;
     line-height: 9px;
-    margin: 1px 1px 1px 1px;
+    margin: 3px 3px 0 0;
     z-index: 100;
 }
-.htColFilterBtn:hover {
+.changeType:hover {
     border: 1px solid #777;
     color: #777;
     cursor: pointer;
 }
-.htColFilterBtn.pressed {
+.changeType.pressed {
     background-color: #999;
 }
 .changeTypeMenu {

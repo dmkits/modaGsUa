@@ -14,7 +14,7 @@ module.exports.getAppStartupParams = function(){
     return appStartupParams;
 };                                                                                                  console.log('Started with startup params:',appStartupParams);//test
 
-if (appStartupParams.logToConsole) {
+if(appStartupParams.logToConsole){
     log.configure({
         transports: [
             new (log.transports.Console)({ colorize: true,level:(logDebug)?'silly':'info', timestamp: function() {
@@ -22,12 +22,10 @@ if (appStartupParams.logToConsole) {
             } })
         ]
     });
-} else {
+}else{
     var logDir= path.join(__dirname, '/../logs/');
     try {
-        if (!fs.existsSync(logDir)) {
-            fs.mkdirSync(logDir);
-        }
+        if(!fs.existsSync(logDir)) { fs.mkdirSync(logDir); }
     }catch (e){                                                                                     console.log("FAILED START! Reason: Failed create log directory! Reason:"+ e.message);
         return;
     }
@@ -61,24 +59,24 @@ module.exports.getApp=function(){
     return server;
 };
 
-var startupConfig=null;
-global.serverConfigPath= path.join(__dirname,'/../','');
-function loadStartupConfig(){
+var sysConfig=null;
+global.sysConfigPath= path.join(__dirname,'/../','');
+function loadSysConfig(){
     try {
-        startupConfig= common.loadConfig(appStartupParams.mode + '.cfg');
+        sysConfig= common.loadConfig(appStartupParams.mode + '.cfg');
     } catch (e) {
         log.error("Failed to load configuration! Reason:" + e);
-        startupConfig= null;
+        sysConfig= null;
     }
 }
-loadStartupConfig();                                                                                log.info('startup configuration loaded on ', new Date().getTime()-startTime);//test
-module.exports.loadStartupConfig= loadStartupConfig;                                                log.info('startup mode:'+appStartupParams.mode,' startup configuration:', startupConfig);//test
-module.exports.getStartupConfig= function(){ return startupConfig };
-module.exports.setStartupConfig= function(newStartupConfig){ startupConfig=newStartupConfig; };
+loadSysConfig();                                                                                    log.info('system configuration loaded on ', new Date().getTime()-startTime);//test
+module.exports.loadSysConfig= loadSysConfig;                                                        log.info('app startup mode:'+appStartupParams.mode,' system config:', sysConfig);//test
+module.exports.getSysConfig= function(){ return sysConfig };
+module.exports.setSysConfig= function(newSysConfig){ sysConfig=newSysConfig; };
 
 var database = require('./databaseMSSQL');                                                          log.info('dataBase loaded on ', new Date().getTime()-startTime);//test
 
-var configFileName=(startupConfig&&startupConfig.configName)?startupConfig.configName:'config.json',
+var configFileName=(sysConfig&&sysConfig.configName)?sysConfig.configName:'config.json',
     appConfig=JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+configFileName,'utf-8')));
 module.exports.getAppConfig=function(){ return appConfig; };
 module.exports.getConfigAppMenu=function(){ return (appConfig&&appConfig.appMenu)?appConfig.appMenu:null; };
@@ -115,7 +113,7 @@ var startServer= function(){
     });                                                                                             log.info("server inited.");
 };
 
-database.setDBSystemConnection(startupConfig, function(err,result){
+database.setDBSystemConnection(sysConfig, function(err,result){
     if(err) log.error("FAILED to set system connection! Reason: ",err);
     appModules.validateModules(function(errs, errMessage){
         if (errMessage){                                                                            log.error("FAILED validate! Reason: ",errMessage);
@@ -129,7 +127,7 @@ database.setDBSystemConnection(startupConfig, function(err,result){
                 eCount++;
                 if(eCount>3) break;
             }
-        }   console.log("startServer");
+        }
         startServer();
     });
 });

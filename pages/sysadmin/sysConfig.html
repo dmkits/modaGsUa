@@ -1,0 +1,119 @@
+<table width="100%" height="100%" style="position:static;top:0;">
+    <tr>
+        <td width="500px">
+            <table width="500px" height="100%" style="position: static;top:0;">
+                <tr height="30px">
+                    <th width="150px" style="text-align:left;"><span style="margin-left:20px"><b>system configuration:</b></span>
+                        <span id="sa_sysConfig_configState">default</span>
+                    </th>
+                </tr>
+                <tr height="25px">
+                    <td><textBox id="sa_sysConfig_dbHost" label="dbHost:" labelstyle="width:100px;text-align:right" style="width:350px;margin-left:5px;"></textBox></td>
+                </tr>
+                <tr height="25px">
+                    <td><textBox id="sa_sysConfig_dbPort" label="dbPort:" labelstyle="width:100px;text-align:right" style="width:50px;margin-left:5px;"></textBox></td>
+                </tr>
+                <tr height="25px">
+                    <td colspan="2"><textBox id="sa_sysConfig_dbName" label="dbName:" labelstyle="width:100px;text-align:right" style="width:200px;margin-left:5px;"></textBox></td>
+                </tr>
+                <tr height="25px">
+                    <td><textBox id="sa_sysConfig_dbUser" label="dbUser:" labelstyle="width:100px;text-align:right" style="width:150px;margin-left:5px;"></textBox></td>
+                </tr>
+                <tr height="25px">
+                    <td><textBox id="sa_sysConfig_dbUserPass" label="dbUserPass:" labelstyle="width:100px;text-align:right" style="width:150px;margin-left:5px;"></textBox></td>
+                </tr>
+                <tr height="25px">
+                    <td><textBox id="sa_sysConfig_appConfigName" label="app configName:" labelstyle="width:100px;text-align:right" style="width:100px;margin-left:5px;"></textBox></td>
+                </tr>
+                <tr height="40px">
+                    <td>
+                        <button id="sa_sysConfig_btnLoadConfig">Load config</button>
+                        <button id="sa_sysConfig_btnSaveConfigAndReconnect">Store config & reconnect to database</button>
+                    </td>
+                </tr>
+                <tr></tr>
+            </table>
+        </td>
+        <td>
+            <table width="300px" height="100%" style="position: static;top:0;">
+                <tr height="30px">
+                    <th><b>Database list</b></th>
+                </tr>
+                <tr height="25px;">
+                    <td><div id="sa_sysConfig_dbList" style="overflow-y:scroll"></div></td>
+                </tr>
+                <tr></tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<script type="text/javascript">                                                                             //log("sysadmin sysConfig",$$);//!!!IT'S FOR TESTING!!!
+    var getSysConfig = function(){
+        $$.request.getJSONData({url:"/sysadmin/sysConfig/getSysConfig",consoleLog: true},function(result,error){
+            if(error){
+                $$.sa_sysConfig_configState.innerHTML = "<div><b style='color:red'>"+error.message+"</b></div>";
+                return;
+            }
+            $$.sa_sysConfig_configState.innerHTML = "<div><b>Configuration loaded.</b></div>";
+            setSysConfigContent(result);
+        })
+    };
+    var getDBList= function (){
+        $$.request.getJSONData({url:"/sysadmin/sysConfig/getDBList",consoleLog: true},function(result,error){
+            if(error||!result){
+                var errMsg=(error)?error.message:"No server result!";
+                $$.sa_sysConfig_dbList.innerHTML= "<div><b style='color:red'>Failed to get database list!</b> Reason:"+errMsg+"</div>";
+                return;
+            }
+            var dbList=result.dbList, dbListStr="";
+            if(!dbList)dbListStr="NO database list from server!";
+            else for(var i in dbList) dbListStr+=dbList[i].name+"<br>";
+            $$.sa_sysConfig_dbList.innerHTML= dbListStr;
+        })
+    };
+    function setSysConfigContent(sysConfigData) {
+        $$.sa_sysConfig_dbHost.set("value",sysConfigData["dbHost"]);
+        if(sysConfigData["dbPort"]) $$.sa_sysConfig_dbPort.set("value",sysConfigData["dbPort"]);
+        else $$.sa_sysConfig_dbPort.set("value","1433");
+        $$.sa_sysConfig_dbName.set("value",sysConfigData["dbName"] );
+        $$.sa_sysConfig_dbUser.set("value",sysConfigData["dbUser"]);
+        $$.sa_sysConfig_dbUserPass.set("value",sysConfigData["dbUserPass"]);
+        $$.sa_sysConfig_appConfigName.set("value",sysConfigData["configName"]);
+    }
+    getSysConfig(); getDBList();
+    $$.sa_sysConfig_btnLoadConfig.onClick=function(){
+        $$.sa_sysConfig_configState.innerHTML = "<div><b>Loading configuration parameters...</b></div>";
+        $$.request.getJSONData({url: "/sysadmin/sysConfig/loadSysConfig", consoleLog: true},function(result,error){
+            if(error){
+                $$.sa_sysConfig_configState.innerHTML = "<div><b style='color:red'>"+error.message+"</b></div>";
+                return;
+            }
+            $$.sa_sysConfig_configState.innerHTML = "<div><b>Configuration reloaded.</b></div>";
+            setSysConfigContent(result);
+            if($$.$parent.getParent().updateSysState)  $$.$parent.getParent().updateSysState();
+        });
+    };
+    $$.sa_sysConfig_btnSaveConfigAndReconnect.onClick=function(){
+        $$.sa_sysConfig_configState.innerHTML = "<div><b>Configuration saving and reconnected to database...</b></div>";
+        var newDBConfig={
+            "dbHost": $$.sa_sysConfig_dbHost.get('value'),
+            "dbPort": $$.sa_sysConfig_dbPort.get('value'),
+            "dbName": $$.sa_sysConfig_dbName.get('value'),
+            "dbUser": $$.sa_sysConfig_dbUser.get('value'),
+            "dbUserPass": $$.sa_sysConfig_dbUserPass.get('value'),
+            "configName":$$.sa_sysConfig_appConfigName.get('value')
+        };
+        $$.request.postJSONData({url:"/sysadmin/sysConfig/storeSysConfigAndReconnectToDB",data:newDBConfig,consoleLog:true},
+                function(result,error){
+                    if(error){
+                        $$.sa_sysConfig_configState.innerHTML = "<span><b style='color:red'>"+error.message+"</b></span>";
+                        $$.$parent.getParent().updateSysState();
+                        return;
+                    }
+                    $$.sa_sysConfig_configState.innerHTML = "<span><b>"+result.message+"</b></span>";
+                    var dbConnectMsg=(result.dbSysConnErr)?"<br><span><b style='color:red'>"+result.dbSysConnErr+"</b></span>":"";
+                    $$.sa_sysConfig_configState.innerHTML+= dbConnectMsg;
+                    $$.$parent.getParent().updateSysState();
+                });
+    };
+</script>

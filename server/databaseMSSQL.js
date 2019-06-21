@@ -1,8 +1,6 @@
 var mssql = require('mssql');
 var common=require('./common'), server = require('./server'), log =server.log;
-var dbConnectError=null;
 
-module.exports.getDBConnectError= function(){ return dbConnectError; };
 /**
  *{uuid:{user:<user>, connection: <connection> }}
  */
@@ -18,46 +16,43 @@ module.exports.cleanConnectionPool=function(){
 };
 /**
  * @param userData = { uuid, login, password }
- * @param callback (err,result), result = { dbUC:<database user connection> }, err = { error, userErrorMsg }
+ * @param callback (err,result), result = { dbUC:<database user connection> }, err = { error, userMessage }
  */
 function createNewUserDBConnection(userData, callback){
     var uuid= userData.uuid;
     if(uuid===undefined||uuid===null){                                                              log.error("database createNewUserDBConnection: Failed create new user database connection! Reason:No UUID.");
-        dbConnectError="Failed create new user database connection! Reason:No UUID.";
-        callback({error:dbConnectError});
+        callback({error:"Failed create new user database connection! Reason:No UUID."});
         return;
     }
-    var dbConfig=server.getStartupConfig();
+    var dbConfig=server.getSysConfig();
     if(!dbConfig){
         callback({error:"Failed create database system connection! Reason: no server configuration!",
-            userErrorMsg:"Не удалось подключиться к базе данных!<br> Нет параметров подключения к базе данных!<br> Обратитесь к системному администратору."});
+            userMessage:"Не удалось подключиться к базе данных!<br> Нет параметров подключения к базе данных!<br> Обратитесь к системному администратору."});
         return;
     }
     var dbUserConnection = new mssql.ConnectionPool({
         user: userData.login,
         password: userData.password,
-        server:   dbConfig.host,
-        database: dbConfig.database,
+        server:   dbConfig.dbHost,
+        database: dbConfig.dbName,
         pool: {
             max: 100,
             min: 0/*,
             idleTimeoutMillis: 30000*/
         }
-    }, function(err){
+    },function(err){
         var connectionData=connections[uuid];
         if(err){                                                                                    log.error("database createNewUserDBConnection: Failed to create connection for user "+userData.login+" userData.uuid="+userData.uuid+ ". Reason: "+err);
-            dbConnectError=err.message;
             if(connectionData) {
                 connectionData.connection=null;
                 connectionData.user=userData.login;
             }
-            callback({error:err.message,userErrorMsg: "Авторизация не удалась!<br> Неправильное имя и/или пароль."});
+            callback({error:err.message,userMessage:err});
             return;
         }
-        dbConnectError=null;
         if(!connectionData)
             connections[uuid]={ connection:dbUserConnection, user:userData.login };
-        else {
+        else{
             connectionData.connection=dbUserConnection;
             connectionData.user=userData.login;
         }
@@ -73,21 +68,21 @@ module.exports.getDBSystemConnection=function(){
 };
 /**
  * callback= function(err,result)
- *  result = { dbUC:<database user connection> }, err = { error, userErrorMsg }
+ *  result = { dbUC:<database user connection> }, err = { error, userMessage }
  */
-function setDBSystemConnection(serverConfig, callback){                                          log.debug("database setDBSystemConnection serverConfig:",serverConfig);
-    if(!serverConfig){
+function setDBSystemConnection(sysConfig, callback){                                                log.debug("database setDBSystemConnection sysConfig:",sysConfig);
+    if(!sysConfig){
         callback({error:"Failed create database system connection! Reason: no server configuration!"});
         return;
     }
     var systemConnectionUUID="systemConnection";
     var systemConnUser= {
-        login: serverConfig.user,
-        password: serverConfig.password,
+        login: sysConfig.dbUser,
+        password: sysConfig.dbUserPass,
         uuid: systemConnectionUUID
     };
     createNewUserDBConnection(systemConnUser,function(err,result){
-        if(err) {                                                                                   log.error("database setDBSystemConnection err:",err);
+        if(err){                                                                                    log.error("database setDBSystemConnection err:",err);
             systemConnectionErr = err.error;
             callback(err);
             return;
@@ -98,9 +93,7 @@ function setDBSystemConnection(serverConfig, callback){                         
 }
 module.exports.setDBSystemConnection=setDBSystemConnection;
 
-function getSystemConnectionErr(){
-    return systemConnectionErr;
-}
+function getSystemConnectionErr(){ return systemConnectionErr; }
 module.exports.getSystemConnectionErr=getSystemConnectionErr;
 
 function getFieldsTypes(recordset){
@@ -129,15 +122,12 @@ function selectQuery(connection,query, callback) {                              
         return;
     }
     var request = new mssql.Request(connection);
-    request.query(query,
-        function(err, result) {
-            if (err) {
-                if(err.name=="ConnectionError")dbConnectError=err.message;                          log.error('database: selectQuery error:',err.message, {});
-                callback(err);
-                return;
-            }
-            callback(null, result.recordset, result.rowsAffected.length, getFieldsTypes(result.recordset));
-        });
+    request.query(query,function(err, result){
+        if(err){                                                                                    log.error('database: selectQuery error:',err.message, {});
+            callback(err); return;
+        }
+        callback(null, result.recordset, result.rowsAffected.length, getFieldsTypes(result.recordset));
+    });
 }
 module.exports.selectQuery=selectQuery;
 /**
@@ -151,16 +141,12 @@ module.exports.executeQuery=function(connection,query,callback){                
         return;
     }
     var request = new mssql.Request(connection);
-    request.query(query,
-        function(err,result){
-            if(err){
-                if(err.name=="ConnectionError")dbConnectError=err.message;
-                log.error('database: executeQuery error:',err.message,{});
-                callback(err);
-                return;
-            }
-            callback(null, result.rowsAffected[result.rowsAffected.length-1]);
-        });
+    request.query(query,function(err,result){
+        if(err){                                                                                    log.error('database: executeQuery error:',err.message,{});
+            callback(err); return;
+        }
+        callback(null, result.rowsAffected[result.rowsAffected.length-1]);
+    });
 };
 /**
  * for MS SQL database select query
@@ -173,18 +159,13 @@ function selectParamsQuery(connection,query, parameters, callback) {            
         return;
     }
     var request = new mssql.Request(connection);
-    for(var i in parameters){
-        request.input('p'+i,parameters[i]);
-    }
-    request.query(query,
-        function (err, result) {
-            if (err) {                                                                              log.error('database: selectParamsQuery error:',err.message,{});
-                if(err.name=="ConnectionError")dbConnectError=err.message;
-                callback(err);
-                return;
-            }
-            callback(null, result.recordset, result.rowsAffected.length, getFieldsTypes(result.recordset));
-        });
+    for(var i in parameters)request.input('p'+i,parameters[i]);
+    request.query(query,function(err,result){
+        if(err){                                                                                    log.error('database: selectParamsQuery error:',err.message,{});
+            callback(err); return;
+        }
+        callback(null, result.recordset, result.rowsAffected.length, getFieldsTypes(result.recordset));
+    });
 }
 module.exports.selectParamsQuery=selectParamsQuery;
 /**
@@ -199,15 +180,11 @@ module.exports.executeParamsQuery= function(connection, query, parameters, callb
         return;
     }
     var request = new mssql.Request(connection);
-    for(var i in parameters){
-        request.input('p'+i,parameters[i]);
-    }
-    request.query(query,
-        function (err, result) {
-            if (err) {                                                                              log.error('database: executeParamsQuery error:',err.message,{});//test
-                callback(err);
-                return;
-            }                                                                                       log.debug('database: executeParamsQuery result:',result,result.rowsAffected[result.rowsAffected.length-1],{});//test
-            callback(null, result.rowsAffected[result.rowsAffected.length-1]);
-        });
+    for(var i in parameters)request.input('p'+i,parameters[i]);
+    request.query(query,function(err,result){
+        if(err){                                                                                    log.error('database: executeParamsQuery error:',err.message,{});//test
+            callback(err); return;
+        }                                                                                           log.debug('database: executeParamsQuery result:',result,result.rowsAffected[result.rowsAffected.length-1],{});//test
+        callback(null, result.rowsAffected[result.rowsAffected.length-1]);
+    });
 };
