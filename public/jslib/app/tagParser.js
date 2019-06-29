@@ -85,6 +85,7 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                 var tagClass=null;
                 if(node.tagName=="TDocSimpleTable".toUpperCase()) tagClass=window.TDocSimpleTable;
                 else if(node.tagName=="TDocSimpleTableEdt".toUpperCase()) tagClass=window.TDocSimpleTableEdt;
+                else if(node.tagName=="TDocStdTable".toUpperCase()) tagClass=window.TDocStdTable;
                 else return;
                 if(!tagClass){ console.error("Module for tag "+node.tagName+" cannot loaded!");return; }
                 var params={tagName:node.tagName};
