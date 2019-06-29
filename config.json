@@ -11,7 +11,7 @@
     "dirsCommon",
     "dirsForDocs",
     "dirsForProds",
-    "rec",
+    /*"rec",*/
     /*"mainPage",*/
     "reportsProds",
     "reportsCashier",
@@ -21,7 +21,7 @@
     "mobileReportsCashier"
   ],
   "appMenu":[
-    { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },
+    /*{ "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },*/
     { "menuItemName":"menuBarItemReportsProds", "menuTitle":"Товарные отчеты", "pageTitle":"Товарные отчеты", "module":"reportsProds", "closable":false },
     { "menuItemName":"menuBarItemReportsCashier", "menuTitle":"Отчеты кассира", "pageTitle":"Отчеты кассира", "module":"reportsCashier", "closable":false },
     { "menuItemName":"menuBarItemHelpAbout", "menuTitle":"О программе", "action":"help_about" },

@@ -52,11 +52,11 @@
         }
         var updateMainState = function(result,error){
             $$.main_stateFail.innerHTML="";
-            if(error){
+            if(error||!result){
+                error=error||{message:"NO DATA FROM SERVER!"};
                 $$.main_page.mainContentData = {error:error};
                 $$.main_stateFail.innerHTML='<b>FAILED: </b><span style="color:red">'+error.message+'</span>';
-            }
-            if(result){
+            }else{
                 $$.main_page.mainContentData = result;
                 $$.main_modeName.innerHTML = "<b>Режим приложения:</b> ";
                 if(result.mode){
@@ -66,30 +66,28 @@
                     else
                         $$.main_modeName.innerHTML+= "<b style='color:dimgrey'>"+result.mode+"</b>";
                     $$.main_modeName.setAttribute("title",result.mode);
-                }else {
+                }else{
                     $$.main_modeName.innerHTML += "<b>UNKNOWN!!!</b>";
                     $$.main_modeName.setAttribute("title","UNKNOWN!");
                 }
                 $$.sysadmin_appUser.innerHTML="<b>Пользователь: <span style='color:dimgrey'>"+result.dbUserName;
                 $$.sysadmin_appUser.setAttribute("title",result.dbUserName);
-                if(!result.sysConfig)result.sysConfig={};
-                var dbSysConnState=(result.dbSysConnErr)
-                        ?'<span style="color:red">'+result.dbSysConnErr+'</span>'
-                        :'<span style="color:dimgrey">Connected</span>';
-//                $$.sysadmin_dbConnectionState.innerHTML ='<b>DB SYSTEM CONNECTION STATE: '+dbSysConnState+'</b>';
-//                $$.sysadmin_dbConnectionState.setAttribute("title",result.dbSysConnErr||"Connected");
-                var dbValidState=(result.dbValidationErr)
-                        ?'<span style="color:red">'+result.dbValidationErr+'</span>'
-                        :'<span style="color:dimgrey">'+result.dbValidation+'</span>';
-//                $$.sysadmin_dbValidateState.innerHTML ='<b>DB VALIDATION STATE: '+dbValidState+'</b>';
-//                $$.sysadmin_dbValidateState.setAttribute("title",result.dbValidationErr||result.dbValidation);
+//                if(!result.sysConfig)result.sysConfig={};
+//                var dbSysConnState=(result.dbSysConnErr)
+//                        ?'<span style="color:red">'+result.dbSysConnErr+'</span>'
+//                        :'<span style="color:dimgrey">Connected</span>';
+////                $$.sysadmin_dbConnectionState.innerHTML ='<b>DB SYSTEM CONNECTION STATE: '+dbSysConnState+'</b>';
+////                $$.sysadmin_dbConnectionState.setAttribute("title",result.dbSysConnErr||"Connected");
+//                var dbValidState=(result.dbValidationErr)
+//                        ?'<span style="color:red">'+result.dbValidationErr+'</span>'
+//                        :'<span style="color:dimgrey">'+result.dbValidation+'</span>';
+////                $$.sysadmin_dbValidateState.innerHTML ='<b>DB VALIDATION STATE: '+dbValidState+'</b>';
+////                $$.sysadmin_dbValidateState.setAttribute("title",result.dbValidationErr||result.dbValidation);
                 setBrending(result.appConfig);
             }
         };
         var closeAction= function(menuItemData){
-            $$.main_mainMenu.destroy();
-            $$.main_tabs.destroy();
-            //   location.reload();
+            $$.main_mainMenu.destroy(); $$.main_tabs.destroy();
             $$.request.postJSONData({url:"/exit"},function(result){
                 var exitContent;
                 if(result&&result.actionResult=="successful"){
@@ -113,18 +111,15 @@
                 btnOkLabel:"Закрыть"
             });
         };
-        var createMainMenu = function(mainMenuData){                                            console.log("mainMenuData",mainMenuData);
-            var mainMenu=$$.main_mainMenu, mainTabs=$$.main_tabs;                                           console.log("mainTabs=",mainTabs);
-            var menuClickAddInnerPage=function(menuItem,e){                                                 console.log(menuItem.id+" "+menuItem.label+" click",menuItem,e);
-
+        var createMainMenu = function(mainMenuData){                                                        //console.log("mainMenuData",mainMenuData);
+            var mainMenu=$$.main_mainMenu, mainTabs=$$.main_tabs;                                           //console.log("mainTabs=",mainTabs);
+            var menuClickAddInnerPage=function(menuItem,e){                                                 //console.log(menuItem.id+" "+menuItem.label+" click",menuItem,e);
                 if(menuItem.itemData.action=="close"){ closeAction(menuItem.itemData); return; }
                 else if(menuItem.itemData.action=="help_about"){ aboutAction(menuItem.itemData); return; }
-
-                var iPageName="innerPage_"+menuItem.id, iPageInstance=mainTabs.$.cid(iPageName);            console.log(menuItem.id+" "+menuItem.label+" click iPageInstance=",iPageInstance);
-
+                var iPageName="innerPage_"+menuItem.id, iPageInstance=mainTabs.$.cid(iPageName);            //console.log(menuItem.id+" "+menuItem.label+" click iPageInstance=",iPageInstance);
                 if(!iPageInstance){
-                    mainTabs.$.addInnerPage({id:iPageName, title:menuItem.pageTitle, region:"center",style:"margin:0;padding:0;",
-                                closable:menuItem.closable, href:menuItem.pageHref
+                    mainTabs.$.addInnerPage({id:iPageName, title:menuItem.itemData.pageTitle, region:"center",style:"margin:0;padding:0;",
+                                closable:menuItem.itemData.closable, href:menuItem.itemData.contentHref
                             },
                             function(innerPage){
                                 iPageInstance=mainTabs[iPageName]=innerPage;
@@ -136,7 +131,6 @@
                 var mainMenuDataItem=mainMenuData[i];
                 if(!mainMenuDataItem.popupMenu||mainMenuDataItem.popupMenu.length==0){                     //console.log("mainMenuDataItem",mainMenuDataItem);
                     mainMenu.$.addMenu("MenuBarItem", {id:mainMenuDataItem.menuItemName,label:mainMenuDataItem.menuTitle, itemData:mainMenuDataItem,
-                        pageTitle:mainMenuDataItem.pageTitle,closable:mainMenuDataItem.closable,pageHref:mainMenuDataItem.pageHref,
                         click:menuClickAddInnerPage
                     });
                     continue;
@@ -152,7 +146,6 @@
                                     continue;
                                 }
                                 menuBar.$.addMenu("MenuItem", {id:popupMenuItem.menuItemName,label:popupMenuItem.menuTitle, itemData:popupMenuItem,
-                                    pageTitle:popupMenuItem.pageTitle,closable:popupMenuItem.closable,pageHref:popupMenuItem.pageHref,
                                     click:menuClickAddInnerPage
                                 });
                             }
@@ -161,36 +154,13 @@
         };
 
         $$.getMainData = function(){
-            $$.request.getJSONData({url:"/getMainData"},function(result,error){                                       console.log("getJSONData /getMainData",result,error);
-                if(error){
-                    updateMainState(result,error);
-                    return;
-                }
-//                if(result.mainMenu){
-//                    result.mainMenu.push({
-//                        "menuItemName":"menuBarItemTDocSimpleTable1", "menuTitle":"tDocSimpleTable1", "pageTitle":"tDocSimpleTable1", pageHref:"/test/tDocSimpleTable1", "closable":true
-//                    });
-//                    result.mainMenu.push({
-//                        "menuItemName":"menuBarItemTDocSimpleTable2wActions", "menuTitle":"tDocSimpleTable2wActions", "pageTitle":"tDocSimpleTable2wActions", pageHref:"/test/tDocSimpleTable2wActions", "closable":true
-//                    });
-//                }
-                updateMainState(result);
+            $$.request.getJSONData({url:"/getMainData"},function(result,error){                            //console.log("getJSONData /getMainData",result,error);
+                updateMainState(result,error);
+                if(!result) return;
                 createMainMenu(result.menuBar);
-
-//        mainTabs.$.addInnerPage({region:"center", title:"Template Doc Simple Table 1", closable:true, style:"margin:0;padding:0;",href:"/test/tDocSimpleTable1"});
-//                if($$.menuBarItemTDocSimpleTable1)$$.menuBarItemTDocSimpleTable1.click($$.menuBarItemTDocSimpleTable1);
-//                if($$.menuBarItemTDocSimpleTable2wActions)$$.menuBarItemTDocSimpleTable2wActions.click($$.menuBarItemTDocSimpleTable2wActions);
             });
         };
         $$.getMainData();
-//        $$("#main_Page").$.addInnerPage({region:"center", title:"innerPage_1", closable:true, style:"margin:0;padding:0;",href:"/ipage1"});
-//        mainTabs.$.addInnerPage({region:"center", title:"innerPage_1", closable:false, style:"margin:0;padding:0;",href:"/ipage1"});
-
-//        mainTabs.$.addInnerPage({region:"center", id:"reportsCashier", title:"Отчеты кассира", closable:true, style:"margin:0;padding:0;",href:"/reports/cashier"},
-//                function(innerPage){
-//                    mainTabs.selectChild(mainTabs["reportsCashier"]=innerPage);
-//                });
-        console.log("MAIN PAGE STARTED! $$=",$$);//!!!IT'S FOR TESTING!!!
     });
 </script>
 </html>

@@ -1,91 +1,69 @@
-<!DOCTYPE HTML>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-<div id="reportsCashier_PageContainer" style="width:100%;height:100%;">
-    <div id="reportsCashier_ContentPaneLeft" style="width:167px;height:100%; margin:0;padding:0;">
-        <table>
-            <tr><th>Отчеты</th></tr>
-            <tr><td>
-                <button id="reportsCashier_btnProdsSales">Продажи товаров</button>
-                <button id="reportsCashier_btnProdsRems">Остатки товаров</button>
-                <button id="reportsCashier_btnProdsMoves">Движение товаров</button>
-            </td></tr>
+<LayoutContainer id="reportsCashier_PageContainer" style="width:100%;height:100%;">
+    <!--<ContentPane id="reportsCashier_ContentPaneLeft" region="left" splitter="true" style="width:167px;height:100%; margin:0;padding:0;">-->
+        <!--<table>-->
+            <!--<tr><th>Отчеты</th></tr>-->
+            <!--<tr><td>-->
+                <!--<StackController style="" containerId="reportsCashier_ContentPaneDetailContainer"></StackController>-->
+                <!--&lt;!&ndash;<button id="reportsCashier_btnProdsSales" width="150px">Продажи товаров</button>&ndash;&gt;-->
+                <!--&lt;!&ndash;<button id="reportsCashier_btnProdsRems" width="150px">Остатки товаров</button>&ndash;&gt;-->
+                <!--&lt;!&ndash;<button id="reportsCashier_btnProdsMoves" width="150px">Движение товаров</button>&ndash;&gt;-->
+            <!--</td></tr>-->
+        <!--</table>-->
+    <!--</ContentPane>-->
+    <ContentPane id="reportsCashier_ContentPaneTop" region="top" style="width:100%;margin:0;padding:0;">
+        <table width="100%" style="padding:0;text-align:left;border-top:none;border-left:none;border-right:none" class="dijitBorderContainer-child">
+            <tr><th>
+                <span style="margin-left:20px;margin-right:10px;vertical-align:middle;font-size:14px;font-weight:bold">Отчеты кассира:</span>
+                <StackController style="" containerId="reportsCashier_ContentPaneDetailContainer"></StackController>
+            </th></tr>
         </table>
-    </div>
-    <div id="reportsCashier_ContentPaneDetailContainer" style="width:100%;height:100%; margin:0;padding:0;"></div>
-</div>
-</body>
+    </ContentPane>
+    <StackContainer id="reportsCashier_ContentPaneDetailContainer" region="center" style="width:100%;height:100%; margin:0;padding:0;">
+        <TDocSimpleTable id="reportsCashier_TDocProdsSales" title="Продажи товаров" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTable>
+        <TDocSimpleTable id="reportsCashier_TDocProdsRems" title="Остатки товаров" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTable>
+        <TDocSimpleTable id="reportsCashier_TDocProdsMoves" title="Движение товаров" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTable>
+    </StackContainer>
+</LayoutContainer>
 <script type="text/javascript">
-    require(["app/app", "dojo/dom-style", "dijit/layout/BorderContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
-                "dijit/form/Button", "app/tDocSimpleTable"],
-            function (APP, domStyle, BorderContainer, StackContainer, ContentPane, Button, TDocSimpleTable) {
-                var pageContainer= APP.instanceForID("reportsCashier_PageContainer", BorderContainer, {});
-                APP.instanceForID("reportsCashier_ContentPaneLeft", ContentPane, {region:'left', splitter:true});
-                var btnProdsSales= APP.instanceForID("reportsCashier_btnProdsSales", Button, {},{"width":"150px"}),
-                    btnProdsRems= APP.instanceForID("reportsCashier_btnProdsRems", Button, {},{"width":"150px"}),
-                    btnProdsMoves= APP.instanceForID("reportsCashier_btnProdsMoves", Button, {},{"width":"150px"});
-                var contentPaneDetailContainer= APP.instanceForID("reportsCashier_ContentPaneDetailContainer", StackContainer, {region:'center'});
-                btnProdsSales.onClick= function(){
-                    if (!btnProdsSales.report){
-                        btnProdsSales.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsSales",
-                                TDocSimpleTable, {titleText:"Продажи товаров", dataURL:"/reports/prodsSales/getProductsSales",
-                                    buttonPrint:true, buttonExportToExcel:true})
-                                .addSelectBox("Касса",{valueItemName:"CRID", labelDataItem:"CRName",
-                                    loadDropDownURL:"/reports/cashier/getDirCRsForSelect",
-                                    contentTableCondition:"CRID=", width:300})
-                                .addHeaderDateBox("с",{contentTableCondition:"DocDate>="})
-                                .addHeaderDateBox("по",{contentTableCondition:"DocDate<="})
-                                .addCheckBtnCondition("Все",{width:90})
-                                .addCheckBtnCondition("Со скидкой",{width:90,contentTableConditions:{"DiscountP<>":"0"}})
-                                .addCheckBtnCondition("Без скидки",{width:90,contentTableConditions:{"DiscountP~":"0"}})
-                                .addTotalCountNumberBox("ИТОГО строк:", 140)
-                                .addTotalSumNumberTextBox("ИТОГО Кол-во:", 415, "Qty", {style:"font-weight:bold;"})
-                                .addTotalSumNumberTextBox("ИТОГО Сумма:", 205, "RealSum", {style:"font-weight:bold;",inputStyle:"width:95px",pattern:"#,###,###,###,##0.00#######"})
-                                .addTotalSumNumberTextBox("ИТОГО Скидка:", 185, "DiscountSum", {style:"font-weight:bold;",inputStyle:"width:75px",pattern:"#,###,###,###,##0.00#######"})
-                                .startUp();
-                    }
-                    contentPaneDetailContainer.selectChild(btnProdsSales.report);
-                };
-                btnProdsRems.onClick= function(){
-                    if (!btnProdsRems.report){
-                        btnProdsRems.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsRems",
-                            TDocSimpleTable, {titleText:"Текущие остатки товаров", dataURL:"/reports/prodsRems/getProductsRems",
-                                buttonPrint:true, buttonExportToExcel:true})
-                            .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
-                                loadDropDownURL:"/reports/cashier/getDirStocksForSelect",
-                                contentTableCondition:"StockID="/*, width:300*/})
-                            .addCheckBtnCondition("Не нулевые",{width:90,contentTableConditions:{"SUM(Qty)<>":"0"}})
-                            .addCheckBtnCondition("Все",{width:85})
-                            .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
-                            .addTotalCountNumberBox("ИТОГО строк:", 140)
-                            .addTotalSumNumberTextBox("ИТОГО остаток:", 650, "TQty", {style:"font-weight:bold;"})
-                            .startUp();
-                    }
-                    contentPaneDetailContainer.selectChild(btnProdsRems.report);
-                };
-                btnProdsMoves.onClick= function(){
-                    if (!btnProdsMoves.report){
-                        btnProdsMoves.report = APP.childFor(contentPaneDetailContainer, "reportsCashier_tableProdsMoves",
-                                TDocSimpleTable, {titleText:"Движение товаров", dataURL:"/reports/prodsRems/getProductsMoves",
-                                    buttonPrint:true, buttonExportToExcel:false})
-                                .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
-                                    loadDropDownURL:"/reports/cashier/getDirStocksForSelect",
-                                    contentTableCondition:"StockID="/*, width:300*/})
-                                .addHeaderDateBox("с",{contentTableParam:"@BDate"})
-                                .addHeaderDateBox("по",{contentTableParam:"@EDate"})
-                                .addTotalCountNumberBox("ИТОГО строк:", 140)
-                                .addTotalSumNumberTextBox("ИТОГО остаток:", 895, "TQty", {style:"font-weight:bold;"})
-                                .startUp();
-                    }
-                    contentPaneDetailContainer.selectChild(btnProdsMoves.report);
-                };
-                pageContainer.layout();
-                btnProdsSales.onClick();
-//                btnProdsMoves.onClick();
-        });
+    $$.reportsCashier_TDocProdsSales
+            .init({titleText:"Продажи товаров", dataURL:"/reports/prodsSales/getProductsSales", buttonPrint:true,buttonExportToExcel:true})
+            .addSelectBox("Касса",{valueItemName:"CRID", labelDataItem:"CRName",
+                loadDropDownURL:"/reports/cashier/getDirCRsForSelect", contentTableCondition:"CRID=", width:300})
+            .addHeaderDateBox("с",{contentTableCondition:"DocDate>="})
+            .addHeaderDateBox("по",{contentTableCondition:"DocDate<="})
+            .addCheckBtnCondition("Все",{width:90})
+            .addCheckBtnCondition("Со скидкой",{width:90,contentTableConditions:{"DiscountP<>":"0"}})
+            .addCheckBtnCondition("Без скидки",{width:90,contentTableConditions:{"DiscountP~":"0"}})
+            .addTotalCountNumberBox("ИТОГО строк:", 140)
+            .addTotalSumNumberTextBox("ИТОГО Кол-во:", 415, "Qty", {style:"font-weight:bold;"})
+            .addTotalSumNumberTextBox("ИТОГО Сумма:", 205, "RealSum", {style:"font-weight:bold;",inputStyle:"width:95px",pattern:"#,###,###,###,##0.00#######"})
+            .addTotalSumNumberTextBox("ИТОГО Скидка:", 185, "DiscountSum", {style:"font-weight:bold;",inputStyle:"width:75px",pattern:"#,###,###,###,##0.00#######"});
+    $$.reportsCashier_TDocProdsSales.onShow= function(){
+        if(!$$.reportsCashier_TDocProdsSales.startedUp)$$.reportsCashier_TDocProdsSales.startupDoc();
+    };
+    $$.reportsCashier_TDocProdsRems
+            .init({titleText:"Текущие остатки товаров", dataURL:"/reports/prodsRems/getProductsRems", buttonPrint:true,buttonExportToExcel:true})
+            .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
+                loadDropDownURL:"/reports/cashier/getDirStocksForSelect", contentTableCondition:"StockID="/*, width:300*/})
+            .addCheckBtnCondition("Не нулевые",{width:90,contentTableConditions:{"SUM(Qty)<>":"0"}})
+            .addCheckBtnCondition("Все",{width:85})
+            .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
+            .addTotalCountNumberBox("ИТОГО строк:", 140)
+            .addTotalSumNumberTextBox("ИТОГО остаток:", 650, "TQty", {style:"font-weight:bold;"});
+    $$.reportsCashier_TDocProdsRems.onShow= function(){
+        if(!$$.reportsCashier_TDocProdsRems.startedUp)$$.reportsCashier_TDocProdsRems.startupDoc();
+    };
+    $$.reportsCashier_TDocProdsMoves
+            .init({titleText:"Движение товаров", dataURL:"/reports/prodsRems/getProductsMoves", buttonPrint:true,buttonExportToExcel:false})
+            .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
+                loadDropDownURL:"/reports/cashier/getDirStocksForSelect", contentTableCondition:"StockID="/*, width:300*/})
+            .addHeaderDateBox("с",{contentTableParam:"@BDate"})
+            .addHeaderDateBox("по",{contentTableParam:"@EDate"})
+            .addTotalCountNumberBox("ИТОГО строк:", 140)
+            .addTotalSumNumberTextBox("ИТОГО остаток:", 895, "TQty", {style:"font-weight:bold;"});
+    $$.reportsCashier_TDocProdsMoves.onShow= function(){
+        if(!$$.reportsCashier_TDocProdsMoves.startedUp)$$.reportsCashier_TDocProdsMoves.startupDoc();
+    };
+    $$.reportsCashier_TDocProdsSales.onShow();
 </script>
 </html>

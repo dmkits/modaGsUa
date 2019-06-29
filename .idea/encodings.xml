@@ -3,7 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/debug.cfg" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/debugDev.cfg" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/debugDev2.cfg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/debugDev2-localhost.cfg" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/package.json" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/scripts/SQLQuery_if_GetProdNameByMaskValues.sql" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/server/common.js" charset="UTF-8" />
