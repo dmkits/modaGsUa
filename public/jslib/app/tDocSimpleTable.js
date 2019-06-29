@@ -567,6 +567,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                         if(headerInstanceType=="SelectBox"&&headerInstance.loadDropDownValuesFromServer) headerInstance.loadDropDownValuesFromServer();
                     }
                 this.loadTableContent();
+                this.startedUp=true;
                 return this;
             },
 
