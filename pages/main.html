@@ -59,19 +59,22 @@
             }else{
                 $$.main_page.mainContentData = result;
                 $$.main_modeName.innerHTML = "<b>Режим приложения:</b> ";
+                var sDBUserPostfix="";
                 if(result.mode){
+                    sDBUserPostfix=" ["+result.mode+"]";
                     var sMode=result.mode.toString().toLocaleLowerCase();
                     if(sMode.indexOf("test")>=0||sMode.indexOf("debug")>=0)
                         $$.main_modeName.innerHTML+= "<b style='color:red'>"+result.mode+"</b>";
-                    else
-                        $$.main_modeName.innerHTML+= "<b style='color:dimgrey'>"+result.mode+"</b>";
+                    else if(sMode.indexOf("production")>=0)
+                        $$.main_modeName.innerHTML= "";
                     $$.main_modeName.setAttribute("title",result.mode);
                 }else{
+                    sDBUserPostfix=" [UNKNOWN MODE]";
                     $$.main_modeName.innerHTML += "<b>UNKNOWN!!!</b>";
                     $$.main_modeName.setAttribute("title","UNKNOWN!");
                 }
                 $$.sysadmin_appUser.innerHTML="<b>Пользователь: <span style='color:dimgrey'>"+result.dbUserName;
-                $$.sysadmin_appUser.setAttribute("title",result.dbUserName);
+                $$.sysadmin_appUser.setAttribute("title",result.dbUserName+sDBUserPostfix);
 //                if(!result.sysConfig)result.sysConfig={};
 //                var dbSysConnState=(result.dbSysConnErr)
 //                        ?'<span style="color:red">'+result.dbSysConnErr+'</span>'
@@ -111,22 +114,26 @@
                 btnOkLabel:"Закрыть"
             });
         };
+        var runMenuAction= function(itemData){
+            var mainTabs=$$.main_tabs;                                                                              //console.log("mainTabs=",mainTabs);
+            if(itemData.action=="close"){ closeAction(itemData); return; }
+            else if(itemData.action=="help_about"){ aboutAction(itemData); return; }
+            var iPageName="innerPage_"+itemData.menuItemName, iPageInstance=mainTabs.$.cid(iPageName);            //console.log(menuItem.id+" "+menuItem.label+" click iPageInstance=",iPageInstance);
+            if(!iPageInstance){
+                mainTabs.$.addInnerPage({id:iPageName, title:itemData.pageTitle, region:"center",style:"margin:0;padding:0;",
+                            closable:itemData.closable, href:itemData.contentHref
+                        },
+                        function(innerPage){
+                            iPageInstance=mainTabs[iPageName]=innerPage;
+                        });
+            }
+            var ch=mainTabs.selectChild(iPageName);
+        };
         var createMainMenu = function(mainMenuData){                                                        //console.log("mainMenuData",mainMenuData);
-            var mainMenu=$$.main_mainMenu, mainTabs=$$.main_tabs;                                           //console.log("mainTabs=",mainTabs);
             var menuClickAddInnerPage=function(menuItem,e){                                                 //console.log(menuItem.id+" "+menuItem.label+" click",menuItem,e);
-                if(menuItem.itemData.action=="close"){ closeAction(menuItem.itemData); return; }
-                else if(menuItem.itemData.action=="help_about"){ aboutAction(menuItem.itemData); return; }
-                var iPageName="innerPage_"+menuItem.id, iPageInstance=mainTabs.$.cid(iPageName);            //console.log(menuItem.id+" "+menuItem.label+" click iPageInstance=",iPageInstance);
-                if(!iPageInstance){
-                    mainTabs.$.addInnerPage({id:iPageName, title:menuItem.itemData.pageTitle, region:"center",style:"margin:0;padding:0;",
-                                closable:menuItem.itemData.closable, href:menuItem.itemData.contentHref
-                            },
-                            function(innerPage){
-                                iPageInstance=mainTabs[iPageName]=innerPage;
-                            });
-                }
-                var ch=mainTabs.selectChild(iPageName);
+                runMenuAction(menuItem.itemData);
             };
+            var mainMenu=$$.main_mainMenu;
             for(var i in mainMenuData) {
                 var mainMenuDataItem=mainMenuData[i];
                 if(!mainMenuDataItem.popupMenu||mainMenuDataItem.popupMenu.length==0){                     //console.log("mainMenuDataItem",mainMenuDataItem);
@@ -152,12 +159,31 @@
                         });
             }
         };
-
+        var runAutorunActions = function(mainContentData){
+            if(!mainContentData||!mainContentData.autorun) return;
+            var autorunActions = mainContentData.autorun;
+            for(var autorunIndex in autorunActions){
+                var autorunMenuItemName = autorunActions[autorunIndex];
+                var mainMenu = mainContentData.menuBar;
+                for(var i in mainMenu){// create and add main menu items
+                    var item=mainMenu[i];
+                    if(item.popupMenu == null || item.popupMenu.length == 0){
+                        if(item.menuItemName==autorunMenuItemName) runMenuAction(item);
+                    }else{
+                        for(var pi in item.popupMenu){
+                            var pitem = item.popupMenu[pi];
+                            if(pitem.menuItemName==autorunMenuItemName) runMenuAction(pitem);
+                        }
+                    }
+                }
+            }
+        };
         $$.getMainData = function(){
             $$.request.getJSONData({url:"/getMainData"},function(result,error){                            //console.log("getJSONData /getMainData",result,error);
                 updateMainState(result,error);
                 if(!result) return;
                 createMainMenu(result.menuBar);
+                runAutorunActions(result);
             });
         };
         $$.getMainData();

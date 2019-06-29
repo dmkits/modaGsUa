@@ -147,8 +147,8 @@
 
             loadStocksForCashierData:function(callback){
                 let cInstance=this;
-                app7.srvRequestJSON({url:'/reports/cashier/getDirCRsForSelect',
-                        errorDialogMsg:"Не удалось получить список складов для кассира с сервера!"},
+                app7.srvRequestJSON({url:'/reports/products/getDirCRsForSelect',
+                        errorDialogMsg:"Не удалось получить список касс для кассира с сервера!"},
                     function(result,error){                                                             //console.log('pageReportsCashier.html loadStocksForCashierData result=',result);
                         app7.preloader.hide();
                         if(!result){
@@ -174,16 +174,17 @@
                 var conditions={}, sdates=$$("#pageReportsCashierDatesRange").val();
                 if(sdates){
                     var dates=sdates.split("-");
-                    if(dates.length==1)conditions["DocDate="]=moment(dates[0],"DD.MM.YYYY").format("YYYY-MM-DD");
-                    else
+                    if(dates.length==1){
+                        conditions["@BDate"]=moment(dates[0],"DD.MM.YYYY").format("YYYY-MM-DD");conditions["@EDate"]=conditions["@BDate"];
+                    }else
                         for (var i = 0; i < dates.length; i++) {
                             var val=dates[i];
-                            if(i==0)conditions["DocDate>="]=moment(val,"DD.MM.YYYY").format("YYYY-MM-DD");
-                            else if(i==dates.length-1)conditions["DocDate<="]=moment(val,"DD.MM.YYYY").format("YYYY-MM-DD");
+                            if(i==0)conditions["@BDate"]=moment(val,"DD.MM.YYYY").format("YYYY-MM-DD");
+                            else if(i==dates.length-1)conditions["@EDate"]=moment(val,"DD.MM.YYYY").format("YYYY-MM-DD");
                         }
                 }
                 if(crIDFilter=='')conditions['CRID is NULL']="null"; else conditions['CRID=']=crIDFilter;
-                app7.srvRequestJSON({url:'/mobile/reports/getSalesForCashier',conditions:conditions,
+                app7.srvRequestJSON({url:'/mobile/reports/getSalesCRRetsForCashier',conditions:conditions,
                         errorDialogMsg:"Не удалось получить продажи с сервера!"},
                     function(result,error){
                         app7.preloader.hide();

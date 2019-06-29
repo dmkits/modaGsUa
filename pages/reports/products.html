@@ -8,17 +8,36 @@
         </table>
     </ContentPane>
     <StackContainer id="reportsProducts_ContentPaneDetailContainer" region="center" style="width:100%;height:100%; margin:0;padding:0;">
+        <TDocSimpleTable id="reportsProducts_TDocProdsSalesCRRets" title="Продажи с возвратами товаров" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTable>
         <TDocSimpleTable id="reportsProducts_TDocProdsSales" title="Продажи товаров" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTable>
         <TDocSimpleTable id="reportsProducts_TDocProdsRems" title="Текущие остатки товаров" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTable>
+        <TDocSimpleTable id="reportsProducts_TDocProdsRemsWSPrice" title="Текущие остатки товаров с ценами продажи" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTable>
         <TDocSimpleTable id="reportsProducts_TDocProdsMoves" title="Движение товаров" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTable>
-
     </StackContainer>
 </LayoutContainer>
 <script type="text/javascript">
-    $$.reportsProducts_TDocProdsSales
-            .init({titleText:"Продажи товаров", dataURL:"/reports/prodsSales/getProductsSales", buttonPrint:true,buttonExportToExcel:true})
+    $$.reportsProducts_TDocProdsSalesCRRets
+            .init({titleText:"Продажи товаров с возвратами", dataURL:"/reports/products/getProductsSalesCRRets", buttonPrint:true,buttonExportToExcel:true})
             .addSelectBox("Касса",{valueItemName:"CRID", labelDataItem:"CRName",
-                loadDropDownURL:"/reports/cashier/getDirCRsForSelect", contentTableCondition:"CRID=", width:300})
+                loadDropDownURL:"/reports/products/getDirCRsForSelect", contentTableCondition:"CRID=", width:300})
+            .addHeaderDateBox("с",{contentTableCondition:"@BDate"})
+            .addHeaderDateBox("по",{contentTableCondition:"@EDate"})
+            .addCheckBtnCondition("Все",{width:90})
+            .addCheckBtnCondition("Продажи",{width:90,contentTableConditions:{"DocCode~":"11035"}})
+            .addCheckBtnCondition("Возвраты",{width:90,contentTableConditions:{"DocCode~":"11004"}})
+            .addCheckBtnCondition("Продажи со скидкой",{width:90,contentTableConditions:{"DiscountP<>":"0"}})
+            .addCheckBtnCondition("Продажи без скидки",{width:90,contentTableConditions:{"DiscountP~":"0"}})
+            .addTotalCountNumberBox("ИТОГО строк:", 140)
+            .addTotalSumNumberTextBox("ИТОГО Кол-во:", 415, "Qty", {style:"font-weight:bold;"})
+            .addTotalSumNumberTextBox("ИТОГО Сумма:", 205, "RealSum", {style:"font-weight:bold;",inputStyle:"width:95px",pattern:"#,###,###,###,##0.00#######"})
+            .addTotalSumNumberTextBox("ИТОГО Скидка:", 185, "DiscountSum", {style:"font-weight:bold;",inputStyle:"width:75px",pattern:"#,###,###,###,##0.00#######"});
+    $$.reportsProducts_TDocProdsSalesCRRets.onShow= function(){
+        if(!$$.reportsProducts_TDocProdsSalesCRRets.startedUp)$$.reportsProducts_TDocProdsSalesCRRets.startupDoc();
+    };
+    $$.reportsProducts_TDocProdsSales
+            .init({titleText:"Продажи товаров", dataURL:"/reports/products/getProductsSales", buttonPrint:true,buttonExportToExcel:true})
+            .addSelectBox("Касса",{valueItemName:"CRID", labelDataItem:"CRName",
+                loadDropDownURL:"/reports/products/getDirCRsForSelect", contentTableCondition:"CRID=", width:300})
             .addHeaderDateBox("с",{contentTableCondition:"DocDate>="})
             .addHeaderDateBox("по",{contentTableCondition:"DocDate<="})
             .addCheckBtnCondition("Все",{width:90})
@@ -32,21 +51,35 @@
         if(!$$.reportsProducts_TDocProdsSales.startedUp)$$.reportsProducts_TDocProdsSales.startupDoc();
     };
     $$.reportsProducts_TDocProdsRems
-            .init({titleText:"Текущие остатки товаров", dataURL:"/reports/prodsRems/getProductsRems", buttonPrint:true,buttonExportToExcel:true})
+            .init({titleText:"Текущие остатки товаров", dataURL:"/reports/products/getProductsRems", buttonPrint:true,buttonExportToExcel:true})
             .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
-                loadDropDownURL:"/reports/cashier/getDirStocksForSelect", contentTableCondition:"StockID="/*, width:300*/})
+                loadDropDownURL:"/reports/products/getDirStocksForSelect", contentTableCondition:"StockID="/*, width:300*/})
             .addCheckBtnCondition("Не нулевые",{width:90,contentTableConditions:{"SUM(Qty)<>":"0"}})
             .addCheckBtnCondition("Все",{width:85})
             .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
             .addTotalCountNumberBox("ИТОГО строк:", 140)
-            .addTotalSumNumberTextBox("ИТОГО остаток:", 650, "TQty", {style:"font-weight:bold;"});
+            .addTotalSumNumberTextBox("ИТОГО остаток:", 700, "TQty", {style:"font-weight:bold;"});
     $$.reportsProducts_TDocProdsRems.onShow= function(){
         if(!$$.reportsProducts_TDocProdsRems.startedUp)$$.reportsProducts_TDocProdsRems.startupDoc();
     };
-    $$.reportsProducts_TDocProdsMoves
-            .init({titleText:"Движение товаров", dataURL:"/reports/prodsRems/getProductsMoves", buttonPrint:true, buttonExportToExcel:false})
+
+    $$.reportsProducts_TDocProdsRemsWSPrice
+            .init({titleText:"Текущие остатки товаров с ценами продажи", dataURL:"/reports/products/getProductsRemsWSPrice", buttonPrint:true,buttonExportToExcel:true})
             .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
-                loadDropDownURL:"/reports/cashier/getDirStocksForSelect",
+                loadDropDownURL:"/reports/products/getDirStocksForSelect", contentTableCondition:"StockID="/*, width:300*/})
+            .addCheckBtnCondition("Не нулевые",{width:90,contentTableConditions:{"SUM(Qty)<>":"0"}})
+            .addCheckBtnCondition("Все",{width:85})
+            .addCheckBtnCondition("Нулевые",{width:70,contentTableConditions:{"SUM(Qty)~":"0"}})
+            .addTotalCountNumberBox("ИТОГО строк:", 140)
+            .addTotalSumNumberTextBox("ИТОГО остаток:", 650, "TQty", {style:"font-weight:bold;"})
+            .addTotalSumNumberTextBox("ИТОГО сумма:", 195, "TSumMC", {style:"font-weight:bold;",inputStyle:"width:95px",pattern:"#,###,###,###,##0.00#######"});
+    $$.reportsProducts_TDocProdsRemsWSPrice.onShow= function(){
+        if(!$$.reportsProducts_TDocProdsRemsWSPrice.startedUp)$$.reportsProducts_TDocProdsRemsWSPrice.startupDoc();
+    };
+    $$.reportsProducts_TDocProdsMoves
+            .init({titleText:"Движение товаров", dataURL:"/reports/products/getProductsMoves", buttonPrint:true, buttonExportToExcel:false})
+            .addSelectBox("Склад",{valueItemName:"StockID", labelItemName:"StockName",
+                loadDropDownURL:"/reports/products/getDirStocksForSelect",
                 contentTableCondition:"StockID="/*, width:300*/})
             .addHeaderDateBox("с",{contentTableParam:"@BDate"})
             .addHeaderDateBox("по",{contentTableParam:"@EDate"})
@@ -55,6 +88,6 @@
     $$.reportsProducts_TDocProdsMoves.onShow= function(){
         if(!$$.reportsProducts_TDocProdsMoves.startedUp)$$.reportsProducts_TDocProdsMoves.startupDoc();
     };
-    $$.reportsProducts_TDocProdsSales.onShow();
+    $$.reportsProducts_TDocProdsSalesCRRets.onShow();
 </script>
 </html>
