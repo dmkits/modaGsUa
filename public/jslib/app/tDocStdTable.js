@@ -964,7 +964,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                         var detHRow=this.detailHeaderElements[ri];
                         this.addPrintDataItemTo(printData, "header", {newTable:true, style:headerTextStyle});
                         for(var ci=0;ci<detHRow.length;ci++){
-                            var detHElem=detHRow[ci];                                                                   //console.log("TDocStdTable.doPrint ",ri,ci,detHElem);
+                            var detHElem=detHRow[ci];                                                       //console.log("TDocStdTable.doPrint ",ri,ci,detHElem);
                             if(detHElem.tagName&&detHElem.tagName==="TH")
                                 this.addPrintDataSubItemTo(printData, "header",
                                     {label:detHElem.innerText, width:0, align:"center",style:"width:100%;font-size:14px;font-weight:bold;text-align:center;",
@@ -999,7 +999,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                         this.addPrintDataItemTo(printData, "total", {newTable:true, style:totalStyle});
                         this.addPrintDataSubItemTo(printData, "total");
                         for(var ci=0;ci<detTRow.length;ci++){
-                            var detTElem=detTRow[ci], value=null;                                                  //console.log("TDocStdTable.doPrint ",ri,ci,detTElem);
+                            var detTElem=detTRow[ci], value=null;                                           //console.log("TDocStdTable.doPrint ",ri,ci,detTElem);
                             if (detTElem.print===false) continue;
                             if (detTElem.textbox) value=detTElem.textbox.value;
                             else if(detTElem.textDirNode) value=detTElem.textDirNode.textContent;//if element Select
@@ -1019,8 +1019,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "dijit/layout/Cont
                     }
                 }
                 this.setPrintDataFormats(printData, this.printFormats);
-                var printWindow= window.open("/print/printSimpleDocument");                                             //console.log("doPrint printWindow printData=",printData);
-                printWindow["printTableContentData"]= printData;
+                var printWindow= window.open("/print/printDocSimpleTable");                                 //console.log("doPrint printWindow printData=",printData);
+                printWindow["printDocSimpleTableData"]= printData;
             },
             exportTableContentToExcel:function(){
                 this.requestForExcelFile({tableData:this.detailTable.getContent(), visibleColumns:this.detailTable.getVisibleColumns()});

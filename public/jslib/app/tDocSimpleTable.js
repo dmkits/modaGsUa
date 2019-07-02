@@ -37,10 +37,10 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(!params)return this;
                 for(var pName in params) {
                     var pValue=params[pName];
-                    if(pName=="titleText") this.topHeaderTitle.innerHTML=pValue;
-                    else if(pName=="rightPane") this.createRightContent(pValue);
-                    else this[pName]=pValue;
+                    if(pName=="rightPane") this.rightContainerParams=pValue; else this[pName]=pValue;
                 }
+                if(this.titleText) this.topHeaderTitle.innerHTML=this.titleText;
+                if(this.rightContainerParams) this.createRightContent(this.rightContainerParams);
                 return this;
             },
             createTopContent: function(){
@@ -580,28 +580,30 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                         style:"width:100%;font-size:14px;font-weight:bold;text-align:center;",contentStyle:"margin-top:5px;margin-bottom:3px;"});
                 }
                 var headerTextStyle="font-size:14px;", headerContentStyle="margin-bottom:3px;";
-                if(this.headerData){
+                if(this.headerData){                                                                        //console.log("TDocSimpleTable doPrint headerData=",this.headerData);
                     $TDF.addPrintDataItemTo(printData, "header", {newTable:true, style:headerTextStyle});
                     $TDF.addPrintDataSubItemTo(printData, "header");
                     for(var i in this.headerData){
-                        var headerItemData=this.headerData[i];                                              console.log('TDocSimpleTable doPrint headerItemData=',headerItemData);
-                        var printParams={}, print=true, value="";
-                        if(headerItemData.instance&&headerItemData.instance.printParams)printParams = headerItemData.instance.printParams;
+                        var headerItemData=this.headerData[i], print=true, value="";                        //console.log('TDocSimpleTable doPrint headerItemData=',headerItemData);
                         if(headerItemData.type=="DateBox") value=headerItemData.instance.textbox.value;
                         else if(headerItemData.type=="SelectBox") value=headerItemData.instance.textDirNode.textContent;
                         else if(headerItemData.type=="CheckButton"){
                             if(headerItemData.instance.checked==true) value=undefined; else print=false;
                         }
                         if(!print)continue;
-                        $TDF.addPrintDataSubItemTo(printData, "header",{label:printParams.labelText, width:printParams.cellWidth+5, align:"left",
-                            style:headerTextStyle+printParams.printStyle, contentStyle:headerContentStyle, valueStyle:printParams.inputStyle, value:value});
+                        var printParams={};
+                        if(headerItemData.instance&&headerItemData.instance.printParams)printParams = headerItemData.instance.printParams;
+                        $TDF.addPrintDataSubItemTo(printData, "header",{
+                            width:Math.round(printParams.cellWidth*1.1)+5, align:"left",style:headerTextStyle+(printParams.printStyle||""), contentStyle:headerContentStyle,
+                            label:printParams.labelText,labelStyle:printParams.labelStyle,
+                            valueStyle:printParams.inputStyle, value:value});
                     }
                 }
                 $TDF.addPrintDataSubItemTo(printData, "header");
-                printData.columns = this.contentHTable.getVisibleColumns();                                  //console.log("TDocSimpleTable doPrint printData.columns=",this.contentHTable.getVisibleColumns());
-                printData.data = this.contentHTable.getContent();
+                printData.columns = this.contentHTable.getVisibleColumns();                                 //console.log("TDocSimpleTable doPrint printData.columns=",this.contentHTable.getVisibleColumns());
+                printData.data = this.contentHTable.getContent();                                           //console.log("TDocSimpleTable doPrint totals=",this.totals);
                 var totalStyle="font-size:12px;";
-                if(this.totals){
+                if(this.totals){                                                                            //console.log("TDocSimpleTable doPrint totals=",this.totals);
                     for(var tRowIndex in this.totalTableData){
                         var tRowData= this.totalTableData[tRowIndex];
                         $TDF.addPrintDataItemTo(printData, "total", {style:totalStyle});
@@ -611,15 +613,17 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                                 $TDF.addPrintDataSubItemTo(printData, "total");
                                 continue
                             }
-                            $TDF.addPrintDataSubItemTo(printData, "total", {label:tCellData.labelText,width:tCellData.cellWidth+5, align:"right",
-                                style:tCellData.printStyle, contentStyle:"margin-top:3px;",
-                                value:tCellData.textbox.value, type:"text", valueStyle:tCellData.inputStyle});
+                            var printParams=tCellData.printParams;
+                            $TDF.addPrintDataSubItemTo(printData, "total", {
+                                width:printParams.cellWidth+5, align:"right",style:printParams.printStyle, contentStyle:"margin-top:3px;",
+                                label:printParams.labelText,labelStyle:printParams.labelStyle,
+                                type:"text", valueStyle:printParams.inputStyle, value:tCellData.textbox.value});
                         }
                     }
                 }
                 $TDF.setPrintDataFormats(printData, printFormats);
-                var printWindow= window.open("/print/printSimpleDocument");                                 //console.log("TDocSimpleTable doPrint printWindow printData=",printData);
-                printWindow["printTableContentData"]= printData;
+                var printWindow= window.open("/print/printDocSimpleTable");                                 //console.log("TDocSimpleTable doPrint printWindow printData=",printData);
+                printWindow["printDocSimpleTableData"]= printData;
             },
             exportTableContentToExcel:function(){
                 $TDF.requestForExcelFile({tableData:this.contentHTable.getContent(),visibleColumns:this.contentHTable.getVisibleColumns()});
