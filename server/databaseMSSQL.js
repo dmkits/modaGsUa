@@ -43,11 +43,11 @@ function createNewUserDBConnection(userData, callback){
     },function(err){
         var connectionData=connections[uuid];
         if(err){                                                                                    log.error("database createNewUserDBConnection: Failed to create connection for user "+userData.login+" userData.uuid="+userData.uuid+ ". Reason: "+err);
-            if(connectionData) {
+            if(connectionData){
                 connectionData.connection=null;
                 connectionData.user=userData.login;
             }
-            callback({error:err.message,userMessage:err});
+            callback({error:err.message,userMessage:err.message});
             return;
         }
         if(!connectionData)

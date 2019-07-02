@@ -17,6 +17,7 @@
     "reportsCashier",
     "mobile",
     "mobileRec",
+    "mobileExc",
     "mobileVen",
     "mobileReportsCashier"
   ],
@@ -36,7 +37,7 @@
     "manager":{
       "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier"],
-      "mobile":["mobileVen","mobileRec","mobileReportsCashier"]
+      "mobile":["mobileRec","mobileExc","mobileVen","mobileReportsCashier"]
     },
     "operatorRec":{
       "menu":["menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],

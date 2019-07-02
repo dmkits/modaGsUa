@@ -543,6 +543,12 @@ function _setDataItem(params, resultCallback){
     resultCallback({item:itemData});
 }
 
+function _getDSAlias(sDataSource){
+    if(!sDataSource) return sDataSource;
+    sDataSource= sDataSource.trim();
+    var iSpaceInd= sDataSource.indexOf(" ");
+    return (iSpaceInd<0)?sDataSource:sDataSource.substr(iSpaceInd+1,sDataSource.length-iSpaceInd).toLowerCase().replace("as","");
+}
 /**
  * params = { source, sourceName, sourceType, sourceParamsNames, sourceParams,
  *      tableColumns = [
@@ -603,9 +609,9 @@ function _getDataItemsForTable(connection, params, resultCallback){
             if(tableColumnData.name) fieldsList.push(fieldName);
             if(tableColumnData.name&&hasAFunctions)groupedFieldsList.push(fieldName);
             if(tableColumnData.dataSource&&tableColumnData.sourceField)
-                fieldsSources[fieldName]=tableColumnData.dataSource+"."+tableColumnData.sourceField;
+                fieldsSources[fieldName]= _getDSAlias(tableColumnData.dataSource)+"."+tableColumnData.sourceField;
             else if(tableColumnData.dataSource)
-                fieldsSources[fieldName]=tableColumnData.dataSource+"."+fieldName;
+                fieldsSources[fieldName]= _getDSAlias(tableColumnData.dataSource)+"."+fieldName;
             else if(hasSources&&params.sourceName)
                 fieldsSources[fieldName]=params.sourceName+"."+fieldName;
         } else if(!tableColumnData.dataFunction &&( tableColumnData.sourceField||tableColumnData.dataSource||tableColumnData.childDataSource)){
@@ -613,7 +619,7 @@ function _getDataItemsForTable(connection, params, resultCallback){
             if(tableColumnData.name&&hasAFunctions)groupedFieldsList.push(fieldName);
             var fieldDS="";
             if(hasSources) fieldDS= params.sourceName+".";
-            if(tableColumnData.dataSource) fieldDS=tableColumnData.dataSource+".";
+            if(tableColumnData.dataSource) fieldDS=_getDSAlias(tableColumnData.dataSource)+".";
             if(tableColumnData.childDataSource) fieldDS=tableColumnData.childDataSource+".";
             if(tableColumnData.sourceField)
                 fieldsSources[fieldName]=fieldDS+tableColumnData.sourceField;

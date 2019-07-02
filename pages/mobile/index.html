@@ -48,7 +48,10 @@
                             <div class="list links-list">
                                 <ul>
                                     <li>
-                                        <a href="/pageListRecs" class="panel-close" data-force="true" data-ignore-cache="true">Приход товара</a>
+                                        <a href="/pageListRecs" class="panel-close" data-force="true" data-ignore-cache="true">Приходы товара</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pageListExcs" class="panel-close" data-force="true" data-ignore-cache="true">Перемещения товара</a>
                                     </li>
                                     <li>
                                         <a href="/pageListInvents" class="panel-close" data-force="true" data-ignore-cache="true">Инвентаризации</a>
@@ -62,10 +65,13 @@
                             <div class="list links-list">
                                 <ul>
                                     <li>
-                                        <a href="/pageSettingsInvents" class="panel-close">Инвентаризации</a>
+                                        <a href="/pageSettingsRecs" class="panel-close">Приходы товара</a>
                                     </li>
                                     <li>
-                                        <a href="/pageSettingsRecs" class="panel-close">Приходы товара</a>
+                                        <a href="/pageSettingsExcs" class="panel-close">Перемещения товара</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pageSettingsInvents" class="panel-close">Инвентаризации</a>
                                     </li>
                                 </ul>
                             </div>
@@ -151,8 +157,9 @@
     app7.initData=function(){
         app7.data={};
         app7.data.uuid="";document.cookie="uuid=0";
-        app7.data['inventoryListDocCount']=50;
         app7.data['recsListDocCount']=50;
+        app7.data['excsListDocCount']=50;
+        app7.data['inventoryListDocCount']=50;
         if (typeof(Storage)!=="undefined") {
             var username=localStorage.getItem("login-username");
             if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
@@ -252,9 +259,7 @@
                 var errMsg;
                 if(!params.errorDialogMsg)params.errorDialogMsg='Не удалось получить данные с сервера!';
                 if(data==undefined||data==null) {
-                    if (params.showRequestErrorDialog == false) {
-                        callback(null, null);return;
-                    }
+                    if(params.showRequestErrorDialog==false){ callback(null, null);return; }
                     errMsg=params.errorDialogMsg;
                 }
                 var jsonData;
@@ -263,16 +268,10 @@
                 }catch (e) {
                     errMsg=params.errorDialogMsg+'<br>Данные некорректные!';
                 }
-                if(jsonData&&jsonData.error){
-                    if(jsonData.userErrorMsg)errMsg=params.errorDialogMsg+"<br>"+jsonData.userErrorMsg;
-                    else errMsg=params.errorDialogMsg+"<br>"+jsonData.error;
-                }
-                if(errMsg&&params.showRequestErrorDialog==false){
-                    callback(null, errMsg);return;
-                }
-                if(errMsg&&app7.srvRequestJSONDialogErr){
-                    app7.srvRequestJSONDialogErr.open(); return;
-                }else if(errMsg) {
+                if(jsonData&&jsonData.error) errMsg=params.errorDialogMsg+"<br>"+(jsonData.error.userMessage||jsonData.error.message||jsonData.error.error);
+                if(errMsg&&params.showRequestErrorDialog==false){ callback(null, errMsg);return; }
+                if(errMsg&&app7.srvRequestJSONDialogErr){ app7.srvRequestJSONDialogErr.open(); return; }
+                else if(errMsg){
                     app7.srvRequestJSONDialogErr = app7.dialog.alert(errMsg, "Внимание", function () {
                         app7.srvRequestJSONDialogErr = null;
                         callback(null, errMsg);
