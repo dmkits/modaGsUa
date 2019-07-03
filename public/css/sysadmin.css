@@ -85,10 +85,12 @@ input {
 #sysadmin_TopStateInfo{
     margin: 0;
     margin-left: -5px;
-    padding: 5px;
+    height: 20px;
+    padding: 4px;
     background: none;
     border-left: none;
     text-align: left;
+    vertical-align: middle;
 }
 #sysadmin_TopActions {
     margin:0;
@@ -96,7 +98,7 @@ input {
     height: 30px;
     background: none;
     border-left: none;
-    padding:3px;
+    padding:2px 2px 0px 2px;
 }
 #sysadmin_ContentContainer{
     margin: 0; padding: 0;

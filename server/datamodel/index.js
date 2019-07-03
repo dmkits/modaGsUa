@@ -32,6 +32,21 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
         return;
     }
     var tableName, viewName, queryName, tableFieldsList=[],tableFields={}, idFieldName, joinedSources={};
+    if(dataModel.modelData){
+        var modelData=dataModel.modelData;
+        if(modelData.tableName) tableName=modelData.tableName;
+        if(modelData.viewName) viewName=modelData.viewName;
+        if(modelData.queryName) queryName=modelData.queryName;
+        if(modelData.idField) idFieldName=modelData.idField;
+        if(modelData.fields)
+            for(var fieldIndex in modelData.fields){
+                var fieldName=modelData.fields[fieldIndex];
+                if(!tableFields[fieldName]){
+                    tableFields[fieldName]=true;
+                    tableFieldsList.push(fieldName);
+                }
+            }
+    }
     if(dataModel.changeLog){
         for(var i=0;i<dataModel.changeLog.length;i++){
             var changeLogItem=dataModel.changeLog[i];
@@ -46,7 +61,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
                         tableFieldsList.push(fieldName);
                     }
                 }
-            } else if(changeLogItem.field){
+            }else if(changeLogItem.field){
                 if(!tableFields[changeLogItem.field]){
                     tableFields[changeLogItem.field]=true;
                     tableFieldsList.push(changeLogItem.field);
@@ -62,20 +77,6 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
                 }
             }
         }
-    } else if(dataModel.modelData) {
-        var modelData=dataModel.modelData;
-        if(modelData.tableName) tableName=modelData.tableName;
-        if(modelData.viewName) viewName=modelData.viewName;
-        if(modelData.queryName) queryName=modelData.queryName;
-        if(modelData.idField) idFieldName=modelData.idField;
-        if(modelData.fields)
-            for(var fieldIndex in modelData.fields){
-                var fieldName=modelData.fields[fieldIndex];
-                if(!tableFields[fieldName]){
-                    tableFields[fieldName]=true;
-                    tableFieldsList.push(fieldName);
-                }
-            }
     }
     dataModel.getDataItems= _getDataItems;
     dataModel.getDataItemsForSelect= _getDataItemsForSelect;

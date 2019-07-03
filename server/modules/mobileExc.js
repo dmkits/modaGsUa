@@ -134,6 +134,7 @@ module.exports.init = function(app){
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_ExcD.ProdID" },
         {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"t_ExcD", sourceField:"UM"},
         {data: "Qty", name: "Кол-во", width: 50, type: "numeric", dataSource:"t_ExcD"},
+        {data: "NewQty", name: "Нов кол-во", width: 50, type: "numeric", dataSource:"t_ExcD", dataFunction:"0"},
         // {data: "PPID", name: "Партия", width: 60, type: "numeric", visible:false},
         // {data: "PriceCC_wt", name: "Цена", width: 65, type: "numeric2", dataSource:"t_ExcD"},
         {data: "SumCC_wt", name: "Сумма", width: 75, type: "numeric2", dataSource:"t_ExcD"}
@@ -144,8 +145,8 @@ module.exports.init = function(app){
     app.get("/mobile/exc/getDataForExcDTable", function(req, res){
         var conditions={};
         for(var condItem in req.query)
-            if(condItem.indexOf("ParentChID")==0) conditions["t_RecD.ChID="]=req.query[condItem];
-            else conditions["t_RecD."+condItem]=req.query[condItem];
+            if(condItem.indexOf("ParentChID")==0) conditions["t_ExcD.ChID="]=req.query[condItem];
+            else conditions["t_ExcD."+condItem]=req.query[condItem];
         t_ExcD.getDataItemsForTable(req.dbUC,{tableColumns:tExcDTableColumns, conditions:conditions, order:"SrcPosID"},
             function(result){
                 res.send(result);

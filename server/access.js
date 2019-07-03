@@ -2,6 +2,7 @@ var path=require('path'), fs=require('fs');
 var log=require("./server").log,
     server=require("./server"), getSysConfig=server.getSysConfig,getAppConfig=server.getAppConfig,
     database=require("./databaseMSSQL"),
+    appModules=require("./modules"),
     common=require("./common");
 
 var sysadminsList={};
@@ -89,7 +90,7 @@ module.exports= function(app) {
      */
     var getDBUserData= function(connection,callback){
         database.selectQuery(connection,
-            "select SUSER_NAME() as dbUserName,"+
+            "1select SUSER_NAME() as dbUserName,"+
             "GMS_DBVersion=dbo.zf_Var('GMS_DBVersion'),OT_DBiID=dbo.zf_Var('OT_DBiID'),"+
             "t_OurID=dbo.zf_Var('t_OurID'),t_OneOur=dbo.zf_Var('t_OneOur'),OT_MainOurID=dbo.zf_Var('OT_MainOurID'),"+
             "z_CurrMC=dbo.zf_Var('z_CurrMC'),z_CurrCC=dbo.zf_Var('z_CurrCC'),"+
@@ -127,8 +128,8 @@ module.exports= function(app) {
             getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
                 req.dbUserParams=dbUserParameters;
                 if(errMsg){
-                    req.dbUserName=sysadminName;req.dbEmpRole="sysadmin";
-                } else {
+                    req.dbUserName=sysadminName;req.dbEmpRole="sysadmin";req.dbUserError=errMsg;
+                }else{
                     req.dbUserName=dbUserParameters.dbUserName;req.dbEmpRole=dbUserParameters["EmpRole"];
                 }                                                                               //log.info('ACCESS CONTROLLER: dbUserName:',req.dbUserName,'dbUserParams:',req.dbUserParams);
                 next();
@@ -157,7 +158,7 @@ module.exports= function(app) {
             return;
         }
         if(!sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
-            var errMsg="Невозможно получить данные! Пользователь не авторизироват как сисадмин!";
+            var errMsg="Невозможно получить данные! Пользователь не авторизирован как сисадмин!";
             if (isReqJSON(req.method,req.headers)) {
                 res.send({ error:{error:"Failed to get data! Reason: login user is not sysadmin!",userMessage:errMsg} });
                 return;
@@ -168,17 +169,33 @@ module.exports= function(app) {
         req.dbUC = userConnectionData.connection;
         getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
             if(errMsg){
-                if (isReqJSON(req.method,req.headers)) {
-                    res.send({ error:{error:"Failed to get data! Reason: failed to get login user data from database!",userMessage:errMsg} });
-                    return;
-                }
-                if(renderIsMobile(req,res,next))return;
-                renderToAccessFailed(req,res,errMsg);
+                //if (isReqJSON(req.method,req.headers)) {
+                //    res.send({ error:{error:"Failed to get data! Reason: failed to get login user data from database!",userMessage:errMsg} });
+                //    return;
+                //}
+                //if(renderIsMobile(req,res,next))return;
+                //renderToAccessFailed(req,res,errMsg);
+                accessFail(req,res,next,{
+                    error: "ailed to get data! Reason: failed to get login user data from database!",
+                    userErrorMsg: errMsg,
+                    pageMsg:'<div><p><span style="color:red">Вход невозможен!<br>Не удалось получить данные пользователя из базы данных!<br>Обратитесь к системному администратору!</span></p></div>'
+                });
                 return;
             }
             req.dbUserParams=dbUserParameters;
             req.dbUserName=dbUserParameters.dbUserName;                                             log.info('ACCESS CONTROLLER: dbUserName=',req.dbUserName,'dbUserParams=',req.dbUserParams);
             req.dbEmpRole=(dbUserParameters)?dbUserParameters["EmpRole"]:null;
+
+            var validateError=appModules.getValidateError();
+            if(validateError){
+                accessFail(req,res,next,{
+                    error: "Failed to get data! Reason: database not valid!",
+                    userErrorMsg: "Невозможно получить данные! База данных не прошла проверку! Обратитесь к системному администратору!",
+                    pageMsg:'<div><p><span style="color:red">Вход невозможен!<br>Проверка базы данных завершилась неудачно!<br>Обратитесь к системному администратору!</span></p></div>'
+                });
+                return;
+            }
+
             if(renderIsMobile(req,res,next))return;
             next();
         });

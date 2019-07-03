@@ -89,7 +89,7 @@
                 let cInstance=this,
                     stockIDFilter=this.stockIDFilter, stockNameFilter=this.stockNameFilter;
                 app7.preloader.show();
-                var conditions={top:app7.data['inventoryListDocCount']};
+                var conditions={top:app7.data['inventsListDocCount']};
                 if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
                 app7.srvRequestJSON({url:'/mobile/invent/getDataForVensList',conditions:conditions,
                         errorDialogMsg:"Не удалось получить список инвентаризаций с сервера!"},

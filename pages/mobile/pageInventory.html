@@ -24,14 +24,14 @@
     <div class="page-content" id="pageContentInventory">
         <table width="100%" style="position:fixed; top:104px; z-index: 100">
             <thead>
-            <tr class="small-size">
+            <tr class="mobile-table-small-size">
                 <th width="40px">№<br>п/п</th>
                 <th>Наименование товара<br>Штрихкод</th>
                 <th width="50px">Ед.<br>изм.</th>
                 <th width="50px">Уч.<br>кол-во</th>
                 <th width="50px">Факт.<br>кол-во</th>
             </tr>
-            <tr class="large-size">
+            <tr class="mobile-table-large-size">
                 <th width="40px">№<br>п/п</th>
                 <th width="110px">Штрихкод</th>
                 <th width="50px">Код товара</th>
@@ -42,18 +42,18 @@
             </tr>
             </thead>
             <tbody style="display:none">
-            <tr class="small-size" rowSelecting="true">
+            <tr class="mobile-table-small-size" rowSelecting="true">
                 <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="TSrcPosID"></td>
                 <td colSpan="4" class="tdProdName" dataItemName="ProdName"></td>
             </tr>
-            <tr class="small-size" rowSelecting="true">
+            <tr class="mobile-table-small-size" rowSelecting="true">
                 <td dataItemName="Barcode"></td>
                 <td width="50px" class="text-centered" dataItemName="UM"></td>
                 <td width="50px" class="tdQty" dataItemName="TQty"></td>
                 <td width="50px" class="tdNewQty" dataItemName="TNewQty"
                     onCreated="inventoryTableTDNewQtyOnCreated" onClick="inventoryTableTDNewQtyOnClick"></td>
             </tr>
-            <tr class="large-size" rowSelecting="true">
+            <tr class="mobile-table-large-size" rowSelecting="true">
                 <td width="40px" class="tdSrcPosID" dataItemName="TSrcPosID"></td>
                 <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"></td>
                 <td width="50px" class="text-centered" dataItemName="ProdID"></td>

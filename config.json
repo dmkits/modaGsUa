@@ -16,8 +16,8 @@
     "reportsProds",
     "reportsCashier",
     "mobile",
-    "mobileRec",
     "mobileExc",
+    "mobileRec",
     "mobileVen",
     "mobileReportsCashier"
   ],

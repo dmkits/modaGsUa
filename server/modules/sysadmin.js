@@ -27,6 +27,7 @@ module.exports.init = function(app){
         if(req.query&&req.query["REVALIDATE"]) revalidateModules= true;
         var outData= {mode:appParams.mode, port:appParams.port, dbUserName:req.dbUserName},
             sysConfig=getSysConfig();
+        if(req.dbUserError)outData.dbUserError=req.dbUserError;
         if(!sysConfig||sysConfig.error){
             outData.error= (sysConfig&&sysConfig.error)?sysConfig.error:"unknown";
             res.send(outData);
@@ -156,10 +157,10 @@ module.exports.init = function(app){
         });
     };
     var changesTableColumns=[
-        {data: "changeID", name: "changeID", width: 200, type: "text"},
+        {data: "changeID", name: "changeID", width: 150, type: "text"},
         {data: "changeDatetime", name: "changeDatetime", width: 120, type:"text", datetimeFormat:"YYYY-MM-DD HH:mm:ss"},
-        {data: "changeObj", name: "changeObj", width: 200, type: "text"},
-        {data: "changeVal", name: "changeVal", width: 450, type: "text"},
+        {data: "changeObj", name: "changeObj", width: 150, type: "text"},
+        {data: "changeVal", name: "changeVal", width: 600, type: "text"},
         {data: "type", name: "type", width: 100, type: "text"},
         {data: "message", name: "message", width: 200, type: "text"}
     ];
@@ -196,10 +197,10 @@ module.exports.init = function(app){
         changeLog.getDataItems(database.getDBSystemConnection(),{conditions:{"ID IS NULL":null}}, resultCallback);
     };
     var changeLogTableColumns=[
-        {data: "ID", name: "changeID", width: 200, type: "text"},
+        {data: "ID", name: "changeID", width: 150, type: "text"},
         {data: "CHANGE_DATETIME", name: "changeDatetime", width: 120, type: "text", datetimeFormat:"YYYY-MM-DD HH:mm:ss", align:"center"},
-        {data: "CHANGE_OBJ", name: "changeObj", width: 200, type: "text"},
-        {data: "CHANGE_VAL", name: "changeVal", width: 450, type: "text"},
+        {data: "CHANGE_OBJ", name: "changeObj", width: 150, type: "text"},
+        {data: "CHANGE_VAL", name: "changeVal", width: 600, type: "text"},
         {data: "APPLIED_DATETIME", name: "appliedDatetime", width: 120, type: "text", datetimeFormat:"YYYY-MM-DD HH:mm:ss", align:"center"}
     ];
     /**
@@ -569,9 +570,9 @@ module.exports.init = function(app){
         res.sendFile(appViewsPath+'sysadmin/logs.html');
     });
     var sysLogsTableColumns=[
-        {data: "level", name: "Level", width: 100, type: "text"},
-        {data: "message", name: "Message", width: 700, type: "text"},
-        {data: "timestamp", name: "Timestamp", width: 220, type: "text", datetimeFormat:"DD.MM.YY HH:mm:ss"}
+        {data: "level", name: "Level", width:80, align:"center", type: "text"},
+        {data: "message", name: "Message", width:700, type: "text"},
+        {data: "timestamp", name: "Timestamp", width:120, align:"center", type: "text", datetimeFormat:"DD.MM.YY HH:mm:ss"}
     ];
     app.get('/sysadmin/logs/getDataForTable',function(req,res){
         var fileDate = req.query.DATE, outData = {};

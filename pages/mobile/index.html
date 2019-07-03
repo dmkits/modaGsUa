@@ -146,7 +146,7 @@
         app7  = new Framework7({// Framework7 App main instance
             id:'io.framework7.mobile.gabis',
             root: '#app', // app7 root element
-            theme: 'auto', // Automatic theme detection
+            theme: 'md', // 'auto' - Automatic theme detection, Can be md, ios or aurora
             routes: baseRoutes,
             workingDoc:null
         }),
@@ -159,15 +159,16 @@
         app7.data.uuid="";document.cookie="uuid=0";
         app7.data['recsListDocCount']=50;
         app7.data['excsListDocCount']=50;
-        app7.data['inventoryListDocCount']=50;
+        app7.data['inventsListDocCount']=50;
         if (typeof(Storage)!=="undefined") {
             var username=localStorage.getItem("login-username");
             if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
-            var inventoryListDocCount=localStorage.getItem("settings-inventory-listDocCount");
-            if(inventoryListDocCount&&!isNaN(parseInt(inventoryListDocCount)))
-                app7.data['inventoryListDocCount']=parseInt(inventoryListDocCount);
             var recsListDocCount=localStorage.getItem("settings-recs-listDocCount");
             if(recsListDocCount&&!isNaN(parseInt(recsListDocCount)))app7.data['recsListDocCount']=parseInt(recsListDocCount);
+            var excsListDocCount=localStorage.getItem("settings-excs-listDocCount");
+            if(excsListDocCount&&!isNaN(parseInt(excsListDocCount)))app7.data['excsListDocCount']=parseInt(excsListDocCount);
+            var inventsListDocCount=localStorage.getItem("settings-inventory-listDocCount");
+            if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount)))app7.data['inventsListDocCount']=parseInt(inventsListDocCount);
         } else {// Sorry! No Web Storage support..
         }
     };
@@ -268,7 +269,11 @@
                 }catch (e) {
                     errMsg=params.errorDialogMsg+'<br>Данные некорректные!';
                 }
-                if(jsonData&&jsonData.error) errMsg=params.errorDialogMsg+"<br>"+(jsonData.error.userMessage||jsonData.error.message||jsonData.error.error);
+                if(jsonData&&jsonData.error){
+                    if(typeof(jsonData.error)=="string")errMsg=jsonData.error;
+                    else errMsg=(jsonData.error.userMessage||jsonData.error.message||jsonData.error.error);
+                    errMsg=params.errorDialogMsg+"<br>"+errMsg;
+                }
                 if(errMsg&&params.showRequestErrorDialog==false){ callback(null, errMsg);return; }
                 if(errMsg&&app7.srvRequestJSONDialogErr){ app7.srvRequestJSONDialogErr.open(); return; }
                 else if(errMsg){
@@ -371,7 +376,7 @@
         if(!dataTableHeaderRows) return;
         if(!tableDataItem) tableDataItem={};
         var newTRs=[];
-        for (var i = 0; i < dataTableHeaderRows.length; i++) {
+        for(var i = 0; i < dataTableHeaderRows.length; i++){
             var dthTR=dataTableHeaderRows[i], newTR;
             newTRs.push(newTR=dthTR.cloneNode(true)); dataTableBody.appendChild(newTR);
             var rowSelecting=newTR.getAttribute("rowSelecting"),
@@ -379,11 +384,12 @@
                     $$(dataTableBody).children('.tdSelectedRow').removeClass('tdSelectedRow');
                     for (var i = 0; i < newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
                 };
-            for (var j = 0; j < newTR.children.length; j++) {
+            for(var j = 0; j < newTR.children.length; j++){
                 var newTD=newTR.children[j];
                 var dataTableItemName=newTD.getAttribute("dataItemName"), val;
                 if(dataTableItemName!==undefined)val=tableDataItem[dataTableItemName];
-                newTD.innerText=(val==undefined||val==null)?"":val.toString();
+                let newTDText=newTD.firstChild||newTD;
+                newTDText.innerText=(val==undefined||val==null)?"":val.toString();
                 if(rowSelecting)newTD.onclick=tdOnClick;
                 var onClickMethodName=newTD.getAttribute("onClick");
                 if(onClickMethodName){
@@ -420,8 +426,7 @@
     app7.innerPageUpdateTotalTable=function(dataTableFoot, params){
         if(!params)return;
         var dataTableFootTR=$$(dataTableFoot).find("tr");
-        for (var valueName in params)
-            dataTableFootTR.find("td#"+valueName).html(params[valueName]);
+        for(var valueName in params) dataTableFootTR.find("td#"+valueName).html(params[valueName]);
     };
     /** IT'S USED IN INNER PAGE TEMPLATES
      * self = component instance

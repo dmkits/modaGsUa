@@ -48,7 +48,7 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                 if(!tagClass)return;
                 var params={tagName:node.tagName};
                 this.parseNodeAttributes(params,node,
-                    ["class","style","region","design","gutters","splitter","tabPosition","containerId","title","iconClass"],
+                    ["class","style","region","design","gutters","liveSplitters","splitter","tabPosition","containerId","title","iconClass"],
                     {"childIconClass":"iconClass"});
                 var d=new tagClass(params,node);                                                            //log('tagParser.createContainerTags: d=',d);
                 d.domNode.setAttribute("tagName",node.tagName);

@@ -8,11 +8,11 @@ th{
     border: 1px solid black;
     background-color: lightblue;
     font-weight: lighter;
-    padding: 0 5px 0 5px;
+    padding: 0 0px 0 0px;
 }
 td{
     border: 1px solid black;
-    padding: 0 5px 0 5px;
+    padding: 0 0px 0 0px;
     /*overflow: hidden;*/
     word-wrap:break-word;
     /*white-space:pre-wrap;*/
@@ -22,7 +22,7 @@ tfoot td{
     background-color: lightblue;
     font-weight: bold;
     height: 42px;
-    padding: 0px 5px 0px 5px;
+    padding: 0px 0px 0px 0px;
     text-align:center;
 }
 @media (min-width:768px){
@@ -43,16 +43,28 @@ tfoot td{
     text-align: center;
 }
 
-.large-size{
+.mobile-table-large-size{
     display:none;
 }
 @media (min-width:768px){
-    .small-size{
+    .mobile-table-small-size{
         display:none;
     }
-    .large-size{
+    .mobile-table-large-size{
         display:table-row;
     }
+}
+.table-header-small{
+    height: 43px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.table-header-large{
+
+}
+.table-text{
+    margin-left:5px;
+    margin-right:5px;
 }
 .text-centered{
     text-align: center;
@@ -78,6 +90,9 @@ tfoot td{
 }
 .tdSumCC{
     text-align: right;
+}
+.table-total{
+
 }
 
 .docsListStockName{

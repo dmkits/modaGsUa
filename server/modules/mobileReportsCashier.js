@@ -22,7 +22,7 @@ module.exports.routes=[//-- App routes --
 ];
 module.exports.init = function(app){
     // app.get("/mobile/Invent/settingsInventory", function (req, res) {
-    //     res.sendFile(appViewsPath+'mobile/pageSettingsInventory.html');
+    //     res.sendFile(appViewsPath+'mobile/pageSettingsInvents.html');
     // });
     // app.get("/mobile/invent/pageInventory", function (req, res) {
     //     res.sendFile(appViewsPath+'mobile/pageInventory.html');
