@@ -3,7 +3,7 @@ go
 /*
 --DocCode 1021
 --TableCode 11021002
-select * from z_Fields where TableCode=11021002  --столбцы таблицы остатков t_ExcD
+select * from z_Fields where TableCode=11021002  --пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ t_ExcD
 select * from z_FieldsRep where FieldName = 'Qty'
 select * from z_FieldsRep where FieldName = 'NewQty'
 select * from z_Tables where TableName='t_ExcD'
@@ -20,6 +20,15 @@ select * from z_DataSetFields where DSCode=11021002
 select * from z_DataSets where DSCode=11021002
 */
 
+delete from z_DataSetFields where DSCode=11021002 and FieldName='NewQty'
+delete f from z_Fields f,z_Tables t where f.TableCode=t.TableCode and t.TableName='t_ExcD' and f.FieldName='NewQty'
+ALTER TABLE t_ExcD DROP Constraint DF__t_ExcD__NewQty__7640FDE6
+ALTER TABLE t_ExcD DROP COLUMN NewQty
+
+delete from change_log where ID='t_ExcD__1'
+delete from change_log where ID='t_ExcD__2'
+delete from change_log where ID='t_ExcD__3'
+delete from change_log where ID='t_ExcD__4'
 /*
 delete from z_DataSetFields where DSCode=11021002 and FieldName='NewQty'
 delete f from z_Fields f,z_Tables t where f.TableCode=t.TableCode and t.TableName='t_ExcD' and f.FieldName='NewQty'

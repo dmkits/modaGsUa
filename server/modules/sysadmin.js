@@ -24,7 +24,7 @@ module.exports.modulePagePath = "sysadmin.html";
 module.exports.init = function(app){
     app.get("/sysadmin/sysState",function(req,res){
         var revalidateModules= false;
-        if(req.query&&req.query["REVALIDATE"]) revalidateModules= true;
+        if(req.query&&req.query["revalidate"]) revalidateModules= true;
         var outData= {mode:appParams.mode, port:appParams.port, dbUserName:req.dbUserName},
             sysConfig=getSysConfig();
         if(req.dbUserError)outData.dbUserError=req.dbUserError;

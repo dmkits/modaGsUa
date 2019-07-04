@@ -13,15 +13,17 @@
 <page id="sysadmin_page" design="headline">
     <BorderContainer id="sysadmin_TopContainer" region="top" design="sidebar" liveSplitters="false" class="sysadmin_TopContent" gutters="true" style="height:63px; margin:0; padding:0">
         <ContentPane id="sysadmin_TopImg" region="left" splitter="false" class="sysadmin_TopContent"></ContentPane>
-        <ContentPane id="sysadmin_TopStateInfo" region="top" splitter="false" class="sysadmin_TopContent">
-            <div style="width:100%;height:100%;overflow:hidden;text-overflow:ellipsis;">
-                <span id="sysadmin_getStateFail"></span>
-                <span id="sysadmin_appMode" style="margin-left:20px;"></span>
-                <span id="sysadmin_appPort" style="margin-left:20px;"></span>
-                <span id="sysadmin_appUser" style="margin-left:20px;display:inline-block;width:300px;overflow:hidden;text-overflow:ellipsis"></span>
-                <span id="sysadmin_dbName" style="margin-left:20px;"></span>
-                <span id="sysadmin_dbConnectionState" style="margin-left:20px;"></span>
-                <span id="sysadmin_dbValidateState" style="margin-left:20px;"></span>
+        <ContentPane region="top" splitter="false" class="sysadmin_TopContent" style="margin:0;margin-left:-6px;height:28px;padding:0;">
+            <div class="sysadmin_TopContent" style="width:calc(100% - 10px);height:100%;margin:0;padding:0 5px 0 5px;">
+                <div id="sysadmin_TopStateInfo" style="width:100%;height:100%">
+                    <div id="sysadmin_getStateFail" class="sysadmin_TopStateInfoElements" style="max-width:200px;height:100%"></div>
+                    <div id="sysadmin_appMode" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%"></div>
+                    <div id="sysadmin_appPort" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%"></div>
+                    <div id="sysadmin_appUser" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%"></div>
+                    <div id="sysadmin_dbName" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%;"></div>
+                    <div id="sysadmin_dbConnectionState" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%"></div>
+                    <div id="sysadmin_dbValidateState" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%"></div>
+                </div>
             </div>
         </ContentPane>
         <ContentPane id="sysadmin_TopActions" region="bottom" class="sysadmin_TopContent">
@@ -66,8 +68,12 @@
             if(oldLink)document.head.removeChild(oldLink);
             document.head.appendChild(link);
         }
-        $$.sysadmin_page.updateSysState = function(){
-            $$.request.getJSONData({url:"/sysadmin/sysState",consoleLog:true},function(result,error){
+        /**
+         * params = { revalidate:true }
+         */
+        $$.sysadmin_page.updateSysState = function(params){
+            var conds=(!params||!params.revalidate)?null:{revalidate:true};
+            $$.request.getJSONData({url:"/sysadmin/sysState",conditions:conds,consoleLog:true},function(result,error){
                 $$.sysadmin_getStateFail.innerHTML="";
                 if(error){
                     $$.sysadmin_page.mainContentData = {error:error};

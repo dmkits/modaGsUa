@@ -90,7 +90,7 @@ module.exports= function(app) {
      */
     var getDBUserData= function(connection,callback){
         database.selectQuery(connection,
-            "1select SUSER_NAME() as dbUserName,"+
+            "select SUSER_NAME() as dbUserName,"+
             "GMS_DBVersion=dbo.zf_Var('GMS_DBVersion'),OT_DBiID=dbo.zf_Var('OT_DBiID'),"+
             "t_OurID=dbo.zf_Var('t_OurID'),t_OneOur=dbo.zf_Var('t_OneOur'),OT_MainOurID=dbo.zf_Var('OT_MainOurID'),"+
             "z_CurrMC=dbo.zf_Var('z_CurrMC'),z_CurrCC=dbo.zf_Var('z_CurrCC'),"+

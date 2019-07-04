@@ -45,8 +45,6 @@ table {
     border-collapse: collapse;
     font-size : 11px;
     font-family : Tahoma,Arial,Helvetica;
-    /*margin:0;*/
-    /*padding:0;*/
 }
 th {
     font-family : Tahoma,Arial,Helvetica;
@@ -65,12 +63,9 @@ input {
     position: absolute; left: 0; top: 0; right: 0; bottom: 0;
     margin: 1px; padding: 0;
 }
-
 .sysadmin_TopContent{
     background: #eee;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 #sysadmin_TopContainer{
     margin: 0; padding: 0;
@@ -84,13 +79,15 @@ input {
 }
 #sysadmin_TopStateInfo{
     margin: 0;
-    margin-left: -5px;
-    height: 20px;
-    padding: 4px;
-    background: none;
-    border-left: none;
-    text-align: left;
-    vertical-align: middle;
+    display:table;
+}
+.sysadmin_TopStateInfoElements{
+    margin: 0;
+    margin-left:10px;
+    display:table-cell;
+    vertical-align:middle;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 #sysadmin_TopActions {
     margin:0;
