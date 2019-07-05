@@ -169,12 +169,6 @@ module.exports= function(app) {
         req.dbUC = userConnectionData.connection;
         getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
             if(errMsg){
-                //if (isReqJSON(req.method,req.headers)) {
-                //    res.send({ error:{error:"Failed to get data! Reason: failed to get login user data from database!",userMessage:errMsg} });
-                //    return;
-                //}
-                //if(renderIsMobile(req,res,next))return;
-                //renderToAccessFailed(req,res,errMsg);
                 accessFail(req,res,next,{
                     error: "ailed to get data! Reason: failed to get login user data from database!",
                     userErrorMsg: errMsg,
@@ -185,7 +179,6 @@ module.exports= function(app) {
             req.dbUserParams=dbUserParameters;
             req.dbUserName=dbUserParameters.dbUserName;                                             log.info('ACCESS CONTROLLER: dbUserName=',req.dbUserName,'dbUserParams=',req.dbUserParams);
             req.dbEmpRole=(dbUserParameters)?dbUserParameters["EmpRole"]:null;
-
             var validateError=appModules.getValidateError();
             if(validateError){
                 accessFail(req,res,next,{

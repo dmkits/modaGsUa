@@ -26,7 +26,14 @@
             })
             .addToolPaneWHTableActionBtns({title:"Database login actions",buttons:{allowEditTableSelectedRow:"Change", storeTableSelectedRow:"Store"}})
             .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
-            .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"});
+            .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+            .addContentTableOnChangeRowAction(function(crd/*changedRowData*/, contentTable, params, nextCallback){
+                if(crd.item("ShiftPostName").isChanged()){
+                    var shiftPostID= contentTable.getAutocompleteColumnValueForItem("ShiftPostName",crd.item("ShiftPostName").getValue(),"ShiftPostID");
+                    crd.item("ShiftPostID").setValue(shiftPostID);
+                }
+                nextCallback();
+            });
     $$.sa_logins_TDocDBLogins.onShow= function(){
         if(!$$.sa_logins_TDocDBLogins.startedUp)$$.sa_logins_TDocDBLogins.startupDoc();
     };

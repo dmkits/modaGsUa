@@ -17,8 +17,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }                                                                                       //console.log("HTableEditable setData htVisibleColumns",this.htVisibleColumns);
             },
             setAutocompleteColumnValues: function(colData,tableData){                                    //console.log("HTableEditable setAutocompleteColumnValues",colData.data);
-                colData.sourceValues={};
-                colData.source=[];
+                colData.sourceValues={}; colData.source=[];
                 for(var r=0;r<tableData.length;r++){
                     var value=tableData[r][colData.data];
                     if(!colData.sourceValues[value]){
@@ -33,18 +32,16 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     thisInstance.setAutocompleteColumnValues(colData,tableData);
                     return;
                 }
-                colData.sourceValues={};
-                colData.source=[];
+                colData.sourceValues={};colData.source=[];
                 Request.getJSONData({url:colData.sourceURL, resultItemName:"items"}
                     ,function(resultItems){
                         if(!resultItems){
                             thisInstance.setAutocompleteColumnValues(colData,tableData);
                             return;
                         }
-                        colData.sourceValues={};
                         for(var r=0;r<resultItems.length;r++){
                             var resultItemsData=resultItems[r], value=resultItemsData[colData.data];
-                            if(!colData.sourceValues[value]){
+                            if(colData.sourceValues[value]===undefined){
                                 colData.sourceValues[value]=resultItemsData;
                                 colData.source.push(value);
                             }
