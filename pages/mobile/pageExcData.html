@@ -9,7 +9,10 @@
                     <span class="ios-only">Назад</span>
                 </a>
             </div>
-            <div class="title sliding docHeaderTitle">Перемещение {{item.DocID}} от {{item.SDocDate}}<br>с {{item.StockName}}<br>на {{item.NewStockName}}</div>
+            <div class="title sliding docHeaderTitle">
+                <span>Перемещение {{item.DocID}} от {{item.SDocDate}}</span><br>
+                <span style="font-size:12px">с {{item.StockName}}<br>на {{item.NewStockName}}</span>
+            </div>
         </div>
     </div>
     <div class="toolbar" id="pageExcDataToolbar" style="">
@@ -17,7 +20,10 @@
             <div class="row" style="padding-left:16px;padding-right:16px;">
                 <input type="number" class="col" style="height:36px;min-width:200px;" id="pageExcDataBarCodeInput" placeholder="ШК или код товара">
                 <button class="col button button-outline button-round" id="pageExcDataBtnBarcodeInputEnter" style="width:80px;">ВВОД</button>
-                <span id="pageExcDataState" style="color:black;font-weight:bold;display:none"></span>
+                <div>
+                <span id="pageExcDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>
+                <span id="pageExcDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -51,7 +57,7 @@
                 <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
                 <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
                 <td width="50px" class="tdNewQty" dataItemName="NewQty"
-                    onCreated="excDataTableTDOnCreated" onClick="inventoryTableTDNewQtyOnClick"><div class="table-text"></div></td>
+                    onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
             </tr>
             <tr class="mobile-table-large-size" rowSelecting="true">
                 <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
@@ -61,7 +67,7 @@
                 <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
                 <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
                 <td width="50px" class="tdNewQty" dataItemName="NewQty"
-                    onCreated="excDataTableTDOnCreated" onClick="inventoryTableTDNewQtyOnClick"><div class="table-text"></div></td>
+                    onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
             </tr>
             </tbody>
         </table>
@@ -89,9 +95,7 @@
                 if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
                 if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
                 if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
-                if(!this.item||(this.item&&this.item["StateCode"]!==0)) {
-                    this.loadExcData(); return;
-                }
+                if(!this.item||(this.item&&!this.item["IsStateOnConfirmation"])){ this.loadExcData(); return; }
                 var self=this;
                 $$('#pageExcDataToolbar #pageExcDataBtnBarcodeInputEnter').on('click',function(){
                     self.barcodeInputEnter();
@@ -120,23 +124,21 @@
             return {item:excData,items:[]};
         },
         methods: {
-            excDataTableTDOnCreated:function(td,tableDataItem,methods){
+            excDataTableTDNewQtyOnCreated: function(td,tableDataItem,methods){                                  //console.log("excDataTableTDNewQtyOnCreated",tableDataItem,td);
                 td.id="id_"+tableDataItem["ChID"].toString()+'_'+tableDataItem["SrcPosID"].toString();
-                td.ChID=tableDataItem["ChID"].toString();td.SrcPosID=tableDataItem["SrcPosID"].toString();
-                td.ProdID=tableDataItem["ProdID"].toString();td.ProdName=tableDataItem["ProdName"].toString();
-                td.Qty=tableDataItem["Qty"].toString();
                 td.doSelect=methods["rowSelectingMethod"];
-                tableDataItem.tableTDNewQty= td;
+                tableDataItem.tableTDNewQty= td;                                                                //console.log("excDataTableTDNewQtyOnCreated SrcPosID",td.SrcPosID);
             },
-            addProdToTable:function(prodData){
-                if(!prodData) prodData={TQty:0,TNewQty:0};
-                var existstdReal=$$(this.dataTableBody).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["SrcPosID"])[0];
-                if(existstdReal){
-                    let oldNewQty=parseFloat(existstdReal.innerText), newQty=prodData["NewQty"],
-                        oldQty=parseFloat(existstdReal.TQty), qty=prodData["Qty"];
-                    existstdReal.innerText=newQty; existstdReal.Qty=qty;
-                    existstdReal.doSelect();
-                    this.setScroll(existstdReal);
+            addProdToTable: function(prodData){
+                if(!prodData) prodData={Qty:0,NewQty:0};
+                var existsTDNewQty=$$(this.dataTableBody).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["SrcPosID"])[0];
+                if(existsTDNewQty){                                                                             console.log("addProdToTable existsTDNewQty",existsTDNewQty.dataTableRowData);
+                    let oldNewQty=parseFloat(existsTDNewQty.dataTableRowData["NewQty"]), newQty=prodData["NewQty"],
+                        oldQty=parseFloat(existsTDNewQty.dataTableRowData["Qty"]), qty=prodData["Qty"];
+                    existsTDNewQty.innerText=newQty; existsTDNewQty.Qty=qty;
+                    existsTDNewQty.dataTableRowData["NewQty"]=newQty;
+                    existsTDNewQty.doSelect();
+                    this.setScroll(existsTDNewQty);
                     this.setTotalInfo(qty-oldQty,newQty-oldNewQty);
                     return;
                 }
@@ -159,19 +161,19 @@
                 page.scrollTo(0, absoluteElementTop - (page.clientHeight / 2));
             },
 
-            loadExcData:function(){                                                                  //console.log('pageExcData.html loadExcData excData=',this.item);
+            loadExcData: function(){                                                                            //console.log('pageExcData.html loadExcData excData=',this.item);
                 let excData=this.item, excChID=excData.ChID;
                 if(excChID===null||excChID===undefined) return;
-                let cInstance=this;                                                                     //console.log('pageExcData.html loadExcData inventChID=',inventChID, this);
+                let cInstance=this;                                                                             //console.log('pageExcData.html loadExcData inventChID=',inventChID, this);
                 cInstance.setInputProdBarcodeByState({focus:true,enable:false});
                 app7.preloader.show();
                 app7.srvRequestJSON({url:'/mobile/exc/getDataForExcDTable',conditions:{'ParentChID=':excChID},
-                        errorDialogMsg:"Не удалось получить список товаров перемещения с сервера!"},
+                        errorDialogMsg:"Не удалось получить товары перемещения с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
                         let resultItems=(result)?result.items:null;
                         cInstance.items=resultItems;
-                        app7.data.pageExcData={inventDataItems:resultItems};                          console.log('pageExcData.html loadExcData resultItems=',resultItems);
+                        app7.data.pageExcData={inventDataItems:resultItems};                                    //console.log('pageExcData.html loadExcData resultItems=',resultItems);
                         cInstance.fillExcDataTable(resultItems,function(tableData){
                             cInstance.setInputProdBarcodeByState({focus:true,enable:true});
                         });
@@ -188,100 +190,98 @@
                 excData=excData||[];
                 app7.innerPageFillTableData(this, excData, params, finishedCallback)
             },
-            barcodeInputEnter: function () {
+            barcodeInputEnter: function(){
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
                 var self=this;
-                this.storeInputValueToInvent($$("#pageExcDataToolbar #pageExcDataBarCodeInput").val(),function(inventProdData){
+                this.storeInputValueToExc($$("#pageExcDataToolbar #pageExcDataBarCodeInput").val(),function(excProdData){
                     app7.preloader.hide();
-                    if(!inventProdData){
-                        self.setInputProdBarcodeByState({enable:true,focus:true});
-                        return;
+                    if(!excProdData){
+                        self.setInputProdBarcodeByState({enable:true,focus:true}); return;
                     }
-                    self.addProdToTable(inventProdData);
+                    self.addProdToTable(excProdData);
                     self.setInputProdBarcodeByState({enable:true,focus:true,val:""});
                 });
             },
             /**
              * opts = { enable, disable, focus, val }
              */
-            setInputProdBarcodeByState:function(opts){
+            setInputProdBarcodeByState: function(opts){
                 if(!opts)return;
                 var pageExcDataBarCodeInput=$$("#pageExcDataToolbar #pageExcDataBarCodeInput"),
                     pageExcDataBtnBarcodeInputEnter=$$('#pageExcDataToolbar #pageExcDataBtnBarcodeInputEnter'),
-                    pageExcDataState=$$('#pageExcDataToolbar #pageExcDataState');
-                pageExcDataBarCodeInput.show();pageExcDataBtnBarcodeInputEnter.show();pageExcDataState.hide();
-                if(opts.val!==undefined){
-                    pageExcDataBarCodeInput.val(opts.val);
-                }
+                    pageExcDataStateInfo=$$('#pageExcDataToolbar #pageExcDataStateInfo'),
+                    pageExcDataStateName=$$('#pageExcDataToolbar #pageExcDataStateName');
+                pageExcDataBarCodeInput.show();pageExcDataBtnBarcodeInputEnter.show();
+                pageExcDataStateInfo.hide();pageExcDataStateName.hide();
+                if(opts.val!==undefined) pageExcDataBarCodeInput.val(opts.val);
                 if(opts.enable==true||opts.disable==false){
                     pageExcDataBarCodeInput.removeAttr('disabled');
                     pageExcDataBtnBarcodeInputEnter.removeAttr('disabled');
                     if(opts.focus==true) pageExcDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
-                } else if(opts.disable==true||opts.enable==false){
+                }else if(opts.disable==true||opts.enable==false){
                     if(opts.focus==true) pageExcDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                     pageExcDataBarCodeInput.attr('disabled',1);
                     pageExcDataBtnBarcodeInputEnter.attr('disabled',1);
-                } else if(opts.focus==true) {
+                }else if(opts.focus==true){
                     pageExcDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }
-                if(this.item&&this.item["StateCode"]!==0){
+                if(this.item&&!this.item["IsStateOnConfirmation"]){
                     pageExcDataBarCodeInput.attr('disabled',1);
                     pageExcDataBtnBarcodeInputEnter.attr('disabled',1);
                     pageExcDataBarCodeInput.hide();pageExcDataBtnBarcodeInputEnter.hide();
-                    pageExcDataState.show();pageExcDataState.text(this.item["StateInfo"]);
+                    pageExcDataStateInfo.show();pageExcDataStateInfo.text(this.item["StateInfo"]);
+                    pageExcDataStateName.show();pageExcDataStateName.text("("+this.item["StateName"]+")");
                 }
             },
-
-            inventoryTableTDNewQtyOnClick:function(e,dataTableItemName,self){
-                if(this.item&&this.item["StateCode"]!==0)return;
-                var td=e.target;
-                self.showRealQtyDialog(td, dataTableItemName["ProdName"], td.innerText.trim());
+            excDTableTDNewQtyOnClick: function(e,tableDataItem,self){
+                if(this.item&&!this.item["IsStateOnConfirmation"])return;
+                var tdNewQty=e.target;                                                                          //console.log("excDTableTDNewQtyOnClick",e,tableDataItem,tdNewQty,tdNewQty.innerText);
+                self.showDialogExcDEditNewQty(tdNewQty,tableDataItem);
             },
-
-            showRealQtyDialog: function(tdReal, prodName, displayedQty){
+            showDialogExcDEditNewQty: function(tdNewQty,tableDataItem){
                 let thisInstance=this,
-                    realQtyDialog=app7.dialog.create({ title:"Фактический остаток", destroyOnClose:true, text:prodName,
-                        content:'<span id="storeRealQtyErrMsg" style="color:red;font-weight:bold;font-size:14px;line-height:1;"></span>'+
-                            '<br><input id="inputRealQty" type="number" style="text-align:center;border:solid 1px grey;padding:5px"></<input>',
+                    dialogEditNewQty=app7.dialog.create({ title:"Фактическое количество", destroyOnClose:true, text:tableDataItem.ProdName,
+                        content:'<span id="dialogExcDEditNewQtyErrMsg" style="color:red;font-weight:bold;font-size:14px;line-height:1;"></span>'+
+                            '<br><input id="inputExcDNewQty" type="number" style="text-align:center;border:solid 1px grey;padding:5px"></<input>',
                         on:{
                             open:function(){
-                                $$("#storeRealQtyErrMsg").html("");
-                                $$("#inputRealQty").val(displayedQty).focus();document.getElementById("inputRealQty").select();
-                                document.getElementById("inputRealQty").onkeydown=function(e){
-                                    if(e.key=="Escape"||e.code=="Escape"||e.keyCode==27)realQtyDialog.params.buttons[1].onClick();
-                                    else if(e.key=="Enter"||e.code=="Enter"||e.keyCode==13)realQtyDialog.params.buttons[0].onClick();
+                                $$("#dialogExcDEditNewQtyErrMsg").html("");
+                                $$("#inputExcDNewQty").val(tableDataItem.NewQty).focus();document.getElementById("inputExcDNewQty").select();
+                                document.getElementById("inputExcDNewQty").onkeydown=function(e){
+                                    if(e.key=="Escape"||e.code=="Escape"||e.keyCode==27)dialogEditNewQty.close();
+                                    else if(e.key=="Enter"||e.code=="Enter"||e.keyCode==13)dialogEditNewQty.params.buttons[0].onClick();
                                 };
                             },
                         },
                         buttons:[
                             { text:"ВВОД",close:false,keyCodes:[13],onClick:function(){
-                                let val=parseFloat($$("#inputRealQty").val());
+                                let val=parseFloat($$("#inputExcDNewQty").val());
                                 if(isNaN(val)){
-                                    $$("#storeRealQtyErrMsg").html("Неверное значение количества!");
-                                    $$("#inputRealQty").focus();document.getElementById("inputRealQty").select();
+                                    $$("#dialogExcDEditNewQtyErrMsg").html("Неверное значение количества!");
+                                    $$("#inputExcDNewQty").focus();document.getElementById("inputExcDNewQty").select();
                                     return;
                                 }
-                                thisInstance.storeExistsToInvent(tdReal.TSrcPosID,tdReal.ProdID,val,
+                                thisInstance.storeNewQtyToExcD(tableDataItem.SrcPosID,tableDataItem.ProdID,val,
                                     function(storeResult,errMsg){
                                         if(errMsg){
-                                            $$("#storeRealQtyErrMsg").html(errMsg);
-                                            $$("#inputRealQty").focus();document.getElementById("inputRealQty").select();
+                                            $$("#dialogExcDEditNewQtyErrMsg").html(errMsg);
+                                            $$("#inputExcDNewQty").focus();document.getElementById("inputExcDNewQty").select();
                                             return;
                                         }
-                                        tdReal.innerText=val;
-                                        thisInstance.setTotalInfo(0,val-parseFloat(displayedQty));
-                                        realQtyDialog.close();
+                                        var oldNewQty=tableDataItem["NewQty"];
+                                        tableDataItem["NewQty"]=val;tdNewQty.innerText=val.toString();
+                                        thisInstance.setTotalInfo(0,val-parseFloat(oldNewQty));
+                                        dialogEditNewQty.close();
                                     })
                             } },
                             { text:"ОТМЕНА",close:true,keyCodes:[27] } ]
                     }).open().on("closed",function(){ thisInstance.setInputProdBarcodeByState({focus:true}); });
             },
-
             /**
              * callback = function(prodData,err)
              */
-            storeInputValueToInvent:function(inputValue,callback){
+            storeInputValueToExc:function(inputValue,callback){
                 if(!inputValue||inputValue.toString().trim()==''){
                     var self=this;
                     if(!this.dialogAlertNoBarcode)
@@ -294,32 +294,29 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                let cInstance=this, parentChID=this.item.ChID;                                          //console.log('pageExcData.html storeInputValueToInvent inputValue=',inputValue, this);
+                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageExcData.html storeInputValueToExc inputValue=',inputValue, this);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/Invent/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
-                        userErrorMsg:"Не удалось добавить товар в инвентаризацию!"},
+                app7.srvPostRequestJSON({url:'/mobile/exc/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
+                        userErrorMsg:"Не удалось добавить товар в перемещение!"},
                     function(result,errmsg){
-                        app7.preloader.hide();// Hide Preloader
-                        if(!result||!result.resultItem){
-                            callback(null); return;
-                        }
+                        app7.preloader.hide();
+                        if(!result||!result.resultItem){ callback(null); return; }
                         let inventProdData=result.resultItem;
                         callback(inventProdData);
                     })
             },
-            storeExistsToInvent:function(tSrcPosID,prodID,tNewQty,callback){
-                let cInstance=this, parentChID=this.item.ChID;                                          //console.log('pageExcData.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
+            storeNewQtyToExcD:function(srcPosID,prodID,newQty,callback){
+                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageExcData.html storeNewQtyToExcD tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/Invent/storeExistsPosProdData',
-                        data:{parentChID:parentChID,TSrcPosID:tSrcPosID,TNewQty:tNewQty},
-                        userErrorMsg:"Не удалось сохранить данные на сервере!",showRequestErrorDialog:false},
+                app7.srvPostRequestJSON({url:'/mobile/exc/storeNewQtyData',data:{parentChID:parentChID,SrcPosID:srcPosID,NewQty:newQty},
+                            showRequestErrorDialog:false},
                     function(result,errmsg){
                         app7.preloader.hide();// Hide Preloader
                         if(!result||!result.resultItem){
                             callback(null,(errmsg||"Не удалось сохранить данные на сервере!")); return;
                         }
-                        let inventProdData=result.resultItem;
-                        callback(inventProdData);
+                        let excDData=result.resultItem;
+                        callback(excDData);
                     })
             }
         }

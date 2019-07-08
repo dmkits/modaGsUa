@@ -369,6 +369,7 @@
      * </table>
      * totalTable updated in innerPageUpdateTotalTable function
      * self = component instance
+     * tableDataItem added to table TDs and table TD childs as [dataTableRowData]
      */
     app7.innerPageCreateTableRow= function(dataTableHeader, dataTableBody, tableDataItem, self){
         if(!dataTableHeader||!dataTableBody) return;
@@ -376,33 +377,34 @@
         if(!dataTableHeaderRows) return;
         if(!tableDataItem) tableDataItem={};
         var newTRs=[];
-        for(var i = 0; i < dataTableHeaderRows.length; i++){
+        for(var i=0; i<dataTableHeaderRows.length; i++){
             var dthTR=dataTableHeaderRows[i], newTR;
             newTRs.push(newTR=dthTR.cloneNode(true)); dataTableBody.appendChild(newTR);
             var rowSelecting=newTR.getAttribute("rowSelecting"),
-                tdOnClick=function(e){
+                tdOnClickFunction=function(e){
                     $$(dataTableBody).children('.tdSelectedRow').removeClass('tdSelectedRow');
-                    for (var i = 0; i < newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
+                    for(var i=0; i<newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
                 };
-            for(var j = 0; j < newTR.children.length; j++){
-                var newTD=newTR.children[j];
-                var dataTableItemName=newTD.getAttribute("dataItemName"), val;
+            for(var j=0; j<newTR.children.length; j++){
+                var newTD=newTR.children[j], dataTableItemName=newTD.getAttribute("dataItemName"), val;
+                newTD.dataTableRowData=tableDataItem;
+                if(newTD.firstChild)newTD.firstChild.dataTableRowData=tableDataItem;
                 if(dataTableItemName!==undefined)val=tableDataItem[dataTableItemName];
                 let newTDText=newTD.firstChild||newTD;
                 newTDText.innerText=(val==undefined||val==null)?"":val.toString();
-                if(rowSelecting)newTD.onclick=tdOnClick;
+                if(rowSelecting)newTD.onclick=tdOnClickFunction;
                 var onClickMethodName=newTD.getAttribute("onClick");
                 if(onClickMethodName){
                     var onClickMethod=self[onClickMethodName];
                     newTD.onclick=function(e){
-                        tdOnClick(e);
+                        tdOnClickFunction(e);
                         onClickMethod(e,tableDataItem,self);
                     };
                 }
                 var onCreatedMethodName=newTD.getAttribute("onCreated");
                 if(onCreatedMethodName){
                     var methods={};
-                    if(rowSelecting)methods["rowSelectingMethod"]=tdOnClick;
+                    if(rowSelecting)methods["rowSelectingMethod"]=tdOnClickFunction;
                     if(onClickMethodName)methods[onClickMethodName]=self[onClickMethodName];
                     self[onCreatedMethodName](newTD,tableDataItem,methods);
                 }

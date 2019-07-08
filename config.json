@@ -44,6 +44,11 @@
       "autorun":["menuBarItemRec"],
       "mobile":["mobileRec"]
     },
+    "sendExcs":{
+      "menu":["menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":[],
+      "mobile":["mobileExc"]
+    },
     "cashier":{
       "menu":["menuBarItemReportsCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier"],

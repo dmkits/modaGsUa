@@ -40,13 +40,13 @@
                 {{#each listExcs}}
                 <li>
                     <a class="item-link item-content" href="/pageExcData/{{ChID}}"
-                            style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
+                            style="background-color:lightgrey;background-color:{{#if IsStateCreated}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row" style="padding-right:16px">
                                 <div class="item-title" style="width:100%">
                                     <div class="item-title">
-                                        <div class="item-header" style="display:inline-block;float:left;max-width:120px;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{DocID}} <br>от {{SDocDate}}</div>
-                                        <div class="item-header" style="display:inline-block;float:right;max-width:130px;text-align:right;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{StateName}}</div>
+                                        <div class="item-header" style="display:inline-block;float:left;max-width:120px;font-weight:inherit">{{DocID}} <br>от {{SDocDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:right;max-width:130px;text-align:right;font-weight:inherit">{{StateName}}</div>
                                     </div>
                                     <div class="item-title docsListStockName">с {{StockName}}</div>
                                     <div class="item-title docsListStockName">на {{NewStockName}}</div>

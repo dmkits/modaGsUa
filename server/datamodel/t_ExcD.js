@@ -1,6 +1,6 @@
 module.exports.id=module.id;
 module.exports.modelData = { tableName:"t_ExcD", idField:"ChID",
-    fields:["ChID","SrcPosID","ProdID","PPID","UM","Qty","PriceCC_nt","SumCC_nt","Tax","TaxSum","PriceCC_wt","SumCC_wt","BarCode","SecID","NewSecID"]
+    fields:["ChID","SrcPosID","ProdID","PPID","UM","Qty","PriceCC_nt","SumCC_nt","Tax","TaxSum","PriceCC_wt","SumCC_wt","Barcode","SecID","NewSecID"]
 };
 module.exports.changeLog = [
     { changeID:"t_ExcD__1", changeDatetime:"2019-07-03 16:04:00", changeObj:"t_ExcD",
