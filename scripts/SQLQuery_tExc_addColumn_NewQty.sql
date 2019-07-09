@@ -55,7 +55,8 @@ update z_DataSetFields
 	set FieldPosID=FieldPosID+1 --Adding shift to place NewQty near Qty, where '9' is PosID of 'Qty'
 	where DSCode=11021002 and FieldPosID > 9
 go	 
-insert into z_DataSetFields(DSCode,FieldPosID,FieldName,FieldInfo,Required,ReadOnly,Visible,DisplayFormat,Width,AutoNewType,AutoNewValue,DataSize,Calc,Lookup,LookupKey,LookupSource,LookupSourceKey,LookupSourceResult,PickListType,PickList,EditMask,EditFormat,MinValue,MaxValue,CustomConstraint,ErrorMessage,InitBeforePost,IsHidden) --Adding column to field 11021
-	values(11021002, 10, 'NewQty', '', 1, 0, 0, '', 10, 0, '', 9, 0, 0, '', '', '', '', 0, '', '', '', 0, 0, '', '', 0, 0)
+insert into z_DataSetFields --Adding column to field 11021
+values(11021002, @POSID+1, 'NewQty', '', 1, 1/*ReadOnly*/, 0/*Visible*/, '#,##0.#####', 10, 1, 0, 9, 0, 0, '', '', '', '', 0, '', '', '', 0, 0, '', '', 0, 0)
+--update z_DataSetFields set ReadOnly=1 where DSCode=11021002 and FieldName='NewQty'
 go
 select * from z_DataSetFields where DSCode=11021002 and FieldName='NewQty'
