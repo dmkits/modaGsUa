@@ -1,13 +1,18 @@
 var body=document.body;if(body) body.style.display="none";
+
 window.$app= function(arg){
     if(arg&&typeof(arg)=="object"){
-        for (var p in arg) window.$$[p]=arg[p]
+        for(var p in arg) window.$$[p]=arg[p]
     }
 };
-window.log= function(args){
-    if(!window.$app.debug&&!window.$app.dev)return;
-    console.log.apply(true,arguments);
+
+window.log= function(){};
+window.$app.dev= function(on){
+    if(!on||!window.console||!console.log){ window.log= function(){}; return; }
+    window.log= Function.prototype.bind.call(console.log,console);
 };
+window.$app.debug=window.$app.dev;
+
 $app._loadScript=function(parent,src,attributes,onload){
     if(!parent)return;
     var script = document.createElement('script');

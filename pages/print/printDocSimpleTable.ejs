@@ -69,9 +69,9 @@
     <ContentPane id="print_PrintContent" region="center"></ContentPane>
 </page>
 </body>
-<script type="text/javascript"> $app.dev=false;
-    $app.startup("#print_page",function(){                                                                  //log("START PRINT PAGE...",$$);//!!!IT'S FOR TESTING!!!
-        var printData = window["printDocSimpleTableData"];                                                   log("PRINT PAGE printData=",printData);//!!!IT'S FOR TESTING!!!
+<script type="text/javascript"> //$app.dev(true);
+    $app.startup("#print_page",function(){                                                                  log("START PRINT PAGE...",$$);//!!!IT'S FOR TESTING!!!
+        var printData = window["printDocSimpleTableData"];                                                  log("PRINT PAGE printData=",printData);//!!!IT'S FOR TESTING!!!
         if(!printData) return;
         var table_width = calcTableWidth(printData);
         if(printData.header) $$.print_PrintContent.domNode.appendChild(createDescriptiveTable(printData.header, table_width));
