@@ -15,18 +15,18 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/invent/pageListInvents";
+module.exports.modulePageURL = "/mobile/pageListInvents";
 module.exports.modulePagePath = "mobile/pageListInvents.html";
 module.exports.routes=[//-- App routes --
-    { path: '/pageListInvents', componentUrl: '/mobile/invent/pageListInvents', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
-    { path: '/pageInventory/:inventChID', componentUrl: '/mobile/invent/pageInventory', options:{ignoreCache:true} },
-    { path: '/pageSettingsInvents', componentUrl: '/mobile/invent/pageSettingsInvents', options:{ignoreCache:true} }
+    { path: '/pageListInvents', componentUrl: '/mobile/pageListInvents', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
+    { path: '/pageInventory/:inventChID', componentUrl: '/mobile/pageInventory', options:{ignoreCache:true} },
+    { path: '/pageSettingsInvents', componentUrl: '/mobile/pageSettingsInvents', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
-    app.get("/mobile/invent/pageSettingsInvents", function (req, res) {
+    app.get("/mobile/pageSettingsInvents", function (req, res) {
         res.sendFile(appViewsPath+'mobile/pageSettingsInvents.html');
     });
-    app.get("/mobile/invent/pageInventory", function (req, res) {
+    app.get("/mobile/pageInventory", function (req, res) {
         res.sendFile(appViewsPath+'mobile/pageInventory.html');
     });
     var tVensListTableColumns=[

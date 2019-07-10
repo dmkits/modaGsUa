@@ -15,22 +15,22 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/rec/pageListRecs";
+module.exports.modulePageURL = "/mobile/pageListRecs";
 module.exports.modulePagePath = "mobile/pageListRecs.html";
 module.exports.routes=[//-- App routes --
-    { path: '/pageListRecs', componentUrl: '/mobile/rec/pageListRecs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
-    { path: '/pageRecData/:recChID', componentUrl: '/mobile/rec/pageRecData', options:{ignoreCache:true} },
+    { path: '/pageListRecs', componentUrl: '/mobile/pageListRecs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
+    { path: '/pageRecData/:recChID', componentUrl: '/mobile/pageRecData', options:{ignoreCache:true} },
     { path: '/pageRecPosData/:recChID/:action/:srcPosID', componentUrl: '/mobile/rec/pageRecPosData', options:{ignoreCache:true} },
-    { path: '/pageSettingsRecs', componentUrl: '/mobile/rec/pageSettingsRecs', options:{ignoreCache:true} }
+    { path: '/pageSettingsRecs', componentUrl: '/mobile/pageSettingsRecs', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
-    app.get("/mobile/rec/pageSettingsRecs", function (req, res) {
+    app.get("/mobile/pageSettingsRecs", function (req, res) {
         res.sendFile(appViewsPath+'mobile/pageSettingsRecs.html');
     });
-    app.get("/mobile/rec/pageRecData", function (req, res) {
+    app.get("/mobile/pageRecData", function (req, res) {
         res.sendFile(appViewsPath+'mobile/pageRecData.html');
     });
-    app.get("/mobile/rec/pageRecPosData", function (req, res) {
+    app.get("/mobile/pageRecPosData", function (req, res) {
         res.sendFile(appViewsPath+'mobile/pageRecPosData.html');
     });
     var tRecsListTableColumns=[

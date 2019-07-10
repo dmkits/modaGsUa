@@ -15,23 +15,19 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/exc/pageListExcs";
+module.exports.modulePageURL = "/mobile/pageListExcs";
 module.exports.modulePagePath = "mobile/pageListExcs.html";
 module.exports.routes=[//-- App routes --
-    { path: '/pageListExcs', componentUrl: '/mobile/exc/pageListExcs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
-    { path: '/pageExcData/:excChID', componentUrl: '/mobile/exc/pageExcData', options:{ignoreCache:true} },
-    { path: '/pageExcPosData/:excChID/:action/:srcPosID', componentUrl: '/mobile/exc/pageExcPosData', options:{ignoreCache:true} },
-    { path: '/pageSettingsExcs', componentUrl: '/mobile/exc/pageSettingsExcs', options:{ignoreCache:true} }
+    { path: '/pageListExcs', componentUrl: '/mobile/pageListExcs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
+    { path: '/pageExcData/:excChID', componentUrl: '/mobile/pageExcData', options:{ignoreCache:true} },
+    { path: '/pageSettingsExcs', componentUrl: '/mobile/pageSettingsExcs', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
-    app.get("/mobile/exc/pageSettingsExcs", function (req, res) {
+    app.get("/mobile/pageSettingsExcs", function(req,res){
         res.sendFile(appViewsPath+'mobile/pageSettingsExcs.html');
     });
-    app.get("/mobile/exc/pageExcData", function (req, res) {
+    app.get("/mobile/pageExcData", function(req,res){
         res.sendFile(appViewsPath+'mobile/pageExcData.html');
-    });
-    app.get("/mobile/exc/pageExcPosData", function (req, res) {
-        res.sendFile(appViewsPath+'mobile/pageExcPosData.html');
     });
     var tExcsListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Exc"},
@@ -73,7 +69,7 @@ module.exports.init = function(app){
         {data: "StateInfo", name: "Информация статуса", width: 50, type: "text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode not in (50,56,60) Then 'Изменение запрещено' Else 'Изменение разрешено' END" }
     ];
-    app.get("/mobile/exc/getDataForExcsList", function(req, res){
+    app.get("/mobile/exc/getDataForExcsList", function(req,res){
         var conditions={}, top="";
         for(var condItem in req.query) {
             if(condItem=="top")top="top "+req.query[condItem]; else conditions["t_Exc."+condItem]=req.query[condItem];
@@ -115,7 +111,7 @@ module.exports.init = function(app){
         //{data: "PriceCC", name: "Цена продажи", width: 65, type: "numeric2", dataSource:"t_ExcD"}
         //{data: "PRICELIST_PRICE", name: "Цена по прайс-листу", width: 75, type: "numeric2"},
     ];
-    app.get("/mobile/exc/getDataForExcDTable", function(req, res){
+    app.get("/mobile/exc/getDataForExcDTable", function(req,res){
         var conditions={};
         for(var condItem in req.query)
             if(condItem.indexOf("ParentChID")==0) conditions["t_ExcD.ChID="]=req.query[condItem];
@@ -193,7 +189,7 @@ module.exports.init = function(app){
 
          //resultCallback(result);
      };
-     app.post("/mobile/exc/storeProdDataByCRUniInput", function(req, res){
+     app.post("/mobile/exc/storeProdDataByCRUniInput", function(req,res){
          var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];  console.log('/mobile/exc/storeProdDataByCRUniInput req.body',req.body);
          r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
              if(resultFindProd.error){
@@ -206,7 +202,7 @@ module.exports.init = function(app){
              })
          });
      });
-     app.post("/mobile/exc/storeNewQtyData", function(req, res){
+     app.post("/mobile/exc/storeNewQtyData", function(req,res){
          var storingData=req.body, parentChID=storingData["parentChID"],excDData={SrcPosID:storingData["SrcPosID"]};   console.log('/mobile/exc/storeNewQtyData req.body',req.body);
          t_ExcD.storeExcDProdData(req.dbUC,parentChID,excDData,storingData["NewQty"],function (result){
              res.send(result);

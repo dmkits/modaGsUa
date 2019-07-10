@@ -15,18 +15,12 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/reports/pageReportsCashier";
+module.exports.modulePageURL = "/mobile/pageReportsCashier";
 module.exports.modulePagePath = "mobile/pageReportsCashier.html";
 module.exports.routes=[//-- App routes --
-    { path: '/pageReportsCashier', componentUrl: '/mobile/reports/pageReportsCashier', options:{clearPreviousHistory:true,ignoreCache:true}, define:true }
+    { path: '/pageReportsCashier', componentUrl: '/mobile/pageReportsCashier', options:{clearPreviousHistory:true,ignoreCache:true}, define:true }
 ];
 module.exports.init = function(app){
-    // app.get("/mobile/Invent/settingsInventory", function (req, res) {
-    //     res.sendFile(appViewsPath+'mobile/pageSettingsInvents.html');
-    // });
-    // app.get("/mobile/invent/pageInventory", function (req, res) {
-    //     res.sendFile(appViewsPath+'mobile/pageInventory.html');
-    // });
 
     //var tSalesForCashierTableColumns=[
     //    {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_Sale", identifier:true, readOnly:true, visible:false},
@@ -39,32 +33,6 @@ module.exports.init = function(app){
     //        dataFunction:"CONVERT(varchar(10),DocTime,104)+' '+CONVERT(varchar(10),DocTime,108)" },
     //    {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", identifier:true,
     //        dataSource:"t_SaleD", sourceField:"SrcPosID", linkCondition:"t_SaleD.ChID=t_Sale.ChID" },
-    //    // {data: "Article1", name: "Артикул1 товара", width: 200,
-    //    //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForArticle1Combobox",
-    //    //     dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID"},
-    //    // {data: "PCatName", name: "Бренд товара", width: 140,
-    //    //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPCatNameCombobox",
-    //    //     dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
-    //    // {data: "PGrName", name: "Коллекция товара", width: 95,
-    //    //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrNameCombobox",
-    //    //     dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"},
-    //    // {data: "PGrName2", name: "Тип товара", width: 140,
-    //    //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName2Combobox",
-    //    //     dataSource:"r_ProdG2", sourceField:"PGrName2", linkCondition:"r_ProdG2.PGrID2=r_Prods.PGrID2"},
-    //    // {data: "PGrName3", name: "Вид товара", width: 150,
-    //    //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName3Combobox",
-    //    //     dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"},
-    //    // {data: "PGrName1", name: "Линия товара", width: 70,
-    //    //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName1Combobox",
-    //    //     dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
-    //    // {data: "ColorName", name: "Цвет товара", width: 80,
-    //    //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForColorNameCombobox",
-    //    //     dataSource:"ir_ProdColors", dataFunction:"CASE When ir_ProdColors.ColorID>0 Then ir_ProdColors.ColorName Else '' END",
-    //    //     linkCondition:"ir_ProdColors.ColorID=r_Prods.ColorID"},
-    //    // {data: "SizeName", name: "Размер товара", width: 70,
-    //    //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForSizeNameCombobox",
-    //    //     dataSource:"ir_ProdSizes", dataFunction:"CASE When ir_ProdSizes.ChID>100000001 Then ir_ProdSizes.SizeName Else '' END",
-    //    //     linkCondition:"ir_ProdSizes.SizeName=r_Prods.SizeName"},
     //    {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"t_SaleD", visible:true},
     //    {data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_SaleD", visible:false},
     //    {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
@@ -98,32 +66,6 @@ module.exports.init = function(app){
         {data: "SDocTime", name: "Дата времяЯ", width: 60, type: "test",align:"center",
             dataFunction:"CONVERT(varchar(10),DocTime,104)+' '+CONVERT(varchar(10),DocTime,108)" },
         {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", identifier:true, dataSource:"querySalesCRRets"},
-        // {data: "Article1", name: "Артикул1 товара", width: 200,
-        //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForArticle1Combobox",
-        //     dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID"},
-        // {data: "PCatName", name: "Бренд товара", width: 140,
-        //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPCatNameCombobox",
-        //     dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
-        // {data: "PGrName", name: "Коллекция товара", width: 95,
-        //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrNameCombobox",
-        //     dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"},
-        // {data: "PGrName2", name: "Тип товара", width: 140,
-        //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName2Combobox",
-        //     dataSource:"r_ProdG2", sourceField:"PGrName2", linkCondition:"r_ProdG2.PGrID2=r_Prods.PGrID2"},
-        // {data: "PGrName3", name: "Вид товара", width: 150,
-        //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName3Combobox",
-        //     dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"},
-        // {data: "PGrName1", name: "Линия товара", width: 70,
-        //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName1Combobox",
-        //     dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
-        // {data: "ColorName", name: "Цвет товара", width: 80,
-        //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForColorNameCombobox",
-        //     dataSource:"ir_ProdColors", dataFunction:"CASE When ir_ProdColors.ColorID>0 Then ir_ProdColors.ColorName Else '' END",
-        //     linkCondition:"ir_ProdColors.ColorID=r_Prods.ColorID"},
-        // {data: "SizeName", name: "Размер товара", width: 70,
-        //     type: "comboboxWN", sourceURL:"/dirsProds/getDataForSizeNameCombobox",
-        //     dataSource:"ir_ProdSizes", dataFunction:"CASE When ir_ProdSizes.ChID>100000001 Then ir_ProdSizes.SizeName Else '' END",
-        //     linkCondition:"ir_ProdSizes.SizeName=r_Prods.SizeName"},
         {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"querySalesCRRets", visible:true},
         {data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"querySalesCRRets", visible:false},
         {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
