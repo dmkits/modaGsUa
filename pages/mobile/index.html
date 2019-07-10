@@ -19,13 +19,14 @@
     <meta name="theme-color" content="#2196f3">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
-    <link rel="stylesheet" type="text/css" href="/cssm/mobileIndex.css">
+    <script src="/jslib/framework7/js/framework7.min.js"></script>
     <link rel="stylesheet" href="/jslib/framework7/css/framework7.min.css">
+    <link rel="stylesheet" type="text/css" href="/cssm/mobileIndex.css">
     <link rel="stylesheet" href="/cssm/mobileIcons.css">
     <link rel="stylesheet" href="/cssm/mobileApp.css">
     <script src="/jslib/moment/moment.js"></script>
-    <link rel="shortcut icon" href="/img/logo red-ico-32.jpg">
-    <title>Mobile</title>
+    <link rel="shortcut icon" href="/img/logo-gs red-min-app.png">
+    <title>GABIS Mobile</title>
 </head>
 <body>
 <div id="app">
@@ -135,7 +136,6 @@
         </div>
     </div>
 </div>
-<script src="/jslib/framework7/js/framework7.min.js"></script>
 <script>
     var $$=Dom7,
         baseRoutes=[//-- App routes --
@@ -146,7 +146,7 @@
         app7  = new Framework7({// Framework7 App main instance
             id:'io.framework7.mobile.gabis',
             root: '#app', // app7 root element
-            theme: 'md', // 'auto' - Automatic theme detection, Can be md, ios or aurora
+            theme: 'ios', // 'auto' - Automatic theme detection, Can be md, ios or aurora
             routes: baseRoutes,
             workingDoc:null
         }),
