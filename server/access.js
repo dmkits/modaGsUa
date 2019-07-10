@@ -17,6 +17,9 @@ module.exports= function(app) {
     var isReqInternalPage = function (method,headers) {
         return (headers && headers["x-requested-with"] == "XMLHttpRequest" && headers["content-type"] == "application/x-www-form-urlencoded");
     };
+    var setAccessControlAllowOriginForMapp= function(req,res){
+        if(isMobileReq(req)&&isReqJSON(req.method,req.headers)) res.header("Access-Control-Allow-Origin","*");
+    };
     var renderToLogin= function (res,loginMsg){
         var appConfig=getAppConfig();
         res.render(path.join(__dirname, "../pages/login.ejs"), {
@@ -24,11 +27,14 @@ module.exports= function(app) {
             loginMsg: loginMsg
         });
     };
-    var renderIsMobile= function (req,res,next){
-        if(req.originalUrl.indexOf("/mobile")==0){ req.isMobile=true; next(); return true; }
+    var isMobileReq= function(req){
         var userAgent=req.headers["user-agent"];
         if(!userAgent) return false;
-        else if(userAgent.indexOf("Android")>=0||userAgent.indexOf("Mobile")>=0) {
+        return (userAgent.indexOf("Android")>=0||userAgent.indexOf("Mobile")>=0);
+    };
+    var renderIsMobile= function (req,res,next){
+        if(req.originalUrl.indexOf("/mobile")==0){ req.isMobile=true; next(); return true; }
+        if(isMobileReq(req)){
             if(isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)){
                 req.isMobile=true; next(); return true;
             }
@@ -107,8 +113,9 @@ module.exports= function(app) {
                 callback(null,recordset[0]);
             });
     };
-    app.use(function (req, res, next) {                                                         log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
-        res.header("Access-Control-Allow-Headers","Content-Type,Content-Length, Accept, X-Requested-With, uuid");
+    app.use(function (req, res, next){                                                          log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
+        res.header("Access-Control-Allow-Headers","origin, Content-Type,Content-Length, Accept, X-Requested-With, uuid");
+        setAccessControlAllowOriginForMapp(req,res);
         if(req.originalUrl.indexOf("/login")==0){
             next(); return;
         }                                                                                       //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});

@@ -16,7 +16,7 @@ module.exports.routes=[//-- App routes --
     { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
 ];
 module.exports.init = function(app){
-    app.get("/mobile/getUserRoutes", function (req, res) {
+    app.get("/mobile/getUserRoutes", function(req,res){
         if(!req.dbEmpRole){
             res.send({error:"Failed get routes! Reason: no database employee role!"});return;
         }
@@ -51,7 +51,7 @@ module.exports.init = function(app){
         res.send(userRoutes);
     });
 
-    app.get("/mobile/actionError", function (req, res) {
+    app.get("/mobile/actionError", function(req,res){
         res.sendFile(appViewsPath+'mobile/actionError.html');
     });
 };
