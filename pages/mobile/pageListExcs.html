@@ -14,19 +14,21 @@
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" id="pageListExcs-stock" class="item-link smart-select" @smartselect:close="pageListExcsStockClose">
+                                <a href="#" id="pageListExcs-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageListExcsStockClose">
+                                    <div class="item-content" style="font-size:16px">
+                                        <div class="item-inner">
+                                            <div class="item-title" style="font-weight:bold">Склад</div>
+                                            <div id="pageListExcs-stock-label" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
+                                        </div>
+                                    </div>
+
                                     <select id="pageListExcs-stock-select">
                                         {{#each listStocks}}
                                         <option value={{StockID}}>{{StockName}}</option>
                                         {{/each}}
                                     </select>
-                                    <div class="item-content">
-                                        <div class="item-inner">
-                                            <div class="item-title">Склад</div>
-                                            <div id="pageListExcs-stock-label" class="item-after" style="color:#212121"></div>
-                                        </div>
-                                    </div>
                                 </a>
+
                             </li>
                         </ul>
                     </div>
@@ -48,8 +50,8 @@
                                         <div class="item-header" style="display:inline-block;float:left;max-width:120px;font-weight:inherit">{{DocID}} <br>от {{SDocDate}}</div>
                                         <div class="item-header" style="display:inline-block;float:right;max-width:130px;text-align:right;font-weight:inherit">{{StateName}}</div>
                                     </div>
-                                    <div class="item-title docsListStockName">с {{StockName}}</div>
-                                    <div class="item-title docsListStockName">на {{NewStockName}}</div>
+                                    <div class="item-title docsListStockName" style="font-weight:normal">с {{StockName}}</div>
+                                    <div class="item-title docsListStockName" style="font-weight:normal">на {{NewStockName}}</div>
                                 </div>
                                 <div class="item-after" style="min-width:70px">
                                     <div style="width:100%;text-align:right">{{TSumCC_wt}}</div>
