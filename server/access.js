@@ -7,18 +7,27 @@ var log=require("./server").log,
 
 var sysadminsList={};
 
-module.exports= function(app) {
-    var isReqJSON = function (method,headers) {
+module.exports= function(app){
+    var isReqJSON = function(method,headers){
         return (headers && (
             (headers["x-requested-with"] && headers["x-requested-with"] == "application/json; charset=utf-8")
-                || (headers["x-requested-with"] && headers["x-requested-with"].indexOf("application/json; charset=utf-8")>=0))
+                || (headers["x-requested-with"] && headers["x-requested-with"].indexOf("application/json; charset=utf-8")>=0) )
         )
     };
-    var isReqInternalPage = function (method,headers) {
+    var isReqInternalPage = function(method,headers){
         return (headers && headers["x-requested-with"] == "XMLHttpRequest" && headers["content-type"] == "application/x-www-form-urlencoded");
     };
     var setAccessControlAllowOriginForMapp= function(req,res){
-        if(isMobileReq(req)&&isReqJSON(req.method,req.headers)) res.header("Access-Control-Allow-Origin","*");
+        if(isMobileReq(req)&&req.method=="OPTIONS"&&req.headers["origin"]=="file://"&&req.path=="/login"&&req.headers["access-control-request-method"]=="POST"){
+            res.header("Access-Control-Allow-Method","POST");
+            res.header("Access-Control-Allow-Origin","file://");
+        }else if(isMobileReq(req)&&req.method=="OPTIONS"&&req.headers["origin"]=="file://"&&req.headers["access-control-request-headers"]
+                &&req.headers["access-control-request-headers"].indexOf("x-requested-with")>=0
+                &&req.headers["access-control-request-headers"].indexOf("uuid")>=0){
+            res.header("Access-Control-Allow-Origin","file://");
+        }else if(isMobileReq(req)&&req.method!=="OPTIONS"&&req.headers["origin"]=="file://"&&isReqJSON(req.method,req.headers)){
+            res.header("Access-Control-Allow-Origin","file://");
+        }
     };
     var renderToLogin= function (res,loginMsg){
         var appConfig=getAppConfig();
@@ -113,9 +122,13 @@ module.exports= function(app) {
                 callback(null,recordset[0]);
             });
     };
-    app.use(function (req, res, next){                                                          log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
+    app.use(function (req, res, next){                                                          log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
         res.header("Access-Control-Allow-Headers","origin, Content-Type,Content-Length, Accept, X-Requested-With, uuid");
-        setAccessControlAllowOriginForMapp(req,res);
+        //                                    console.log("res.header 1",res.header["Access-Control-Allow-Origin"]);
+        //res.header("Access-Control-Allow-Origin","*");
+        //                                    console.log("res.header 2",res.header["Access-Control-Allow-Origin"]);
+
+        setAccessControlAllowOriginForMapp(req,res);                                            //console.log("res.header",res);
         if(req.originalUrl.indexOf("/login")==0){
             next(); return;
         }                                                                                       //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
