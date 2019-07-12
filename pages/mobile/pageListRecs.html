@@ -8,24 +8,24 @@
                     <i class="icon f7-icons">menu</i>
                 </a>
             </div>
-            <div class="title sliding">Приходы товара</div>
+            <div class="title">Приходы товара</div>
             <div class="subnavbar" style="top:calc(100% - 1px);">
                 <div class="subnavbar-inner">
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" id="pageListRecs-stock" class="item-link smart-select" @smartselect:close="pageListRecsStockClose">
+                                <a href="#" id="pageListRecs-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageListRecsStockClose">
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title" style="font-weight:bold">Склад</div>
+                                            <div id="pageListRecs-stock-label" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
+                                        </div>
+                                    </div>
                                     <select id="pageListRecs-stock-select">
                                         {{#each listStocks}}
                                         <option value={{StockID}}>{{StockName}}</option>
                                         {{/each}}
                                     </select>
-                                    <div class="item-content">
-                                        <div class="item-inner">
-                                            <div class="item-title">Склад</div>
-                                            <div id="pageListRecs-stock-label" class="item-after" style="color:#212121"></div>
-                                        </div>
-                                    </div>
                                 </a>
                             </li>
                         </ul>
@@ -40,15 +40,15 @@
                 {{#each listRecs}}
                 <li>
                     <a class="item-link item-content" href="/pageRecData/{{ChID}}"
-                            style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
+                            style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row" style="padding-right:16px">
-                                <div class="item-title" style="width:100%">
-                                    <div class="item-title">
-                                        <div class="item-header" style="display:inline-block;float:left;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{DocID}} от {{SDocDate}}</div>
-                                        <div class="item-header" style="display:inline-block;float:right;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{StateName}}</div>
+                                <div class="item-title" style="width:100%;font-weight:normal{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
+                                    <div class="item-title" style="font-weight:inherit">
+                                        <div class="item-header" style="display:inline-block;float:left;max-width:150px;font-weight:inherit">{{DocID}} от {{SDocDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:right;max-width:130px;font-weight:inherit">{{StateName}}</div>
                                     </div>
-                                    <div class="item-title docsListStockName">{{StockName}}</div>
+                                    <div class="item-title docsListStockName" style="font-weight:normal">{{StockName}}</div>
                                 </div>
                                 <div class="item-after" style="min-width:70px">
                                     <div style="width:100%;text-align:right">{{TSumCC_wt}}</div>

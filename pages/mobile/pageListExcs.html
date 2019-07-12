@@ -8,7 +8,7 @@
                     <i class="icon f7-icons">menu</i>
                 </a>
             </div>
-            <div class="title sliding">Перемещения товара</div>
+            <div class="title">Перемещения товара</div>
             <div class="subnavbar" style="top:calc(100% - 1px);">
                 <div class="subnavbar-inner">
                     <div class="list" style="width:100%">
@@ -21,7 +21,6 @@
                                             <div id="pageListExcs-stock-label" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
                                         </div>
                                     </div>
-
                                     <select id="pageListExcs-stock-select">
                                         {{#each listStocks}}
                                         <option value={{StockID}}>{{StockName}}</option>
@@ -47,7 +46,7 @@
                             <div class="item-title-row" style="padding-right:16px">
                                 <div class="item-title" style="width:100%">
                                     <div class="item-title">
-                                        <div class="item-header" style="display:inline-block;float:left;max-width:120px;font-weight:inherit">{{DocID}} <br>от {{SDocDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:left;max-width:150px;font-weight:inherit">{{DocID}} от {{SDocDate}}</div>
                                         <div class="item-header" style="display:inline-block;float:right;max-width:130px;text-align:right;font-weight:inherit">{{StateName}}</div>
                                     </div>
                                     <div class="item-title docsListStockName" style="font-weight:normal">с {{StockName}}</div>

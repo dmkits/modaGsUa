@@ -15,19 +15,19 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/pageListInvents";
-module.exports.modulePagePath = "mobile/pageListInvents.html";
+module.exports.modulePageURL = "/mobile/pageListVens";
+module.exports.modulePagePath = "mobile/pageListVens.html";
 module.exports.routes=[//-- App routes --
-    { path: '/pageListInvents', componentUrl: '/mobile/pageListInvents', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
-    { path: '/pageInventory/:inventChID', componentUrl: '/mobile/pageInventory', options:{ignoreCache:true} },
-    { path: '/pageSettingsInvents', componentUrl: '/mobile/pageSettingsInvents', options:{ignoreCache:true} }
+    { path: '/pageListVens', componentUrl: '/mobile/pageListVens', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
+    { path: '/pageVenData/:venChID', componentUrl: '/mobile/pageVenData', options:{ignoreCache:true} },
+    { path: '/pageSettingsVens', componentUrl: '/mobile/pageSettingsVens', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
-    app.get("/mobile/pageSettingsInvents", function (req, res) {
-        res.sendFile(appViewsPath+'mobile/pageSettingsInvents.html');
+    app.get("/mobile/pageSettingsVens", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/pageSettingsVens.html');
     });
-    app.get("/mobile/pageInventory", function (req, res) {
-        res.sendFile(appViewsPath+'mobile/pageInventory.html');
+    app.get("/mobile/pageVenData", function (req, res) {
+        res.sendFile(appViewsPath+'mobile/pageVenData.html');
     });
     var tVensListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Ven"},
@@ -75,7 +75,7 @@ module.exports.init = function(app){
                         order:"DocDate desc, DocID desc", top:top},
                     function(result){
                         error+=(result.error)?result.error:'';
-                        var outData={listStocks:listStocks,listInventsByStockID:(result)?result.items:null};
+                        var outData={listStocks:listStocks,listVensByStockID:(result)?result.items:null};
                         if(error!='')outData.error=error;
                         res.send(outData);
                     });

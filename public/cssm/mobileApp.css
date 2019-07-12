@@ -32,13 +32,45 @@ tfoot td{
     .md .navbar+.toolbar:not(.toolbar-bottom-md):not(.messagebar) {
         top: 56px;
     }
-    .md .navbar+.toolbar:not(.toolbar-bottom-md):not(.messagebar)~* .page-content, .md .navbar+.toolbar:not(.toolbar-bottom-md):not(.messagebar)~.page-content {
+    .md .navbar+.toolbar:not(.toolbar-bottom-md):not(.messagebar)~* .page-content,
+    .md .navbar+.toolbar:not(.toolbar-bottom-md):not(.messagebar)~.page-content {
         padding-top: 104px;
     }
-    .md .navbar~.subnavbar~* .page-content, .md .navbar~.subnavbar~.page-content, .md .page-with-subnavbar .navbar~* .page-content, .md .page-with-subnavbar .navbar~.page-content {
+    .md .navbar~.subnavbar~* .page-content,
+    .md .navbar~.subnavbar~.page-content,
+    .md .page-with-subnavbar .navbar~* .page-content,
+    .md .page-with-subnavbar .navbar~.page-content {
         padding-top: 104px;
     }
 }
+
+.md .toolbar {
+    /*height: 96px;*/
+}
+.md .list .item-content,
+.md .list .item-inner {
+    min-height:32px;
+}
+.md .list .item-inner {
+    padding-top:4px;
+    padding-bottom:4px;
+}
+
+.ios .navbar,
+.ios .navbar~*,
+.ios .subnavbar,
+.ios .subnavbar~* {
+    border-color: #E4E4E4;;
+}
+
+.docsListStockName{
+    font-size:14px;
+}
+.docHeaderTitle{
+    font-size:14px;
+    line-height: 1.0 !important;
+}
+
 #login-button-div{
     text-align: center;
 }
@@ -95,14 +127,6 @@ tfoot td{
 
 }
 
-.docsListStockName{
-    font-size:14px;
-}
-.docHeaderTitle{
-    font-size:14px;
-    line-height: 1.0 !important;
-}
-
 .tableReport{
     line-height: 1.5;
     font-size: 12px;
@@ -123,16 +147,4 @@ tfoot td{
 }
 .tableReport .numeric-cell{
     text-align: right;
-}
-
-.md .toolbar {
-    /*height: 96px;*/
-}
-.md .list .item-content,
-.md .list .item-inner {
-    min-height:32px;
-}
-.md .list .item-inner {
-    padding-top:4px;
-    padding-bottom:4px;
 }

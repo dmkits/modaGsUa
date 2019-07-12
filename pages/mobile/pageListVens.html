@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" id="pageListInvents">
+<div class="page page-with-subnavbar" id="pageListVens">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -8,24 +8,24 @@
                     <i class="icon f7-icons">menu</i>
                 </a>
             </div>
-            <div class="title sliding">Инвентаризации</div>
+            <div class="title">Инвентаризации</div>
             <div class="subnavbar" style="top:calc(100% - 1px);">
                 <div class="subnavbar-inner">
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" id="pageListInvents-stock" class="item-link smart-select" @smartselect:close="pageListInventsStockClose">
-                                    <select id="pageListInvents-stock-select">
+                                <a href="#" id="pageListVens-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageListVensStockClose">
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title" style="font-weight:bold">Склад</div>
+                                            <div id="pageListVens-stock-label" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
+                                        </div>
+                                    </div>
+                                    <select id="pageListVens-stock-select">
                                         {{#each listStocks}}
                                         <option value={{StockID}}>{{StockName}}</option>
                                         {{/each}}
                                     </select>
-                                    <div class="item-content">
-                                        <div class="item-inner">
-                                            <div class="item-title">Склад</div>
-                                            <div id="pageListInvents-stock-label" class="item-after" style="color:#212121"></div>
-                                        </div>
-                                    </div>
                                 </a>
                             </li>
                         </ul>
@@ -37,9 +37,9 @@
     <div class="page-content">
         <div class="list media-list" style="margin:0">
             <ul>
-                {{#each listInvents}}
+                {{#each listVens}}
                 <li>
-                    <a class="item-link item-content" href="/pageInventory/{{ChID}}"
+                    <a class="item-link item-content" href="/pageVenData/{{ChID}}"
                             style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row">
@@ -48,7 +48,7 @@
                                         <div class="item-header" style="display:inline-block;float:left;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{DocID}} от {{SDocDate}}</div>
                                         <div class="item-header" style="display:inline-block;float:right;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{StateName}}</div>
                                     </div>
-                                    <div class="item-title docsListStockName">{{StockName}}</div>
+                                    <div class="item-title docsListStockName" style="font-weight:normal">{{StockName}}</div>
                                 </div>
                                 <div class="item-after" style="min-width:70px">
                                     <div style="width:100%;text-align:right">{{TVenQty}}</div>
@@ -66,16 +66,16 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e, page) {                                                             //console.log('pageListInvents.html pageAfterIn', app7.data.pageListInvents);
-                if(app7.data.pageListInvents) {
-                    this.stockIDFilter=app7.data.pageListInvents.stockIDFilter;
-                    this.stockNameFilter=app7.data.pageListInvents.stockNameFilter;
-                    if(this.stockIDFilter!==undefined) $$('#pageListInvents-stock-select').val(this.stockIDFilter);
-                    if(this.stockNameFilter) $$('#pageListInvents-stock').find("#pageListInvents-stock-label").text(this.stockNameFilter);
+            pageAfterIn: function(e, page) {                                                             //console.log('pageListVens.html pageAfterIn', app7.data.pageListVens);
+                if(app7.data.pageListVens) {
+                    this.stockIDFilter=app7.data.pageListVens.stockIDFilter;
+                    this.stockNameFilter=app7.data.pageListVens.stockNameFilter;
+                    if(this.stockIDFilter!==undefined) $$('#pageListVens-stock-select').val(this.stockIDFilter);
+                    if(this.stockNameFilter) $$('#pageListVens-stock').find("#pageListVens-stock-label").text(this.stockNameFilter);
                     this.$setState({
-                        listStocks:app7.data.pageListInvents.listStocks,
+                        listStocks:app7.data.pageListVens.listStocks,
                         stockIDFilter:this.stockIDFilter,stockNameFilter:this.stockNameFilter,
-                        listInvents:app7.data.pageListInvents.listInvents
+                        listVens:app7.data.pageListVens.listVens
                     });
                     return;
                 }
@@ -96,22 +96,22 @@
                     function(result,error){
                         app7.preloader.hide();
                         if(!result)return;
-                        app7.data.pageListInvents={
+                        app7.data.pageListVens={
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter,stockNameFilter:stockNameFilter,
-                            listInvents:result.listInventsByStockID
-                        };                                                                              //console.log('pageListInvents.html pageAfterIn app.data.pageListInvents 2=',app.data.pageListInvents);
+                            listVens:result.listVensByStockID
+                        };                                                                              //console.log('pageListVens.html pageAfterIn app.data.pageListVens 2=',app.data.pageListVens);
                         cInstance.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter,stockNameFilter:stockNameFilter,
-                            listInvents:result.listInventsByStockID
+                            listVens:result.listVensByStockID
                         });
                     })
             },
-            pageListInventsStockClose:function(e){
-                this.stockIDFilter=$$('#pageListInvents-stock-select').val();
-                this.stockNameFilter=$$('#pageListInvents-stock-label').text();
-                app7.data.pageListInvents=null;
+            pageListVensStockClose:function(e){
+                this.stockIDFilter=$$('#pageListVens-stock-select').val();
+                this.stockNameFilter=$$('#pageListVens-stock-label').text();
+                app7.data.pageListVens=null;
             }
         }
     }
