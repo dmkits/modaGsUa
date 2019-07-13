@@ -1,6 +1,6 @@
 {
   "title":"GABIS.UA",
-  "icon32x32":"/imgs/logoGS-red-min-whiteBG-ico32.jpg.jpg",
+  "icon32x32":"/imgs/logoGS-red-min-whiteBG-ico32.jpg",
   "imageSmall":"/imgs/logo red-small.jpg",
   "imageMain":"/imgs/logo red-small.jpg",
   "modules":[
@@ -37,7 +37,7 @@
     "manager":{
       "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier"],
-      "mobile":["mobileRec","mobileExc","mobileVen","mobileReportsCashier"]
+      "mobile":["mobileExc","mobileVen","mobileRec","mobileReportsCashier"]
     },
     "operatorRec":{
       "menu":["menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],

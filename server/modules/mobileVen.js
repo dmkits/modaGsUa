@@ -23,10 +23,10 @@ module.exports.routes=[//-- App routes --
     { path: '/pageSettingsVens', componentUrl: '/mobile/pageSettingsVens', options:{ignoreCache:true} }
 ];
 module.exports.init = function(app){
-    app.get("/mobile/pageSettingsVens", function (req, res) {
+    app.get("/mobile/pageSettingsVens", function(req,res){
         res.sendFile(appViewsPath+'mobile/pageSettingsVens.html');
     });
-    app.get("/mobile/pageVenData", function (req, res) {
+    app.get("/mobile/pageVenData", function(req,res){
         res.sendFile(appViewsPath+'mobile/pageVenData.html');
     });
     var tVensListTableColumns=[
@@ -63,7 +63,7 @@ module.exports.init = function(app){
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Ven.StateCode" },
         {data: "StateInfo", name: "Информация статуса", width: 250, type: "text", dataSource:"r_States", sourceField:"StateInfo" }
     ];
-    app.get("/mobile/Invent/getDataForVensList", function(req, res){
+    app.get("/mobile/Invent/getDataForVensList", function(req,res){
         var conditions={}, top="";
         for(var condItem in req.query) {
             if(condItem=="top")top="top "+req.query[condItem]; else conditions["t_Ven."+condItem]=req.query[condItem];
@@ -134,7 +134,7 @@ module.exports.init = function(app){
         // {data: "PriceCC", name: "Цена продажи", width: 65, type: "numeric2", dataSource:"t_RecD"}
         //{data: "PRICELIST_PRICE", name: "Цена по прайс-листу", width: 75, type: "numeric2"},
     ];
-    app.get("/mobile/Invent/getDataForVenATable", function(req, res){
+    app.get("/mobile/Invent/getDataForVenATable", function(req,res){
         var conditions={};
         for(var condItem in req.query)
             if(condItem.indexOf("ParentChID")==0) conditions["t_VenA.ChID="]=req.query[condItem];
@@ -207,7 +207,7 @@ module.exports.init = function(app){
                     });
         });
     };
-    app.post("/mobile/Invent/storeProdDataByCRUniInput", function(req, res){
+    app.post("/mobile/Invent/storeProdDataByCRUniInput", function(req,res){
         var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];  console.log('req.body',req.body);
         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
             if(resultFindProd.error){
@@ -219,7 +219,7 @@ module.exports.init = function(app){
             })
         });
     });
-    app.post("/mobile/Invent/storeExistsPosProdData", function(req, res){
+    app.post("/mobile/Invent/storeExistsPosProdData", function(req,res){
         var storingData=req.body, parentChID=storingData["parentChID"],venAData={TSrcPosID:storingData["TSrcPosID"]};   console.log('req.body',req.body);
         t_VenA.storeVenAProdData(req.dbUC,parentChID,venAData,storingData["TNewQty"],function (result){
             res.send(result);

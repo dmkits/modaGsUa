@@ -13,9 +13,13 @@ module.exports.modulePageURL = "/mobile";
 module.exports.modulePagePath = "mobile/index.html";
 module.exports.routes=[//-- App routes --
     { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
+    { path: '/pageSettingsServerURI', componentUrl: '/mobile/pageSettingsServerURI'},
     { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
 ];
 module.exports.init = function(app){
+    app.get("/mobile/pageSettingsServerURI", function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageSettingsServerURI.html');
+    });
     app.get("/mobile/getUserRoutes", function(req,res){
         if(!req.dbEmpRole){
             res.send({error:"Failed get routes! Reason: no database employee role!"});return;

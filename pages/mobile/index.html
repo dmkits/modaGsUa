@@ -19,13 +19,13 @@
     <meta name="theme-color" content="#2196f3">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
+    <link rel="shortcut icon" href="/img/logoGS-red-min-app.png">
     <script src="/jslib/framework7/js/framework7.min.js"></script>
     <link rel="stylesheet" href="/jslib/framework7/css/framework7.min.css">
     <link rel="stylesheet" type="text/css" href="/cssm/mobileIndex.css">
-    <link rel="stylesheet" href="/cssm/mobileIcons.css">
-    <link rel="stylesheet" href="/cssm/mobileApp.css">
+    <link rel="stylesheet" type="text/css" href="/cssm/mobileIcons.css">
+    <link rel="stylesheet" type="text/css" href="/cssm/mobileApp.css">
     <script src="/jslib/moment/moment.js"></script>
-    <link rel="shortcut icon" href="/img/logoGS-red-min-app.png">
     <title>GABIS Mobile</title>
 </head>
 <body>
@@ -82,7 +82,7 @@
                             <div class="list links-list">
                                 <ul>
                                     <li>
-                                    <a href="/settingsServerURI" class="panel-close">Сервер</a>
+                                    <a href="/pageSettingsServerURI" class="panel-close">Сервер</a>
                                     </li>
                                 </ul>
                             </div>
@@ -140,7 +140,7 @@
     var $$=Dom7,
         baseRoutes=[//-- App routes --
             { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
-            { path: '/settingsServerURI', componentUrl: './settingsServerURI.html'},
+            { path: '/pageSettingsServerURI', componentUrl: '/mobile/pageSettingsServerURI'},
             { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
         ],
         app7  = new Framework7({// Framework7 App main instance
@@ -151,8 +151,7 @@
             workingDoc:null
         }),
         mainView = app7.views.create('.view-main',{domCache:true,stackPages:true});
-
-    $$('#main-panel-left-settings').hide();//IT'S ONLY FOR MOBILE APP
+    //$$('#main-panel-left-settings').hide();//IT'S ONLY FOR MOBILE APP
     $$('#main-panel-left-pages').hide();
     app7.initData=function(){
         app7.data={};
@@ -161,6 +160,8 @@
         app7.data['excsListDocCount']=50;
         app7.data['inventsListDocCount']=50;
         if (typeof(Storage)!=="undefined") {
+            var serverURI=localStorage.getItem("settings-serverURI");
+            if(serverURI)app7.data['serverURI']=serverURI;
             var username=localStorage.getItem("login-username");
             if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
             var recsListDocCount=localStorage.getItem("settings-recs-listDocCount");
@@ -171,6 +172,7 @@
             if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount)))app7.data['inventsListDocCount']=parseInt(inventsListDocCount);
         } else {// Sorry! No Web Storage support..
         }
+        if(!app7.data['serverURI'])app7.data['serverURI']=(window&&window.origin)?window.origin:"http://192.168.56.21:8181";
     };
     app7.initData();
     $$('.view-main').on('page:afterin','.page[data-name="home"]',function(e){
@@ -215,9 +217,7 @@
     app7.setUserRoutes=function(){
         this.srvRequestJSON({url:'/mobile/getUserRoutes', errorDialogMsg:"Не удалось получить данные для загрузки!"},
             function(result,errmsg){
-                if(!result){
-                    mainView.router.navigate('/home');return;
-                }
+                if(!result){ mainView.router.navigate('/home');return; }
                 mainView.router.routes=result;                                                         //console.log("userRoutes",result);
                 var userRoutes={}, definePath;
                 for(var i=0; i<result.length; i++){

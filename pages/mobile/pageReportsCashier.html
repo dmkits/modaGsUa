@@ -11,14 +11,22 @@
             <div class="title sliding">Отчеты кассира</div>
         </div>
     </div>
-    <div class="toolbar" style="height:48px">
-        <div class="toolbar-inner" style="padding-left:5px;padding-right:5px">
-            <div class="row" style="width:100%">
-                <a href="#" id="pageReportsCashier-cr" class="col item-link smart-select" style="width:450px;" @smartselect:closed="pageReportsCashierCRClosed">
+
+    <div class="subnavbar docHeaderTitle" id="pageVenDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
+        <div class="subnavbar-inner">
+            <div class="row" style="padding-left:16px;padding-right:16px;width:100%;display:table">
+                <!--<input type="number" class="col" style="height:36px;min-width:200px;" id="pageVenDataBarCodeInput" placeholder="ШК или код товара">-->
+                <!--<button class="col button button-outline button-round" id="pageVenDataBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>-->
+                <!--<div>-->
+                    <!--<span id="pageVenDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>-->
+                    <!--<span id="pageVenDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>-->
+                <!--</div>-->
+
+                <a href="#" id="pageReportsCashier-cr" class="col item-link smart-select" style="display:table-cell;min-width:180px;" @smartselect:closed="pageReportsCashierCRClosed">
                     <div class="item-content">
-                        <div class="item-inner">
-                            <div class="item-title" style="display: contents">Касса</div>
-                            <div id="pageReportsCashier-cr-label" class="item-after" style="display:contents; color:#212121"></div>
+                        <div class="item-inner" style="min-height:30px">
+                            <div class="item-title" style="display:contents">Касса</div>
+                            <div id="pageReportsCashier-cr-label" class="item-after" style="display:contents;margin-left:0px;max-width:80%;color:#212121"></div>
                         </div>
                     </div>
                     <select id="pageReportsCashier-cr-select">
@@ -27,18 +35,22 @@
                         {{/each}}
                     </select>
                 </a>
-                <div class="col item-content item-input" style="width:auto">
-                    <div class="item-inner">
-                        <div class="item-input-wrap" style="min-height:auto;padding-top:5px;padding-bottom:5px">
-                            <input type="text" placeholder="Период дат" readonly id="pageReportsCashierDatesRange" @calendar:closed="pageReportsCashierDatesRangeClosed"/>
+                <a class="col" style="display:table-cell;width:140px">
+                    <div class="item-content">
+                        <div class="item-inner item-input">
+                            <div class="item-title1 item-label1" style="margin:0px;font-size:14px">Дата или период</div>
+                            <div class="item-input-wrap" style="margin-top:1px;color:#212121">
+                                <input type="text" placeholder="Период дат" readonly id="pageReportsCashierDatesRange" style="font-size:12px;" @calendar:closed="pageReportsCashierDatesRangeClosed"/>
+                            </div>
                         </div>
                     </div>
-                </div>
+
+                </a>
             </div>
         </div>
     </div>
-    <div class="page-content" style="padding-top:104px">
-        <table width="100%" style="position:fixed; z-index: 100;" class="tableReport tableReportCashierSales">
+    <div class="page-content" style="padding-top:88px">
+        <table width="100%" style="position:fixed;left:0px;top:88px; z-index:100;" class="tableReport tableReportCashierSales">
             <thead>
             <tr class="mobile-table-small-size">
                 <th rowspan="2" width="65px" class="datetime-cell">Дата<br>время<br>чека</th>
@@ -86,8 +98,8 @@
             </tr>
             </tbody>
         </table>
-        <table width="100%" style="margin-top:55px; margin-bottom: 43px;" class="tableReport tableReportCashierSales"></table>
-        <table width="100%" style="position:fixed; bottom:0px; z-index: 100" class="tableReport tableReportCashierSales">
+        <table width="100%" style="margin-top:55px;margin-bottom:30px;" class="tableReport tableReportCashierSales"></table>
+        <table width="100%" style="position:fixed;left:0px;bottom:0px;z-index:100" class="tableReport tableReportCashierSales">
             <tfoot>
             <tr class="mobile-table-small-size">
                 <td id="totalRows" width="65px" class="datetime-cell">0</td>

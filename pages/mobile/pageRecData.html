@@ -5,34 +5,33 @@
         <div class="navbar-inner">
             <div class="left">
                 <a href="#" class="link back">
-                    <i class="icon icon-back"></i>
-                    <span class="ios-only">Назад</span>
+                    <i class="icon icon-back"></i><i class="icon icon-back"></i>
+                    <!--<span class="ios-only">Назад</span>-->
                 </a>
             </div>
-            <div class="title sliding docHeaderTitle">Приход товара {{item.DocID}} от {{item.SDocDate}}<br>{{item.StockName}}</div>
-            <!--<div class="subnavbar">-->
-                <!--<div class="subnavbar-inner">-->
-                    <!--<div class="row">-->
-                        <!--<input type="number" class="col" style="height:36px;min-width:200px;" id="barCodeInput" placeholder="ШК или код товара" @keypress="barcodeInputKeypress">-->
-                        <!--<button class="col button button-outline button-round" id="buttonBarcodeInputEnter" style="width:80px;" @click="barcodeInputEnter">ВВОД</button>-->
-                    <!--</div>-->
-                <!--</div>-->
-            <!--</div>-->
-        </div>
-    </div>
-    <div class="toolbar" id="pageRecDataToolbar" style="">
-        <div class="toolbar-inner">
-            <div class="row" style="padding-left:16px;padding-right:16px;">
-                <!--<input type="number" class="col" style="height:36px;min-width:200px;" id="pageInventoryBarCodeInput" placeholder="ШК или код товара">-->
-                <button class="col button button-outline button-round" id="pageRecDataBtnNewPos" style="width:120px;">Добавить</button>
-                <button class="col button button-outline button-round" id="pageRecDataBtnEdtSel" style="width:120px;">Изменить</button>
-                <button class="col button button-outline button-round" id="pageRecDataBtnDelSel" style="width:120px;">Удалить</button>
-                <span id="pageRecDataState" style="color:black;font-weight:bold;display:none"></span>
+            <div class="title docHeaderTitle">
+                <span class="title docHeaderTitle">Приход товара {{item.DocID}} от {{item.SDocDate}}</span><br>
+                <span style="font-size:14px;font-weight:normal">{{item.StockName}}</span>
             </div>
+            <div class="subnavbar docHeaderTitle" id="pageRecDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
+                <div class="subnavbar-inner">
+                    <div class="row" style="padding-left:16px;padding-right:16px;">
+                        <button class="col button button-outline button-round" id="pageRecDataBtnNewPos" style="width:100px;">Добавить</button>
+                        <button class="col button button-outline button-round" id="pageRecDataBtnEdtSel" style="width:100px;">Изменить</button>
+                        <button class="col button button-outline button-round" id="pageRecDataBtnDelSel" style="width:100px;">Удалить</button>
+                        <div>
+                            <span id="pageRecDataState" style="color:black;font-weight:bold;display:none"></span>
+                            <!--<span id="pageVenDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>-->
+                            <!--<span id="pageVenDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <div class="page-content" id="pageContentRecData">
-        <table width="100%" style="position:fixed; top:104px; z-index: 100">
+        <table width="100%" style="position:fixed;left:0px;top:88px;z-index:100">
             <thead>
             <tr class="mobile-table-small-size">
                 <th width="40px">№<br>п/п</th>
@@ -75,8 +74,8 @@
             </tr>
             </tbody>
         </table>
-        <table width="100%" style="margin-top:37px; margin-bottom: 43px;"></table>
-        <table width="100%" style="position:fixed; bottom:0px; z-index: 100">
+        <table width="100%" style="margin-top:33px;margin-bottom:30px;"></table>
+        <table width="100%" style="position:fixed;left:0px;bottom:0px;z-index:100">
             <tfoot>
             <tr>
                 <td id="totalRows" width="40px">0</td>
@@ -92,12 +91,12 @@
 <script>
     return {
         on: {
-            pageInit: function(e, page) {                                                               //console.log('pageRecData.html pageInit', page, this);
+            pageInit: function(e,page){                                                                         //console.log('pageRecData.html pageInit', page, this);
                 var dataTables=$$(this.el).children(".page-content").children("table");
                 if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
                 if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
                 if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
-                if(!this.item||(this.item&&this.item["StateCode"]!==0)) {
+                if(!this.item||(this.item&&this.item["StateCode"]!==0)){
                     this.loadRecData(); return;
                 }
                 var self=this;
@@ -112,21 +111,18 @@
                 });
                 this.loadRecData();
             },
-            pageAfterOut: function(e, page) {                                                           //console.log('pageRecData.html pageAfterOut', page);
+            pageAfterOut: function(e,page){                                                                     //console.log('pageRecData.html pageAfterOut', page);
                 if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl);
             },
         },
-        data: function data() {                                                                         //console.log('pageRecData.html data',this.$route.params);
+        data: function data(){                                                                                  //console.log('pageRecData.html data',this.$route.params);
             let recData={},listRecsData=this.$app.data.pageListRecs.listRecs;
             if(!this.$route.params) return {item:recData,items:[]};
             let recChID=this.$route.params.recChID;
             if(!listRecsData||recChID===null||recChID===undefined) return {item:recData,items:[]};
             for(let ind in listRecsData){
                 let itemRecData=listRecsData[ind];
-                if(itemRecData&&itemRecData.ChID==recChID){
-                    recData=itemRecData;
-                    break;
-                }
+                if(itemRecData&&itemRecData.ChID==recChID){ recData=itemRecData; break; }
             }
             return {item:recData,items:[]};
         },
@@ -167,10 +163,9 @@
             setScroll: function(innerElem){
                 var page=$$('#pageContentRecData')[0],
                     absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
-                page.scrollTo(0, absoluteElementTop - (page.clientHeight / 2));
+                page.scrollTop= absoluteElementTop - (page.clientHeight / 2);//page.scrollTo(1, absoluteElementTop - (page.clientHeight / 2));-fail in mobileApp
             },
-
-            loadRecData:function(){                                                                  console.log('pageRecData.html loadRecData inventData=',this.item);
+            loadRecData:function(){                                                                             //console.log('pageRecData.html loadRecData inventData=',this.item);
                 let recData=this.item, recChID=recData.ChID;
                 if(recChID===null||recChID===undefined) return;
                 let cInstance=this;
@@ -180,11 +175,9 @@
                         errorDialogMsg:"Не удалось получить список товаров прихода товара с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
-                        if(!result){
-                            cInstance.disableActionButtons(true); return;
-                        }
+                        if(!result){ cInstance.disableActionButtons(true); return; }
                         cInstance.items=result.items;
-                        app7.data.pageRecData={recDataItems:result.items};                          console.log('pageRecData.html loadRecData items=',result.items);
+                        app7.data.pageRecData={recDataItems:result.items};                                      //console.log('pageRecData.html loadRecData items=',result.items);
                         cInstance.fillRecDTable(result.items,function(){
                             cInstance.disableActionButtons(false);
                             // $$("#barCodeInput").focus();
@@ -201,9 +194,8 @@
                             self.setTotalInfo(tableDataItem["Qty"],tableDataItem["SumCC_wt"],ind+1);
                         }
                     };
-                app7.innerPageFillTableData(this, inventData, params, finishedCallback)
+                app7.innerPageFillTableData(this, inventData, params, finishedCallback);
             },
-
             disableActionButtons:function(disable){
                 // if(disable!==false){
                 //     $$('#barCodeInput').attr('disabled',1);
@@ -213,11 +205,10 @@
                 // $$('#barCodeInput').removeAttr('disabled');
                 // $$('#buttonBarcodeInputEnter').removeAttr('disabled');
             },
-
-            // recTableTDNewQtyOnClick:function(e,dataTableItemName,self){
-            //     var td=e.target;
-            //     // self.showRealQtyDialog(td, dataTableItemName["ProdName"], td.innerText.trim());
-            // }
+            recTableTDNewQtyOnClick:function(e,dataTableItemName,self){
+//                var td=e.target;
+//                self.showRealQtyDialog(td, dataTableItemName["ProdName"], td.innerText.trim());
+            }
         }
     }
 </script>

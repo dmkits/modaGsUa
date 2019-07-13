@@ -71,9 +71,14 @@ module.exports.init = function(app){
     ];
     app.get("/mobile/exc/getDataForExcsList", function(req,res){
         var conditions={}, top="";
-        for(var condItem in req.query) {
-            if(condItem=="top")top="top "+req.query[condItem]; else conditions["t_Exc."+condItem]=req.query[condItem];
+        for(var condItem in req.query){
+            if(condItem=="top")top="top "+req.query[condItem];
+            else if(condItem&&condItem.indexOf("StockID")==0){
+                var sCond=condItem.replace("StockID","").replace("~","=")+req.query[condItem];
+                conditions["(t_Exc.StockID"+sCond+" or t_Exc.NewStockID"+sCond+")"]=null;
+            }else conditions["t_Exc."+condItem]=req.query[condItem];
         }
+        if(req.dbEmpRole=="sendExcs") conditions["t_Exc.StateCode in (50,56,60)"]=null;
         r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
             function(result){
                 var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;
