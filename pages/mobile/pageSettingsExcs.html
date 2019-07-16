@@ -24,7 +24,7 @@
                     </div>
                 </li>
             </ul>
-            <div class="row">
+            <div class="row" style="margin-top:10px">
                 <div class="col" style="width:0px"></div>
                 <button id="settings-excs-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
                 <div class="col" style="width:0px"></div>
@@ -36,7 +36,7 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e, page) {
+            pageAfterIn: function(e,page){
                 $$("#settings-excs-input").val(this.$app.data['excsListDocCount']);
             }
         },

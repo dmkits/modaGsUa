@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" id="pageListRecs">
+<div class="page page-with-subnavbar" id="pageListExcs">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -35,13 +35,17 @@
             </div>
         </div>
     </div>
-    <div class="page-content">
+    <div class="page-content ptr-content">
+        <div class="ptr-preloader">
+            <div class="preloader"></div>
+            <div class="ptr-arrow"></div>
+        </div>
         <div class="list media-list" style="margin:0">
             <ul>
                 {{#each listExcs}}
                 <li>
                     <a class="item-link item-content" href="/pageExcData/{{ChID}}"
-                            style="background-color:lightgrey;background-color:{{#if IsStateCreated}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
+                       style="background-color:lightgrey;background-color:{{#if IsStateCreated}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row" style="padding-right:16px">
                                 <div class="item-title" style="width:100%">
@@ -68,7 +72,14 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e, page){                                                            //console.log("app7.data.pageListExcs",app7.data.pageListExcs);
+            pageAfterIn: function(e,page){                                                                      //console.log("app7.data.pageListExcs",app7.data.pageListExcs);
+                var self=this;
+                $$('#pageListExcs .ptr-content').on('ptr:refresh',function(e){
+                    setTimeout(function(){
+                        self.loadListExcsData();
+                        app7.ptr.done(); // or e.detail();
+                    },1000);
+                });
                 if(app7.data.pageListExcs){
                     this.stockIDFilter=app7.data.pageListExcs.stockIDFilter;
                     this.stockNameFilter=app7.data.pageListExcs.stockNameFilter;
@@ -87,7 +98,7 @@
             }
         },
         methods:{
-            loadListExcsData:function(){
+            loadListExcsData: function(){
                 let cInstance=this,
                     stockIDFilter=this.stockIDFilter,stockNameFilter=this.stockNameFilter;
                 app7.preloader.show();
@@ -102,16 +113,15 @@
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
                             listExcs:result.listExcsByStockID
-                        };                                                                              //console.log('pageListExcs.html pageAfterIn app.data.pageListExcs 2=',app.data.pageListExcs);
+                        };                                                                                      //console.log('pageListExcs.html pageAfterIn app.data.pageListExcs 2=',app.data.pageListExcs);
                         cInstance.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
                             listExcs:result.listExcsByStockID
                         });
                     })
-                return;
             },
-            pageListExcsStockClose:function(e){
+            pageListExcsStockClose: function(e){
                 this.stockIDFilter=$$('#pageListExcs-stock-select').val();
                 this.stockNameFilter=$$('#pageListExcs-stock-label').text();
                 app7.data.pageListExcs=null;

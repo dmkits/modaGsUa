@@ -34,7 +34,11 @@
             </div>
         </div>
     </div>
-    <div class="page-content">
+    <div class="page-content ptr-content">
+        <div class="ptr-preloader">
+            <div class="preloader"></div>
+            <div class="ptr-arrow"></div>
+        </div>
         <div class="list media-list" style="margin:0">
             <ul>
                 {{#each listVens}}
@@ -66,7 +70,14 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e, page) {                                                             //console.log('pageListVens.html pageAfterIn', app7.data.pageListVens);
+            pageAfterIn: function(e,page){                                                                      //console.log('pageListVens.html pageAfterIn', app7.data.pageListVens);
+                var self=this;
+                $$('#pageListVens .ptr-content').on('ptr:refresh',function(e){
+                    setTimeout(function(){
+                        self.loadListInventsData();
+                        app7.ptr.done(); // or e.detail();
+                    },1000);
+                });
                 if(app7.data.pageListVens) {
                     this.stockIDFilter=app7.data.pageListVens.stockIDFilter;
                     this.stockNameFilter=app7.data.pageListVens.stockNameFilter;
@@ -100,7 +111,7 @@
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter,stockNameFilter:stockNameFilter,
                             listVens:result.listVensByStockID
-                        };                                                                              //console.log('pageListVens.html pageAfterIn app.data.pageListVens 2=',app.data.pageListVens);
+                        };                                                                                      //console.log('pageListVens.html pageAfterIn app.data.pageListVens 2=',app.data.pageListVens);
                         cInstance.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter,stockNameFilter:stockNameFilter,

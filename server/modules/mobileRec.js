@@ -75,6 +75,7 @@ module.exports.init = function(app){
         for(var condItem in req.query) {
             if(condItem=="top")top="top "+req.query[condItem]; else conditions["t_Rec."+condItem]=req.query[condItem];
         }
+        conditions["t_Rec.StateCode in (0, 50,56,60, 52,58,62)"]=null;
         r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
             function(result){
                 var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;

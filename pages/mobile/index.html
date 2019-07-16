@@ -446,7 +446,7 @@
             app7.progressbar.hide(params.progressBarEl);
             app7.preloader.hide();$$(params.dataTableBody).show();
             if(params.progressAction)params.progressAction(tableData);
-            if(finishedCallback) finishedCallback(tableData);
+            if(finishedCallback) setTimeout(function(){ finishedCallback(tableData); },1);
         });
     };
     /** IT'S USED IN INNER PAGE TEMPLATES
@@ -456,8 +456,7 @@
      * finishedCallback = function(tableData)
      */
     app7.fillInnerPageTableDataProgress= function(self, ind,tableData, params, finishedCallback){
-        var timeout=10+Math.round(ind/100);
-        var i=ind, tableDataItem;
+        var timeout=10+Math.round(ind/100), i=ind, tableDataItem;
         while(i<ind+10){
             tableDataItem=tableData[i];
             if(!tableDataItem)break;
@@ -467,10 +466,8 @@
             i++;
         }
         app7.progressbar.set(params.progressBarEl, params.progress);
-        if(!tableDataItem) {
-            setTimeout(function(){
-                if(finishedCallback)finishedCallback(tableData);
-            },timeout);
+        if(!tableDataItem){
+            if(finishedCallback) setTimeout(function(){ finishedCallback(tableData); },timeout);
             return;
         }
         setTimeout(function(){
