@@ -75,6 +75,7 @@ module.exports.init = function(app){
             if(condItem=="top")top="top "+req.query[condItem];
             else if(condItem&&condItem.indexOf("StockID")==0){
                 var sCond=condItem.replace("StockID","").replace("~","=")+req.query[condItem];
+                sCond=sCond.replace("=-1",">0");
                 conditions["(t_Exc.StockID"+sCond+" or t_Exc.NewStockID"+sCond+")"]=null;
             }else conditions["t_Exc."+condItem]=req.query[condItem];
         }
@@ -82,6 +83,7 @@ module.exports.init = function(app){
         r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
             function(result){
                 var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;
+                if(listStocks)listStocks=[{StockID:-1, StockName:'Все склады'}].concat(listStocks);
                 t_Exc.getDataItemsForTable(req.dbUC,{tableColumns:tExcsListTableColumns, conditions:conditions,
                         order:"DocDate desc, DocID desc", top:top},
                     function(result){

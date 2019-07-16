@@ -143,7 +143,7 @@
             },
             pageAfterOut: function(e,page){
                 if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl);
-            },
+            }
         },
         data: function(){
             let excData={},listExcs=this.$app.data.pageListExcs.listExcs;
@@ -196,7 +196,6 @@
                     absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
                 page.scrollTop= absoluteElementTop - (page.clientHeight / 2);//page.scrollTo(1, absoluteElementTop - (page.clientHeight / 2));-fail in mobileApp
             },
-
             loadExcData: function(){                                                                            //console.log('pageExcData.html loadExcData excData=',this.item);
                 this.setInputProdBarcodeByState({focus:true,enable:false});
                 let excData=this.item, excChID=excData.ChID;

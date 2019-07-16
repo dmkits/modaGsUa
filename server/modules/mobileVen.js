@@ -65,13 +65,17 @@ module.exports.init = function(app){
     ];
     app.get("/mobile/Invent/getDataForVensList", function(req,res){
         var conditions={}, top="";
-        for(var condItem in req.query) {
-            if(condItem=="top")top="top "+req.query[condItem]; else conditions["t_Ven."+condItem]=req.query[condItem];
+        for(var condItem in req.query){
+            var condVal=req.query[condItem];
+            if(condItem=="top")top="top "+condVal;
+            else if(condVal=="-1") conditions["t_Ven."+condItem.replace("~",">")+"0"]=null;
+            else conditions["t_Ven."+condItem]=condVal;
         }
         conditions["t_Ven.StateCode=0"]=null;
         r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
             function(result){
                 var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;
+                if(listStocks)listStocks=[{StockID:-1, StockName:'Все склады'}].concat(listStocks);
                 t_Ven.getDataItemsForTable(req.dbUC,{tableColumns:tVensListTableColumns, conditions:conditions,
                         order:"DocDate desc, DocID desc", top:top},
                     function(result){
