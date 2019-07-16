@@ -102,8 +102,8 @@
             <div class="page-content login-screen-content" id="mobInv-login-screen">
                 <div class="block main-logo">
                 </div>
-                <div class="login-screen-title">Авторизация</div>
-                <div class="list no-hairlines-md">
+                <!--<div class="login-screen-title">Авторизация</div>-->
+                <div class="list no-hairlines-md" style="margin-bottom:0">
                     <ul>
                         <li class="item-content item-input">
                             <div class="item-inner">
@@ -125,7 +125,19 @@
                         </li>
                     </ul>
                 </div>
-                <div class="block">
+                <div class="block" style="margin-top:0">
+                    <div class="row list" style="margin-top:0;margin-bottom:0">
+                        <div class="col" style="width:0px"></div>
+                        <div class="col" style="width:auto;padding-right:0">
+                            <label class="item-checkbox item-content" style="padding-left:0">
+                                <input id="login-storeUser" type="checkbox" value=""/>
+                                <i class="icon icon-checkbox"></i>
+                                <div class="item-title">Запомнить меня</div>
+                            </label>
+
+                        </div>
+                        <div class="col" style="width:0px"></div>
+                    </div>
                     <div class="row">
                         <div class="col" style="width:0px"></div>
                         <button id="login-button" class="col button button-fill button-round" style="width:200px">ВОЙТИ</button>
@@ -159,36 +171,45 @@
         app7.data['recsListDocCount']=50;
         app7.data['excsListDocCount']=50;
         app7.data['inventsListDocCount']=50;
-        if (typeof(Storage)!=="undefined") {
+        if(typeof(Storage)!=="undefined"){
             var serverURI=localStorage.getItem("settings-serverURI");
             if(serverURI)app7.data['serverURI']=serverURI;
-            var username=localStorage.getItem("login-username");
-            if(username&&username.toString().trim()!="")$$('#mobInv-login-screen #login-username').val(username);
             var recsListDocCount=localStorage.getItem("settings-recs-listDocCount");
             if(recsListDocCount&&!isNaN(parseInt(recsListDocCount)))app7.data['recsListDocCount']=parseInt(recsListDocCount);
             var excsListDocCount=localStorage.getItem("settings-excs-listDocCount");
             if(excsListDocCount&&!isNaN(parseInt(excsListDocCount)))app7.data['excsListDocCount']=parseInt(excsListDocCount);
             var inventsListDocCount=localStorage.getItem("settings-inventory-listDocCount");
             if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount)))app7.data['inventsListDocCount']=parseInt(inventsListDocCount);
-        } else {// Sorry! No Web Storage support..
+        }else{// Sorry! No Web Storage support..
         }
         if(!app7.data['serverURI'])app7.data['serverURI']=(window&&window.origin)?window.origin:"http://192.168.56.21:8181";
     };
+    app7.setLoginStoredData=function(){
+        $$('#mobInv-login-screen #login-password').val("");
+        $$('#mobInv-login-screen #login-storeUser').prop('checked',false);
+        if(typeof(Storage)=="undefined"){
+            $$('#mobInv-login-screen #login-storeUser').attr('disabled',1);
+            return
+        }
+        $$('#mobInv-login-screen #login-storeUser').removeAttr('disabled');
+        var username=localStorage.getItem("login-username");
+        if(!username||username.toString().trim()=="")return;
+        $$('#mobInv-login-screen #login-username').val(username);
+        var storeLoginUserpswrdItemName="login-userpswrd-"+username,
+                storeLoginUserpswrd=localStorage.getItem(storeLoginUserpswrdItemName);
+        if(!storeLoginUserpswrd||storeLoginUserpswrd=="null")return;
+        $$('#mobInv-login-screen #login-password').val(storeLoginUserpswrd);
+        $$('#mobInv-login-screen #login-storeUser').prop('checked',true);
+    };
     app7.initData();
+    app7.setLoginStoredData();
     $$('.view-main').on('page:afterin','.page[data-name="home"]',function(e){
         $$('#main-panel-left-pages').hide();
         app7.initData();
+        app7.setLoginStoredData();
         app7.request.setup({ headers: {'uuid':app7.data.uuid} });
-        $$('#mobInv-login-screen #login-password').val("");
-        var username="";
-        if (typeof(Storage)!=="undefined") {
-            username=localStorage.getItem("login-username");
-            if(username)username=username.toString().trim();
-        } else {// Sorry! No Web Storage support..
-        }
-        $$('#mobInv-login-screen #login-username').val(username).focus();
+        $$('#mobInv-login-screen #login-username').focus();
     });
-
     $$('#mobInv-login-screen #login-button').on('click',function(){
         app7.loginProcess();
     });
@@ -205,9 +226,14 @@
                     $$('#mobInv-login-screen #login-password').focus(); return;
                 }
                 $$('#mobInv-login-screen #login-username').val("");
-                if (typeof(Storage)!=="undefined") {
+                if(typeof(Storage)!=="undefined"){
                     localStorage.setItem("login-username",username);
-                } else {// Sorry! No Web Storage support..
+                    var storeLoginUserpswrdItemName="login-userpswrd-"+username;
+                    if($$('#mobInv-login-screen #login-storeUser').prop('checked'))
+                        localStorage.setItem(storeLoginUserpswrdItemName,password);
+                    else
+                        localStorage.setItem(storeLoginUserpswrdItemName,null);
+                }else{// Sorry! No Web Storage support..
                 }
                 app7.data.uuid=result.uuid;
                 app7.request.setup({ headers: {'uuid':result.uuid} });
