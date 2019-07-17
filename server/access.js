@@ -1,6 +1,7 @@
 var path=require('path'), fs=require('fs');
 var log=require("./server").log,
-    server=require("./server"), getSysConfig=server.getSysConfig,getAppConfig=server.getAppConfig,
+    server=require("./server"),
+    appStartupParams=server.getAppStartupParams(), getSysConfig=server.getSysConfig, getAppConfig=server.getAppConfig,
     database=require("./databaseMSSQL"),
     appModules=require("./modules"),
     common=require("./common");
@@ -29,7 +30,7 @@ module.exports= function(app){
             res.header("Access-Control-Allow-Origin","file://");
         }
     };
-    var renderToLogin= function (res,loginMsg){
+    var renderToLogin= function(res,loginMsg){
         var appConfig=getAppConfig();
         res.render(path.join(__dirname, "../pages/login.ejs"), {
             title: (appConfig&&appConfig.title)?appConfig.title:"",
@@ -202,7 +203,6 @@ module.exports= function(app){
                 });
                 return;
             }
-
             if(renderIsMobile(req,res,next))return;
             next();
         });
@@ -230,22 +230,35 @@ module.exports= function(app){
         }
         var uuid = common.getUIDNumber();
         database.createNewUserDBConnection({uuid:uuid,login:userName,password:userPswrd}, function(err,result){
-            var isSysadmin=false, sysConfig=getSysConfig();
+            var isSysadmin=false, sysConfig=getSysConfig(),
+                appMode=(appStartupParams)?appStartupParams.mode:null,
+                appModeIsDebug=!appMode
+                    ||(appMode.toLocaleLowerCase().indexOf("debug")>=0)
+                    ||(appMode.toLocaleLowerCase().indexOf("test")>=0);
+            var outData={"uuid":uuid, mode:appMode, modeIsDebug:appModeIsDebug, dbName:sysConfig.dbName};
             if(sysConfig && userName==sysConfig.dbUser && userPswrd==sysConfig.dbUserPass) isSysadmin=true;
             if(err){
                 if(isSysadmin){
                     storeSysadminUUID({uuid:uuid,userName:userName},function(){
                         res.cookie("uuid", uuid);
-                        res.send({"uuid":uuid});
+                        res.send(outData);
                     });
                     return;
                 }
-                res.send({ error:{error:err.error,userMessage:err.userMessage} });
+                outData.error= {error:err.error,userMessage:err.userMessage};
+                res.send(outData);
                 return;
             }
             if(isSysadmin) storeSysadminUUID({uuid:uuid,userName:userName});
             res.cookie("uuid", uuid);
-            res.send({"uuid":uuid});
+            getDBUserData(result.dbUC, function(errMsg,dbUserParameters){
+                if(errMsg) outData.dbUserError= errMsg;
+                if(dbUserParameters){
+                    outData.dbUserName= dbUserParameters.dbUserName;
+                    outData.dbEmpRole= dbUserParameters["EmpRole"];
+                }
+                res.send(outData);
+            });
         });
     });
 };

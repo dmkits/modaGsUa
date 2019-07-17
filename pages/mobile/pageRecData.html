@@ -177,6 +177,7 @@
                         app7.preloader.hide();
                         if(!result){ cInstance.disableActionButtons(true); return; }
                         cInstance.items=result.items;
+//                        if(!result.items){ self.setInputProdBarcodeByState(); return; }
                         app7.data.pageRecData={recDataItems:result.items};                                      //console.log('pageRecData.html loadRecData items=',result.items);
                         cInstance.fillRecDTable(result.items,function(){
                             cInstance.disableActionButtons(false);

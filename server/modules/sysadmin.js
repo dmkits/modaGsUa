@@ -1,7 +1,7 @@
 var path = require('path'), fs = require('fs'),
     moment=require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron')*/;
 var server=require('../server'), getLoadInitModulesError=server.getLoadInitModulesError, log = server.log,
-    appParams=server.getAppStartupParams(),
+    appStartupParams=server.getAppStartupParams(),
     getSysConfig=server.getSysConfig, setSysConfig=server.setSysConfig,loadSysConfig=server.loadSysConfig,
     getAppConfig=server.getAppConfig;
 var common=require('../common'), database=require('../databaseMSSQL');
@@ -25,7 +25,7 @@ module.exports.init = function(app){
     app.get("/sysadmin/sysState",function(req,res){
         var revalidateModules= false;
         if(req.query&&req.query["revalidate"]) revalidateModules= true;
-        var outData= {mode:appParams.mode, port:appParams.port, dbUserName:req.dbUserName},
+        var outData= {mode:appStartupParams.mode, port:appStartupParams.port, dbUserName:req.dbUserName},
             sysConfig=getSysConfig();
         if(req.dbUserError)outData.dbUserError=req.dbUserError;
         if(!sysConfig||sysConfig.error){
@@ -86,7 +86,7 @@ module.exports.init = function(app){
     app.post("/sysadmin/sysConfig/storeSysConfigAndReconnectToDB",function(req,res){
         var newSysConfig = req.body,
             currentDbName=server.getSysConfig().database, currentDbHost=server.getSysConfig().host;
-        common.saveConfig(appParams.mode+".cfg", newSysConfig, function(err){
+        common.saveConfig(appStartupParams.mode+".cfg", newSysConfig, function(err){
             var outData = {};
             if(err){
                 outData.error = "Failed to store system config. Reason: "+err+". New system config not applied!";

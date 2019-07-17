@@ -176,6 +176,7 @@
                         app7.preloader.hide();
                         let resultItems=(result)?result.items:null;
                         self.items=resultItems;
+                        if(!resultItems){ self.setInputProdBarcodeByState(); return; }
                         app7.data.pageVenData={inventDataItems:resultItems};                                    //console.log('pageVenData loadVenData resultItems=',resultItems);
                         if(error||!resultItems) return;
                         var params={ dataTableHeader:self.dataTableHeader, dataTableBody:self.dataTableBody,

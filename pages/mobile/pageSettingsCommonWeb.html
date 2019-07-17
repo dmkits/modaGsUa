@@ -1,0 +1,63 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page" id="settingsCommon-view">
+    <div class="navbar">
+        <div class="navbar-inner sliding">
+            <div class="left">
+                <a href="#" class="link back">
+                    <i class="icon icon-back"></i><i class="icon icon-back"></i>
+                    <!--<span class="ios-only">Назад</span>-->
+                </a>
+            </div>
+            <div class="title">Общие настройки</div>
+        </div>
+    </div>
+    <div class="page-content">
+        <div class="block-title">Приложение</div>
+        <div class="list no-hairlines-md">
+            <ul>
+                <li class="row item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Режим</div>
+                            <div id="settingsCommon-appMode" class="item-input" style="margin-top:10px"></div>
+                        </div>
+                    </div>
+                    <div class="item-inner">
+                        <div class="item-inner">
+                            <div class="item-title item-label">БД</div>
+                            <div id="settingsCommon-dbName" class="item-input" style="margin-top:10px"></div>
+                        </div>
+                    </div>
+                    <div class="item-inner">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Пользователь</div>
+                            <div id="settingsCommon-dbUserName" class="item-input" style="margin-top:10px"></div>
+                        </div>
+                    </div>
+                    <div class="item-inner">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Роль</div>
+                            <div id="settingsCommon-dbEmpRole" class="item-input" style="margin-top:10px"></div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        on: {
+            pageAfterIn: function(e,page){
+                $$("#settingsCommon-appMode").html(this.$app.data['appMode']);
+                $$("#settingsCommon-dbName").html(this.$app.data['dbName']);
+                $$("#settingsCommon-dbUserName").html(this.$app.data['dbUserName']);
+                $$("#settingsCommon-dbEmpRole").html(this.$app.data['dbEmpRole']);
+            }
+        },
+        methods: {
+        }
+    }
+</script>

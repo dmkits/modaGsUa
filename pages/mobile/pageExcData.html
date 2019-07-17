@@ -208,6 +208,7 @@
                         app7.preloader.hide();
                         let resultItems=(result)?result.items:null;
                         self.items=resultItems;
+                        if(!resultItems){ self.setInputProdBarcodeByState(); return; }
                         app7.data.pageExcData={inventDataItems:resultItems};                                    //console.log('pageExcData.html loadExcData resultItems=',resultItems);
                         var params={ dataTableHeader:self.dataTableHeader, dataTableBody:self.dataTableBody,
                             progressAction:function(tableData, ind,tableDataItem){
