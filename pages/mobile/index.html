@@ -235,6 +235,10 @@
                             .html('ТЕСТОВЫЙ РЕЖИМ!!!'+((mode)?'<br><span style="font-size:18px">('+mode+')</span>':''));
                     app7.data["appModeMsg"]= "!ТЕСТОВЫЙ РЕЖИМ!";
                     $$('#appbar-modeMsg').text(app7.data["appModeMsg"]);
+                }else{
+                    $$('#mobileLogin-screen #mobileLogin-mainLogo').show();
+                    $$('#mobileLogin-screen #mobileLogin-mainModeDebug').hide();
+                    $$('#appbar-modeMsg').text("");
                 }
                 app7.data["dbName"]= (result)?result.dbName:null;
                 app7.data["dbUserError"]= (result)?result.dbUserError:null;
