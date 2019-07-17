@@ -1,0 +1,74 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page" id="settingsCommon-view">
+    <div class="navbar">
+        <div class="navbar-inner sliding">
+            <div class="left">
+                <a href="#" class="link back">
+                    <i class="icon icon-back"></i>
+                    <span class="ios-only">Назад</span>
+                </a>
+            </div>
+            <div class="title">Общие настройки</div>
+        </div>
+    </div>
+    <div class="page-content">
+        <div class="block-title">Доступ</div>
+        <div class="list no-hairlines-md">
+            <ul>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Адрес сервера</div>
+                        <div class="item-input-wrap">
+                            <input id="settingsCommon-inputServerURI" type="text" placeholder="Адрес сервера">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="block-title">Устройство</div>
+        <div class="list no-hairlines-md">
+            <ul>
+                <li class="row item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Сканер штрихкодов</div>
+                        <label class="item-checkbox item-content" style="padding-left:0;display:-webkit-inline-box">
+                            <input id="settingsCommon-checkboxUseBCScanner" type="checkbox" value=""/>
+                            <i class="icon icon-checkbox"></i>
+                            <div class="item-title">Активировать сканер штрихкодов</div>
+                        </label>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="row" style="margin-top:0px">
+            <div class="col" style="width:0px"></div>
+            <button class="col button button-fill button-round" style="width:200px" @click="btnStoreClick">СОХРАНИТЬ</button>
+            <div class="col" style="width:0px"></div>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        on: {
+            pageAfterIn: function(e,page){
+                $$("#settingsCommon-inputServerURI").val(this.$app.data['serverURI']);
+                $$("#settingsCommon-checkboxUseBCScanner").prop("checked",this.$app.data['useBCScanner']);
+            }
+        },
+        methods: {
+            btnStoreClick: function(){
+                let srvURI=$$("#settingsCommon-inputServerURI").val(),
+                        useBCScanner=$$("#settingsCommon-checkboxUseBCScanner").prop("checked");
+                if(typeof(Storage)!=="undefined"&&srvURI&&srvURI.toString().trim()!=""){
+                    localStorage.setItem("settings-serverURI",srvURI);
+                    localStorage.setItem("settings-useBCScanner",useBCScanner);
+                }else{// Sorry! No Web Storage support..
+                }
+                this.$app.data['serverURI']=srvURI;
+                this.$app.data['useBCScanner']=useBCScanner;
+            }
+        }
+    }
+</script>

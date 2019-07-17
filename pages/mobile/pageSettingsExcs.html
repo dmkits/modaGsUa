@@ -9,10 +9,11 @@
                     <!--<span class="ios-only">Назад</span>-->
                 </a>
             </div>
-            <div class="title">Перемещения товара</div>
+            <div class="title">Настройки перемещений товара</div>
         </div>
     </div>
     <div class="page-content">
+        <div class="block-title">Настройки списка документов</div>
         <div class="list no-hairlines-md">
             <ul>
                 <li class="item-content item-input">
@@ -40,8 +41,8 @@
                 $$("#settings-excs-input").val(this.$app.data['excsListDocCount']);
             }
         },
-        methods:{
-            buttonStoreClick:function(){
+        methods: {
+            buttonStoreClick: function(){
                 let excListDocCount=$$("#settings-excs-input").val();
                 if (typeof(Storage)!=="undefined"&&excListDocCount&&excListDocCount.toString().trim()!="") {
                     localStorage.setItem("settings-excs-listDocCount",excListDocCount);

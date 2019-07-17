@@ -10,22 +10,27 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
     -->
-    <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline' gap: https://ssl.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">-->
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data:'unsafe-inline' gap: https://ssl.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">-->
     <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:">
     <meta charset=utf-8>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
     <!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">-->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2196f3">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
-    <link rel="shortcut icon" href="/img/logoGS-red-min-app.png">
-    <script src="/jslib/framework7/js/framework7.min.js"></script>
-    <link rel="stylesheet" href="/jslib/framework7/css/framework7.min.css">
-    <link rel="stylesheet" type="text/css" href="/cssm/mobileIndex.css">
-    <link rel="stylesheet" type="text/css" href="/cssm/mobileIcons.css">
-    <link rel="stylesheet" type="text/css" href="/cssm/mobileApp.css">
-    <script src="/jslib/moment/moment.js"></script>
+    <link rel="shortcut icon" href="../img/logoGS-red-min-whiteBG-ico32.jpg">
+    <script src="../framework7/js/framework7.min.js"></script>
+    <link rel="stylesheet" href="../framework7/css/framework7.min.css">
+    <!--<link rel="stylesheet" href="../framework7/css/framework7.md.min.css">-->
+    <!--<link rel="stylesheet" href="../framework7/css/framework7.ios.min.css">-->
+    <link rel="stylesheet" type="text/css" href="../css/mobileIndex.css">
+    <link rel="stylesheet" type="text/css" href="../css/mobileIcons.css">
+    <link rel="stylesheet" type="text/css" href="../css/mobileApp.css">
+    <script src="../js/moment/moment.js"></script>
+    <script src="../cordova.js"></script>
+    <script src="../js/device.js"></script>
     <title>GABIS Mobile</title>
 </head>
 <body>
@@ -77,15 +82,16 @@
                                 </ul>
                             </div>
                         </div>
-                        <!--<div class="block" id="main-panel-left-settings">-->
-                            <!--<div class="block-title">Настройки</div>-->
-                            <!--<div class="list links-list">-->
-                                <!--<ul>-->
-                                    <!--<li>-->
-                                    <!--</li>-->
-                                <!--</ul>-->
-                            <!--</div>-->
-                        <!--</div>-->
+                        <div class="block" id="main-panel-left-settings">
+                            <div class="block-title">Общие настройки</div>
+                            <div class="list links-list">
+                                <ul>
+                                    <li>
+                                    <a href="/pageSettingsCommon" class="panel-close">Доступ и устройство</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -133,7 +139,6 @@
                                 <i class="icon icon-checkbox"></i>
                                 <div class="item-title">Запомнить меня</div>
                             </label>
-
                         </div>
                         <div class="col" style="width:0px"></div>
                     </div>
@@ -151,26 +156,31 @@
     var $$=Dom7,
         baseRoutes=[//-- App routes --
             { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
-//            { path: '/pageSettingsCommon', componentUrl: '/mobile/pageSettingsCommon'},//IT'S USED ONLY IN MOBILE APP
-            { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
+            { path: '/pageSettingsCommon', componentUrl: 'pageSettingsCommon.html'},
+            { path: '(.*)', url: './actionError' }// Default route (404 page). MUST BE THE LAST
         ],
         app7  = new Framework7({// Framework7 App main instance
             id:'io.framework7.mobile.gabis',
             root: '#app', // app7 root element
-            theme: 'ios', // 'auto' - Automatic theme detection, Can be md, ios or aurora
+            theme: 'ios', //for mobile app gabis ios!!! //'auto' - Automatic theme detection, Can be md, ios or aurora
             routes: baseRoutes,
             workingDoc:null
         }),
-        mainView = app7.views.create('.view-main',{domCache:true,stackPages:true});
+        mainView = app7.views.create('.view-main',{domCache:true,stackPages:true});                             //app7.dialog.alert('<span style="font-size:18px">1</span>', "debug")//IT'S FOR TEST
     //$$('#main-panel-left-settings').hide();//IT'S ONLY FOR MOBILE APP
     $$('#main-panel-left-pages').hide();
     app7.initData=function(){
         app7.data={};
         app7.data.uuid="";document.cookie="uuid=0";
+        app7.data['useBCScanner']=false;
         app7.data['recsListDocCount']=50;
         app7.data['excsListDocCount']=50;
         app7.data['inventsListDocCount']=50;
         if(typeof(Storage)!=="undefined"){
+            var serverURI=localStorage.getItem("settings-serverURI");
+            if(serverURI)app7.data['serverURI']=serverURI;
+            var useBCScanner=localStorage.getItem("settings-useBCScanner")=="true";
+            if(useBCScanner)app7.data['useBCScanner']=useBCScanner;
             var recsListDocCount=localStorage.getItem("settings-recs-listDocCount");
             if(recsListDocCount&&!isNaN(parseInt(recsListDocCount)))app7.data['recsListDocCount']=parseInt(recsListDocCount);
             var excsListDocCount=localStorage.getItem("settings-excs-listDocCount");
@@ -179,6 +189,7 @@
             if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount)))app7.data['inventsListDocCount']=parseInt(inventsListDocCount);
         }else{// Sorry! No Web Storage support..
         }
+        if(!app7.data['serverURI'])app7.data['serverURI']=(window&&window.origin)?window.origin:"http://159.224.244.224:58181";
     };
     app7.setLoginStoredData=function(){
         $$('#mobInv-login-screen #login-password').val("");
@@ -239,13 +250,17 @@
     app7.setUserRoutes=function(){
         this.srvRequestJSON({url:'/mobile/getUserRoutes', errorDialogMsg:"Не удалось получить данные для загрузки!"},
             function(result,errmsg){
-                if(!result){ mainView.router.navigate('/home');return; }
-                mainView.router.routes=result;                                                         //console.log("userRoutes",result);
+                if(!result){
+                    mainView.router.navigate('/home');return;
+                }
+                mainView.router.routes=result;
                 var userRoutes={}, definePath;
                 for(var i=0; i<result.length; i++){
                     var userRoutesItem=result[i];
                     userRoutes[userRoutesItem.path]=true;
                     if(!definePath&&userRoutesItem&&userRoutesItem.define) definePath=userRoutesItem.path;
+                    if(userRoutesItem&&userRoutesItem.url) userRoutesItem.url=userRoutesItem.url.replace("./mobile/","");
+                    if(userRoutesItem&&userRoutesItem.componentUrl) userRoutesItem.componentUrl=userRoutesItem.componentUrl.replace("/mobile/","")+".html";
                 }
                 var panelItems=$$("#main-panel-left-pages li a"),hasVisible=false;
                 for(var i=0; i<panelItems.length; i++){
@@ -271,14 +286,15 @@
     app7.srvRequestJSON=function(params,callback){
         if(!params)return;
         if(!params.method)params.method="GET";
-        var requestData={};
+        if((!window.origin||window.origin=="null"||window.origin.indexOf("file")==0)&&params.url) params.url= app7.data['serverURI']+params.url;
+        var requestData={};                                                                                     //app7.dialog.alert('<div style="height:500px;max-height:500px;font-size:8px;overflow:scroll">'+JSON.stringify(params)+'</span>', "debug")
         if(params.data)requestData=params.data;
         else if(params.conditions&&typeof(params.conditions)=="string") requestData=params.conditions.replace('=','~');
         else if(params.conditions)
             for(var cName in params.conditions) requestData[cName.replace('=','~')]=params.conditions[cName];   //console.log('srvRequestJSON app7.request',params.url,'requestData=',requestData);
         this.request({method:params.method,url:params.url,data:requestData,
                 headers:{ 'x-requested-with': 'application/json; charset=utf-8' },
-            success:function(data){                                                                             //console.log('srvRequestJSON app7.request',params.url,'success data=',data);
+            success:function(data){                                                                             //console.log('srvRequestJSON app7.request',params.url,'success data=',data); //app7.dialog.alert('<div style="height:500px;max-height:500px;font-size:8px;overflow:scroll">'+JSON.stringify(data)+'</span>', "debug")
                 var errMsg;
                 if(!params.errorDialogMsg)params.errorDialogMsg='Не удалось получить данные с сервера!';
                 if(data==undefined||data==null) {

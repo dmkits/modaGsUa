@@ -9,10 +9,11 @@
                     <!--<span class="ios-only">Назад</span>-->
                 </a>
             </div>
-            <div class="title">Приходы товара</div>
+            <div class="title">Настройки приходов товара</div>
         </div>
     </div>
     <div class="page-content">
+        <div class="block-title">Настройки списка документов</div>
         <div class="list no-hairlines-md">
             <ul>
                 <li class="item-content item-input">
@@ -40,8 +41,8 @@
                 $$("#settings-recs-input").val(this.$app.data['recsListDocCount']);
             }
         },
-        methods:{
-            buttonStoreClick:function(){
+        methods: {
+            buttonStoreClick: function(){
                 let recsListDocCount=$$("#settings-recs-input").val();
                 if (typeof(Storage)!=="undefined"&&recsListDocCount&&recsListDocCount.toString().trim()!="") {
                     localStorage.setItem("settings-recs-listDocCount",recsListDocCount);

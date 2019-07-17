@@ -9,10 +9,11 @@
                     <!--<span class="ios-only">Назад</span>-->
                 </a>
             </div>
-            <div class="title">Инвентаризации</div>
+            <div class="title">Настройки инвентаризаций</div>
         </div>
     </div>
     <div class="page-content">
+        <div class="block-title">Настройки списка документов</div>
         <div class="list no-hairlines-md">
             <ul>
                 <li class="item-content item-input">
@@ -40,8 +41,8 @@
                 $$("#settings-invents-input").val(this.$app.data['inventsListDocCount']);
             }
         },
-        methods:{
-            buttonStoreClick:function(){
+        methods: {
+            buttonStoreClick: function(){
                 let inventsListDocCount=$$("#settings-invents-input").val();
                 if (typeof(Storage)!=="undefined"&&inventsListDocCount&&inventsListDocCount.toString().trim()!="") {
                     localStorage.setItem("settings-invents-listDocCount",inventsListDocCount);
