@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" data-name="pageVenData">
+<div id="pageVenData" class="page page-with-subnavbar" data-name="pageVenData">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -105,6 +105,14 @@
                 $$('#pageVenDataToolbar #pageVenDataBarCodeInput').on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
                 });
+                if(deviceBarcodeScannerReaderAction){
+                    deviceBarcodeScannerReaderAction= function(barcode){
+                        let pageDom=$$('.view-main #pageVenData');
+                        if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0) return;              //alert("pageVenData scan:"+barcode);
+                        if(barcode) barcode= barcode.replace("\n","");
+                        self.barcodeInputEnter(barcode);
+                    }
+                }
                 this.loadVenData();
             },
             pageAfterOut: function(e,page){
@@ -190,17 +198,14 @@
                         })
                     })
             },
-            barcodeInputEnter: function(){
+            barcodeInputEnter: function(scanBarcode){
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
                 var self=this;
-                this.storeInputValueToInvent($$("#pageVenDataToolbar #pageVenDataBarCodeInput").val(),function(venProdData){
+                this.storeInputValueToInvent(scanBarcode || $$("#pageVenDataToolbar #pageVenDataBarCodeInput").val(),function(venProdData){
                     app7.preloader.hide();
-                    if(!venProdData){
-                        self.setInputProdBarcodeByState({enable:true,focus:true}); return;
-                    }
-                    self.addProdToTable(venProdData);
-                    self.setInputProdBarcodeByState({enable:true,focus:true,val:""});
+                    if(venProdData) self.addProdToTable(venProdData);
+                    self.setInputProdBarcodeByState({enable:true,focus:(!scanBarcode),val:""});
                 });
             },
             /**

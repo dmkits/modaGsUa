@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" data-name="pageExcData">
+<div id="pageExcData" class="page page-with-subnavbar" data-name="pageExcData">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -139,6 +139,21 @@
                 $$('#pageExcDataToolbar #pageExcDataBarCodeInput').on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
                 });
+//                app7.data.pageExcD_bccallback= function(){
+//                    var pageDom=$$('.view-main #pageExcData');                                              //console.log("pageExcD_bccallback",pageDom.length==0,!pageDom[0],pageDom[0].innerHTML.length==0);
+//                    if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0)return;               console.log("pageExcD_bccallback DO SCAN!!!");
+//                }
+//                setTimeout(function(){
+//                    if(app7.data.pageExcD_bccallback)app7.data.pageExcD_bccallback();
+//                },0)
+                if(deviceBarcodeScannerReaderAction){
+                    deviceBarcodeScannerReaderAction= function(barcode){
+                        let pageDom=$$('.view-main #pageExcData');
+                        if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0) return;              //alert("pageExcData scan:"+barcode);
+                        if(barcode) barcode= barcode.replace("\n","");
+                        self.barcodeInputEnter(barcode);
+                    }
+                }
                 this.loadExcData();
             },
             pageAfterOut: function(e,page){
@@ -221,17 +236,14 @@
                         });
                     })
             },
-            barcodeInputEnter: function(){
+            barcodeInputEnter: function(scanBarcode){
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
                 var self=this;
-                this.storeInputValueToExc($$("#pageExcDataToolbar #pageExcDataBarCodeInput").val(),function(excProdData){
+                this.storeInputValueToExc(scanBarcode || $$("#pageExcDataToolbar #pageExcDataBarCodeInput").val(),function(excProdData){
                     app7.preloader.hide();
-                    if(!excProdData){
-                        self.setInputProdBarcodeByState({enable:true,focus:true}); return;
-                    }
-                    self.addProdToTable(excProdData);
-                    self.setInputProdBarcodeByState({enable:true,focus:true,val:""});
+                    if(excProdData)self.addProdToTable(excProdData);
+                    self.setInputProdBarcodeByState({enable:true,focus:(!scanBarcode),val:""});
                 });
             },
             /**
