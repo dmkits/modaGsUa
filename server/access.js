@@ -224,7 +224,7 @@ module.exports= function(app){
     };
     app.post("/login", function (req, res) {                                                                    log.info("ACCESS CONTROLLER: post /login user=",req.body.user,'pswrd=',req.body.pswrd);
         var userName=req.body.user, userPswrd=req.body.pswrd;
-        if(!userName ||!userPswrd ){
+        if(!userName ||!userPswrd){
             res.send({ error:{error:"Authorisation failed! No login or password!",userMessage:"Пожалуйста введите имя и пароль."} });
             return;
         }
