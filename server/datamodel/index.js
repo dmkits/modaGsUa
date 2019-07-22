@@ -994,13 +994,11 @@ function _updDataItem(connection, params, resultCallback){
     }
     updQuery+= " where "+queryConditions;
     database.executeParamsQuery(connection,updQuery,fieldsValues,function(err,updateCount){
-        var updResult={};
         if(err){
-            updResult.error= "Failed update data item! Reason:"+err.message; updResult.message= err.message;
-            resultCallback(updResult);
+            resultCallback({error:{error:"Failed update data item! Reason:"+err.message, message:err.message}});
             return;
         }
-        updResult.updateCount= updateCount;
+        var updResult={updateCount:updateCount};
         if(updateCount==0) updResult.error= "Failed update data item! Reason: no updated row count!";
         resultCallback(updResult);
     });
