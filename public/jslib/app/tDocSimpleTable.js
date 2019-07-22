@@ -35,7 +35,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
             */
             init: function(params){
                 if(!params)return this;
-                for(var pName in params) {
+                for(var pName in params){
                     var pValue=params[pName];
                     if(pName=="rightPane") this.rightContainerParams=pValue; else this[pName]=pValue;
                 }
@@ -55,13 +55,13 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 this.btnsTableRow = $TDF.addRowToTable(btnsTable);
             },
             createContentTable: function(HTable, params){
-                if (!params) params={};
-                if (!params.region) params.region='center';
-                if (!params.style) params.style="margin:0;padding:0;";
-                if (params.readOnly===undefined) params.readOnly=true;
-                if (params.wordWrap===undefined) params.wordWrap=true;
-                if (params.useFilters===undefined) params.useFilters=true;
-                if (params.allowFillHandle===undefined) params.allowFillHandle=false;
+                if(!params) params={};
+                if(!params.region) params.region='center';
+                if(!params.style) params.style="margin:0;padding:0;";
+                if(params.readOnly===undefined) params.readOnly=true;
+                if(params.wordWrap===undefined) params.wordWrap=true;
+                if(params.useFilters===undefined) params.useFilters=true;
+                if(params.allowFillHandle===undefined) params.allowFillHandle=false;
                 this.addChild(this.contentHTable=new HTable(params));
                 var instance = this;
                 this.contentHTable.onUpdateContent = function(){

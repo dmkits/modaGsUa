@@ -67,7 +67,7 @@ $app.startup= function(pageTagID,pageScript){
             function(){
                 window.$$={};
                 var appHTableModules=
-                    (window.Handsontable)?["app/hTableSimple","app/hTableSimpleFiltered","app/tDocSimpleTable","app/hTableEditable","app/tDocSimpleTableEdt"]:[];
+                    (window.Handsontable)?["app/hTableSimple","app/hTableSimpleFiltered","app/tDocSimpleTable","app/hTableEditable","app/tDocSimpleTableEdt","app/tDocStdTable"]:[];
                 require(["dijit/registry","dojo/ready","app/dialogs","app/request","app/Page","app/InnerPage"].concat(appHTableModules),
                     function (registry,ready,dialogs,request){
                         window.$$.dialogs= dialogs;

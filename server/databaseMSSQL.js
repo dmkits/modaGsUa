@@ -182,8 +182,17 @@ module.exports.executeParamsQuery= function(connection, query, parameters, callb
     var request = new mssql.Request(connection);
     for(var i in parameters)request.input('p'+i,parameters[i]);
     request.query(query,function(err,result){
-        if(err){                                                                                    log.error('database: executeParamsQuery error:',err.message,{});//test
-            callback(err); return;
+        if(err){                                                                                    //log.error('database: executeParamsQuery error:',err.message,err.precedingErrors,{});//test
+            var precedingErrors= err.precedingErrors, sMsg=null, sErr="";
+            for(var prErrNum in precedingErrors){
+                var prErrItem= precedingErrors[prErrNum], sReqErrMsg= prErrItem.message,
+                    sReqErrProcName= prErrItem.procName,sReqErrLineNumber= prErrItem.lineNumber;    //log.error('database: executeParamsQuery error info:',sReqErrMsg,sReqErrProcName,sReqErrLineNumber,prErrItem,{});//test
+                sMsg=((!sMsg)?"":sMsg+"\n")+sReqErrMsg;
+                sErr=((!sErr)?"":sErr+"\n")+sReqErrMsg+((sReqErrProcName)?" Error in "+sReqErrProcName:"")+((sReqErrLineNumber)?", in line "+sReqErrLineNumber:"");
+            }
+            var qErr= {message:sMsg||err.message, error:sErr||err.message};                         log.error('database: executeParamsQuery error:',qErr,{});//test
+            callback(qErr);
+            return;
         }                                                                                           log.debug('database: executeParamsQuery result:',result,result.rowsAffected[result.rowsAffected.length-1],{});//test
         callback(null, result.rowsAffected[result.rowsAffected.length-1]);
     });

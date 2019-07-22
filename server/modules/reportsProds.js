@@ -67,7 +67,7 @@ module.exports.init = function(app){
         for(var condItem in req.query) {
             var val=req.query[condItem];
             if(condItem.indexOf("DiscountP")==0) conditions[condItem.replace("DiscountP","(PurPriceCC_wt-RealPrice)")]=val;
-            else if(condItem.indexOf("CRID")==0&&val=="-1"&&req.dbEmpRole!=="cashier"&&!req.isMobile) {//ALL
+            else if(condItem.indexOf("CRID")==0&&val=="-1"&&req.dbEmpRole!=="cashier"&&!req.isMobile){//ALL
                 conditions["1=1"]=null; allItems=true;
             }else{
                 var newCondItem=condItem;
@@ -80,11 +80,9 @@ module.exports.init = function(app){
                 conditions[newCondItem]=val;
             }
         }
-        for (var i = 0; i < tProdsSalesTableColumns.length; i++) {
+        for(var i=0; i<tProdsSalesTableColumns.length; i++){
             var tColData=tProdsSalesTableColumns[i];
-            if(tColData.data=="CRName"){
-                tColData.visible=allItems; break;
-            }
+            if(tColData.data=="CRName"){ tColData.visible=allItems; break; }
         }
         t_SaleD.getDataForTable(req.dbUC,{tableColumns:tProdsSalesTableColumns, identifier:tProdsSalesTableColumns[0].data,
                 conditions:conditions, order:"OurID, StockID, SrcPosID"},
@@ -163,7 +161,7 @@ module.exports.init = function(app){
                 groupedFields:["r_Stocks.StockID","r_Stocks.StockName"],
                 conditions:{"r_Stocks.StockID>":0,"r_Opers.EmpID=":empID},
                 order: "StockName" },
-            function (result) {
+            function(result){
                 res.send(result);
             });
     });

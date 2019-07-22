@@ -10,7 +10,7 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
             },
 
             setContainer: function(params, tagName){
-                if (!params) params={};
+                if(!params) params= {};
                 if(!tagName)return new LayoutContainer(params); else return new LayoutContainer(params, tagName);
             },
             /*
@@ -25,7 +25,7 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
              * params= { style }
              */
             setContentPane: function(params, tagName){
-                if (!params) params={};
+                if(!params) params={};
                 if(!tagName) return new ContentPane(params); else return new ContentPane(params, tagName);
             },
             setChildContentPaneTo: function(parent, params){
@@ -53,16 +53,16 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
             },
             addRowToTable: function(table,height,style){
                 var tableRow = document.createElement("tr");
-                if (height!=undefined) tableRow.setAttribute("height", height);
-                if (!style) style="";
+                if(height!=undefined) tableRow.setAttribute("height", height);
+                if(!style) style="";
                 style= "white-space:nowrap;"+style;
                 tableRow.setAttribute("style", style);
                 table.appendChild(tableRow);
                 return tableRow;
             },
-            addHeaderCellToTableRow: function(tableRow, width, style, content) {
+            addHeaderCellToTableRow: function(tableRow, width, style, content){
                 var tableCell = document.createElement("th");
-                if (!style) style="";
+                if(!style) style="";
                 style= "white-space:nowrap;"+style;
                 tableCell.setAttribute("style", style);
                 if (width!=undefined) tableCell.setAttribute("width", width+"px");
@@ -82,13 +82,13 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
             //    return tableCell;
             //},
             addLeftCellToTableRow: function(tableRow, width, style){
-                if (tableRow.children.length===0) {
+                if(tableRow.children.length===0){
                     var tableCellEmpty = document.createElement("td");
                     tableRow.appendChild(tableCellEmpty);
                 }
                 var tableCell = document.createElement("td");
-                if (width!=undefined) tableCell.setAttribute("width", width+"px");
-                if (!style) style="";
+                if(width!=undefined) tableCell.setAttribute("width", width+"px");
+                if(!style) style="";
                 tableCell.setAttribute("style", "white-space:nowrap;"+style);
                 tableRow.insertBefore(tableCell, tableRow.lastChild);
                 return tableCell;
@@ -171,8 +171,8 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
                 if(!params) params={};
                 var tableCell = this.addLeftCellToTableRow(tableRowNode, params.cellWidth, params.cellStyle),
                     textBoxParams=params.inputParams||{};
-                if(params.initValueText!==undefined) textBoxParams.value=params.initValueText;
-                if(params.inputStyle!==undefined) textBoxParams.style=params.inputStyle;
+                if(params.initValueText!==undefined) textBoxParams.value= params.initValueText;
+                if(params.inputStyle!==undefined) textBoxParams.style= params.inputStyle;
                 var textBox= new TextBox(textBoxParams,this.createInputTo(tableCell));
                 textBox.printParams={ cellWidth:params.cellWidth, cellStyle:params.cellStyle,
                     labelText:params.labelText, labelStyle:params.labelStyle, inputStyle:params.inputStyle };
@@ -187,9 +187,9 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
                 var tableCell = this.addLeftCellToTableRow(tableRowNode, params.cellWidth, params.cellStyle),
                     numberTextBoxParams=params.inputParams||{};
                 if(params.initValue!==undefined) numberTextBoxParams.value= params.initValue;
-                if(params.inputStyle) numberTextBoxParams.style=params.inputStyle;
+                if(params.inputStyle) numberTextBoxParams.style= params.inputStyle;
                 var numberTextBox= new NumberTextBox(numberTextBoxParams,this.createInputTo(tableCell)), printLabel;
-                if(numberTextBoxParams.printLabel)printLabel=numberTextBoxParams.printLabel;
+                if(numberTextBoxParams.printLabel) printLabel= numberTextBoxParams.printLabel;
                 else if(params.labelText) printLabel=params.labelText;
                 numberTextBox.printParams={ cellWidth:params.cellWidth, cellStyle:params.cellStyle,
                     labelText:printLabel, labelStyle:params.labelStyle, inputStyle:params.inputStyle };
@@ -202,11 +202,11 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
             addTableCellDateBoxTo: function(tableRowNode, params){
                 if(!params) params={};
                 var tableCell = this.addLeftCellToTableRow(tableRowNode, params.cellWidth, params.cellStyle),
-                    dateBoxParams=params.dateBoxParams||{};
+                    dateBoxParams= params.dateBoxParams||{};
                 if(params.initValueDate!==undefined) dateBoxParams.value= params.initValueDate;
                 dateBoxParams.style= "width:85px";
-                if(params.inputStyle) dateBoxParams.style=params.inputStyle;
-                var dateTextBox=new DateTextBox(dateBoxParams, this.createInputTo(tableCell));
+                if(params.inputStyle) dateBoxParams.style= params.inputStyle;
+                var dateTextBox= new DateTextBox(dateBoxParams, this.createInputTo(tableCell));
                 dateTextBox.printParams={ cellWidth:params.cellWidth, cellStyle:params.cellStyle,
                     labelText:params.labelText, labelStyle:params.labelStyle, inputStyle:params.inputStyle };
                 this.createLabelFor(dateTextBox, params.labelText, params.labelStyle);
@@ -218,7 +218,7 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
                 //btnForDateBox.setAttribute("id","previousDayBtnFor"+dateTextBox.id);
                 btnForDateBox.className = "dijitReset dijitButtonNode";
                 btnForDateBox.style.width = "18px"; btnForDateBox.style.height = "18px";
-                btnForDateBox.style.border="solid 1px #b5bcc7"; btnForDateBox.style.color="#b5bcc7";
+                btnForDateBox.style.border= "solid 1px #b5bcc7"; btnForDateBox.style.color="#b5bcc7";
                 if(btnType=="prev"){
                     btnForDateBox.innerText= "\u25c4";btnForDateBox.increment=-1;
                     tableCell.insertBefore(btnForDateBox, tableCell.lastChild);
@@ -240,10 +240,10 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
             addTableCellSelectTo: function(tableRowNode, params){
                 if(!params) params={};
                 var tableCell = this.addLeftCellToTableRow(tableRowNode, params.cellWidth, params.cellStyle),
-                    selectParams=params.selectParams||{};
+                    selectParams= params.selectParams||{};
                 selectParams.style= "width:180px";
                 if(params.selectStyle) selectParams.style=params.selectStyle;
-                var select=new Select(selectParams,this.createInputTo(tableCell));
+                var select= new Select(selectParams,this.createInputTo(tableCell));
                 select.printParams={ cellWidth:params.cellWidth, cellStyle:params.cellStyle,
                     labelText:params.labelText, labelStyle:params.labelStyle, inputStyle:params.inputStyle };
                 this.createLabelFor(select, params.labelText, params.labelStyle);
@@ -261,7 +261,7 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
              * params { style, newTable:true/false }
              */
             addPrintDataItemTo: function(printData, sectionName, params){
-                if (!printData[sectionName]) printData[sectionName]=[];
+                if(!printData[sectionName]) printData[sectionName]=[];
                 var sectionItems= printData[sectionName], sectionItemData={items:[]};
                 if(params&&params.style) sectionItemData["style"]= params.style;
                 if(params&&params.newTable) sectionItemData["newTable"]= params.newTable;
@@ -273,11 +273,11 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
              * params { width, style, contentStyle, align: "left" / "right" / "center", label, labelStyle, value, type, valueStyle, printFormat }
              */
             addPrintDataSubItemTo: function(printData, sectionName, params){
-                if (!printData[sectionName]) printData[sectionName]=[];
+                if(!printData[sectionName]) printData[sectionName]=[];
                 var sectionData= printData[sectionName];
                 if(sectionData.length==0) sectionData.push({items:[]});
                 var sectionSubItems= sectionData[sectionData.length-1].items, printDataItem= {};
-                if (!params){
+                if(!params){
                     sectionSubItems.push(printDataItem); return printDataItem;
                 }
                 if(params.style!==undefined) printDataItem["style"]= params.style;
@@ -314,21 +314,19 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
              * params= { visibleColumns,tableData }
              */
             requestForExcelFile:function(params){
-                var tableData=params.tableData;
-                var visibleColumns=params.visibleColumns;
-                var columnsDataForExcel= [];
+                var tableData=params.tableData, visibleColumns=params.visibleColumns, columnsDataForExcel= [];
                 for(var i in visibleColumns){
                     var column = visibleColumns[i],
                         columnForExcel = {data:column.data,type:column.type,name:column.name,width:column.width};
-                    if(column.format)columnForExcel.format = column.format;
-                    if(column.datetimeFormat)columnForExcel.datetimeFormat = column.datetimeFormat;
+                    if(column.format)columnForExcel.format= column.format;
+                    if(column.datetimeFormat) columnForExcel.datetimeFormat= column.datetimeFormat;
                     columnsDataForExcel.push(columnForExcel);
                 }
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST',"/sys/getExcelFile");
                 xhr.responseType = 'blob';
                 xhr.onload = function (e){
-                    if (this.status == 200) {
+                    if(this.status == 200){
                         var blob = new Blob([this.response], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
                         var a = document.createElement("a");
                         a.style = "display: none";

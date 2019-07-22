@@ -90,7 +90,7 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                 if(!tagClass){ console.error("Module for tag "+node.tagName+" cannot loaded!");return; }
                 var params={tagName:node.tagName};
                 this.parseNodeAttributes(params,node,["class","style","region","design","gutters","title","iconClass"]);
-                var d=new tagClass(params,node);                                                            //log('tagParser.createHTableTags: d=',d);
+                var d= new tagClass(params,node);                                                            //log('tagParser.createTDocTags: d=',d);
                 d.domNode.setAttribute("tagName",node.tagName);
                 return d;
             },
@@ -132,7 +132,7 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                 if(!newNode)newNode=this.createHTableTags(containerChild);
                 if(!newNode)newNode=this.createTDocTags(containerChild);
                 if(!newNode&&this.parseCFunctions)
-                    for (var fInd in this.parseCFunctions) {
+                    for(var fInd in this.parseCFunctions){
                         var parseFunction=this.parseCFunctions[fInd];
                         if(!parseFunction)continue;
                         newNode=parseFunction(containerChild);

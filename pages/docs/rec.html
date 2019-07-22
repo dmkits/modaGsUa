@@ -80,7 +80,7 @@
             .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
             .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
             .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
-            .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+            .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
                 if(!thisInstance.setDetailTableProdData)
                     thisInstance.setDetailTableProdData= function(crd/*changedRowData*/,prodData){
                         if(!prodData)prodData={};
@@ -108,7 +108,7 @@
                     };
                 nextCallback();
             })
-            .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+            .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
                 var isChangedProdAttrs=crd.item("Article1").isChanged()
                         ||crd.item("PCatName").isChanged()||crd.item("PGrName").isChanged()
                         ||crd.item("PGrName1").isChanged()||crd.item("PGrName2").isChanged()||crd.item("PGrName3").isChanged()
@@ -156,7 +156,7 @@
                 }
                 nextCallback();
             })
-//                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+//                        .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
 //                            if ((crd.item("PCatName").isChanged()||crd.item("PGrName").isChanged()
 //                                    ||crd.item("PGrName1").isChanged()||crd.item("PGrName2").isChanged()||crd.item("PGrName3").isChanged()
 //                                    ||crd.item("ProdColor").isChanged()||crd.item("ProdSize").isChanged())
@@ -184,7 +184,7 @@
 //                            }
 //                            nextCallback();
 //                        })
-            .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+            .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
                 if ( (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
                         || (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY()) ) {
                     var condition = {};
@@ -206,7 +206,7 @@
                 }
                 nextCallback();
             })
-//                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
+//                        .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){
 //                            var supplierOrderNum= thisInstance.detailHeader.getContentDataItem("SUPPLIER_ORDER_NUM");
 //
 //
@@ -303,7 +303,7 @@
 //                            }
 //                            nextCallback();
 //                        })
-//                        .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+//                        .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
 //                            if( !crd.item("PRODUCT_CODE").isChanged()&&!crd.item("PRODUCT_NAME").isChanged()
 //                                    &&  (crd.item("PRODUCT_ARTICLE").isChanged() || crd.item("PRODUCT_KIND").isChanged()
 //                                        || crd.item("PRODUCT_COMPOSITION").isChanged() || crd.item("PRODUCT_SIZE").isChanged()
@@ -341,7 +341,7 @@
 //                            }
 //                            nextCallback();
 //                        })
-            .addDetailTableRowChangeCallback(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){          //console.log("INV detailTableRowChangeCallback1 ",crd.data());
+            .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){          //console.log("INV detailTableRowChangeCallback1 ",crd.data());
                 var prevSrcPosID=detailTable.getPrevRowDataItemValue(crd.data(),"SrcPosID");
                 if(prevSrcPosID===undefined||prevSrcPosID===null||isNaN(prevSrcPosID/1)) prevSrcPosID=0;
                 if (crd.item("SrcPosID").isUNDEFNULL()) crd.item("SrcPosID").setValue(prevSrcPosID+1);

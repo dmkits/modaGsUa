@@ -12,6 +12,8 @@
     "dirsForDocs",
     "dirsForProds",
     /*"rec",*/
+    "exc",
+    "exc-cashier",
     /*"mainPage",*/
     "reportsProds",
     "reportsCashier",
@@ -23,6 +25,8 @@
   ],
   "appMenu":[
     /*{ "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },*/
+    /*{ "menuItemName":"menuBarItemExc", "menuTitle":"Перемещение товара", "pageTitle":"Перемещение товара", "module":"exc", "closable":true },*/
+    { "menuItemName":"menuBarItemExcCashier", "menuTitle":"Перемещение товара на ТТ", "pageTitle":"Перемещение товара на ТТ", "module":"exc-cashier", "closable":true },
     { "menuItemName":"menuBarItemReportsProds", "menuTitle":"Товарные отчеты", "pageTitle":"Товарные отчеты", "module":"reportsProds", "closable":false },
     { "menuItemName":"menuBarItemReportsCashier", "menuTitle":"Отчеты кассира", "pageTitle":"Отчеты кассира", "module":"reportsCashier", "closable":false },
     { "menuItemName":"menuBarItemHelpAbout", "menuTitle":"О программе", "action":"help_about" },
@@ -30,13 +34,13 @@
   ],
   "usersRoles":{
     "admin":{
-      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":["menuBarItemRec"],
+      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemExcCashier","menuBarItemExc","menuBarItemRec"],
       "mobile":["mobileReportsCashier","mobileVen"]
     },
     "manager":{
-      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":["menuBarItemReportsCashier"],
+      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
       "mobile":["mobileExc","mobileVen","mobileRec","mobileReportsCashier"]
     },
     "operatorRec":{
@@ -45,13 +49,13 @@
       "mobile":["mobileRec"]
     },
     "sendExcs":{
-      "menu":["menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":[],
+      "menu":["menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemExcCashier"],
       "mobile":["mobileExc"]
     },
     "cashier":{
-      "menu":["menuBarItemReportsCashier","menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":["menuBarItemReportsCashier"],
+      "menu":["menuBarItemReportsCashier","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
       "mobile":["mobileReportsCashier"]
     }
   }

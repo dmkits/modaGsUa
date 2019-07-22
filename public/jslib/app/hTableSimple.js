@@ -206,11 +206,11 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                     {/*width:this.domNode.clientWidth,*/ height:changeSize.h-2-thisMarginTop-thisMarginBottom}
                 );
             },
-            //setReadOnly: function(readOnly){                                                              console.log("this.handsonTable",this.handsonTable.getSettings().readOnly);
-            //    if(readOnly===undefined) readOnly=true;
-            //    this.readOnly= readOnly;
-            //    this.handsonTable.updateSettings({readOnly:readOnly!==false});                            console.log("this.handsonTable",this.handsonTable.getSettings().readOnly);
-            //},
+            setReadOnly: function(readOnly){                                                              //log("HTableSimple",this.handsonTable.getSettings().readOnly);
+                if(readOnly===undefined) readOnly=true;
+                this.readOnly= readOnly;
+                this.handsonTable.updateSettings({readOnly:readOnly!==false});                            //log("HTableSimple",this.handsonTable.getSettings().readOnly);
+            },
             setWordWrap: function(wordWrap){
                 if(wordWrap===undefined) wordWrap=true;
                 this.wordWrap= wordWrap;
@@ -257,7 +257,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
              * default params.callUpdateContent!=false
              * if params.callUpdateContent==false not call onUpdateContent
              */
-            updateContent: function(newdata,params){                                                log("HTableSimple updateContent newdata=",newdata," params=", params);
+            updateContent: function(newdata,params){                                                        log("HTableSimple updateContent newdata=",newdata," params=", params);
                 if(newdata!==undefined) this.setData(newdata);
                 if(this.htData!==null) {//loadTableContent
                     this.handsonTable.updateSettings(
@@ -271,7 +271,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 if(params&&params.callUpdateContent===false) return;
                 this.onUpdateContent((params&&params.error)?{error:params.error}:{});
             },
-            setContent: function(newdata,params){                                                   //log("HTableSimple setContent newdata=", newdata);
+            setContent: function(newdata,params){                                                           //log("HTableSimple setContent newdata=", newdata);
                 this.updateContent(newdata,params);
             },
             /**
@@ -281,13 +281,13 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
              * default params.callUpdateContent!=false
              * if params.callUpdateContent==false not call onUpdateContent
              */
-            clearContent: function(params){                                                         //log("HTableSimple clearContent");
+            clearContent: function(params){                                                                 //log("HTableSimple clearContent");
                 if(params&&params.resetSelection!==false) this.setSelection(null,null);
                 this.handsonTable.updateSettings({columns:this.htVisibleColumns, data:[], comments:false, readOnly:true});
                 if(params&&params.callUpdateContent===false) return;
                 this.onUpdateContent({});
             },
-            resetSelection: function(){                                                             //log("HTableSimple resetSelection ",this.getSelectedRows()," rowIDName=", this.handsonTable.rowIDName);
+            resetSelection: function(){                                                                     //log("HTableSimple resetSelection ",this.getSelectedRows()," rowIDName=", this.handsonTable.rowIDName);
                 var newData= this.getContent();
                 var newSelection= null, newSelectionFirstRowIndex, oldSelection= this.getSelectedRows();
                 if(oldSelection){
@@ -313,7 +313,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                         break;
                     }
                 }
-                this.setSelection( (newSelection)?newSelection[newSelectionFirstRowIndex]:null, newSelection); //log("HTableSimple resetSelection END",this.getSelectedRows()," rowIDName=", this.handsonTable.rowIDName);
+                this.setSelection( (newSelection)?newSelection[newSelectionFirstRowIndex]:null, newSelection);  //log("HTableSimple resetSelection END",this.getSelectedRows()," rowIDName=", this.handsonTable.rowIDName);
             },
             getContent: function(){ return this.handsonTable.getContent(); },
             getContentData: function(){//copy of contentData
@@ -343,7 +343,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                     this.handsonTable.render();
                     return;
                 }
-                var oldSelRow= this.getSelectedRow();                                                       //log("HTableSimple setSelection",selection);
+                var oldSelRow= this.getSelectedRow();                                                           //log("HTableSimple setSelection",selection);
                 this.handsonTable.getSettings().setDataSelectedProp(firstSelectedRowData,oldSelRow);
                 this.htSelection= selection;
                 this.handsonTable.render();
