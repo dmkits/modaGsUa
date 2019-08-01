@@ -205,6 +205,14 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
                 return false;
             },
+            getContentEditableRows: function(){
+                var editableContentRowsData=[], contentRowsData=this.handsonTable.getContent();
+                for(var row=0;row<contentRowsData.length;row++){
+                    var contentRowData=contentRowsData[row];
+                    if(this.isRowEditable(contentRowData))editableContentRowsData.push(contentRowData);
+                }
+                return editableContentRowsData;
+            },
             /*
              * params: {posItemName, posIndexItemName}
              */

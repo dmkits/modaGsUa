@@ -30,7 +30,7 @@
             .addDetailHeaderSelect("StockName","Со склада", 250,
                 {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"StockName"})
             .addDetailHeaderSelect("NewStockName","На склад", 280,
-                {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"StockName"})
+                {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"NewStockName"})
             .addDetailHeaderSelect("CurrName","Валюта", 260,
                 {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCurrsForSelect", labelDataItem:"CurrName"})
             .setDetailTableParameters({conditionIDName:"ParentChID",
@@ -52,7 +52,9 @@
             .addToolPane({title:"Действия"})
             .addToolPaneBR()
             .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableSelectedRow"})
+            .addToolPaneActionButton("Изменить все строки", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableAllVisibleRows"})
             .addToolPaneActionButton("Сохранить строку", {btnStyle:"width:200px;", actionButtonName:"storeDetailTableSelectedRow"})
+            .addToolPaneActionButton("Сохранить все строки", {btnStyle:"width:200px;", actionButtonName:"storeDetailTableAllEditableRows"})
             .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
             .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
             .addToolPane({title:"Информация о товаре",

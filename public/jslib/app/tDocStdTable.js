@@ -677,7 +677,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
             /**
              * actionButtonName: loadHeaderNewValues, storeHeaderValues, loadHeaderLastValues, deleteHeader,
              *              insertDetailTableRow, insertDetailTableCopySelectedRow,
-             *              allowEditDetailTableSelectedRow, storeDetailTableSelectedRow,
+             *              allowEditDetailTableSelectedRow, allowEditDetailTableAllVisibleRows,
+             *              storeDetailTableSelectedRow, storeDetailTableAllEditableRows,
              *              deleteDetailTableSelectedRow,
              *              exportTableContentToExcel
              */
@@ -697,8 +698,12 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     return function(){ thisInstance.detailHTable.insertRowAfterSelected(thisInstance.detailHTable.getSelectedRow()); }
                 }else if(actionButtonName==="allowEditDetailTableSelectedRow"){
                     return function(){ thisInstance.detailHTable.allowEditSelectedRow(); }
+                }else if(actionButtonName==="allowEditDetailTableAllVisibleRows"){
+                    return function(){ thisInstance.detailHTable.allowEditRows(thisInstance.detailHTable.getContent()); }
                 }else if(actionButtonName==="storeDetailTableSelectedRow"){
                     return function(){ thisInstance.storeDetailTableSelectedRowValuesToServer(); }
+                }else if(actionButtonName==="storeDetailTableAllEditableRows"){
+                    return function(){ thisInstance.storeDetailTableRowsDataToServer(thisInstance.detailHTable.getContentEditableRows()); }
                 }else if(actionButtonName==="deleteDetailTableSelectedRow"){
                     return function(){ thisInstance.deleteDetailTableSelectedRowFromServer(); }
                 }else if(actionButtonName==="exportTableContentToExcel"){
@@ -748,11 +753,31 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                         else
                             this.setDisabled(true);
                     }
+                }else if(actionButtonName==="allowEditDetailTableAllVisibleRows"){
+                    return function(){
+                        var detailHeader=thisInstance.detailHeader, detailHTable=thisInstance.detailHTable,
+                            detailHeaderContentData=detailHeader.getContentData();
+                        if(detailHeaderContentData && !detailHeader.isContentChanged() && detailHTable.getContent().length>0
+                            && detailHeaderContentData[thisInstance.detailHeader.dataStateName]!==undefined
+                            && detailHeaderContentData[thisInstance.detailHeader.dataStateName]==detailHeader.activeStateValue)
+                            this.setDisabled(false);
+                        else
+                            this.setDisabled(true);
+                    }
                 }else if(actionButtonName==="storeDetailTableSelectedRow"){
                     return function(){
                         var detailHeader=thisInstance.detailHeader, detailHTable=thisInstance.detailHTable,
                             detailHeaderContentData=detailHeader.getContentData();
                         if(detailHeaderContentData && !detailHeader.isContentChanged() && detailHTable.isSelectedRowEditable())
+                            this.setDisabled(false);
+                        else
+                            this.setDisabled(true);
+                    }
+                }else if(actionButtonName==="storeDetailTableAllEditableRows"){
+                    return function(){
+                        var detailHeader=thisInstance.detailHeader, detailHTable=thisInstance.detailHTable,
+                            detailHeaderContentData=detailHeader.getContentData();
+                        if(detailHeaderContentData && !detailHeader.isContentChanged() && detailHTable.getContentEditableRows().length>0)
                             this.setDisabled(false);
                         else
                             this.setDisabled(true);
