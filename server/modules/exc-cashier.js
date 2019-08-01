@@ -45,7 +45,7 @@ module.exports.init = function(app){
         {data:"StateName", name:"Статус", width:250, type:"text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Exc.StateCode" }
     ];
-    r_Stocks.getEmpOperStocksLisls= function(dbUC,empID,calback){
+    r_Stocks.getEmpOperStocksList= function(dbUC,empID,calback){
         r_Stocks.getDataItems(dbUC,
             { fields: ["r_Stocks.StockID"],
                 joinedSources: {
@@ -56,7 +56,7 @@ module.exports.init = function(app){
                 groupedFields:["r_Stocks.StockID"],
                 conditions:{"r_Stocks.StockID>":0,"r_Opers.EmpID=":empID},
                 order: "r_Stocks.StockID" },
-            function(result){                                                                                   //console.log("r_Stocks.getEmpOperStocksLisls result",result);
+            function(result){
                 if(!result||!result.items){ calback(null); return; }
                 var empOperStocksLists=null;
                 for(var i=0;i<result.items.length;i++){
@@ -64,18 +64,17 @@ module.exports.init = function(app){
                     empOperStocksLists+= result.items[i]["StockID"];
                 }
                 calback(empOperStocksLists);
-
             });
     };
     app.get("/docs/excCashier/getDataForExcsListTable", function(req,res){
         var conditions= {};
         for(var condItem in req.query) conditions["t_Exc."+condItem]=req.query[condItem];
-        r_Stocks.getEmpOperStocksLisls(req.dbUC,req.dbUserParams["EmpID"],function(empOperStocksLists){         console.log("call r_Stocks.getEmpOperStocksLisls empOperStocksLists",empOperStocksLists);
-            var aconditions= {};
+        r_Stocks.getEmpOperStocksList(req.dbUC,req.dbUserParams["EmpID"],function(empOperStocksLists){
+            var aconditions= {"t_Exc.StateCode in (50,56,60)":null};
             if(empOperStocksLists) aconditions["t_Exc.NewStockID in ("+empOperStocksLists+")"]=null; else aconditions["t_Exc.NewStockID is null"]=null;
             t_Exc.getDataForTable(req.dbUC,{tableColumns:tExcsListTableColumns, identifier:tExcsListTableColumns[0].data,
                     conditions:conditions, aconditions:aconditions, order:"DocDate, DocID"},
-                function(result){                                            console.log("call t_Exc.getDataForTable conditions",conditions);
+                function(result){
                     res.send(result);
                 });
         });
