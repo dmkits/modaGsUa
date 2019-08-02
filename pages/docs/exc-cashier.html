@@ -53,6 +53,25 @@
             .addToolPaneBR()
             .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableSelectedRow"})
             .addToolPaneActionButton("Изменить все строки", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableAllVisibleRows"})
+            .addToolPaneBR()
+            .addToolPaneActionButton("Запонить факт", {btnStyle:"width:200px;",
+                actionFunction:function(ap){
+                    var dhtContentEditableRows= ap.detailHTable.getContentEditableRows();
+                    ap.detailHTable.updateRowsAction(dhtContentEditableRows,{},
+                            /*actionFunction*/function(rowData, actionParams, updatedRowData, nextAction, finishedAction){
+                                updatedRowData["NewQty"]= rowData["Qty"];
+                                nextAction();
+                            }
+                    );
+                },
+                actionStateFunction:function(ap){
+                    if(ap.detailHeader.getContentData() && !ap.detailHeader.isContentChanged() && ap.detailHTable.getContentEditableRows().length>0)
+                        this.setDisabled(false);
+                    else
+                        this.setDisabled(true);
+                }
+            })
+            .addToolPaneBR()
             .addToolPaneActionButton("Сохранить строку", {btnStyle:"width:200px;", actionButtonName:"storeDetailTableSelectedRow"})
             .addToolPaneActionButton("Сохранить все строки", {btnStyle:"width:200px;", actionButtonName:"storeDetailTableAllEditableRows"})
             .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})

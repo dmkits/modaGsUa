@@ -654,9 +654,11 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 return this;
             },
             /**
-             * actionParams = { btnStyle, btnParams, actionFunction, actionButtonName }
-             *    actionFunction = function(actionParams)
-             *    actionParams = { detailTableRowsData, detailTableInstance, toolPanes, thisInstance }
+             * actionParams = { btnStyle, btnParams, actionFunction, actionStateFunction, actionButtonName }
+             *    actionFunction = function(actionParams), actionStateFunction = function(actionParams)
+             *    actionParams = { detailHeader, detailHTable, toolPanes, thisDoc }
+             *    use actionParams: detailHeader.getContentData(), detailHTable.getContent(), detailHTable.getContentEditableRows()
+             *      detailHTable.updateRowsAction(rowsData, actionParams, actionFunction, finishedAction)
              */
             addToolPaneActionButton: function(label,actionParams){
                 if(!this.toolPanes||this.toolPanes.length==0) this.addToolPane();
@@ -664,14 +666,17 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 var actionButton= $TDF.addTableCellButtonTo(actionsTableRow, {labelText:label, cellWidth:0, btnStyle:actionParams.btnStyle, btnParameters:actionParams.btnParams});
                 if(!this.toolPanesActionButtons) this.toolPanesActionButtons={};
                 this.toolPanesActionButtons[actionParams.actionButtonName]= actionButton;
-                var actionFunctionParams={detailTable:this.detailHTable, toolPanes:this.toolPanes, thisInstance:this};
+                var actionFunctionParams= { detailHeader:this.detailHeader, detailHTable:this.detailHTable, toolPanes:this.toolPanes, thisDoc:this };
                 if(actionParams.actionFunction){
-                    actionButton.onClick= function(){ actionParams.actionFunction(actionFunctionParams); };
-                    return this;
-                }else{
+                    actionButton.actionFunction= actionParams.actionFunction;
+                    actionButton.onClick= function(){ this.actionFunction(actionFunctionParams); };
+                }else
                     actionButton.onClick= this.getOnClickAction(actionParams.actionButtonName);
+                if(actionParams.actionStateFunction){
+                    actionButton.actionStateFunction= actionParams.actionStateFunction;
+                    actionButton.setState= function(){ this.actionStateFunction(actionFunctionParams); };
+                }else
                     actionButton.setState= this.getSetStateAction(actionParams.actionButtonName);
-                }
                 return this;
             },
             /**
