@@ -27,17 +27,14 @@
             .addDetailHeaderTitle({title:"Перемещение товара на ТТ",titleForNothing:"Перемещение товара не выбрано", titleForFailedLoad:"Нет данных",
                 numberDataItemName:"DocID", dateDataItemName:"DocDate", titleDatePrefix:"от"},25)
             .addDetailHeaderRow(25,true)
-            .addDetailHeaderSelect("OurName","Фирма", 330,{inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirOursForSelect", labelDataItem:"OurName"})
+            .addDetailHeaderTextBox("OurName","Фирма", 330,{inputStyle:"width:200px"})
             .addDetailHeaderTextBox("DocID", "Номер", 120, {inputStyle:"width:50px"})
-            .addDetailHeaderTextBox("IntDocID", "Вн. номер", 120, {inputStyle:"width:50px"})
-            .addDetailHeaderDateTextBox("DocDate", "Дата", 150, "width:80px")
+            .addDetailHeaderTextBox("IntDocID", "Вн. номер", 120,{inputStyle:"width:50px"})
+            .addDetailHeaderDateTextBox("DocDate", "Дата", 150,{inputStyle:"width:80px",noPrevNextButtons:true})
             .addDetailHeaderRow(25,true)
-            .addDetailHeaderSelect("StockName","Со склада", 250,
-                {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"StockName"})
-            .addDetailHeaderSelect("NewStockName","На склад", 280,
-                {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"NewStockName"})
-            .addDetailHeaderSelect("CurrName","Валюта", 260,
-                {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCurrsForSelect", labelDataItem:"CurrName"})
+            .addDetailHeaderTextBox("StockName","Со склада", 280,{inputStyle:"width:200px"})
+            .addDetailHeaderTextBox("NewStockName","На склад", 280,{inputStyle:"width:200px"})
+            .addDetailHeaderTextBox("CurrName","Валюта", 150,{inputStyle:"width:80px"})
             .setDetailTableParameters({conditionIDName:"ParentChID",
                 getDataUrl:"/docs/excCashier/getDataForExcDTable",
                 storeDataUrl:"/docs/excCashier/storeExcDTableData", deleteDataUrl:"/docs/excCashier/deleteExcDTableData"})

@@ -197,7 +197,7 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
                 return numberTextBox;
             },
             /**
-             * params= {labelText,labelStyle, inputStyle, cellWidth,cellStyle, initValueDate, dateBoxParams}
+             * params= {labelText,labelStyle, inputStyle, cellWidth,cellStyle, initValueDate, dateBoxParams, noPrevNextButtons}
              */
             addTableCellDateBoxTo: function(tableRowNode, params){
                 if(!params) params={};
@@ -210,7 +210,10 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
                 dateTextBox.printParams={ cellWidth:params.cellWidth, cellStyle:params.cellStyle,
                     labelText:params.labelText, labelStyle:params.labelStyle, inputStyle:params.inputStyle };
                 this.createLabelFor(dateTextBox, params.labelText, params.labelStyle);
-                this.addTableCellDateBoxBtn(tableCell,dateTextBox,"prev");this.addTableCellDateBoxBtn(tableCell,dateTextBox,"next");
+                if(!params.noPrevNextButtons){
+                    this.addTableCellDateBoxBtn(tableCell,dateTextBox,"prev");
+                    this.addTableCellDateBoxBtn(tableCell,dateTextBox,"next");
+                }
                 return dateTextBox;
             },
             addTableCellDateBoxBtn:function(tableCell,dateTextBox,btnType){

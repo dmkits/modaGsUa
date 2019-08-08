@@ -357,7 +357,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 return this;
             },
             /**
-             * params={ style, inputStyle }
+             * params={ style, inputStyle, noPrevNextButtons }
              */
             addDetailHeaderDateTextBox: function(itemName,label,cellWidth,params){
                 if(!params) params= {};
@@ -365,7 +365,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(!params.inputStyle) params.inputStyle="";
                 if(!params.style) params.style="";
                 var dateBox= $TDF.addTableCellDateBoxTo(this.detailHeaderTable.lastChild,
-                    {cellWidth:cellWidth, labelText:label, labelStyle:params.style, inputStyle:params.style+params.inputStyle});
+                    {cellWidth:cellWidth, labelText:label, labelStyle:params.style, inputStyle:params.style+params.inputStyle,
+                        noPrevNextButtons:params.noPrevNextButtons});
                 this.detailHeader.addControlElementObject(dateBox, itemName);
                 this.addDetailHeaderElement(false,dateBox);
                 return this;
