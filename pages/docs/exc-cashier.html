@@ -84,11 +84,11 @@
                     var detailHeaderContentData= ap.detailHeader.getContentData();
                     if(!detailHeaderContentData){ this.setDisabled(true); return; }
                     var docStateData= {"StateCode":detailHeaderContentData["StateCode"],"StateName":detailHeaderContentData["StateName"]},
-                            stateCodeConfirm= detailHeaderContentData["StateCodeConfirm"],
-                            detailHeaderContentChangedData= {"StateCode":stateCodeConfirm};
+                            stateCodeCashierConfirm= detailHeaderContentData["StateCodeCashierConfirm"],
+                            detailHeaderContentChangedData= {"StateCode":stateCodeCashierConfirm};
                     $$.request.getJSONData({url:"/dirsDocs/getDirStateData", resultItemName:"item",
                                 conditions:{"StateCode":detailHeaderContentChangedData["StateCode"]+""},
-                                errorDialogMsg:"Не удалось получить данные для перевода документа в статус "+stateCodeConfirm+"!"},
+                                errorDialogMsg:"Не удалось получить данные для перевода документа в статус "+stateCodeCashierConfirm+"!"},
                             function(result,error){
                                 if(!result||error)return;
                                 var newStateName= result["StateName"];
@@ -96,7 +96,7 @@
                                 ap.detailHeader.setContentDataItems(detailHeaderContentChangedData,{onlyValues:true,callContentUpdated:true});
                                 $$.request.postJSONData({url:"/docs/excCashier/updExcDataState", resultItemName:"resultItem",
                                             data:{"ChID":detailHeaderContentData["ChID"],"StateCode":detailHeaderContentChangedData["StateCode"]},
-                                            errorDialogMsg:"Не удалось перевести документ в статус \""+newStateName+"\" ("+stateCodeConfirm+")!"},
+                                            errorDialogMsg:"Не удалось перевести документ в статус \""+newStateName+"\" ("+stateCodeCashierConfirm+")!"},
                                         function(result,error){
                                             if(!result||error){
                                                 ap.detailHeader.setContentDataItems(docStateData,{onlyValues:false,callContentUpdated:true});
@@ -121,11 +121,11 @@
                     var detailHeaderContentData= ap.detailHeader.getContentData();
                     if(!detailHeaderContentData){ this.setDisabled(true); return; }
                     var docStateData= {"StateCode":detailHeaderContentData["StateCode"],"StateName":detailHeaderContentData["StateName"]},
-                            stateCodeRetrieve= detailHeaderContentData["StateCodeRetrieve"],
-                            detailHeaderContentChangedData= {"StateCode":stateCodeRetrieve};
+                            stateCodeCashierRetrieve= detailHeaderContentData["StateCodeCashierRetrieve"],
+                            detailHeaderContentChangedData= {"StateCode":stateCodeCashierRetrieve};
                     $$.request.getJSONData({url:"/dirsDocs/getDirStateData", resultItemName:"item",
                                 conditions:{"StateCode":detailHeaderContentChangedData["StateCode"]+""},
-                                errorDialogMsg:"Не удалось получить данные для перевода документа в статус "+stateCodeRetrieve+"!"},
+                                errorDialogMsg:"Не удалось получить данные для перевода документа в статус "+stateCodeCashierRetrieve+"!"},
                             function(result,error){
                                 if(!result||error)return;
                                 var newStateName= result["StateName"];
@@ -133,7 +133,7 @@
                                 ap.detailHeader.setContentDataItems(detailHeaderContentChangedData,{onlyValues:true,callContentUpdated:true});
                                 $$.request.postJSONData({url:"/docs/excCashier/updExcDataState", resultItemName:"resultItem",
                                             data:{"ChID":detailHeaderContentData["ChID"],"StateCode":detailHeaderContentChangedData["StateCode"]},
-                                            errorDialogMsg:"Не удалось перевести документ в статус \""+newStateName+"\" ("+stateCodeRetrieve+")!"},
+                                            errorDialogMsg:"Не удалось перевести документ в статус \""+newStateName+"\" ("+stateCodeCashierRetrieve+")!"},
                                         function(result,error){
                                             if(!result||error){
                                                 ap.detailHeader.setContentDataItems(docStateData,{onlyValues:false,callContentUpdated:true});

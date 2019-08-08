@@ -48,11 +48,10 @@ module.exports.init = function(app){
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Exc.StateCode" },
         {data:"CanChangeDoc", name:"CanChangeDoc", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"dbo.zf_CanChangeDoc(11021,t_Exc.ChID,t_Exc.StateCode)"},
-
-        {data:"StateCodeConfirm", name:"StateCodeConfirm", width:50, type:"text", readOnly:true, visible:false,
-            dataFunction:"51" /*dataSource:"t_Exc",sourceField:"StateCode"*/},
-        {data:"StateCodeRetrieve", name:"StateCodeRetrieve", width:50, type:"text", readOnly:true, visible:false,
-            dataFunction:"52" /*dataSource:"t_Exc",sourceField:"StateCode"*/}
+        {data:"StateCodeCashierConfirm", name:"StateCodeConfirm", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"CASE t_Exc.StateCode When 50 Then 51 When 56 Then 57 Else NULL END"},
+        {data:"StateCodeCashierRetrieve", name:"StateCodeRetrieve", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"CASE t_Exc.StateCode When 50 Then 52 When 56 Then 58 Else NULL END"}
     ];
     r_Stocks.getEmpOperStocksList= function(dbUC,empID,calback){
         r_Stocks.getDataItems(dbUC,
@@ -79,7 +78,7 @@ module.exports.init = function(app){
         var conditions= {};
         for(var condItem in req.query) conditions["t_Exc."+condItem]=req.query[condItem];
         r_Stocks.getEmpOperStocksList(req.dbUC,req.dbUserParams["EmpID"],function(empOperStocksLists){
-            var aconditions= {"t_Exc.StateCode in (50,56,60)":null};
+            var aconditions= {"t_Exc.StateCode in (50,56)":null};
             if(empOperStocksLists) aconditions["t_Exc.NewStockID in ("+empOperStocksLists+")"]=null; else aconditions["t_Exc.NewStockID is null"]=null;
             t_Exc.getDataForTable(req.dbUC,{tableColumns:tExcsListTableColumns, identifier:tExcsListTableColumns[0].data,
                     conditions:conditions, aconditions:aconditions, order:"DocDate, DocID"},
