@@ -112,7 +112,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 if(this.allowFillHandle===true)
                     this.handsonTable.updateSettings({ fillHandle:{autoInsertRow:false, direction:'vertical'} });
                 this.handsonTable.updateSettings({
-                    beforeChange: function(change,source){                                                  console.log("HTableEditable beforeChange source=", source, " change=", change, change[0][3]);
+                    beforeChange: function(change,source){                                              //console.log("HTableEditable beforeChange source=", source, " change=", change, change[0][3]);
                         if(source==='loadData') return;
                         if(change.length==1){//changed 1 cell
                             var newValue= change[0][3];

@@ -1,14 +1,16 @@
 var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
 var t_Exc= require(appDataModelPath+"t_Exc"), t_ExcD= require(appDataModelPath+"t_ExcD");
+    r_Prods=require(appDataModelPath+"r_Prods");
 var r_DBIs= require(appDataModelPath+"r_DBIs"),
     r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
     r_States= require(appDataModelPath+"r_States"),
-    r_Prods=require(appDataModelPath+"r_Prods");
+    r_StateDocs= require(appDataModelPath+"r_StateDocs"), r_StateDocsChange= require(appDataModelPath+"r_StateDocsChange"),
+    zf_CanChangeDoc= require(appDataModelPath+"zf_CanChangeDoc");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([t_Exc,t_ExcD,r_DBIs,r_Ours,r_Stocks,r_Comps,r_Currs,r_States,r_Prods], errs,
+    dataModel.initValidateDataModels([t_Exc,t_ExcD,r_DBIs,r_Ours,r_Stocks,r_Comps,r_Currs,r_States,r_StateDocs,r_StateDocsChange,zf_CanChangeDoc,r_Prods], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -43,7 +45,14 @@ module.exports.init = function(app){
             dataFunction:{function:"sumIsNull", sourceField:"t_ExcD.NewQty*r_ProdMP.PriceMC"} },
         {data:"StateCode", name:"StateCode", width:50, type:"text", readOnly:true, visible:false, dataSource:"t_Exc"},
         {data:"StateName", name:"Статус", width:250, type:"text",
-            dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Exc.StateCode" }
+            dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Exc.StateCode" },
+        {data:"CanChangeDoc", name:"CanChangeDoc", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"dbo.zf_CanChangeDoc(11021,t_Exc.ChID,t_Exc.StateCode)"},
+
+        {data:"StateCodeConfirm", name:"StateCodeConfirm", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"51" /*dataSource:"t_Exc",sourceField:"StateCode"*/},
+        {data:"StateCodeRetrieve", name:"StateCodeRetrieve", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"52" /*dataSource:"t_Exc",sourceField:"StateCode"*/}
     ];
     r_Stocks.getEmpOperStocksList= function(dbUC,empID,calback){
         r_Stocks.getDataItems(dbUC,
@@ -84,6 +93,18 @@ module.exports.init = function(app){
         for(var condItem in req.query) conditions["t_Exc."+condItem]=req.query[condItem];
         t_Exc.getDataItemForTable(req.dbUC,{tableColumns:tExcsListTableColumns,
                 conditions:conditions},
+            function(result){
+                res.send(result);
+            });
+    });
+    app.post("/docs/excCashier/updExcDataState", function(req, res){
+        var storeData=req.body, chID=storeData["ChID"];
+        if(!chID){
+            res.send({error:"Non correct ChID!",userErrorMsg:"Не корректные данные сохраняемого документа (код регистрации)!"});
+            return;
+        }
+        t_Exc.updTableDataItem(req.dbUC,{tableColumns:tExcsListTableColumns, idFieldName:"ChID",
+                updFileds:["StateCode"], updTableData:{"ChID":chID,"StateCode":storeData["StateCode"]}},
             function(result){
                 res.send(result);
             });

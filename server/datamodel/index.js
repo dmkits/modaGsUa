@@ -11,6 +11,11 @@ module.exports.resetValidatedDataModels= function(){ validatedDataModels={}; };
 
 /**
  * created for data model fields: sourceType, source, fields, idField, fieldsMetadata
+ * dataModel.changeLog or dataModel.modelData
+ *      modelData = { tableName/viewName/queryName/functionName, <parameters> }
+ *          tableName/viewName, idField="<idFieldName>", fields=["<fieldName>, ..." ];
+ *          queryName, idField="<idFieldName>", fields=["<fieldName>, ..."], queryParameters=["@<parameterName>", ... ];
+ *          functionName, functionParameters=["@<parameterName>", ... ]
  * created data model functions
  */
 function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataModelCallback){                  log.info('InitValidateDataModel: dataModel:'+dataModelName+"...");//test
@@ -27,13 +32,16 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
         dataModel.doValidate(errs, nextValidateDataModelCallback);
         return;
     }
-    var tableName, viewName, queryName, tableFieldsList=[],tableFields={}, idFieldName, joinedSources={};
+    var tableName, viewName, queryName, functionName, tableFieldsList=[],tableFields={}, idFieldName, functionParameters=[],
+        joinedSources={};
     if(dataModel.modelData){
         var modelData=dataModel.modelData;
         if(modelData.tableName) tableName= modelData.tableName;
         if(modelData.viewName) viewName= modelData.viewName;
         if(modelData.queryName) queryName= modelData.queryName;
+        if(modelData.functionName) functionName= modelData.functionName;
         if(modelData.idField) idFieldName= modelData.idField;
+        functionParameters= modelData.functionParameters;
         if(modelData.fields)
             for(var fieldIndex in modelData.fields){
                 var fieldName=modelData.fields[fieldIndex];
@@ -97,14 +105,18 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.calcNewIDValueOnStoreTableDataItem= _calcNewIDValueOnStoreTableDataItem;
     dataModel.storeTableDataItem= _storeTableDataItem;
     dataModel.delTableDataItem= _delTableDataItem;
-    if(!tableName&&!viewName&&!queryName){
+    if(!tableName&&!viewName&&!queryName&&!functionName){
         errs[dataModelName+"_initError"]= "Failed init dataModel:"+dataModelName
-            +"! Reason: no model table or view name or query name!";                                            log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model table or view name or query name!");//test
+            +"! Reason: no model table or view name or query name or function name!";                           log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model table or view name or query name or function name!");//test
         nextValidateDataModelCallback();
         return;
     }
-    if(tableFieldsList.length==0){
+    if((tableName||viewName||queryName)&&(!tableFieldsList||tableFieldsList.length==0)){
         errs[dataModelName+"_initError"]="Failed init dataModel:"+dataModelName+"! Reason: no model fields!";   log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model fields!");//test
+        nextValidateDataModelCallback();
+        return;
+    }else if(functionName&&(!functionParameters||functionParameters.length==0)){
+        errs[dataModelName+"_initError"]="Failed init dataModel:"+dataModelName+"! Reason: no model parameters!";   log.error('FAILED init dataModel:'+dataModelName+"! Reason: no model parameters!");//test
         nextValidateDataModelCallback();
         return;
     }
@@ -115,6 +127,9 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     }else if(queryName){
         dataModel.sourceType="query";  dataModel.sourceName=modelData.queryName;
         dataModel.source=modelData.query; dataModel.sourceParamsNames=modelData.queryParameters;
+    }else if(functionName){
+        dataModel.sourceType="function";  dataModel.sourceName=functionName;
+        dataModel.source=functionName; dataModel.sourceParamsNames=functionParameters;
     }
     dataModel.fields=tableFieldsList; dataModel.idField=idFieldName;                                            log.debug('Init data model '+dataModel.sourceType+":"+dataModel.sourceName+" fields:",dataModel.fields," idField:"+dataModel.idField);//test
     dataModel.fieldsMetadata=tableFields;
@@ -127,14 +142,19 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
             if(sourceParamName) sourceParams[sourceParamName]=null;
         }
     }
-    var idIsNullCondition= tableFieldsList[0]+" is NULL", validateCondition={};
-    validateCondition[idIsNullCondition]=null;
+    var validateCondition=null, withoutConditions=false;
+    if(tableName||viewName||queryName){
+        var idIsNullCondition= tableFieldsList[0]+" is NULL", validateCondition={};
+        validateCondition[idIsNullCondition]=null;
+    }else if(functionName) withoutConditions=true;
     dataModel.doValidate= function(errs, resultCallback){
-        dataModel.getDataItems(database.getDBSystemConnection(), {sourceParams:sourceParams,conditions:validateCondition}, function(result){
-            if(result.error){                                                                                   log.error('FAILED validate data model:'+dataModelName+"! Reason:"+result.error+"!");//test
-                errs[dataModelName+"_validateError"]= "Failed validate dataModel:"+dataModelName+"! Reason:"+result.error;
-            }
-            resultCallback();
+        dataModel.getDataItems(database.getDBSystemConnection(),
+                {sourceParams:sourceParams,conditions:validateCondition,withoutConditions:withoutConditions},
+            function(result){
+                if(result.error){                                                                               log.error('FAILED validate data model:'+dataModelName+"! Reason:"+result.error+"!");//test
+                    errs[dataModelName+"_validateError"]= "Failed validate dataModel:"+dataModelName+"! Reason:"+result.error;
+                }
+                resultCallback();
         });
     };
     dataModel.doValidate(errs, nextValidateDataModelCallback);
@@ -157,7 +177,7 @@ module.exports.initValidateDataModels= function(dataModelsList, errs, resultCall
 };
 
 /**
- * params = { source, sourceType= table/view/query, sourceName, sourceParamsNames = [<param1Name>,...], sourceParams={<param1Name>:<value>,...},
+ * params = { source, sourceType= table/view/query/function, sourceName, sourceParamsNames = [<param1Name>,...], sourceParams={<param1Name>:<value>,...},
  *      fields = [ <fieldName> or <functionFieldName>, ... ],
  *      fieldsSources = { <fieldName>:<sourceName>.<sourceFieldName>, ... },
  *      fieldsFunctions = {
@@ -220,11 +240,12 @@ function _getSelectItems(connection, params,resultCallback){                    
         queryFields+= ((fieldFunction)?fieldFunction+" as ":"") + fieldName;
     }
     var querySource=params.source, queryValues=[];
+    if(params.sourceType=="function") querySource+="("+((params.sourceParamsNames)?params.sourceParamsNames.join(","):"")+")";
     if(querySource&&params.sourceParams){
         for(var sourceParamName in params.sourceParams){
             var sourceParamValue=params.sourceParams[sourceParamName];
             if(sourceParamName&&sourceParamValue===null){
-                querySource=querySource.replace(new RegExp(sourceParamName,'g'), "0");
+                querySource=querySource.replace(new RegExp(sourceParamName,'g'), "NULL");
             }else if(sourceParamName){
                 querySource=querySource.replace(new RegExp(sourceParamName,'g'), '@p'+queryValues.length);
                 queryValues.push(sourceParamValue);
@@ -234,7 +255,9 @@ function _getSelectItems(connection, params,resultCallback){                    
     if(!params.sourceName) params.sourceName="m";
     if(params.sourceType=="query") querySource= "(\n"+querySource+"\n) "+params.sourceName;
     if(!params.top) params.top=""; else params.top+=" ";
-    var selectQuery="select "+params.top+queryFields+" from "+querySource;
+    var selectQuery=(params.sourceType=="function")
+        ?"select dbo."+querySource+" "+params.sourceName
+        :"select "+params.top+queryFields+" from "+querySource;
     var joins="";
     if(params.joinedSources){
         for(var joinSourceName in params.joinedSources){
@@ -317,7 +340,7 @@ module.exports.getSelectItems= _getSelectItems;
 /**
  * params = { source, sourceType, sourceName, sourceParamsNames, sourceParams,
  *      fields = [<tableFieldName>,<tableFieldName>,<tableFieldName>,...],
- *      conditions={ <condition>:<conditionValue>, ... },
+ *      conditions={ <condition>:<conditionValue>, ... } or withoutConditions=true/false,
  *      order = "<orderFieldsList>"
  * }
  * resultCallback = function(result), result = { items:[ {<tableFieldName>:<value>,...}, ... ], error, errorCode } )
@@ -330,7 +353,7 @@ function _getDataItems(connection, params, resultCallback){                     
     if(!params.sourceParamsNames) params.sourceParamsNames= this.sourceParamsNames;
     if(!params.sourceParams) params.sourceParams= this.sourceParams;
     if(!params.fields) params.fields=this.fields;
-    if(!params.conditions){                                                                                     log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!");//test
+    if(!params.withoutConditions&&!params.conditions){                                                                                     log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!");//test
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!"});
         return;
     }
@@ -342,7 +365,7 @@ function _getDataItems(connection, params, resultCallback){                     
             hasCondition= true;
         }
     }
-    if(!hasCondition){                                                                                          log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!");//test
+    if(!params.withoutConditions&&!hasCondition){                                                                                          log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!");//test
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!"});
         return;
     }

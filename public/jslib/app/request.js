@@ -86,7 +86,7 @@ define(["dojo/request", "app/base","app/dialogs"],
                     })
             },
             /** processJSONDataResult
-             * params = { showErrorDialog, resultItemName }
+             * params = { showErrorDialog, errorDialogMsg, errorDialogReasonMsg, resultItemName }
              * resParams={ dlgErrMsgReqErr, dlgErrReasonReqErrState0, dlgErrReasonReqErr, dlgErrMsgRespErr, dlgErrReasonRespErrNoData }
              * resultCallback = function(<response result>, <error>),
              *      <error> = { message, errorMessage, userMessage, _reqError }
@@ -95,13 +95,17 @@ define(["dojo/request", "app/base","app/dialogs"],
              * call resultCallback(<response result>, <error>) if request success and exists <response result>.error
              */
             processJSONDataResult: function(params, respJSON,error, resParams, resultCallback){
-                var requestFailDialog=null, self=this, hasRespJSON=respJSON!==undefined&&respJSON!==null,
+                var requestFailDialog=null,
+                    errorDialogMsg=(params&&params.errorDialogMsg)?params.errorDialogMsg:null,
+                    errorDialogReasonMsg=(params&&params.errorDialogReasonMsg)?params.errorDialogReasonMsg:null,
+                    self=this, hasRespJSON=respJSON!==undefined&&respJSON!==null,
                     result=(hasRespJSON&&params&&params.resultItemName)?respJSON[params.resultItemName]:respJSON,
                     hasResult=result!==undefined&&result!==null;
                 if(params&&params.showErrorDialog!==false)
                     requestFailDialog= function(msg, reason){
-                        if(!reason) reason="";
-                        self.doRequestFailDialog({title:"Внимание",content:msg+" <br>Причина: "+reason});
+                        self.doRequestFailDialog({title:"Внимание",
+                            content:'<div style="font-weight:bold;color:red">'+(errorDialogMsg||msg)+'</div>'+
+                                '<div style="margin-top:5px;font-size:11px">Причина: '+(errorDialogReasonMsg||reason||"")+'</div>'});
                     };
                 if(!error&&hasResult&&!respJSON.error){
                     resultCallback(result);
@@ -146,7 +150,7 @@ define(["dojo/request", "app/base","app/dialogs"],
                 dlgErrReasonRespErrNoData:"Нет результата операции с сервера!"
             },
             /** jsonData
-             * params = { url, method:"get"/"post", conditions, timeout, showErrorDialog, consoleLog, resultItemName }
+             * params = { url, method:"get"/"post", conditions, timeout, showErrorDialog, errorDialogMsg,errorDialogReasonMsg, consoleLog, resultItemName }
              * default: method="get", params.showErrorDialog = true, params.consoleLog = true
              * resultCallback = function(<response result>, <error>),
              *      <error> = { message, errorMessage, userMessage, _reqError }
@@ -167,7 +171,7 @@ define(["dojo/request", "app/base","app/dialogs"],
                 });
             },
             /** getJSONData
-             * params = { url, conditions, timeout, showErrorDialog, consoleLog, resultItemName }
+             * params = { url, conditions, timeout, showErrorDialog, errorDialogMsg,errorDialogReasonMsg, consoleLog, resultItemName }
              * resultCallback = function(<response result>, <error>),
              *      <error> = { message, errorMessage, userMessage, _reqError }
              * call resultCallback(<response result>) if request success and no result.error
@@ -181,7 +185,7 @@ define(["dojo/request", "app/base","app/dialogs"],
                 });
             },
             /** postJSONData
-             * params = <url>" OR { url, conditions, timeout, showErrorDialog, data, resultItemName }
+             * params = <url>" OR { url, conditions, timeout, showErrorDialog, errorDialogMsg,errorDialogReasonMsg, data, resultItemName }
              * default: params.showErrorDialog = true
              * resultCallback = function(<response result>, <error>),
              *      <error> = { message, errorMessage, userMessage, _reqError }

@@ -17,7 +17,12 @@
                 header:"Список накладных", bdatelabelText:"c",bdateCondition:"DOCDATE>=", edatelabelText:"по",edateCondition:"DOCDATE<="
             })
             .setDetailHeaderParameters({dataIDName:"ChID",getDataUrl:"/docs/excCashier/getExcData",
-                dataStateName:"StateCode", activeStateValue:50, dataHeaderStateName:"StateCode",activeHeaderStateValue:"!headerNonActive!"
+                detailHeaderEditable:false,
+                detailTableEditable:function(params){
+                    if(!params||!params.detailHeaderContentData) return false;
+                    var stateCode=params.detailHeaderContentData["StateCode"];
+                    return stateCode==50||stateCode==56||stateCode==60;
+                }
             })
             .addDetailHeaderTitle({title:"Перемещение товара на ТТ",titleForNothing:"Перемещение товара не выбрано", titleForFailedLoad:"Нет данных",
                 numberDataItemName:"DocID", dateDataItemName:"DocDate", titleDatePrefix:"от"},25)
@@ -50,11 +55,10 @@
             .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 220, "TSumCC",
                 {pattern:"###,###,##0.00#######", inputStyle:"width:80px;", style:"font-weight:bold;", printLabel:"ИТОГО СУММА:"})
             .addToolPane({title:"Действия"})
-            .addToolPaneBR()
             .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableSelectedRow"})
             .addToolPaneActionButton("Изменить все строки", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableAllVisibleRows"})
             .addToolPaneBR()
-            .addToolPaneActionButton("Запонить факт", {btnStyle:"width:200px;",
+            .addToolPaneActionButton("Заполнить факт", {btnStyle:"width:200px;",
                 actionFunction:function(ap){
                     var dhtContentEditableRows= ap.detailHTable.getContentEditableRows();
                     ap.detailHTable.updateRowsAction(dhtContentEditableRows,{},
@@ -76,6 +80,81 @@
             .addToolPaneActionButton("Сохранить все строки", {btnStyle:"width:200px;", actionButtonName:"storeDetailTableAllEditableRows"})
             .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
             .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
+            .addToolPane({title:"Статус"})
+            .addToolPaneActionButton("В статус \"Подтвержден\"", {btnStyle:"width:200px;",
+                actionFunction:function(ap){
+                    var detailHeaderContentData= ap.detailHeader.getContentData();
+                    if(!detailHeaderContentData){ this.setDisabled(true); return; }
+                    var docStateData= {"StateCode":detailHeaderContentData["StateCode"],"StateName":detailHeaderContentData["StateName"]},
+                            stateCodeConfirm= detailHeaderContentData["StateCodeConfirm"],
+                            detailHeaderContentChangedData= {"StateCode":stateCodeConfirm};
+                    $$.request.getJSONData({url:"/dirsDocs/getDirStateData", resultItemName:"item",
+                                conditions:{"StateCode":detailHeaderContentChangedData["StateCode"]+""},
+                                errorDialogMsg:"Не удалось получить данные для перевода документа в статус "+stateCodeConfirm+"!"},
+                            function(result,error){
+                                if(!result||error)return;
+                                var newStateName= result["StateName"];
+                                detailHeaderContentChangedData["StateName"]= newStateName;
+                                ap.detailHeader.setContentDataItems(detailHeaderContentChangedData,{onlyValues:true,callContentUpdated:true});
+                                $$.request.postJSONData({url:"/docs/excCashier/updExcDataState", resultItemName:"resultItem",
+                                            data:{"ChID":detailHeaderContentData["ChID"],"StateCode":detailHeaderContentChangedData["StateCode"]},
+                                            errorDialogMsg:"Не удалось перевести документ в статус \""+newStateName+"\" ("+stateCodeConfirm+")!"},
+                                        function(result,error){
+                                            if(!result||error){
+                                                ap.detailHeader.setContentDataItems(docStateData,{onlyValues:false,callContentUpdated:true});
+                                                return;
+                                            }
+                                            ap.detailHeader.setContentDataItems({"StateCode":result["StateCode"],"StateName":result["StateName"]},
+                                                    {onlyValues:false,callContentUpdated:true,updatedResultItem:detailHeaderContentChangedData});
+                                        });
+                            });
+                },
+                actionStateFunction:function(ap){
+                    var detailHeaderContentData= ap.detailHeader.getContentData();
+                    if(detailHeaderContentData && !ap.detailHeader.isContentChanged()
+                            && ap.thisDoc.detailTableEditableChecker() && ap.detailHTable.getContent().length>0)
+                        this.setDisabled(false);
+                    else
+                        this.setDisabled(true);
+                }
+            })
+            .addToolPaneActionButton("В статус \"Возвращен\"", {btnStyle:"width:200px;",
+                actionFunction:function(ap){
+                    var detailHeaderContentData= ap.detailHeader.getContentData();
+                    if(!detailHeaderContentData){ this.setDisabled(true); return; }
+                    var docStateData= {"StateCode":detailHeaderContentData["StateCode"],"StateName":detailHeaderContentData["StateName"]},
+                            stateCodeRetrieve= detailHeaderContentData["StateCodeRetrieve"],
+                            detailHeaderContentChangedData= {"StateCode":stateCodeRetrieve};
+                    $$.request.getJSONData({url:"/dirsDocs/getDirStateData", resultItemName:"item",
+                                conditions:{"StateCode":detailHeaderContentChangedData["StateCode"]+""},
+                                errorDialogMsg:"Не удалось получить данные для перевода документа в статус "+stateCodeRetrieve+"!"},
+                            function(result,error){
+                                if(!result||error)return;
+                                var newStateName= result["StateName"];
+                                detailHeaderContentChangedData["StateName"]= newStateName;
+                                ap.detailHeader.setContentDataItems(detailHeaderContentChangedData,{onlyValues:true,callContentUpdated:true});
+                                $$.request.postJSONData({url:"/docs/excCashier/updExcDataState", resultItemName:"resultItem",
+                                            data:{"ChID":detailHeaderContentData["ChID"],"StateCode":detailHeaderContentChangedData["StateCode"]},
+                                            errorDialogMsg:"Не удалось перевести документ в статус \""+newStateName+"\" ("+stateCodeRetrieve+")!"},
+                                        function(result,error){
+                                            if(!result||error){
+                                                ap.detailHeader.setContentDataItems(docStateData,{onlyValues:false,callContentUpdated:true});
+                                                return;
+                                            }
+                                            ap.detailHeader.setContentDataItems({"StateCode":result["StateCode"],"StateName":result["StateName"]},
+                                                    {onlyValues:false,callContentUpdated:true,updatedResultItem:detailHeaderContentChangedData});
+                                        });
+                            });
+                },
+                actionStateFunction:function(ap){
+                    var detailHeaderContentData= ap.detailHeader.getContentData();
+                    if(detailHeaderContentData && !ap.detailHeader.isContentChanged()
+                            && ap.thisDoc.detailTableEditableChecker())
+                        this.setDisabled(false);
+                    else
+                        this.setDisabled(true);
+                }
+            })
             .addToolPane({title:"Информация о товаре",
                 detailTableAction:function(toolPane, detailHeader,detailTable,thisInstance){
                     var detailTableSelectedRow= detailTable.getSelectedRow();

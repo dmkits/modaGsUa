@@ -119,13 +119,14 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                         return;
                     }
                     this.setSelection(firstSelectedRowData, selection);
+                    this.rowDataIDForSelect= listTableSelRowDataID;
                     thisInstance.setDetailHeaderContentByListSelectedRow(firstSelectedRowData);
                 };
                 this.setListDatesContent(params);
                 return this;
             },
             /**
-             * params: { callUpdateContent:true/false, selectedRowDataID }
+             * params: { callUpdateContent:true/false, detailHeaderDataID }
              * default callUpdateContent=true
              */
             loadListTableContentFromServer: function(params){
@@ -137,9 +138,9 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     this.listEDate.format(this.listEDate.get("value"),{selector:"date",datePattern:"yyyy-MM-dd"});
                 if(!params) params= {};
                 var callUpdateContent=params.callUpdateContent;
-                if(params.selectedRowDataID!==undefined){
+                if(params.detailHeaderDataID!==undefined){
                     callUpdateContent=true;
-                    this.listTable.rowDataIDForSelect=params.selectedRowDataID;
+                    this.listTable.rowDataIDForSelect=params.detailHeaderDataID;
                 }
                 this.listTable.setContentFromUrl({url:this.listTable.getDataUrl,conditions:conditions,callUpdateContent:callUpdateContent});
             },
@@ -176,7 +177,13 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
             },
 
             /**
-             * parameters= { dataIDName, getDataUrl, dataStateName,activeStateValue, dataHeaderStateName,activeHeaderStateValue }
+             * parameters= { dataIDName, getDataUrl,
+             *     docDetailEditable= true/false/function(params),
+             *     detailHeaderEditable= true/false/function(params),
+             *     detailTableEditable= true/false/function(params),
+             *         params= { doc:<this document>, detailHeader:<this document header>,
+             *             detailHeaderContentData: doc.detailHeader.getContentData() }
+             * }
              */
             setDetailHeaderParameters: function(parameters){
                 if(parameters.dataIDName) this.detailHeader.setDataIDName(parameters.dataIDName);
@@ -184,47 +191,62 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(parameters.getDataForNewUrl) this.detailHeader.getDataForNewUrl=parameters.getDataForNewUrl;
                 if(parameters.postDataUrl) this.detailHeader.postDataUrl=parameters.postDataUrl;
                 if(parameters.postForDeleteDataUrl) this.detailHeader.postForDeleteDataUrl=parameters.postForDeleteDataUrl;
-                if(parameters.dataStateName){
-                    this.detailHeader.dataStateName=parameters.dataStateName;
-                    var dataHeaderStateName= parameters.dataHeaderStateName||parameters.dataStateName,
-                        activeStateValue= parameters.activeHeaderStateValue||parameters.activeStateValue;
-                    this.detailHeader.dataEnabledChecker= function(dataItems){
-                        return (dataItems&&dataItems[dataHeaderStateName]==activeStateValue)
-                    };
-                }
-                if(parameters.activeStateValue!==undefined) this.detailHeader.activeStateValue=parameters.activeStateValue;
-                var thisInstance=this;
-                this.detailHeader.onContentUpdated= function(contentData,params,idIsChanged){                   console.log("TDocStdTable.detailHeader.onContentUpdated ",contentData," ",params,idIsChanged);
+                if(parameters.docDetailEditable!==undefined) this.docDetailEditable=parameters.docDetailEditable;
+                if(parameters.detailHeaderEditable!==undefined) this.detailHeaderEditable=parameters.detailHeaderEditable;
+                if(parameters.detailTableEditable!==undefined) this.detailTableEditable=parameters.detailTableEditable;
+                this.detailHeaderEditableChecker= function(params){
+                    params=params||{};
+                    params.doc=this; params.detailHeader=this.detailHeader;
+                    if(params.detailHeaderContentData===undefined&&this.detailHeader) params.detailHeaderContentData= this.detailHeader.getContentData();
+                    if(this.detailHeaderEditable!==undefined&&typeof(this.detailHeaderEditable)!="function") return this.detailHeaderEditable;
+                    if(this.detailHeaderEditable!==undefined&&typeof(this.detailHeaderEditable)=="function")
+                        return this.detailHeaderEditable(params);
+                    if(this.docDetailEditable!==undefined&&typeof(this.docDetailEditable)!="function") return this.docDetailEditable;
+                    if(this.docDetailEditable!==undefined&&typeof(this.docDetailEditable)=="function")
+                        return this.docDetailEditable(params);
+                    return false;
+                };
+                this.detailTableEditableChecker= function(params){
+                    params=params||{};
+                    params.doc=this; params.detailHeader=this.detailHeader;
+                    if(params.detailHeaderContentData===undefined&&this.detailHeader) params.detailHeaderContentData= this.detailHeader.getContentData();
+                    if(this.detailTableEditable!==undefined&&typeof(this.detailTableEditable)!="function") return this.detailTableEditable;
+                    else if(this.detailTableEditable!==undefined&&typeof(this.detailTableEditable)=="function")
+                        return this.detailTableEditable(params);
+                    else if(this.docDetailEditable!==undefined&&typeof(this.docDetailEditable)!="function") return this.docDetailEditable;
+                    else if(this.docDetailEditable!==undefined&&typeof(this.docDetailEditable)=="function")
+                        return this.docDetailEditable(params);
+                    return false;
+                };
+                var self=this;
+                this.detailHeader.dataEnabledChecker= function(dataItems){
+                    return self.detailHeaderEditableChecker({detailHeaderContentData:dataItems});
+                };
+                this.detailHeader.onContentUpdated= function(contentData,params,idIsChanged){                   //console.log("TDocStdTable.detailHeader.onContentUpdated ",contentData," ",params,idIsChanged);
                     if(this.setTitleContent) this.setTitleContent();
                     if(idIsChanged&&(!params||(params.onlyValues!==true&&!params.error))) this.lastContentData=contentData;
                     if(idIsChanged){
-                        if(!contentData||contentData.length==0) thisInstance.detailHTable.clearContent();
-                        else thisInstance.loadDetailTableContentDataFromServer();
+                        if(!contentData||contentData.length==0) self.detailHTable.clearContent();
+                        else self.loadDetailTableContentDataFromServer();
                     }else{
                         var detailSubtotalContent=!contentData||contentData.length==0;
-                        thisInstance.setDetailSubtotalContent({disabled:detailSubtotalContent, clearValue:detailSubtotalContent});
-                        thisInstance.setToolPanesActions();
+                        self.setDetailSubtotalContent({disabled:detailSubtotalContent, clearValue:detailSubtotalContent});
+                        self.setToolPanesActions();
                     }
                     if(params&&params.onlyValues!==true&&(params.updatedResultItem!==undefined||params.deletedResultItem!==undefined))
-                        thisInstance.loadListTableContentFromServer({selectedRowDataID:thisInstance.detailHeader.getContentDataIDValue(), callUpdateContent:false});
-                    var detailHeaderContentData=thisInstance.detailHeader.getContentData();
-                    if(detailHeaderContentData && detailHeaderContentData[thisInstance.detailHeader.dataStateName]!==undefined
-                        && detailHeaderContentData[thisInstance.detailHeader.dataStateName]==thisInstance.detailHeader.activeStateValue){
-                         thisInstance.detailHTable.setReadOnly(false);
-                    }else{
-                        thisInstance.detailHTable.setReadOnly();
-                    }                                                                                           //console.log("TDocStdTable.detailHeader.onContentUpdated END",contentData, params, idIsChanged,this.lastContentData);
+                        self.loadListTableContentFromServer({detailHeaderDataID:self.detailHeader.getContentDataIDValue(), callUpdateContent:false});
+                    self.detailHTable.setReadOnly(!self.detailTableEditableChecker());
                 };
                 this.detailHeader.onContentChanged= function(isContentChanged){                                 //console.log("TDocStdTable.detailHeader.onContentChanged ",isContentChanged,this.getContentData());
                     //thisInstance.detailHTableSetDisabled(isContentChanged);
-                    thisInstance.setToolPanesActions();
+                    self.setToolPanesActions();
                 };
                 return this;
             },
             /**
              * param { reloadData, clearBeforeLoad }
              */
-            setDetailHeaderContentByListSelectedRow: function(listSelectedFirstRowData,params){                 console.log("TDocStdTable.setDetailHeaderContentByListSelectedRow ",listSelectedFirstRowData, params);
+            setDetailHeaderContentByListSelectedRow: function(listSelectedFirstRowData,params){                 //console.log("TDocStdTable.setDetailHeaderContentByListSelectedRow ",listSelectedFirstRowData, params);
                 if(!this.detailHeader){ this.setToolPanesActions(); return; }
                 if(!this.detailHeader.getDataUrl||!listSelectedFirstRowData){ this.detailHeader.setContentData(null); return; }
                 var newID= listSelectedFirstRowData[this.detailHeader.dataIDName];                              //console.log("TDocStdTable.setDetailHeaderContentByListSelectedRow newID=",newID);
@@ -401,8 +423,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                             thisInstance.setDetailHeaderContentByListSelectedRow(thisInstance.detailHeader.lastContentData, {reloadData:reloadData});
                         }
                     }
-                    var selectedRowData = this.getSelectedRow();
-                    if( !selectedRowData && this.getContent().length>0){
+                    if(!this.getSelectedRow() && this.getContent().length>0){
                         thisInstance.setDetailSubtotalContent();
                         this.setSelectedRowByIndex(0);
                         return;
@@ -665,6 +686,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 var actionsTableRow= $TDF.addRowToTable(this.toolPanes[this.toolPanes.length-1].containerNode.lastChild);
                 var actionButton= $TDF.addTableCellButtonTo(actionsTableRow, {labelText:label, cellWidth:0, btnStyle:actionParams.btnStyle, btnParameters:actionParams.btnParams});
                 if(!this.toolPanesActionButtons) this.toolPanesActionButtons={};
+                if(!actionParams.actionButtonName) actionParams.actionButtonName= actionButton.id;
                 this.toolPanesActionButtons[actionParams.actionButtonName]= actionButton;
                 var actionFunctionParams= { detailHeader:this.detailHeader, detailHTable:this.detailHTable, toolPanes:this.toolPanes, thisDoc:this };
                 if(actionParams.actionFunction){
@@ -731,8 +753,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     return function(){
                         var detailHeader=thisInstance.detailHeader,detailHTable=thisInstance.detailHTable,
                             detailHeaderContentData=detailHeader.getContentData();
-                        if( detailHeaderContentData && detailHTable.getData() && detailHTable.getData().length==0
-                                && detailHeaderContentData[thisInstance.detailHeader.dataStateName]===thisInstance.detailHeader.activeStateValue)
+                        if( detailHeaderContentData && detailHTable.getData()
+                                && thisInstance.detailHeaderEditableChecker() && detailHTable.getData().length==0)
                             this.setDisabled(false);
                         else
                             this.setDisabled(true);
@@ -741,8 +763,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     return function(){
                         var detailHeader=thisInstance.detailHeader,
                             detailHeaderContentData=detailHeader.getContentData();
-                        if(detailHeaderContentData && !detailHeader.isContentChanged() && detailHeaderContentData[detailHeader.dataStateName]!==undefined
-                                && detailHeaderContentData[detailHeader.dataStateName]==detailHeader.activeStateValue)
+                        if(detailHeaderContentData && !detailHeader.isContentChanged()
+                                && thisInstance.detailTableEditableChecker())
                             this.setDisabled(false);
                         else
                             this.setDisabled(true);
@@ -751,9 +773,9 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     return function(){
                         var detailHeader=thisInstance.detailHeader, detailHTable=thisInstance.detailHTable,
                             detailHeaderContentData=detailHeader.getContentData();
-                        if(detailHeaderContentData && !detailHeader.isContentChanged() && detailHTable.getSelectedRow()&& !detailHTable.isSelectedRowEditable()
-                                && detailHeaderContentData[thisInstance.detailHeader.dataStateName]!==undefined
-                                && detailHeaderContentData[thisInstance.detailHeader.dataStateName]==detailHeader.activeStateValue)
+                        if(detailHeaderContentData && !detailHeader.isContentChanged()
+                                && detailHTable.getSelectedRow()&& !detailHTable.isSelectedRowEditable()
+                                && thisInstance.detailTableEditableChecker())
                             this.setDisabled(false);
                         else
                             this.setDisabled(true);
@@ -762,9 +784,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     return function(){
                         var detailHeader=thisInstance.detailHeader, detailHTable=thisInstance.detailHTable,
                             detailHeaderContentData=detailHeader.getContentData();
-                        if(detailHeaderContentData && !detailHeader.isContentChanged() && detailHTable.getContent().length>0
-                            && detailHeaderContentData[thisInstance.detailHeader.dataStateName]!==undefined
-                            && detailHeaderContentData[thisInstance.detailHeader.dataStateName]==detailHeader.activeStateValue)
+                        if(detailHeaderContentData && !detailHeader.isContentChanged()
+                                && thisInstance.detailTableEditableChecker() && detailHTable.getContent().length>0)
                             this.setDisabled(false);
                         else
                             this.setDisabled(true);
@@ -792,8 +813,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                         var detailHeader=thisInstance.detailHeader, detailHTable=thisInstance.detailHTable,
                             detailHeaderContentData=detailHeader.getContentData();
                         if(detailHeaderContentData && !detailHeader.isContentChanged() && detailHTable.getSelectedRow()
-                                && detailHeaderContentData[thisInstance.detailHeader.dataStateName]!==undefined
-                                && detailHeaderContentData[thisInstance.detailHeader.dataStateName]==thisInstance.detailHeader.activeStateValue)
+                                && thisInstance.detailTableEditableChecker())
                             this.setDisabled(false);
                         else
                             this.setDisabled(true);

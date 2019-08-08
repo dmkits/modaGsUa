@@ -33,7 +33,6 @@ define(["app/base", "dijit/Dialog", "dijit/form/Button", "dijit/ProgressBar", "d
             showSimple: function(params){
                 if(!params) params={};
                 if(!params.content) params.content="";
-                if(params.content)params.content+="<br>";
                 var dlg=this._doSimpleDialog(params); dlg.show();
                 return dlg;
             },

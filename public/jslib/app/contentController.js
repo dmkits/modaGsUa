@@ -63,9 +63,10 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 for(var dataItemName in this.data) this.data[dataItemName]=null;
             },
             /**
+             * set new data items for all elements
              * params= { onlyValues, callContentUpdated, result, error,
              *      loadedResultItem, updatedResultItem, deletedResultItem, updateCount }
-             * callback's onContentUpdated(newData,params,idIsChanged)
+             * call onContentUpdated(newData,params,idIsChanged) if callContentUpdated!==false
              */
             setContentData: function(newData,params){                                                           //console.log("ContentController.setContentData newData=",newData,params);
                 if(newData===this.data&&!this.isContentChanged()) return;
@@ -106,6 +107,38 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 },0);
             },
             /**
+             * set new data items values only for data items elements
+             * call onContentUpdated(newData,params,idIsChanged) if callContentUpdated!==false
+             */
+            setContentDataItems: function(newDataItemsValues,params){
+                if(!newDataItemsValues) return;
+                if(!params) params= {};
+                if(!params.onlyValues&&!this.data) this.data={};
+
+                var oldDataIDValue,newDataIDValue;
+                if(this.data&&this.dataIDName) oldDataIDValue= this.data[this.dataIDName];
+                if(!params.onlyValues&&this.dataIDName&&newDataItemsValues.hasOwnProperty(this.dataIDName)) newDataIDValue= newDataItemsValues[this.dataIDName];
+
+                var enable = false;
+                if(this.dataEnabledChecker&&typeof(this.dataEnabledChecker)!=="function")
+                    enable= this.dataEnabledChecker;//dataEnabledChecker = true/false/function(dataItems,dataItemName,dataItemValue,dataEl)
+                for(var itemName in newDataItemsValues){
+                    var dataItemNewValue=newDataItemsValues[itemName], newDataItem= {value:dataItemNewValue}, dataEl = this.elements[itemName];
+                    if(!params.onlyValues) this.data[itemName]=dataItemNewValue;
+                    if(!dataEl) continue;
+                    if(dataEl.labelDataItem) newDataItem[dataEl.labelDataItem]= newDataItemsValues[dataEl.labelDataItem];
+                    if(this.dataEnabledChecker&&typeof(this.dataEnabledChecker)=="function")
+                        enable= this.dataEnabledChecker(newDataItemsValues, itemName,dataItemNewValue, dataEl);//dataEnabledChecker = true/false/function(dataItems,dataItemName,dataItemValue,dataEl)
+                    this.setControlElementData(itemName, newDataItem, enable, params.onlyValues);
+                }
+                if(params.callContentUpdated===false) return;
+                var idIsChanged= (this.dataIDName&&newDataItemsValues.hasOwnProperty(this.dataIDName))?oldDataIDValue!==newDataIDValue:false,
+                    thisInstance=this;
+                setTimeout(function(){
+                    thisInstance.onContentUpdated(newDataItemsValues,params,idIsChanged);
+                },0);
+            },
+            /**
              * params: { url, conditions, method:"get"/"post", onlyValues:true/false, data }
              * params.data only for post method
              * call setContentData(newData, {...}), newData= request result.item
@@ -140,7 +173,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
              * if postaction call postaction(success,result,resultItem,resultError,updateCount)
              * call setContentData do callback onContentUpdated(newData,params,idIsChanged)
              */
-            storeDataByUrl: function (params, postaction) {
+            storeDataByUrl: function(params,postaction){
                 if(!params) return;
                 var dataToPost = params.data;
                 if(!dataToPost) dataToPost={};
@@ -181,7 +214,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
              * if postaction call postaction(success,result,resultItem,resultError,updateCount)
              * call setContentData do callback onContentUpdated(newData,params,idIsChanged)
              */
-            deleteDataByUrl: function (params, postaction) {
+            deleteDataByUrl: function(params,postaction){
                 if(!params) return;
                 var dataToPost = params.data;
                 if(!dataToPost) dataToPost={};
@@ -210,11 +243,11 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
              * params= { onlyValues, callContentUpdated, result, error,
              *      loadedResultItem, updatedResultItem, deletedResultItem, updateCount }
              */
-            onContentUpdated: function (contentData, params, idIsChanged) {
+            onContentUpdated: function(contentData,params,idIsChanged){
                 // TODO actions on content data has been updated by call setContentData() or loadDataFromUrl()
                 // TODO or storeDataByUrl() or deleteDataByUrl
             },
-            onContentChanged: function (isContentChanged) {
+            onContentChanged: function(isContentChanged){
                 // TODO actions on content has been changed by user or element value has been changed
             },
 
