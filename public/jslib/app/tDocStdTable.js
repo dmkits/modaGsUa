@@ -968,36 +968,39 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
             },
 
             doPrint: function(){                                                                                //console.log("TDocStdTable.doPrint ",this);
-                var printData = {}, headerTextStyle="font-size:14px;";
+                var printData= {}, headerTextStyle= "font-size:14px;";
                 if(this.detailHeaderElements){
                     for(var ri=0;ri<this.detailHeaderElements.length;ri++){
                         var detHRow=this.detailHeaderElements[ri];
-                        this.addPrintDataItemTo(printData, "header", {newTable:true, style:headerTextStyle});
+                        $TDF.addPrintDataItemTo(printData,"header",{newTable:true,style:headerTextStyle});
                         for(var ci=0;ci<detHRow.length;ci++){
-                            var detHElem=detHRow[ci];                                                           //console.log("TDocStdTable.doPrint ",ri,ci,detHElem);
+                            var detHElem= detHRow[ci];                                                          //console.log("TDocStdTable.doPrint ",ri,ci,detHElem);
                             if(detHElem.tagName&&detHElem.tagName==="TH")
-                                this.addPrintDataSubItemTo(printData, "header",
-                                    {label:detHElem.innerText, width:0, align:"center",style:"width:100%;font-size:14px;font-weight:bold;text-align:center;",
+                                $TDF.addPrintDataSubItemTo(printData, "header",
+                                    {label:detHElem.innerText, width:0, align:"center",
+                                        style:"width:100%;font-size:14px;font-weight:bold;text-align:center;",
                                         contentStyle:"margin-top:5px;margin-bottom:3px;"});
                             else{
                                 value=null;
-                                if(detHElem.textbox) value=detHElem.textbox.value;
-                                else if(detHElem.textDirNode) value=detHElem.textDirNode.textContent;//if element Select
-                                var printParams=detHElem.printParams;
+                                if(detHElem.textbox) value= detHElem.textbox.value;
+                                else if(detHElem.textDirNode) value= detHElem.textDirNode.textContent;//if element Select
+                                var printParams= detHElem.printParams;
                                 if(value==""){
                                   if(printParams.inputStyle){
                                       var oldStyleStr =printParams.inputStyle,
                                           newStyleStr= (oldStyleStr.trim().charAt(oldStyleStr.length-1)!=";")?";":"";
                                       newStyleStr+="height:14px;";
-                                      printParams.inputStyle = oldStyleStr + newStyleStr;
+                                      printParams.inputStyle = oldStyleStr+newStyleStr;
                                   }else
-                                      printParams.inputStyle = " height:14px;";
+                                      printParams.inputStyle= " height:14px;";
                                 }
-                                this.addPrintDataSubItemTo(printData, "header", {width:printParams.cellWidth+5, style:printParams.printStyle,align:"left",
-                                    contentStyle:"margin-bottom:3px;", label:printParams.labelText, value:value, type:"text", valueStyle:printParams.inputStyle});
+                                $TDF.addPrintDataSubItemTo(printData,"header",{width:printParams.cellWidth+5,
+                                    style:printParams.printStyle, align:"left", contentStyle:"margin-bottom:3px;",
+                                    label:printParams.labelText,
+                                    value:value, type:"text", valueStyle:printParams.inputStyle});
                             }
                         }
-                        this.addPrintDataSubItemTo(printData, "header");
+                        $TDF.addPrintDataSubItemTo(printData,"header");
                     }
                 }
                 printData.columns = this.detailHTable.getVisibleColumns();
@@ -1006,29 +1009,31 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(this.detailTotalElements){
                     for(var ri=0;ri<this.detailTotalElements.length;ri++){
                         var detTRow=this.detailTotalElements[ri];
-                        this.addPrintDataItemTo(printData, "total", {newTable:true, style:totalStyle});
-                        this.addPrintDataSubItemTo(printData, "total");
+                        $TDF.addPrintDataItemTo(printData,"total",{newTable:true, style:totalStyle});
+                        $TDF.addPrintDataSubItemTo(printData,"total");
                         for(var ci=0;ci<detTRow.length;ci++){
                             var detTElem=detTRow[ci], value=null;                                               //console.log("TDocStdTable.doPrint ",ri,ci,detTElem);
                             if(detTElem.print===false) continue;
-                            if(detTElem.textbox) value=detTElem.textbox.value;
-                            else if(detTElem.textDirNode) value=detTElem.textDirNode.textContent;//if element Select
-                            var printParams=detTElem.printParams;
+                            if(detTElem.textbox) value= detTElem.textbox.value;
+                            else if(detTElem.textDirNode) value= detTElem.textDirNode.textContent;//if element Select
+                            var printParams= detTElem.printParams;                                               //console.log("printParams",printParams);
                             if(value==""){
                                 if(printParams.inputStyle){
-                                    var oldStyleStr =printParams.inputStyle,
+                                    var oldStyleStr= printParams.inputStyle,
                                         newStyleStr= (oldStyleStr.trim().charAt(oldStyleStr.length-1)!=";")?";":"";
-                                    newStyleStr+="height:14px;";
-                                    printParams.inputStyle = oldStyleStr + newStyleStr;
+                                    newStyleStr+= "height:14px;";
+                                    printParams.inputStyle= oldStyleStr+newStyleStr;
                                 }else
-                                    printParams.inputStyle = " height:14px;";
+                                    printParams.inputStyle= " height:14px;";
                             }
-                            this.addPrintDataSubItemTo(printData, "total", {width:printParams.cellWidth+5, style:printParams.printStyle, align:"right",
-                                    contentStyle:"margin-top:3px;", label:printParams.labelText, value:value, type:"text", valueStyle:printParams.inputStyle});
+                            $TDF.addPrintDataSubItemTo(printData,"total",{width:printParams.cellWidth+5, align:"right",
+                                style:printParams.printStyle||printParams.style, contentStyle:"margin-top:3px;",
+                                label:printParams.labelText, labelStyle:printParams.labelStyle,
+                                value:value, type:"text", valueStyle:printParams.inputStyle});
                         }
                     }
                 }
-                this.setPrintDataFormats(printData, this.printFormats);
+                $TDF.setPrintDataFormats(printData,this.printFormats);
                 var printWindow= window.open("/print/printDocSimpleTable");                                     //console.log("doPrint printWindow printData=",printData);
                 printWindow["printDocSimpleTableData"]= printData;
             },

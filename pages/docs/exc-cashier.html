@@ -12,7 +12,7 @@
             .init({idListContainer:"docs_excCashier_ListContainer",idDetailContainer:"docs_excCashier_DetailContainer",
                 idDetailHeader:"docs_excCashier_DetailHeader",idDetailTable:"docs_excCashier_ProductsTable",idDetailTotal:"docs_excCashier_DetailTotal",
                 idRightContainer:"docs_excCashier_RightContainer",
-                buttonPrint:false, buttonExportToExcel:false})
+                buttonPrint:true, buttonExportToExcel:false})
             .addListTable({getDataUrl:"/docs/excCashier/getDataForExcsListTable",
                 header:"Список накладных", bdatelabelText:"c",bdateCondition:"DOCDATE>=", edatelabelText:"по",edateCondition:"DOCDATE<="
             })
@@ -27,30 +27,31 @@
             .addDetailHeaderTitle({title:"Перемещение товара на ТТ",titleForNothing:"Перемещение товара не выбрано", titleForFailedLoad:"Нет данных",
                 numberDataItemName:"DocID", dateDataItemName:"DocDate", titleDatePrefix:"от"},25)
             .addDetailHeaderRow(25,true)
-            .addDetailHeaderTextBox("OurName","Фирма", 330,{inputStyle:"width:200px"})
-            .addDetailHeaderTextBox("DocID", "Номер", 120, {inputStyle:"width:50px"})
-            .addDetailHeaderTextBox("IntDocID", "Вн. номер", 120,{inputStyle:"width:50px"})
-            .addDetailHeaderDateTextBox("DocDate", "Дата", 150,{inputStyle:"width:80px",noPrevNextButtons:true})
+            .addDetailHeaderTextBox("OurName","Фирма", 310,{inputStyle:"width:250px"})
+            .addDetailHeaderTextBox("DocID", "Номер", 120,{inputStyle:"width:70px"})
+            .addDetailHeaderTextBox("IntDocID", "Вн. номер", 140,{inputStyle:"width:70px"})
+            .addDetailHeaderDateTextBox("DocDate", "Дата", 120,{inputStyle:"width:80px",noPrevNextButtons:true})
+            .addDetailHeaderTextBox("CurrName","Валюта", 110,{inputStyle:"width:50px"})
             .addDetailHeaderRow(25,true)
-            .addDetailHeaderTextBox("StockName","Со склада", 280,{inputStyle:"width:200px"})
-            .addDetailHeaderTextBox("NewStockName","На склад", 280,{inputStyle:"width:200px"})
-            .addDetailHeaderTextBox("CurrName","Валюта", 150,{inputStyle:"width:80px"})
+            .addDetailHeaderTextBox("StockName","Со склада", 320,{inputStyle:"width:250px"})
+            .addDetailHeaderTextBox("NewStockName","На склад", 320,{inputStyle:"width:250px"})
             .setDetailTableParameters({conditionIDName:"ParentChID",
                 getDataUrl:"/docs/excCashier/getDataForExcDTable",
                 storeDataUrl:"/docs/excCashier/storeExcDTableData", deleteDataUrl:"/docs/excCashier/deleteExcDTableData"})
             .addDetailTotalRow()
-            .addDetailSubTotalCountNumberTextBox("ИТОГО СТРОК:", 140, {inputStyle:"width:40px;"})
-            .addDetailSubtotalNumberTextBox("ИТОГО КОЛ-ВО:", 410, "Qty", {pattern:"###,###,##0.#########", inputStyle:"width:50px;"})
-            .addDetailSubtotalNumberTextBox("ИТОГО ФАКТ. КОЛ-ВО:", 240, "NewQty", {pattern:"###,###,##0.#########", inputStyle:"width:50px;"})
-            .addDetailSubtotalNumberTextBox("ИТОГО СУММА:", 220, "SumCC", {pattern:"###,###,##0.00#######", inputStyle:"width:80px;"})
+            .addDetailSubTotalCountNumberTextBox("ИТОГО СТРОК:", 140,{inputStyle:"width:40px;"})
+            .addDetailSubtotalNumberTextBox("ИТОГО КОЛ-ВО:", 230,"Qty",{pattern:"###,###,##0.#########",inputStyle:"width:50px;"})
+            .addDetailSubtotalNumberTextBox("ИТОГО ФАКТ. КОЛ-ВО:", 240,"NewQty",{pattern:"###,###,##0.#########",inputStyle:"width:50px;"})
+            .addDetailSubtotalNumberTextBox("ИТОГО СУММА:", 220,"SumCC",{pattern:"###,###,##0.00#######",inputStyle:"width:80px;"})
             .addDetailTotalRow(true)
-            .addDetailTotalTextBox("Статус:", 300, "StateName", {style:"font-weight:bold;", inputStyle:"width:200px", print:false})
-            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ КОЛ-ВО:", 250, "TQty",
-                {pattern:"###,###,##0.#########", inputStyle:"width:50px;", style:"font-weight:bold;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
-            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ ФАКТ. КОЛ-ВО:", 240, "TNewQty",
-                {pattern:"###,###,##0.#########", inputStyle:"width:50px;", style:"font-weight:bold;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
-            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 220, "TSumCC",
-                {pattern:"###,###,##0.00#######", inputStyle:"width:80px;", style:"font-weight:bold;", printLabel:"ИТОГО СУММА:"})
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ КОЛ-ВО:", 372,"TQty",
+                {pattern:"###,###,##0.#########", style:"font-weight:bold;",inputStyle:"width:50px;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ ФАКТ. КОЛ-ВО:", 240,"TNewQty",
+                {pattern:"###,###,##0.#########", style:"font-weight:bold;",inputStyle:"width:50px;", printLabel:"ИТОГО ФАКТ. КОЛИЧЕСТВО:"})
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 220,"TSumCC",
+                {pattern:"###,###,##0.00#######", style:"font-weight:bold;",inputStyle:"width:80px;", printLabel:"ИТОГО СУММА:"})
+            .addDetailTotalRow(true)
+            .addDetailTotalTextBox("Статус:", 260,"StateName",{style:"font-weight:bold;",inputStyle:"width:200px"})
             .addToolPane({title:"Действия"})
             .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableSelectedRow"})
             .addToolPaneActionButton("Изменить все строки", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableAllVisibleRows"})
