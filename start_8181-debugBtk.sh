@@ -6,4 +6,4 @@ if [[ ! -d "$MyVar" ]]; then
     echo 'NODE_ENV="development"' >> ~/.bashrc
 fi
 
-node server/server.js -p:8185 test -log:console
+node server/server.js -p:8185 debugBtk -log:console

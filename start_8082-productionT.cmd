@@ -1,2 +1,2 @@
-node server/server.js -p:8082 productionT
+node server/server.js -p:8082 productionBtkT
 pause
