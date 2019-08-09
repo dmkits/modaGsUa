@@ -38,11 +38,9 @@ module.exports.init = function(app){
             dataFunction:{function:"sumIsNull", source:"t_ExcD", sourceField:"Qty"} },
         {data:"TNewQty", name:"Факт. кол-во", width:75, type:"numeric",
             dataFunction:{function:"sumIsNull", source:"t_ExcD", sourceField:"NewQty"} },
-        {data:"TSumCC", name:"Сумма в ЦП", width:85, type:"numeric",
-            childDataSource:"r_ProdMP", childLinkCondition:"r_ProdMP.ProdID=t_ExcD.ProdID and r_ProdMP.PLID=r_Stocks.PLID",
-            dataFunction:{function:"sumIsNull", sourceField:"t_ExcD.Qty*r_ProdMP.PriceMC"} },
-        {data:"TNewSumCC", name:"Факт. сумма в ЦП", width:85, type:"numeric",
-            dataFunction:{function:"sumIsNull", sourceField:"t_ExcD.NewQty*r_ProdMP.PriceMC"} },
+        {data:"TSumCC", name:"Сумма", width:85, type:"numeric", dataSource:"t_Exc",sourceField:"TSumCC_wt"},
+        {data:"TNewSumCC", name:"Факт. сумма", width:85, type:"numeric",
+            dataFunction:{function:"sumIsNull", sourceField:"t_ExcD.NewQty*t_ExcD.PriceCC_wt"} },
         {data:"StateCode", name:"StateCode", width:50, type:"text", readOnly:true, visible:false, dataSource:"t_Exc"},
         {data:"StateName", name:"Статус", width:250, type:"text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Exc.StateCode" },
@@ -122,16 +120,17 @@ module.exports.init = function(app){
         {data:"Qty", name:"Кол-во", width:55, type:"numeric", align:"center", dataSource:"t_ExcD", readOnly:true},
         {data:"PPID", name:"Партия", width:60, type:"numeric", align:"center", visible:false, readOnly:true},
         {data:"NewQty", name:"Факт кол-во", width:55, type:"numeric", align:"center", dataSource:"t_ExcD", readOnly:false},
+        {data:"PriceCC", name:"Цена", width:75, type:"numeric2", readOnly:true, dataSource:"t_ExcD",sourceField:"PriceCC_wt"},
         {data:"ExcChID", name:"ExcChID", width:0, type:"text", visible:false, readOnly:true,
             dataSource:"t_Exc", sourceField:"ChID", linkCondition:"t_Exc.ChID=t_ExcD.ChID" },
         {data:"StockID", name:"StockID", width:0, type:"text", visible:false, readOnly:true,
             dataSource:"r_Stocks", sourceField:"StockID", linkCondition:"r_Stocks.StockID=t_Exc.StockID" },
         {data:"PLID", name:"PLID", width:50, type:"text", visible:false, readOnly:true,
             dataSource:"r_PLs", sourceField:"PLID", linkCondition:"r_PLs.PLID=r_Stocks.PLID" },
-        {data:"PriceCC", name:"Цена по прайс-листу", width:75, type:"numeric2", readOnly:true,
+        {data:"PLPriceCC", name:"Цена по прайс-листу", width:75, type:"numeric2", visible:false, readOnly:true,
             dataSource:"r_ProdMP", sourceField:"PriceMC", linkCondition:"r_ProdMP.PLID=r_PLs.PLID and r_ProdMP.ProdID=t_ExcD.ProdID" },
-        {data:"SumCC", name:"Сумма в ЦП", width:75, type:"numeric2", dataFunction:"t_ExcD.Qty*r_ProdMP.PriceMC", readOnly:true},
-        {data:"NewSumCC", name:"Факт. сумма в ЦП", width:75, type:"numeric2", dataFunction:"t_ExcD.NewQty*r_ProdMP.PriceMC", readOnly:true}
+        {data:"SumCC", name:"Сумма", width:75, type:"numeric2", dataSource:"t_ExcD",sourceField:"SumCC_wt", readOnly:true},
+        {data:"NewSumCC", name:"Факт. сумма", width:75, type:"numeric2", dataFunction:"t_ExcD.NewQty*t_ExcD.PriceCC_wt", readOnly:true}
     ];
     app.get("/docs/excCashier/getDataForExcDTable", function(req, res){
         var conditions={};
