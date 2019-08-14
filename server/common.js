@@ -2,28 +2,28 @@ var path= require('path'), fs= require('fs'),
     uid= require('uniqid'), BigNumber= require('big-number');
 
 module.exports.getStartupParams= function(){
-    var app_params= {};
+    var startupParams= {};
     if(process.argv.length==0){
-        app_params.mode= 'production';
-        app_params.port= 8080;
-        return app_params;
+        startupParams.mode= 'production';
+        startupParams.port= 8080;
+        return startupParams;
     }
     for(var i=2; i<process.argv.length; i++){
-        var arg=process.argv[i];
-        if(arg.indexOf('-p:')==0){
-            var port= process.argv[i].replace("-p:", "");
-            if(port>0 && port<65536) app_params.port= port;
+        var arg=process.argv[i], sParamName;
+        if(arg.indexOf(sParamName='-p:')==0){
+            var port= arg.replace(sParamName,"");
+            if(port>0 && port<65536) startupParams.port= port;
         }else if(arg.charAt(0).toUpperCase()>'A' && arg.charAt(0).toUpperCase()<'Z'){
-            app_params.mode = arg;
-        }else if(arg.indexOf('-log:')==0){
-            var logParam = process.argv[i].replace("-log:", "");
-            if(logParam.toLowerCase() == "console") app_params.logToConsole= true;
-            else if(logParam.toLowerCase() == "debug") app_params.logDebug= true;
+            startupParams.mode = arg;
+        }else if(arg.indexOf(sParamName='-log:')==0){
+            var logParam = arg.replace(sParamName,"");
+            if(logParam.toLowerCase()=="console") startupParams.logToConsole= true;
+            else if(logParam.toLowerCase()=="debug") startupParams.logDebug= true;
         }
     }
-    if(!app_params.port)app_params.port= 8080;
-    if(!app_params.mode)app_params.mode= 'production';
-    return app_params;
+    if(!startupParams.port)startupParams.port= 8080;
+    if(!startupParams.mode)startupParams.mode= 'production';
+    return startupParams;
 };
 
 module.exports.loadConfig= function(fileName){

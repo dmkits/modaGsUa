@@ -1,4 +1,4 @@
-var loadedModules=require('../modules').loadedModules, dataModel=require('../datamodel'),
+var loadedModules=require(appModulesPath).loadedModules, dataModel=require(appDataModelPath),
     server= require("../server"),appConfig= server.getAppConfig();
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
@@ -9,8 +9,8 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
     //     });
 };
 
-module.exports.modulePageURL = "/mobile";
-module.exports.modulePagePath = "mobile/index.html";
+module.exports.moduleViewURL = "/mobile";
+module.exports.moduleViewPath = "mobile/index.html";
 module.exports.routes=[//-- App routes --
     { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
     { path: '/pageSettingsCommon', componentUrl: '/mobile/pageSettingsCommon'},

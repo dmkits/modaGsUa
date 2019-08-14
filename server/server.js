@@ -34,44 +34,61 @@ log = new log.Logger({transports:transports,level:(logDebug)?'silly':'info', tim
 module.exports.log=log;                                                                             log.info('Module log inited on ', new Date().getTime()-startTime);
 
 var common=require('./common');                                                                     log.info('Module common loaded on ', new Date().getTime()-startTime);
-var tempExcelRepDir=path.join(__dirname, '/../temp/');
-try {
-    if (!fs.existsSync(tempExcelRepDir)) fs.mkdirSync(tempExcelRepDir);
-}catch (e){                                                                                         log.warn('Failed create XLSX_temp directory! Reason:'+e);
-    tempExcelRepDir=null;
-}
-module.exports.tempExcelRepDir=tempExcelRepDir;
-
-var express = require('express');                                                                   log.info('express loaded on ', new Date().getTime()-startTime );
-var server = express();
-var bodyParser = require('body-parser');                                                            log.info('body-parser loaded on ', new Date().getTime()-startTime );
-var cookieParser = require('cookie-parser');                                                        log.info('cookie-parser loaded on ', new Date().getTime()-startTime );
-
-module.exports.getApp=function(){ return server; };
-
-var sysConfig=null;
 global.sysConfigPath= path.join(__dirname,'/../','');
+var sysConfig=null;
 function loadSysConfig(){
     try {
-        sysConfig= common.loadConfig(appStartupParams.mode + '.cfg');
-    } catch (e) {
-        log.error("Failed to load configuration! Reason:" + e);
+        sysConfig= common.loadConfig(appStartupParams.mode+'.cfg');
+    }catch(e){
         sysConfig= null;
+        log.error("Failed to load system configuration! Reason:",e.message);
     }
 }
 loadSysConfig();                                                                                    log.info('system configuration loaded on ', new Date().getTime()-startTime);
+if(!sysConfig){
+    log.error("NO SYSTEM CONFIGURATION! Application cannot start!");
+    return;
+}
 module.exports.loadSysConfig= loadSysConfig;                                                        log.info('app startup mode:'+appStartupParams.mode,' system config:', sysConfig);
 module.exports.getSysConfig= function(){ return sysConfig };
-module.exports.setSysConfig= function(newSysConfig){ sysConfig=newSysConfig; };
+module.exports.setSysConfig= function(newSysConfig){ sysConfig= newSysConfig; };
 
-var database = require('./databaseMSSQL');                                                          log.info('dataBase loaded on ', new Date().getTime()-startTime);
-
-var configFileName=(sysConfig&&sysConfig.configName)?sysConfig.configName:'config.json',
-    appConfig=JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+configFileName,'utf-8')));
+var appConfigFileName= (sysConfig&&sysConfig.configName)?sysConfig.configName:'config.json',
+    appConfig= JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+appConfigFileName,'utf-8')));
 module.exports.getAppConfig=function(){ return appConfig; };
 module.exports.getConfigAppMenu=function(){ return (appConfig&&appConfig.appMenu)?appConfig.appMenu:null; };
 module.exports.getConfigModules=function(){ return (appConfig&&appConfig.modules)?appConfig.modules:null; };
 
+var tempExcelRepDir=path.join(__dirname, '/../temp/');
+try {
+    if (!fs.existsSync(tempExcelRepDir)) fs.mkdirSync(tempExcelRepDir);
+}catch(e){                                                                                          log.warn('Failed create XLSX_temp directory! Reason:'+e);
+    tempExcelRepDir=null;
+}
+module.exports.tempExcelRepDir=tempExcelRepDir;
+
+var appServerComponentsVersion= (sysConfig.appServerComponentsVersion)?"_"+sysConfig.appServerComponentsVersion:"";
+global.appModulesPath= path.join(__dirname,'/modules'+appServerComponentsVersion+'/','');
+global.appDataModelPath= path.join(__dirname,'/datamodel'+appServerComponentsVersion+'/','');
+global.appPagesPath= path.join(__dirname,'/../pages/','');
+global.appViewsPath= path.join(__dirname,'/../pages'+appServerComponentsVersion+'/','');
+
+var database= require('./databaseMSSQL');                                                           log.info('dataBase loaded on ', new Date().getTime()-startTime);
+try{
+    var appModules= require(appModulesPath);                                                        log.info('application server modules loaded on ', new Date().getTime()-startTime);
+}catch(e){
+    log.error("FAILED LOAD APPLICATION SERVER MODULES! Reason:",e.message,"\nApplication cannot start!");
+    return;
+}
+
+var loadInitModulesErrorMsg=null;
+module.exports.getLoadInitModulesError= function(){ return loadInitModulesErrorMsg; };
+
+var express = require('express');                                                                   log.info('express loaded on ', new Date().getTime()-startTime );
+var server = express();
+module.exports.getApp=function(){ return server; };
+var bodyParser = require('body-parser');                                                            log.info('body-parser loaded on ', new Date().getTime()-startTime );
+var cookieParser = require('cookie-parser');                                                        log.info('cookie-parser loaded on ', new Date().getTime()-startTime );
 server.use(function (req, res, next) {
     next();
 });
@@ -81,14 +98,6 @@ server.use(bodyParser.json({limit: '5mb'}));
 server.use(bodyParser.text({limit: '5mb'}));
 server.use('/', express.static('public'));
 server.set('view engine','ejs');
-
-global.appViewsPath= path.join(__dirname,'/../pages/','');
-global.appModulesPath= path.join(__dirname,'/modules/','');
-global.appDataModelPath= path.join(__dirname,'/datamodel/','');
-
-var appModules=require("./modules");
-var loadInitModulesErrorMsg=null;
-module.exports.getLoadInitModulesError= function(){ return loadInitModulesErrorMsg; };
 
 require('./access')(server);
 
@@ -101,9 +110,9 @@ var startServer= function(){
 };
 
 database.setDBSystemConnection(sysConfig, function(err,result){
-    if(err) log.error("FAILED to set system connection! Reason: ",err);
+    if(err) log.error("FAILED to set system database connection! Reason:",err);
     appModules.validateModules(function(errs, errMessage){
-        if(errMessage){                                                                             log.error("FAILED validate! Reason: ",errMessage);
+        if(errMessage){                                                                             log.error("FAILED validate! Reason:",errMessage);
         }
         appModules.init(server,errs);
         if(errs&&!errMessage){

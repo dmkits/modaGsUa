@@ -1,25 +1,22 @@
-var server= require("../server"), log= server.log;
-var loadedModules= {};
-var validateError= null;
+var fs = require('fs'),
+    server= require("../server"), log= server.log;
+var loadedModules= {}, validateError= null;
 module.exports.loadedModules= function(){ return loadedModules; };
 module.exports.getValidateError= function(){ return validateError; };
 
-var dataModel= require("../datamodel");
+var dataModel= require(appDataModelPath);
 /**
  * resultCallback = function(errs, errMessage), errs - object of validate errors
  */
 module.exports.validateModules= function(resultCallback){
     var modules= server.getConfigModules();
-    if (!modules) return;
+    if(!modules) return;
     var validateModuleCallback= function(modules, index, errs){
         var moduleName= modules[index];
-        if (!moduleName) {
+        if(!moduleName){
             var errMsg;
-            for(var errItem in errs) {
-                if (errMsg) {
-                    errMsg+=" ... (see more info)";
-                    break;
-                }
+            for(var errItem in errs){
+                if(errMsg){ errMsg+=" ... (see more info)"; break; }
                 errMsg=errs[errItem];
             }
             resultCallback(errs,errMsg);
@@ -49,9 +46,9 @@ module.exports.validateModules= function(resultCallback){
     validateModuleCallback(modules, 0, {});
 };
 
-module.exports.init = function(app,errs){
+module.exports.init= function(app,errs){
     var modules= server.getConfigModules();
-    if (!modules) return;
+    if(!modules) return;
     for(var i=0; i<modules.length; i++){
         var moduleName=modules[i], module;                                                                  log.info('Initing module '+moduleName+"...");//test
         try{
@@ -60,11 +57,27 @@ module.exports.init = function(app,errs){
             errs[moduleName+"_loadError"]="Failed load module:"+moduleName+"! Reason:"+ e.message;
             continue;
         }
-        if (module.modulePageURL&&module.modulePagePath) {
+        var modulePageViewURL=null, modulePageViewFullPath= null;
+        if(module.modulePageURL&&module.modulePagePath){
+            modulePageViewURL= module.modulePageURL;
+            modulePageViewFullPath= appPagesPath+module.modulePagePath;
+            if (!fs.existsSync(modulePageViewFullPath)){
+                log.error('For module '+moduleName+" not exists page path! Path:",modulePageViewFullPath);
+                continue
+            }
+        }else if(module.moduleViewURL&&module.moduleViewPath){
+            modulePageViewURL= module.moduleViewURL;
+            modulePageViewFullPath= appViewsPath+module.moduleViewPath;
+            if (!fs.existsSync(modulePageViewFullPath)){
+                log.error('For module '+moduleName+" not exists page view path! Path:",modulePageViewFullPath);
+                continue
+            }
+        }
+        if(modulePageViewURL&&modulePageViewFullPath){
             (function(){
-                var modulePagePath=module.modulePagePath;
-                app.get(module.modulePageURL, function (req, res) {
-                    res.sendFile(appViewsPath+modulePagePath);
+                var modulePageViewFileFullPath= modulePageViewFullPath;
+                app.get(modulePageViewURL, function(req,res){
+                    res.sendFile(modulePageViewFileFullPath);
                 });
             })();
         }
@@ -80,18 +93,19 @@ module.exports.init = function(app,errs){
 };
 
 function fillMainMenuItemModuleData(menuItem){
-    if (!menuItem.module) return;
+    if(!menuItem.module) return;
     var moduleName=menuItem.module;
-    if (!loadedModules[moduleName]) return;
+    var loadedModuleInstance= loadedModules[moduleName];
+    if(!loadedModuleInstance) return;
     menuItem.pageId= moduleName;
     menuItem.action= "open";
-    menuItem.contentHref = loadedModules[moduleName].modulePageURL;
+    menuItem.contentHref = loadedModuleInstance.modulePageURL||loadedModuleInstance.moduleViewURL;
 }
 function fillMainMenuModuleData(appMenu){
     for(var mainMenuItemIndex in appMenu) {
         var mainMenuItem= appMenu[mainMenuItemIndex];
         fillMainMenuItemModuleData(mainMenuItem);
-        if (mainMenuItem.popupMenu){
+        if(mainMenuItem.popupMenu){
             for(var popupMenuItemIndex in mainMenuItem.popupMenu) {
                 var popupMenuItem= mainMenuItem.popupMenu[popupMenuItemIndex];
                 fillMainMenuItemModuleData(popupMenuItem)

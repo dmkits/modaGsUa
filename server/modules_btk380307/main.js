@@ -7,9 +7,7 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 
 function setUserRoleMenu(outData, userRole, usersRolesConfig, appMenu){
     var userMenu=[], userRoleItems=usersRolesConfig[userRole];
-    if(!userRoleItems&&userRole=="sysadmin"){
-        outData.menuBar= appMenu; return;
-    }
+    if(!userRoleItems&&userRole=="sysadmin"){ outData.menuBar= appMenu; return; }
     if(!userRoleItems) userRoleItems={menu:["menuBarItemHelpAbout","menuBarItemClose"]};
     var userRoleMenu=userRoleItems.menu;
     for(var i in userRoleMenu){

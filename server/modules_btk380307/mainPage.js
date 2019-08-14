@@ -1,5 +1,5 @@
-module.exports.modulePageURL = "/main/mainpage";
-module.exports.modulePagePath = "main/mainpage.html";
+module.exports.moduleViewURL = "/main/mainpage";
+module.exports.moduleViewPath = "main/mainpage.html";
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     nextValidateModuleCallback();

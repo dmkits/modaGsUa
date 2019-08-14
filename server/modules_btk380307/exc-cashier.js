@@ -1,4 +1,4 @@
-var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
+var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
 var t_Exc= require(appDataModelPath+"t_Exc"), t_ExcD= require(appDataModelPath+"t_ExcD");
     r_Prods=require(appDataModelPath+"r_Prods");
@@ -16,8 +16,8 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/docs/excCashier";
-module.exports.modulePagePath = "docs/exc-cashier.html";
+module.exports.moduleViewURL = "/docs/excCashier";
+module.exports.moduleViewPath = "docs/exc-cashier.html";
 module.exports.init = function(app){
     var tExcsListTableColumns=[
         {data:"ChID", name:"ChID", width:85, type:"text", readOnly:true, visible:false, dataSource:"t_Exc"},

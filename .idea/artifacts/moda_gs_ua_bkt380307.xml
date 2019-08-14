@@ -1,8 +1,9 @@
 <component name="ArtifactManager">
-  <artifact name="moda.gs.ua">
+  <artifact name="moda.gs.ua bkt380307">
     <output-path>$PROJECT_DIR$/builds/modaGsUa</output-path>
     <root id="root">
       <element id="directory" name="pages">
+        <element id="dir-copy" path="$PROJECT_DIR$/pages_btk380307" />
         <element id="dir-copy" path="$PROJECT_DIR$/pages" />
       </element>
       <element id="directory" name="public">
@@ -12,7 +13,16 @@
         <element id="dir-copy" path="$PROJECT_DIR$/node_modules" />
       </element>
       <element id="directory" name="server">
-        <element id="dir-copy" path="$PROJECT_DIR$/server" />
+        <element id="directory" name="datamodel">
+          <element id="dir-copy" path="$PROJECT_DIR$/server/datamodel_btk380307" />
+        </element>
+        <element id="directory" name="modules">
+          <element id="dir-copy" path="$PROJECT_DIR$/server/modules_btk380307" />
+        </element>
+        <element id="file-copy" path="$PROJECT_DIR$/server/access.js" />
+        <element id="file-copy" path="$PROJECT_DIR$/server/common.js" />
+        <element id="file-copy" path="$PROJECT_DIR$/server/databaseMSSQL.js" />
+        <element id="file-copy" path="$PROJECT_DIR$/server/server.js" />
       </element>
       <element id="directory" name="scripts">
         <element id="dir-copy" path="$PROJECT_DIR$/scripts" />
@@ -22,7 +32,6 @@
       <element id="file-copy" path="$PROJECT_DIR$/package.json" />
       <element id="file-copy" path="$PROJECT_DIR$/start_8080-btk.cmd" />
       <element id="file-copy" path="$PROJECT_DIR$/start_8181-debugBtk.cmd" />
-      <element id="file-copy" path="$PROJECT_DIR$/sysAdmins.json" />
       <element id="directory" name="installNode">
         <element id="dir-copy" path="$PROJECT_DIR$/installNode" />
       </element>

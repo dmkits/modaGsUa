@@ -1,4 +1,4 @@
-var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
+var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
 var t_Ven= require(appDataModelPath+"t_Ven"), t_VenA= require(appDataModelPath+"t_VenA"),
     // r_DBIs= require(appDataModelPath+"r_DBIs"),
@@ -15,8 +15,8 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/pageListVens";
-module.exports.modulePagePath = "mobile/pageListVens.html";
+module.exports.moduleViewURL = "/mobile/pageListVens";
+module.exports.moduleViewPath = "mobile/pageListVens.html";
 module.exports.routes=[//-- App routes --
     { path: '/pageListVens', componentUrl: '/mobile/pageListVens', options:{clearPreviousHistory:true,ignoreCache:true}, define:true},
     { path: '/pageVenData/:venChID', componentUrl: '/mobile/pageVenData', options:{ignoreCache:true} },

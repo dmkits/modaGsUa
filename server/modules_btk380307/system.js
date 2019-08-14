@@ -1,5 +1,5 @@
 var path=require('path'), XLSX=require('xlsx'),fs=require('fs');
-var dataModel=require('../datamodel'), common=require('../common');
+var dataModel=require(appDataModelPath), common=require('../common');
 var server=require('../server'), log=server.log, tempExcelRepDir=server.tempExcelRepDir;
 // var database = require('../databaseMSSQL');
 

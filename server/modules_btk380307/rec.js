@@ -1,4 +1,4 @@
-var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
+var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
 var r_DBIs= require(appDataModelPath+"r_DBIs"),
@@ -14,8 +14,8 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/docs/rec";
-module.exports.modulePagePath = "docs/rec.html";
+module.exports.moduleViewURL = "/docs/rec";
+module.exports.moduleViewPath = "docs/rec.html";
 module.exports.init = function(app){
     var tRecsListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},

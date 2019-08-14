@@ -1,4 +1,4 @@
-var dataModel=require('../datamodel');
+var dataModel=require(appDataModelPath);
 var t_Rem= require(appDataModelPath+"t_Rem");
 var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_CRs= require(appDataModelPath+"r_CRs"),
@@ -13,8 +13,8 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/reports/cashier";
-module.exports.modulePagePath = "reports/cashier.html";
+module.exports.moduleViewURL = "/reports/cashier";
+module.exports.moduleViewPath = "reports/cashier.html";
 module.exports.init = function(app){
     //app.get("/reports/cashier/getDirCRsForSelect", function(req, res){
     //    var empID=req.dbUserParams["EmpID"];

@@ -6,7 +6,7 @@ var server=require('../server'), getLoadInitModulesError=server.getLoadInitModul
     getAppConfig=server.getAppConfig;
 var common=require('../common'), database=require('../databaseMSSQL');
 var appModules=require(appModulesPath), getDBValidateError=appModules.getValidateError,
-    dataModel=require('../datamodel'),
+    dataModel=require(appDataModelPath),
     changeLog= require(appDataModelPath+"change_log"),
     r_Users= require(appDataModelPath+"r_Users"),ir_UserData= require(appDataModelPath+"ir_UserData"),
     r_Emps= require(appDataModelPath+"r_Emps"),r_Uni= require(appDataModelPath+"r_Uni"),
@@ -57,7 +57,7 @@ module.exports.init = function(app){
     });
 
     app.get("/sysadmin/sysConfig",function(req,res){
-        res.sendFile(appViewsPath+'sysadmin/sysConfig.html');
+        res.sendFile(appPagesPath+'sysadmin/sysConfig.html');
     });
     app.get("/sysadmin/sysConfig/getSysConfig",function(req,res){
         var sysConfig=getSysConfig();
@@ -112,7 +112,7 @@ module.exports.init = function(app){
     });
 
     app.get("/sysadmin/database",function(req,res){
-        res.sendFile(appViewsPath+'sysadmin/database.html');
+        res.sendFile(appPagesPath+'sysadmin/database.html');
     });
     /**
      * resultCallback = function(result={ item, error, errorCode })
@@ -296,7 +296,7 @@ module.exports.init = function(app){
     });
 
     app.get("/sysadmin/logins",function(req,res){
-        res.sendFile(appViewsPath+'sysadmin/logins.html');
+        res.sendFile(appPagesPath+'sysadmin/logins.html');
     });
     var userVisiblePass="****************",
         loginsTableColumns=[
@@ -567,7 +567,7 @@ module.exports.init = function(app){
     });
 
     app.get("/sysadmin/logs",function(req,res){
-        res.sendFile(appViewsPath+'sysadmin/logs.html');
+        res.sendFile(appPagesPath+'sysadmin/logs.html');
     });
     var sysLogsTableColumns=[
         {data: "level", name: "Level", width:80, align:"center", type: "text"},

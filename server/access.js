@@ -3,7 +3,7 @@ var log=require("./server").log,
     server=require("./server"),
     appStartupParams=server.getAppStartupParams(), getSysConfig=server.getSysConfig, getAppConfig=server.getAppConfig,
     database=require("./databaseMSSQL"),
-    appModules=require("./modules"),
+    appModules=require(appModulesPath),
     common=require("./common");
 
 var sysadminsList={};
@@ -32,7 +32,7 @@ module.exports= function(app){
     };
     var renderToLogin= function(res,loginMsg){
         var appConfig=getAppConfig();
-        res.render(path.join(__dirname, "../pages/login.ejs"), {
+        res.render(appPagesPath+"login.ejs", {
             title: (appConfig&&appConfig.title)?appConfig.title:"",
             loginMsg: loginMsg
         });
@@ -55,13 +55,13 @@ module.exports= function(app){
     };
     var renderToAccessFailed= function (req,res,msg){
         if(isReqInternalPage(req.method,req.headers)){
-            res.render(path.join(__dirname, "../pages/accessFailedInternal.ejs"), {
+            res.render(appPagesPath+"accessFailedInternal.ejs", {
                 errorReason: msg
             });
             return;
         }
         var appConfig=getAppConfig();
-        res.render(path.join(__dirname, "../pages/accessFailed.ejs"), {
+        res.render(appPagesPath+"accessFailed.ejs", {
             title: (appConfig&&appConfig.title)?appConfig.title:"",
             bigImg: "imgs/girls_big.jpg",
             icon: "icons/profits32x32.jpg",

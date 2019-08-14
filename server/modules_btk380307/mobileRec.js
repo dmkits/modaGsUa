@@ -1,4 +1,4 @@
-var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
+var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD"),
     // r_DBIs= require(appDataModelPath+"r_DBIs"),
@@ -15,8 +15,8 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/pageListRecs";
-module.exports.modulePagePath = "mobile/pageListRecs.html";
+module.exports.moduleViewURL = "/mobile/pageListRecs";
+module.exports.moduleViewPath = "mobile/pageListRecs.html";
 module.exports.routes=[//-- App routes --
     { path: '/pageListRecs', componentUrl: '/mobile/pageListRecs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
     { path: '/pageRecData/:recChID', componentUrl: '/mobile/pageRecData', options:{ignoreCache:true} },

@@ -1,4 +1,4 @@
-var dataModel=require('../datamodel'),database= require("../databaseMSSQL");
+var dataModel=require(appDataModelPath),database= require("../databaseMSSQL");
 var r_DBIs= require(appDataModelPath+"r_DBIs");
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([r_DBIs], errs,

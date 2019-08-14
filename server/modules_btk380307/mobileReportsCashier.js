@@ -1,4 +1,4 @@
-var dataModel=require('../datamodel'), database= require("../databaseMSSQL"), common= require("../common"),
+var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
     dateFormat = require('dateformat');
 var t_Sale= require(appDataModelPath+"t_Sale"), t_SaleD= require(appDataModelPath+"t_SaleD"),
     querySalesCRRets=require(appDataModelPath+"querySalesCRRets"),
@@ -15,8 +15,8 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.modulePageURL = "/mobile/pageReportsCashier";
-module.exports.modulePagePath = "mobile/pageReportsCashier.html";
+module.exports.moduleViewURL = "/mobile/pageReportsCashier";
+module.exports.moduleViewPath = "mobile/pageReportsCashier.html";
 module.exports.routes=[//-- App routes --
     { path: '/pageReportsCashier', componentUrl: '/mobile/pageReportsCashier', options:{clearPreviousHistory:true,ignoreCache:true}, define:true }
 ];
