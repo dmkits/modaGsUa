@@ -118,7 +118,7 @@ database.setDBSystemConnection(sysConfig, function(err,result){
         if(errs&&!errMessage){
             var eCount=0;
             for(var errItem in errs){
-                if (!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="<br>";
+                if(!loadInitModulesErrorMsg) loadInitModulesErrorMsg=""; else loadInitModulesErrorMsg+="\n";
                 loadInitModulesErrorMsg+=errs[errItem];
                 eCount++;
                 if(eCount>3) break;

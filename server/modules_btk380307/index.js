@@ -37,7 +37,7 @@ module.exports.validateModules= function(resultCallback){
             validateModuleCallback(modules, index + 1, errs);
             return;
         }
-        module.validateModule(errs, function () {
+        module.validateModule(errs, function(){
             validateModuleCallback(modules, index + 1, errs);
         });
     };
@@ -61,16 +61,15 @@ module.exports.init= function(app,errs){
         if(module.modulePageURL&&module.modulePagePath){
             modulePageViewURL= module.modulePageURL;
             modulePageViewFullPath= appPagesPath+module.modulePagePath;
-            if (!fs.existsSync(modulePageViewFullPath)){
-                log.error('For module '+moduleName+" not exists page path! Path:",modulePageViewFullPath);
-                continue
+            var sErrMsg;
+            if(!fs.existsSync(modulePageViewFullPath)){                                                     log.error(sErrMsg='For module '+moduleName+" not exists page path! Path:",modulePageViewFullPath);
+                errs[moduleName+"_pagePathError"]=sErrMsg+modulePageViewFullPath;
             }
         }else if(module.moduleViewURL&&module.moduleViewPath){
             modulePageViewURL= module.moduleViewURL;
             modulePageViewFullPath= appViewsPath+module.moduleViewPath;
-            if (!fs.existsSync(modulePageViewFullPath)){
-                log.error('For module '+moduleName+" not exists page view path! Path:",modulePageViewFullPath);
-                continue
+            if(!fs.existsSync(modulePageViewFullPath)){                                                     log.error(sErrMsg='For module '+moduleName+" not exists page view path! Path:",modulePageViewFullPath);
+                errs[moduleName+"_pageViewPathError"]=sErrMsg+modulePageViewFullPath;
             }
         }
         if(modulePageViewURL&&modulePageViewFullPath){

@@ -23,6 +23,7 @@
                     <div id="sysadmin_dbName" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%;"></div>
                     <div id="sysadmin_dbConnectionState" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%"></div>
                     <div id="sysadmin_dbValidateState" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%"></div>
+                    <div id="sysadmin_loadInitModulesState" class="sysadmin_TopStateInfoElements" style="max-width:300px;height:100%"></div>
                 </div>
             </div>
         </ContentPane>
@@ -116,6 +117,11 @@
                             :'<span style="color:dimgrey">'+result.dbValidation+'</span>';
                     $$.sysadmin_dbValidateState.innerHTML ='<b>DB VALIDATION STATE: '+dbValidState+'</b>';
                     $$.sysadmin_dbValidateState.setAttribute("title",result.dbValidationErr||result.dbValidation);
+                    var loadInitModulesState=(result.loadInitModulesErr)
+                            ?'<span style="color:red">'+result.loadInitModulesErr+'</span>'
+                            :'<span style="color:dimgrey">OK</span>';
+                    $$.sysadmin_loadInitModulesState.innerHTML ='<b>LOAD-INIT APP MODULES STATE: '+loadInitModulesState+'</b>';
+                    $$.sysadmin_loadInitModulesState.setAttribute("title",result.loadInitModulesErr||"OK");
                     setBrending(result.appConfig);
                 }
             })

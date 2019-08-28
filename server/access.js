@@ -203,6 +203,15 @@ module.exports= function(app){
                 });
                 return;
             }
+            var modulesLoadInitError=server.getLoadInitModulesError();
+            if(modulesLoadInitError){
+                accessFail(req,res,next,{
+                    error: "Failed to get data! Reason: failed load/init application modules!",
+                    userErrorMsg: "Невозможно получить данные! Не все модули приложения были корректно загружены! Обратитесь к системному администратору!",
+                    pageMsg:'<div><p><span style="color:red">Вход невозможен!<br>Не все модули приложения были корректно загружены!<br>Обратитесь к системному администратору!</span></p></div>'
+                });
+                return;
+            }
             if(renderIsMobile(req,res,next))return;
             next();
         });

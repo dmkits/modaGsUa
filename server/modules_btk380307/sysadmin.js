@@ -43,7 +43,7 @@ module.exports.init = function(app){
             return
         }
         var loadInitModulesError=getLoadInitModulesError();
-        if(loadInitModulesError) outData.modulesFailures = loadInitModulesError;
+        if(loadInitModulesError) outData.loadInitModulesErr = loadInitModulesError;
         if(revalidateModules){
             appModules.validateModules(function(errs, errMessage){
                 if(errMessage) outData.dbValidation = errMessage; else outData.dbValidation = "success";
