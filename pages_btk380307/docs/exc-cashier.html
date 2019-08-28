@@ -153,6 +153,17 @@
                         this.setDisabled(true);
                 }
             })
+            .addToolPane({title:"Печать"})
+            .addToolPaneActionButton("Печать Акта расхождений", {btnStyle: "width:200px;",
+                actionFunction: function(ap){                                                                   //console.log("printDocFromTemplate.actionFunction actionParams=",ap);
+                    var printWindow= window.open("/print/printDocFromTemplate");                                //console.log("printDocFromTemplate.actionFunction printWindow=",printWindow);
+                    printWindow["docTemplateName"]= "excDiffReport";
+                    printWindow["docContentData"]= {
+                        columns:ap.detailHTable.getVisibleColumns(),
+                        items:ap.detailHTable.getContent()
+                    };
+                }
+            })
             .addToolPane({title:"Информация о товаре",
                 detailTableAction:function(toolPane, detailHeader,detailTable,thisInstance){
                     var detailTableSelectedRow= detailTable.getSelectedRow();

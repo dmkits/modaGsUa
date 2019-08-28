@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru-ua">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" lang="ru" Accept-Language="ru"/>
+    <link rel="icon" type="image/gif" href="<%-icon%>"/>
+    <!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+    <![endif]-->
+    <script type="text/javascript" src="/jslib/dojoApp.js"></script>
+    <script src="/jslib/moment/moment.js"></script>
+    <script src="/jslib/numeral/numeral.js"></script>
+    <script src="/jslib/numeral/languages/ru-UA.js"></script>
+    <script src="/jslib/app/printTable.js"></script>
+    <title><%-title%></title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, 'Arial', serif; /* Шрифт с засечками */
+        }
+        table {
+            margin: 0;
+        }
+        table, tr, th, td {
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: solid 1px black;
+        }
+        th, tr, td {
+            padding: 2px 5px 2px 5px;
+            font-size: 12px;
+        }
+        .topContent {
+            margin: 0.5cm 1cm 0;
+        }
+        .detailContent {
+            margin: 0 1cm 0;
+        }
+        .bottomContent {
+            margin: 0 1cm 0.5cm;
+        }
+        @media print {
+            html, body {
+                color: black;
+            }
+            /*table {*/
+                /*margin:0;*/
+            /*}*/
+            thead {
+                display: table-header-group;
+            }
+            /*.topContent {*/
+                /*margin: 0;*/
+            /*}*/
+            /*.detailContent {*/
+                /*margin: 0;*/
+            /*}*/
+            /*.bottomContent {*/
+                /*margin: 0;*/
+            /*}*/
+        }
+    </style>
+</head>
+<body class="claro">
+<!--<page id="printDocFT" style="position:absolute;left:0;top:0;right:0;bottom:0;margin:0;padding:0">-->
+    <!--<InnerPage id="printDocFT_PrintContent" region="left"></InnerPage>-->
+<!--</page>-->
+<page id="printDocFT" style="position:absolute;left:0;top:0;right:0;bottom:0;margin:0;padding:0">
+
+</page>
+</body>
+<script type="text/javascript"> $app.dev(true);
+    $app.startup("#printDocFT",function(){                                                              log("START PRINT DOC FROM TEMPLATE PAGE...",$$);//!!!IT'S FOR TESTING!!!
+        var docTemplateName = window["docTemplateName"],docContentData = window["docContentData"];      log("PRINT DOC FROM TEMPLATE PAGE docTemplateName=",docTemplateName,"docContentData=",docContentData);//!!!IT'S FOR TESTING!!!
+        if(!docTemplateName||!docContentData) return;
+        var tableWidth = calcTableWidth(docContentData);                                                console.log("tableWidth",tableWidth);
+//        $$.printDocFT_PrintContent.domNode.style.width=tableWidth+"px";
+//        //$$.printDocFT.domNode.style.width=tableWidth+"px";
+//        $$.printDocFT_PrintContent.set("href","/print/getPrintDocTemplate?docTemplateName="+docTemplateName);
+
+        //$$.printDocFT.domNode.style.width=tableWidth+"px";
+        $$.printDocFT.set("href","/print/getPrintDocTemplate?docTemplateName="+docTemplateName);
+
+//        if(printData.header) $$.print_PrintContent.domNode.appendChild(createDescriptiveTable(printData.header, table_width));
+//        if(printData.columns) $$.print_PrintContent.domNode.appendChild(createPrintDetailTable(printData.columns,printData.data, table_width));
+//        if(printData.total) $$.print_PrintContent.domNode.appendChild(createDescriptiveTable(printData.total, table_width));
+    });
+</script>
+</html>

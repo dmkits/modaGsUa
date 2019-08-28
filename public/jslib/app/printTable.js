@@ -11,7 +11,7 @@
  * <script src="/jslib/Numeral-js/min/languages/ru-UA.min.js"></script>
  */
 
-var calcTableWidth = function (printSectionData) {
+var calcTableWidth = function(printSectionData){
     var col_width, table_width= 0, tableColumns= printSectionData.columns;
     if(!tableColumns) return 0;
     for(var col = 0; col < tableColumns.length; col++){
