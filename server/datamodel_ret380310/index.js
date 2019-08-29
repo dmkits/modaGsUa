@@ -1110,9 +1110,11 @@ function _delDataItem(connection, params, resultCallback){
 /**
  * params = { tableName, resultFields, findByFields, idFieldName,
  *      fieldsValues = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
+ *      fieldsDefValues = {<tableFieldName>:<value>,...},
  *      calcNewIDValue = function(params, callback), callback= function(params)
  * }
  * resultCallback = function(result), result = { resultItem, error } )
+ * result.resultItem = fieldsDefValues where no fieldsValues or values of fieldsValues item is undefined
  */
 function _findDataItemByOrCreateNew(connection, params, resultCallback){
     if(!params){                                                                                                log.error("FAILED _findDataItemByOrCreateNew! Reason: no parameters!");//test
@@ -1135,12 +1137,20 @@ function _findDataItemByOrCreateNew(connection, params, resultCallback){
         resultCallback({error:"Failed find/create data item! Reason:no fields values!"});
         return;
     }
-    var thisInstance=this;
-    var findCondition={};
+    var findCondition={}, hasCondition=false;
     for(var ind=0;ind<params.findByFields.length;ind++){
         var fieldName= params.findByFields[ind];
-        findCondition[fieldName+"="]= params.fieldsValues[fieldName];
+        if(!params.fieldsValues.hasOwnProperty(fieldName))continue;
+        var fieldValue= params.fieldsValues[fieldName];
+        if(fieldValue===undefined)continue;
+        findCondition[fieldName+"="]= fieldValue;
+        hasCondition= true;
     }
+    if(!hasCondition&&params.fieldsDefValues){
+        resultCallback({resultItem:params.fieldsDefValues});
+        return;
+    }
+    var thisInstance=this;
     this.getDataItem(connection, {fields:params.resultFields,conditions:findCondition},
         function(result){
             if(result.error){

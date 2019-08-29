@@ -18,34 +18,34 @@ module.exports.moduleViewURL = "/docs/rec";
 module.exports.moduleViewPath = "docs/rec.html";
 module.exports.init = function(app){
     var tRecsListTableColumns=[
-        {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "DocID", name: "Номер", width: 85, type: "text", align:"right", dataSource:"t_Rec"},
-        {data: "IntDocID", name: "Вн. номер", width: 85, type: "text", align:"right", dataSource:"t_Rec"},
-        {data: "DocDate", name: "Дата", width: 60, type: "dateAsText",align:"center", dataSource:"t_Rec"},
-        {data: "OurName", name: "Фирма", width: 150, type: "text",
+        {data:"ChID", name:"ChID", width:85, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data:"DocID", name:"Номер", width:85, type:"text", align:"right", dataSource:"t_Rec"},
+        {data:"IntDocID", name:"Вн. номер", width:85, type:"text", align:"right", dataSource:"t_Rec"},
+        {data:"DocDate", name:"Дата", width:60, type:"dateAsText",align:"center", dataSource:"t_Rec"},
+        {data:"OurName", name:"Фирма", width:150, type:"text",
             dataSource:"r_Ours", sourceField:"OurName", linkCondition:"r_Ours.OurID=t_Rec.OurID" },
-        {data: "StockName", name: "Склад", width: 150, type: "text",
+        {data:"StockName", name:"Склад", width:150, type:"text",
             dataSource:"r_Stocks", sourceField:"StockName", linkCondition:"r_Stocks.StockID=t_Rec.StockID" },
-        {data: "CompName", name: "Предприятие", width: 150, type: "text",
+        {data:"CompName", name:"Предприятие", width:150, type:"text",
             dataSource:"r_Comps", sourceField:"CompName", linkCondition:"r_Comps.CompID=t_Rec.CompID" },
-        {data: "CurrID", name: "Код валюты", width: 50, type: "text", align:"center", visible:false, dataSource:"t_Rec", sourceField:"CurrID"},
-        {data: "CurrName", name: "Валюта", width: 70, type: "text", align:"center", visible:false,
+        {data:"CurrID", name:"Код валюты", width:50, type:"text", align:"center", visible:false, dataSource:"t_Rec", sourceField:"CurrID"},
+        {data:"CurrName", name:"Валюта", width:70, type:"text", align:"center", visible:false,
             dataSource:"r_Currs", sourceField:"CurrName", linkCondition:"r_Currs.CurrID=t_Rec.CurrID" },
-        {data: "KursCC", name: "Курс ВС", width: 65, type: "numeric", dataSource:"t_Rec", visible:false },
-        {data: "TQty", name: "Кол-во", width: 75, type: "numeric",
+        //{data:"KursCC", name:"Курс ВС", width:65, type:"numeric", dataSource:"t_Rec", visible:false },
+        {data:"TQty", name:"Кол-во", width:75, type:"numeric",
             childDataSource:"t_RecD", childLinkField:"ChID", parentLinkField:"ChID",
             dataFunction:{function:"sumIsNull", source:"t_RecD", sourceField:"Qty"} },
-        {data: "TSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Rec" },
-        {data: "StateCode", name: "StateCode", width: 50, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "StateName", name: "Статус", width: 250, type: "text",
+        {data:"TSumCC_wt", name:"Сумма", width:85, type:"numeric2", dataSource:"t_Rec" },
+        {data:"StateCode", name:"StateCode", width:50, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data:"StateName", name:"Статус", width:250, type:"text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" },
-        {data: "CodeID1", name: "Признак 1", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "CodeID2", name: "Признак 2", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "CodeID3", name: "Признак 3", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "CodeID4", name: "Признак 4", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "CodeID5", name: "Признак 5", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"}
+        {data:"CodeID1", name:"Признак 1", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data:"CodeID2", name:"Признак 2", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data:"CodeID3", name:"Признак 3", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data:"CodeID4", name:"Признак 4", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data:"CodeID5", name:"Признак 5", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"}
     ];
-    app.get("/docs/rec/getDataForRecsListTable", function(req, res){
+    app.get("/docs/rec/getDataForRecsListTable",function(req,res){
         var conditions={};
         for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
         t_Rec.getDataForTable(req.dbUC,{tableColumns:tRecsListTableColumns, identifier:tRecsListTableColumns[0].data,
@@ -54,7 +54,7 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-    app.get("/docs/rec/getRecData", function(req, res){
+    app.get("/docs/rec/getRecData",function(req,res){
         var conditions={};
         for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
         t_Rec.getDataItemForTable(req.dbUC,{tableColumns:tRecsListTableColumns,
@@ -63,14 +63,14 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-    app.get("/docs/rec/getNewRecData", function(req, res){
+    app.get("/docs/rec/getNewRecData",function(req,res){
         r_DBIs.getNewDocID(req.dbUC,"t_Rec",function(newDocID){
             var newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
             r_Ours.getDataItem(req.dbUC,{fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
                 var ourName=(result&&result.item)?result.item["OurName"]:"";
                 r_Stocks.getDataItem(req.dbUC,{fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
                     var stockName=(result&&result.item)?result.item["StockName"]:"";
-                    r_Currs.getDataItem(req.dbUC,{fields:["CurrName"], conditions:{"CurrID=":"1"} },
+                    r_Currs.getDataItem(req.dbUC,{fields:["CurrName"], conditions:{"CurrID=":"980"}},
                         function(result){
                             var currName=(result&&result.item)?result.item["CurrName"]:"";
                             r_Comps.getDataItem(req.dbUC,{fields:["CompName"], conditions:{"CompID=":"1"} },
@@ -80,9 +80,9 @@ module.exports.init = function(app){
                                         var stateName=(result&&result.item)?result.item["StateName"]:"";
                                         t_Rec.setDataItem({
                                                 fields:["DocID","DocDate","OurName","StockName","CurrName","KursCC","KursMC","CompName",
-                                                    "TQty","TSumCC_wt", "StateName"],
+                                                    "TQty","TSumCC_wt", "StateCode","StateName"],
                                                 values:[newDocID,newDocDate,ourName,stockName,currName,1,1,compName,
-                                                    0,0, stateName]},
+                                                    0,0, 0,stateName]},
                                             function(result){
                                                 res.send(result);
                                             });
@@ -93,7 +93,7 @@ module.exports.init = function(app){
             });
         });
     });
-    app.post("/docs/rec/storeRecData", function(req, res){
+    app.post("/docs/rec/storeRecData",function(req,res){
         var storeData=req.body;
         r_Ours.getDataItem(req.dbUC,{fields:["OurID"],conditions:{"OurName=":storeData["OurName"]}}, function(result){
             if(!result.item){
@@ -143,7 +143,7 @@ module.exports.init = function(app){
             });
         });
     });
-    app.post("/docs/rec/deleteRecData", function(req, res){
+    app.post("/docs/rec/deleteRecData",function(req,res){
         var delData=req.body;
         t_Rec.delTableDataItem(req.dbUC,{idFieldName:"ChID", delTableData:delData},
             function(result){
@@ -152,48 +152,40 @@ module.exports.init = function(app){
     });
 
     var tRecDTableColumns=[
-        {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_RecD", identifier:true, readOnly:true, visible:false},
-        {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_RecD", identifier:true },
-        {data: "Article1", name: "Артикул1 товара", width: 200,
-            type: "comboboxWN", sourceURL:"/dirsProds/getDataForArticle1Combobox",
+        {data:"ChID", name:"ChID", width:85, type:"text", dataSource:"t_RecD", identifier:true, readOnly:true, visible:false},
+        {data:"SrcPosID", name:"№ п/п", width:45, type:"numeric", dataSource:"t_RecD", identifier:true },
+        {data:"ProdID", name:"Код товара", width:50, type:"text", dataSource:"t_RecD", visible:true},
+        {data:"Barcode", name:"Штрихкод", width:90, type:"text", align:"center", dataSource:"t_RecD", visible:true},
+        {data:"Article1", name:"Артикул1 товара", width:200,
+            type:"comboboxWN", sourceURL:"/dirsProds/getDataForArticle1Combobox",
             dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID"},
-        {data: "PCatName", name: "Бренд товара", width: 140,
-            type: "comboboxWN", sourceURL:"/dirsProds/getDataForPCatNameCombobox",
-            dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
-        {data: "PGrName", name: "Коллекция товара", width: 95,
-            type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrNameCombobox",
-            dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"},
-        {data: "PGrName2", name: "Тип товара", width: 140,
-            type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName2Combobox",
-            dataSource:"r_ProdG2", sourceField:"PGrName2", linkCondition:"r_ProdG2.PGrID2=r_Prods.PGrID2"},
-        {data: "PGrName3", name: "Вид товара", width: 150,
-            type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName3Combobox",
-            dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"},
-        {data: "PGrName1", name: "Линия товара", width: 70,
-            type: "comboboxWN", sourceURL:"/dirsProds/getDataForPGrName1Combobox",
-            dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
-        {data: "ColorName", name: "Цвет товара", width: 80,
-            type: "comboboxWN", sourceURL:"/dirsProds/getDataForColorNameCombobox",
-            dataSource:"ir_ProdColors", dataFunction:"CASE When ir_ProdColors.ColorID>0 Then ir_ProdColors.ColorName Else '' END",
-            linkCondition:"ir_ProdColors.ColorID=r_Prods.ColorID"},
-        {data: "SizeName", name: "Размер товара", width: 70,
-            type: "comboboxWN", sourceURL:"/dirsProds/getDataForSizeNameCombobox",
-            dataSource:"ir_ProdSizes", dataFunction:"CASE When ir_ProdSizes.ChID>100000001 Then ir_ProdSizes.SizeName Else '' END",
-            linkCondition:"ir_ProdSizes.SizeName=r_Prods.SizeName"},
-        {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"t_RecD", visible:true},
-        {data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_RecD", visible:false},
-        {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
+        {data:"ProdName", name:"Наименование товара", width:350, type:"text",
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
-        {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"t_RecD", sourceField:"UM"},
-        {data: "Qty", name: "Кол-во", width: 50, type: "numeric", dataSource:"t_RecD"},
-        {data: "PPID", name: "Партия", width: 60, type: "numeric", visible:false},
-        {data: "PriceCC_wt", name: "Цена", width: 65, type: "numeric2", dataSource:"t_RecD"},
-        {data: "SumCC_wt", name: "Сумма", width: 75, type: "numeric2", dataSource:"t_RecD"},
-        {data: "Extra", name: "% наценки", width: 55, type: "numeric", format:"#,###,###,##0.00", dataSource:"t_RecD"},
-        {data: "PriceCC", name: "Цена продажи", width: 65, type: "numeric2", dataSource:"t_RecD"}
-        //{data: "PRICELIST_PRICE", name: "Цена по прайс-листу", width: 75, type: "numeric2"},
+        {data:"UM", name:"Ед. изм.", width:55, type:"text", align:"center", dataSource:"t_RecD", sourceField:"UM"},
+        {data:"Qty", name:"Кол-во", width:50, type:"numeric", dataSource:"t_RecD"},
+        {data:"PPID", name:"Партия", width:60, type:"numeric", visible:false},
+        {data:"PriceCC_wt", name:"Цена", width:65, type:"numeric2", dataSource:"t_RecD"},
+        {data:"SumCC_wt", name:"Сумма", width:75, type:"numeric2", dataSource:"t_RecD"},
+        {data:"Extra", name:"% наценки", width:55, type:"numeric", format:"#,###,###,##0.00", dataSource:"t_RecD"},
+        {data:"PriceCC", name:"Цена продажи", width:65, type:"numeric2", dataSource:"t_RecD"},
+        {data:"PCatName", name:"Категория товара", width:140,
+            type:"comboboxWN", sourceURL:"/dirsProds/getDataForPCatNameCombobox",
+            dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
+        {data:"PGrName", name:"Группа товара", width:95,
+            type:"comboboxWN", sourceURL:"/dirsProds/getDataForPGrNameCombobox",
+            dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"}
+        //{data:"PGrName1", name:"Подгруппа1 товара", width:70,
+        //    type:"comboboxWN", sourceURL:"/dirsProds/getDataForPGrName1Combobox",
+        //    dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
+        //{data:"PGrName2", name:"Подгруппа2 товара", width:140,
+        //    type:"comboboxWN", sourceURL:"/dirsProds/getDataForPGrName2Combobox",
+        //    dataSource:"r_ProdG2", sourceField:"PGrName2", linkCondition:"r_ProdG2.PGrID2=r_Prods.PGrID2"},
+        //{data:"PGrName3", name:"Подгруппа3 товара", width:150,
+        //    type:"comboboxWN", sourceURL:"/dirsProds/getDataForPGrName3Combobox",
+        //    dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"},
+        //{data:"PRICELIST_PRICE", name:"Цена по прайс-листу", width:75, type:"numeric2"},
     ];
-    app.get("/docs/rec/getDataForRecDTable", function(req, res){
+    app.get("/docs/rec/getDataForRecDTable",function(req,res){
         var conditions={};
         for(var condItem in req.query)
             if(condItem.indexOf("ParentChID")==0) conditions["t_RecD.ChID="]=req.query[condItem];
@@ -207,7 +199,7 @@ module.exports.init = function(app){
     t_RecD.setRecDTaxPriceCCnt=function(connection,prodID,recChID,recDData,callback){
         database.selectParamsQuery(connection,
             "select tax=dbo.zf_GetProdRecTax(@p0,OurID,CompID,DocDate) from t_Rec where ChID=@p1",[prodID,recChID],
-            function (result) {/* Возвращает ставку НДС для товара в зависимости от поставщика */
+            function(result){/* Возвращает ставку НДС для товара в зависимости от поставщика */
                 var tax=(result&&result.length>0)?result[0]["tax"]:0;
                 recDData["Tax"]=tax; recDData["PriceCC_nt"]=recDData["PriceCC_wt"]-tax;
                 var qty=recDData["Qty"];
@@ -216,7 +208,7 @@ module.exports.init = function(app){
             });
     };
     /**
-     * callback = function(result), result= { resultItem, error, userErrorMsg }
+     * callback = function(result), result= { resultItem, error, userMessage }
      */
     t_RecD.storeNewProdPP=function(connection,prodID,recChID,recDData,callback){
         t_Rec.getDataItem(connection,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
@@ -236,7 +228,7 @@ module.exports.init = function(app){
             });
     };
     /**
-     * callback = function(result), result = { resultItem, error, userErrorMsg }
+     * callback = function(result), result = { resultItem, error, userMessage }
      */
     t_RecD.storeRecD=function(connection,prodID,storeData,dbUserParams,callback){
         var parentChID=storeData["ParentChID"]||storeData["ChID"];
@@ -250,6 +242,7 @@ module.exports.init = function(app){
             storeData["SecID"]=dbUserParams["t_SecID"];
             t_RecD.setRecDTaxPriceCCnt(connection,prodID,parentChID,storeData,function(storeData){
                 storeData["CostCC"]=storeData["PriceCC_wt"]; storeData["CostSum"]=storeData["SumCC_wt"];
+                storeData["SupplyPriceCC_nt"]=storeData["SupplyPriceCC_nt"]||storeData["PriceCC_nt"]||0.0;
                 t_RecD.storeTableDataItem(connection,{tableColumns:tRecDTableColumns, idFields:["ChID","SrcPosID"],storeTableData:storeData,
                         calcNewIDValue: function(params, callback){
                             params.storeTableData["ChID"]=params.storeTableData["ParentChID"];
@@ -258,26 +251,29 @@ module.exports.init = function(app){
                     function(result){
                         if(result.error) {
                             r_Prods.delete(connection,prodID);
-                            if(result.error.indexOf("Violation of PRIMARY KEY constraint '_pk_t_RecD'"))
-                            result.userErrorMsg="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером."
+                            var sErr=result.error.error||result.error||"", sErrUM=result.error.userMessage||sErr||"";
+                            result.error={error:sErr};
+                            if(sErrUM)result.error.userMessage=sErrUM;
+                            if(sErr.indexOf("Violation of PRIMARY KEY constraint '_pk_t_RecD'")>=0)
+                                result.error.userMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером."
                         }
                         callback(result);
                     });
             });
         });
     };
-    app.post("/docs/rec/storeRecDTableData", function(req, res){
+    app.post("/docs/rec/storeRecDTableData",function(req,res){
         var storeData=req.body, prodID=storeData["ProdID"];
-        if(prodID===undefined||prodID===null){
+        if(prodID===undefined||prodID===null||prodID.trim()==""){
             var prodData={"ProdName":storeData["ProdName"], "UM":storeData["UM"], "Article1":storeData["Article1"],
                 "Country":storeData["Country"], "Notes":storeData["ProdName"],
                 "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
                 "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
-                "ColorName":storeData["ColorName"],"SizeName":storeData["SizeName"],
                 "InRems":1};
             r_Prods.storeNewProd(req.dbUC,prodData,req.dbUserParams,function(result){
                 if(!result.resultItem||result.error){
-                    res.send({error:"Failed crate new product! Reason:"+result.error,userErrorMsg:result.userErrorMsg});
+                    var storeNewProdErr=result.error||{};
+                    res.send({error:{error:"Failed create new product! Reason:"+(storeNewProdErr.error||storeNewProdErr),userMessage:storeNewProdErr.userMessage}});
                     return;
                 }
                 prodID=result.resultItem["ProdID"];
@@ -290,14 +286,14 @@ module.exports.init = function(app){
         }
         var iProdID=parseInt(prodID);
         if(isNaN(iProdID)){
-            res.send({error:"Non correct ProdID!",userErrorMsg:"Не корректный код товара!"});
+            res.send({error:"Non correct ProdID!",userMessage:"Не корректный код товара!"});
             return;
         }
         t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
             res.send(result);
         });
     });
-    app.post("/docs/rec/deleteRecDTableData", function(req, res){
+    app.post("/docs/rec/deleteRecDTableData",function(req,res){
         t_RecD.delTableDataItem(req.dbUC,{idFields:["ChID","SrcPosID"],delTableData:req.body},
             function(result){
                 res.send(result);

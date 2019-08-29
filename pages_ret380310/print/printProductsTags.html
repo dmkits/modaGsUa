@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" lang="ru" Accept-Language="ru"/>
+    <!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+    <![endif]-->
+    <link rel="icon" type="image/gif" href="/icons/moda32x32.ico"/>
+    <!--[if IE]>
+    <!---link rel="stylesheet" type="text/css" href="/css/main_ie.css"--!>
+    <link rel="shortcut icon" href="/icons/moda32x32.ico" />
+    <![endif]-->
+    <!--[if !IE]><!-->
+    <!--link rel="stylesheet" type="text/css" href="/css/main_nie.css"--!>
+    <!--<![endif]-->
+    <link rel="stylesheet" href="/jslib/dijit/themes/claro/claro.css" media="screen">
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async:true,parseOnLoad:false"></script>
+    <link rel="stylesheet" type="text/css" href="/css/main.css" media="screen">
+    <script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
+    <title>MODA.GS.UA Print tags</title>
+    <style>
+        html, body {
+            width:100%;
+            height:100%;
+            margin:0;
+            padding:0;
+            /*overflow: hidden;*/
+            font-family: Arial, 'Arial', serif; /* Шрифт с засечками */
+        }
+        .printpage {
+            display: inline;
+            float: left;
+            margin: 0.1cm;
+            border: solid 1px;
+        }
+        .pageNum {
+            border: none;
+        }
+        @media print { /* Стиль для печати */
+            body {
+                width:100%;
+                margin:0;
+                padding:0;
+                font-family: Arial, 'Arial', serif; /* Шрифт с засечками */
+            }
+            h1, h2, p {
+                color: #000; /* Черный цвет текста */
+            }
+            .printpage {
+                border: none;
+                display: block;
+                float: none;
+                page-break-after: always;
+                margin: 0.1cm;
+                margin-top: 0cm;
+                margin-bottom: 0cm;
+                border: none;
+            }
+            .pageNum {
+                border: none;
+                visibility: hidden;
+            }
+        }
+        @page{
+            margin: 0cm 0cm 0cm 0cm;
+        }
+        @page :first {
+            margin: 0cm 0cm 0cm 0cm; /* Отступы для первой страницы */
+        }
+        @page :left {
+            margin: 0cm 0cm 0cm 0cm; /* Отступы для всех левых страниц */
+        }
+        @page :right {
+            margin: 0cm 0cm 0cm 0cm; /* Отступы для всех правых страниц */
+        }
+    </style>
+</head>
+<body>
+    <div id="print_PrintContent" style="margin:0;padding:0;width:100%;height:100%"></div>
+</body>
+<script type="text/javascript">
+    require(["app/app", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane","dojox/layout/ContentPane", "dojo/domReady!"],
+            function (APP, BorderContainer, LayoutContainer, ContentPane, XContentPane) {
+                var prodTagsContentData = window["prodTagsContentData"];
+                var pageProdTagType = window["pageProdTagType"];                                    console.log("!!! PRINT PAGE printProductsTags pageProdTagType=",pageProdTagType," prodTagsContentData=",prodTagsContentData);//!!!IT'S FOR TESTING!!!
+                if(!pageProdTagType || !prodTagsContentData) return;
+                var printContent= document.getElementById("print_PrintContent");
+                APP.instanceForID("print_PrintContent", ContentPane, {class:"",style:"width:100%;height:100%;"});
+                var tagPage = document.createElement("DIV");
+                var tagPageID="print_TagContentPage";
+                tagPage.setAttribute("id",tagPageID);
+                printContent.appendChild(tagPage);
+                var tagPagePaneT= APP.instanceForID(tagPageID, XContentPane, {class:"printpage"});
+                tagPagePaneT.set("href","/print/"+pageProdTagType);
+                tagPage.setAttribute("style","display:none");
+                tagPagePaneT.onLoad= function(){
+                    var tagsData= prodTagsContentData, pageNum=0;
+                    for(var i=0; i<tagsData.length; i++){
+                        var tagData = tagsData[i];                                                  //console.log("PRINT PAGE printProductsTags tagData=",tagData);
+                        var qty = tagData["Qty"];
+                        for(var num=1; num<=qty; num++){
+                            var tagPageID="print_TagContentPage_"+i+"_"+num;
+                            var tagPage = document.createElement("DIV");
+                            tagPage.setAttribute("id",tagPageID);
+                            printContent.appendChild(tagPage);
+                            var tagPagePane= APP.instanceForID(tagPageID, XContentPane, {class:"printpage"});
+                            pageNum++;
+                            tagPagePane.set("prodTagContentData", tagData);
+                            tagPagePane.set("printPageNumber", pageNum);
+                            var tagPaneContent=tagPagePaneT.domNode.innerHTML.replace("parentID=firstHTML.parentNode.id","parentID='"+tagPageID+"'");
+                            tagPagePane.set("content",tagPaneContent);
+                        }
+                    }
+                };
+            });
+</script>
+</html>

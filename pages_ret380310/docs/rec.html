@@ -8,10 +8,6 @@
     <div id="docs_rec_RightContainer" style="width:250px;height:100%; margin:0;padding:0;"></div>
 </TDocStdTable>
 <script type="text/javascript">
-
-//    require(["app/app","app/tDocStdTable","dojo/request/iframe", /*"dojox/form/FileInput ",*/ "dojo/request/handlers", "app/request"],
-//            function (APP, TDocStdTable, iframe/*,FileInput*/,handlers, Request) {
-//    });
     $$.docs_rec_PageContainer
             .init({idListContainer:"docs_rec_ListContainer",idDetailContainer:"docs_rec_DetailContainer",
                 idDetailHeader:"docs_rec_DetailHeader",idDetailTable:"docs_rec_ProductsTable",idDetailTotal:"docs_rec_DetailTotal",
@@ -19,28 +15,31 @@
             .addListTable({getDataUrl:"/docs/rec/getDataForRecsListTable",
                 header:"Список накладных", bdatelabelText:"c",bdateCondition:"DOCDATE>=", edatelabelText:"по",edateCondition:"DOCDATE<="
             })
-            .setDetailHeaderParameters({dataIDName:"ChID",
-                getDataUrl:"/docs/rec/getRecData", getDataForNewUrl:"/docs/rec/getNewRecData",
-                postDataUrl:"/docs/rec/storeRecData", postForDeleteDataUrl:"/docs/rec/deleteRecData",
-                dataStateName:"StateCode", activeStateValue:0
+            .setDetailHeaderParameters({dataIDName:"ChID", getDataUrl:"/docs/rec/getRecData",
+                getDataForNewUrl:"/docs/rec/getNewRecData", postDataUrl:"/docs/rec/storeRecData", postForDeleteDataUrl:"/docs/rec/deleteRecData",
+                docDetailEditable:function(params){
+                    if(!params||!params.detailHeaderContentData) return false;
+                    var stateCode=params.detailHeaderContentData["StateCode"];
+                    return stateCode==0;
+                }
             })
             .addDetailHeaderTitle({title:"Приход товара",
                 titleForNew:"Новая приходная накладная", titleForNothing:"Приход товара не выбран", titleForFailedLoad:"Нет данных",
                 numberDataItemName:"DocID", dateDataItemName:"DocDate", titleDatePrefix:"от"},25)
             .addDetailHeaderRow(25,true)
             .addDetailHeaderSelect("OurName","Фирма", 330,
-            {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirOursForSelect", labelDataItem:"OurName"})
+                {selectStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirOursForSelect", labelDataItem:"OurName"})
             .addDetailHeaderTextBox("DocID", "Номер", 120, {inputStyle:"width:50px"})
             .addDetailHeaderTextBox("IntDocID", "Вн. номер", 120, {inputStyle:"width:50px"})
             .addDetailHeaderDateTextBox("DocDate", "Дата", 150, "width:80px")
             .addDetailHeaderRow(25,true)
             .addDetailHeaderSelect("StockName","Склад", 250,
-            {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"StockName"})
+                {selectStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"StockName"})
             .addDetailHeaderSelect("CompName","Предприятие", 280,
-            {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCompsForSelect", labelDataItem:"CompName"})
+                {selectStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCompsForSelect", labelDataItem:"CompName"})
             .addDetailHeaderSelect("CurrName","Валюта", 260,
-            {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCurrsForSelect", labelDataItem:"CurrName"})
-            .addDetailHeaderNumberTextBox("KursCC", "Курс валюты", 200, {inputStyle:"width:40px", pattern:"########0.00"})
+                {selectStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCurrsForSelect", labelDataItem:"CurrName"})
+//            .addDetailHeaderNumberTextBox("KursCC", "Курс валюты", 200, {inputStyle:"width:40px", pattern:"########0.00"})
             .setDetailTableParameters({conditionIDName:"ParentChID",
                 getDataUrl:"/docs/rec/getDataForRecDTable",
                 storeDataUrl:"/docs/rec/storeRecDTableData", deleteDataUrl:"/docs/rec/deleteRecDTableData"})
@@ -50,9 +49,9 @@
             .addDetailSubtotalNumberTextBox("ИТОГО СУММА:", 245, "SumCC_wt", {pattern:"###,###,##0.00#######", inputStyle:"width:80px;"})
             .addDetailTotalRow(true)
             .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ КОЛИЧЕСТВО:", 890, "TQty",
-            {pattern:"###,###,##0.#########", inputStyle:"width:50px;", style:"font-weight:bold;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
+                {pattern:"###,###,##0.#########", inputStyle:"width:50px;", style:"font-weight:bold;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
             .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 245, "TSumCC_wt",
-            {pattern:"###,###,##0.00#######", inputStyle:"width:80px;", style:"font-weight:bold;", printLabel:"ИТОГО СУММА:"})
+                {pattern:"###,###,##0.00#######", inputStyle:"width:80px;", style:"font-weight:bold;", printLabel:"ИТОГО СУММА:"})
             .addDetailTotalRow(true)
             .addDetailTotalTextBox("Статус:", 1140, "StateName", {style:"font-weight:bold;", inputStyle:"width:200px", print:false})
             .addToolPane({title:"Действия"})
@@ -103,101 +102,44 @@
                         if(!prodData)prodData={};
                         crd.item("Article1").setValue(prodData["Article1"]);
                         this.setDetailTableProdArticle1Attrs(crd,prodData);
-                        crd.item("ColorName").setValue(prodData["ColorName"]);
-                        crd.item("SizeName").setValue(prodData["SizeName"]);
                     };
                 nextCallback();
             })
+//            .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
+//                var isChangedProdAttrs=crd.item("Article1").isChanged()
+//                        ||crd.item("PCatName").isChanged()||crd.item("PGrName").isChanged()
+//                        ||crd.item("PGrName1").isChanged()||crd.item("PGrName2").isChanged()||crd.item("PGrName3").isChanged();
+//                if(isChangedProdAttrs){
+//                    var conditions={};
+//                    conditions["Article1"]=crd.item("Article1").getValue();
+//                    conditions["PCatName"]=crd.item("PCatName").getValue();
+//                    conditions["PGrName"]=crd.item("PGrName").getValue();
+//                    conditions["PGrName1"]=crd.item("PGrName1").getValue();
+//                    conditions["PGrName2"]=crd.item("PGrName2").getValue();
+//                    conditions["PGrName3"]=crd.item("PGrName3").getValue();
+//                    $$.request.getJSONData({url:"/dirsProds/getProdProdAttrsAndNameByArticle1", conditions:conditions},
+//                            function(result){
+//                                if(result.item) thisInstance.setDetailTableProdArticle1Attrs(crd,result.item);
+//                                else if(result.error) thisInstance.setDetailTableProdArticle1Attrs(crd);
+//                                if(result.itemProdName) thisInstance.setDetailTableProdData(crd,result.itemProdName);
+//                                else thisInstance.setDetailTableProdData(crd);
+//                                nextCallback(true);
+//                            });
+//                    return;
+//                }
+//                nextCallback();
+//            })
             .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
-                var isChangedProdAttrs=crd.item("Article1").isChanged()
-                        ||crd.item("PCatName").isChanged()||crd.item("PGrName").isChanged()
-                        ||crd.item("PGrName1").isChanged()||crd.item("PGrName2").isChanged()||crd.item("PGrName3").isChanged()
-                        ||crd.item("ColorName").isChanged()||crd.item("SizeName").isChanged();
-                if (isChangedProdAttrs){
-                    var condition={};
-                    condition["Article1"]=crd.item("Article1").getValue();
-                    condition["PCatName"]=crd.item("PCatName").getValue();
-                    condition["PGrName"]=crd.item("PGrName").getValue();
-                    condition["PGrName1"]=crd.item("PGrName1").getValue();
-                    condition["PGrName2"]=crd.item("PGrName2").getValue();
-                    condition["PGrName3"]=crd.item("PGrName3").getValue();
-                    condition["ColorName"]=crd.item("ColorName").getValue();
-                    condition["SizeName"]=crd.item("SizeName").getValue();
-                    Request.getJSONData({url:"/dirsProds/getProdProdAttrsAndNameByArticle1", condition:condition},
+                if( (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
+                        || (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY()) ){
+                    var conditions={};
+                    if(crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
+                        conditions["ProdID"]= crd.item("ProdID").getValue();
+                    if(crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY())
+                        conditions["ProdName"]= encodeURIComponent(crd.item("ProdName").getValue());
+                    $$.request.getJSONData({url:"/dirsProds/getProdDataByIDName", conditions:conditions},
                             function(result){
-                                if (result.item) thisInstance.setDetailTableProdArticle1Attrs(crd,result.item);
-                                else if(result.error) thisInstance.setDetailTableProdArticle1Attrs(crd);
-                                if (result.itemProdName) thisInstance.setDetailTableProdData(crd,result.itemProdName);
-                                else thisInstance.setDetailTableProdData(crd);
-                                nextCallback(true);
-                            });
-                    return;
-//                            } else if (crd.item("ProdArticle1").isChanged()&&crd.item("ProdArticle1").isEMPTY()){
-//                                var condition={};
-//                                condition["ProdArticle1"]=crd.item("ProdArticle1").getValue();
-//                                condition["PCatName"]=crd.item("PCatName").getValue();
-//                                condition["PGrName"]=crd.item("PGrName").getValue();
-//                                condition["PGrName1"]=crd.item("PGrName1").getValue();
-//                                condition["PGrName2"]=crd.item("PGrName2").getValue();
-//                                condition["PGrName3"]=crd.item("PGrName3").getValue();
-//                                condition["ProdColor"]=crd.item("ProdColor").getValue();
-//                                condition["ProdSize"]=crd.item("ProdSize").getValue();
-//                                Request.getJSONData({url:"/dirsProds/getProdNameByAttrs", condition:condition},
-//                                        function(result){
-//                                            if (!result || !result.item) {
-//                                                thisInstance.setDetailTableProdData(crd);
-//                                                nextCallback(true);
-//                                                return;
-//                                            }
-//                                            thisInstance.setDetailTableProdData(crd,result.item);
-//                                            nextCallback(true);
-//                                        });
-//                                return;
-                }
-                nextCallback();
-            })
-//                        .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
-//                            if ((crd.item("PCatName").isChanged()||crd.item("PGrName").isChanged()
-//                                    ||crd.item("PGrName1").isChanged()||crd.item("PGrName2").isChanged()||crd.item("PGrName3").isChanged()
-//                                    ||crd.item("ProdColor").isChanged()||crd.item("ProdSize").isChanged())
-//                                            && !crd.item("ProdID").isChanged() && !crd.item("ProdName").isChanged()){
-//                                var condition={};
-//                                condition["ProdArticle1"]=crd.item("ProdArticle1").getValue();
-//                                condition["PCatName"]=crd.item("PCatName").getValue();
-//                                condition["PGrName"]=crd.item("PGrName").getValue();
-//                                condition["PGrName1"]=crd.item("PGrName1").getValue();
-//                                condition["PGrName2"]=crd.item("PGrName2").getValue();
-//                                condition["PGrName3"]=crd.item("PGrName3").getValue();
-//                                condition["ProdColor"]=crd.item("ProdColor").getValue();
-//                                condition["ProdSize"]=crd.item("ProdSize").getValue();
-//                                Request.getJSONData({url:"/dirsProds/getProdNameByAttrs", condition:condition},
-//                                        function(result){
-//                                            if (!result || !result.item) {
-//                                                thisInstance.setDetailTableProdData(crd);
-//                                                nextCallback(true);
-//                                                return;
-//                                            }
-//                                            thisInstance.setDetailTableProdData(crd,result.item);
-//                                            nextCallback(true);
-//                                        });
-//                                return;
-//                            }
-//                            nextCallback();
-//                        })
-            .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
-                if ( (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
-                        || (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY()) ) {
-                    var condition = {};
-                    if (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
-                        condition["ProdID"]= crd.item("ProdID").getValue();
-                    if (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY())
-                        condition["ProdName"]= encodeURIComponent(crd.item("ProdName").getValue());
-                    Request.getJSONData({url:"/dirsProds/getProdDataByIDName", condition:condition},
-                            function(result){
-                                if (!result || !result.item ) {
-                                    nextCallback();
-                                    return;
-                                }
+                                if(!result||!result.item){ nextCallback(); return; }
                                 thisInstance.setDetailTableProdData(crd,result.item);
                                 thisInstance.setDetailTableProdAttrs(crd,result.item);
                                 nextCallback(true);
@@ -279,7 +221,7 @@
 ////                                var condition={};
 ////                                condition["SUPPLIER_ORDER_NUM"]= supplierOrderNum;
 ////                                condition["PRODUCT_ARTICLE"]= crd.item("PRODUCT_ARTICLE").getValue();
-////                                Request.getJSONData({url:"/wrh/order_bata/get_order_bata_details_by_article", condition:condition, consoleLog:true},
+////                                Request.getJSONData({url:"/wrh/order_bata/get_order_bata_details_by_article", conditions:condition, consoleLog:true},
 ////                                        function(success,result){
 ////                                            if (success&&result.item) {                                                 //console.log("PINV detailTableRowChangeCallback2 getJSONData success ",result);
 ////                                                var prodDataFromOrderBata = result.item;
@@ -323,7 +265,7 @@
 //                                    condition["PRODUCT_SIZE"]= crd.item("PRODUCT_SIZE").getValue();
 //                                if (!crd.item("PRODUCT_UM").isEMPTY())
 //                                    condition["PRODUCT_UM"]= crd.item("PRODUCT_UM").getValue();
-//                                Request.getJSONData({url:"/dir/products/getProdNameByProdAttributes", condition:condition, resultItemName:"item"},
+//                                Request.getJSONData({url:"/dir/products/getProdNameByProdAttributes", conditions:condition, resultItemName:"item"},
 //                                        function(resData){
 //                                            if (!resData) {
 //                                                nextCallback();
@@ -344,34 +286,34 @@
             .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback){          //console.log("INV detailTableRowChangeCallback1 ",crd.data());
                 var prevSrcPosID=detailTable.getPrevRowDataItemValue(crd.data(),"SrcPosID");
                 if(prevSrcPosID===undefined||prevSrcPosID===null||isNaN(prevSrcPosID/1)) prevSrcPosID=0;
-                if (crd.item("SrcPosID").isUNDEFNULL()) crd.item("SrcPosID").setValue(prevSrcPosID+1);
-                else if (crd.item("SrcPosID").getValue()===prevSrcPosID) crd.item("SrcPosID").setValue(prevSrcPosID+1);
+                if(crd.item("SrcPosID").isUNDEFNULL()) crd.item("SrcPosID").setValue(prevSrcPosID+1);
+                else if(crd.item("SrcPosID").getValue()===prevSrcPosID) crd.item("SrcPosID").setValue(prevSrcPosID+1);
 //
-                if (crd.item("Qty").isUNDEFNULL()) crd.item("Qty").setValue(1);
-                if (crd.item("PriceCC_wt").isUNDEFNULL()) crd.item("PriceCC_wt").setValue(0);
-                if (crd.item("SumCC_wt").isUNDEFNULL()) crd.item("SumCC_wt").setValue(0);
-                if (crd.item("SumCC_wt").isChanged()&&!crd.item("SumCC_wt").isUNDEFNULL()){                     //console.log("detailTableRowChangeCallback SumCC_wt changed",crd,crd.item("Qty").isEMPTYZERO());
-                    if (crd.item("Qty").isEMPTY()&&!crd.item("PriceCC_wt").isEMPTYZERO())
+                if(crd.item("Qty").isUNDEFNULL()) crd.item("Qty").setValue(1);
+                if(crd.item("PriceCC_wt").isUNDEFNULL()) crd.item("PriceCC_wt").setValue(0);
+                if(crd.item("SumCC_wt").isUNDEFNULL()) crd.item("SumCC_wt").setValue(0);
+                if(crd.item("SumCC_wt").isChanged()&&!crd.item("SumCC_wt").isUNDEFNULL()){                     //console.log("detailTableRowChangeCallback SumCC_wt changed",crd,crd.item("Qty").isEMPTYZERO());
+                    if(crd.item("Qty").isEMPTY()&&!crd.item("PriceCC_wt").isEMPTYZERO())
                         crd.item("Qty").setValue( crd.item("SumCC_wt").getValue()/crd.item("PriceCC_wt").getValue() );
-                    else if (crd.item("Qty").isEMPTYZERO()) crd.item("PriceCC_wt").setValue(0);
+                    else if(crd.item("Qty").isEMPTYZERO()) crd.item("PriceCC_wt").setValue(0);
                     else crd.item("PriceCC_wt").setValue( crd.item("SumCC_wt").getValue()/crd.item("Qty").getValue() )
-                } else if (crd.item("PriceCC_wt").isChanged()||crd.item("Qty").isChanged()){                    //console.log("detailTableRowChangeCallback PRICE QTY changed",crd);
-                    if (crd.item("Qty").isUNDEFNULLZERO()||crd.item("PriceCC_wt").isUNDEFNULLZERO()) crd.item("SumCC_wt").setValue(0);
+                }else if(crd.item("PriceCC_wt").isChanged()||crd.item("Qty").isChanged()){                    //console.log("detailTableRowChangeCallback PRICE QTY changed",crd);
+                    if(crd.item("Qty").isUNDEFNULLZERO()||crd.item("PriceCC_wt").isUNDEFNULLZERO()) crd.item("SumCC_wt").setValue(0);
                     else crd.item("SumCC_wt").setValue( crd.item("PriceCC_wt").getValue()*crd.item("Qty").getValue() )
-                } else if (!crd.item("PriceCC_wt").isEMPTY()) {
-                    if (crd.item("Qty").isEMPTYZERO()) crd.item("PriceCC_wt").setValue(0);
+                }else if(!crd.item("PriceCC_wt").isEMPTY()){
+                    if(crd.item("Qty").isEMPTYZERO()) crd.item("PriceCC_wt").setValue(0);
                     else crd.item("PriceCC_wt").setValue( crd.item("SumCC_wt").getValue()/crd.item("Qty").getValue() )
                 }
                 if(crd.item("Extra").isEMPTYZERO()) crd.item("Extra").setValue(0);
-                if (crd.item("PriceCC_wt").isChanged() || crd.item("Extra").isChanged()) {                      //console.log("PINV detailTableRowChangeCallback1 PRICE or FACTOR isChanged");
-                    if (!crd.item("PriceCC_wt").isEMPTY() && !crd.item("Extra").isEMPTY()) {
+                if(crd.item("PriceCC_wt").isChanged() || crd.item("Extra").isChanged()){                      //console.log("PINV detailTableRowChangeCallback1 PRICE or FACTOR isChanged");
+                    if(!crd.item("PriceCC_wt").isEMPTY() && !crd.item("Extra").isEMPTY()) {
                         crd.item("PriceCC").setValue( crd.item("PriceCC_wt").getValue()*(1+crd.item("Extra").getValue()/100) );
-                    } else
+                    }else
                         crd.item("PriceCC").setValue("");
-                } else if (crd.item("PriceCC").isChanged()) {                                                   //console.log("PINV detailTableRowChangeCallback1 SALE_PRICE isChanged");
-                    if (!crd.item("Qty").isEMPTY() && !crd.item("PriceCC_wt").isEMPTYZERO()) {
+                }else if(crd.item("PriceCC").isChanged()){                                                   //console.log("PINV detailTableRowChangeCallback1 SALE_PRICE isChanged");
+                    if(!crd.item("Qty").isEMPTY() && !crd.item("PriceCC_wt").isEMPTYZERO()){
                         crd.item("Extra").setValue( (crd.item("PriceCC").getValue()/crd.item("PriceCC_wt").getValue()-1)*100 );
-                    } else
+                    }else
                         crd.item("Extra").setValue("");
                 }
 //                            if (crd.item("SALE_PRICE").isChanged() && !crd.item("SALE_PRICE").isEMPTYZERO()){
@@ -386,36 +328,31 @@
             })
 //                        .addToolPane({title:"экспорт"})
 //                        .addToolPaneActionButton("таблица в эксель", {btnStyle: "width:200px;",detailTableActionName:"exportTableContentToExcel"})
-            .addToolPane({title:"Печать"})
-            .addToolPaneActionButton("Печать ценников", {btnStyle: "width:200px;",detailTableActionName:"printProdTags",
-                actionFunction:  function(actionFunctionParams){                                        console.log("printProdTags.onClick actionFunctionParams=",actionFunctionParams);
-                    var printWindow= window.open("/print/printProductsTags");                           //console.log("printProdTags.onClick printWindow=",printWindow);
-                    //window.open("/print?pinvid="+docs_rec_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
-                    printWindow["prodTagsContentData"]= actionFunctionParams.detailTable.getContent();
-                    printWindow["pageProdTagType"]= "productTag40x25";}
-            })
-            .addToolPaneActionButton("Печать цен", {btnStyle: "width:200px;", detailTableActionName:"printProdPricesTags",
-                actionFunction:function(actionFunctionParams){
-                    var printWindow= window.open("/print/printProductsTags");
-                    //window.open("/print?pinvid="+docs_rec_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
-                    var detailTableContentData=actionFunctionParams.detailTable.getContent();
-                    for(var row=0;row<detailTableContentData.length;row++) detailTableContentData[row]["QTY"]=1;
-                    printWindow["prodTagsContentData"]= detailTableContentData;
-                    printWindow["pageProdTagType"]= "tag40x25price";
-                }
-            })
+//            .addToolPane({title:"Печать"})
+//            .addToolPaneActionButton("Печать ценников", {btnStyle: "width:200px;",detailTableActionName:"printProdTags",
+//                actionFunction:  function(actionFunctionParams){                                        console.log("printProdTags.onClick actionFunctionParams=",actionFunctionParams);
+//                    var printWindow= window.open("/print/printProductsTags");                           //console.log("printProdTags.onClick printWindow=",printWindow);
+//                    //window.open("/print?pinvid="+docs_rec_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
+//                    printWindow["prodTagsContentData"]= actionFunctionParams.detailTable.getContent();
+//                    printWindow["pageProdTagType"]= "productTag40x25";}
+//            })
+//            .addToolPaneActionButton("Печать цен", {btnStyle: "width:200px;", detailTableActionName:"printProdPricesTags",
+//                actionFunction:function(actionFunctionParams){
+//                    var printWindow= window.open("/print/printProductsTags");
+//                    //window.open("/print?pinvid="+docs_rec_ContentController.getDataIDValue(), "", "location=1,status=1,scrollbars=1,width=650,height=600");
+//                    var detailTableContentData=actionFunctionParams.detailTable.getContent();
+//                    for(var row=0;row<detailTableContentData.length;row++) detailTableContentData[row]["QTY"]=1;
+//                    printWindow["prodTagsContentData"]= detailTableContentData;
+//                    printWindow["pageProdTagType"]= "tag40x25price";
+//                }
+//            })
             .addToolPane({title:"Информация о товаре",
                 detailTableAction:function(toolPane, detailHeader,detailTable,thisInstance){
                     var detailTableSelectedRow= detailTable.getSelectedRow();
-                    if(!detailTableSelectedRow){
-                        toolPane.set("content","");
-                        return;
-                    }
+                    if(!detailTableSelectedRow){ toolPane.set("content",""); return; }
                     var htCols = detailTable.getColumns(); var prodInfoHtml = "";
-
                     for(var c=0;c<htCols.length;c++){
-                        var colItem = htCols[c]; var colData = colItem["data"];
-                        var colValue = detailTableSelectedRow[colData];
+                        var colItem = htCols[c]; var colData = colItem["data"], colValue = detailTableSelectedRow[colData];
                         if(colData.indexOf('Prod')==0||colData=='UM'||colData.indexOf('Barcode')==0
                                 ||colData.indexOf('Article')==0||colData.indexOf('PCat')==0||colData.indexOf('PGr')==0
                                 ||colData.indexOf('Color')==0||colData.indexOf('Size')==0)
