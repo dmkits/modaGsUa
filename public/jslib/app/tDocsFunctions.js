@@ -238,7 +238,7 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
 
             },
             /**
-             * params= {labelText,labelStyle, selectStyle, cellWidth,cellStyle, selectParams}
+             * params= {labelText,labelStyle, selectStyle, cellWidth,cellStyle, selectParams:{labelDataItem,loadDropDownURL} }
              */
             addTableCellSelectTo: function(tableRowNode, params){
                 if(!params) params={};

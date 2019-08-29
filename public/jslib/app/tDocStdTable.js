@@ -3,10 +3,10 @@
  */
 define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunctions",
         "app/base", "app/dialogs", "app/contentController", "app/hTableEditable",
-        "dijit/form/Select", "dojox/layout/ContentPane", "dojox/form/Uploader"],
+        "dojox/layout/ContentPane", "dojox/form/Uploader"],
     function(declare, BorderContainer, TDocsFunctions,
              base, Dialogs, ContentController, HTable,
-             Select, XContentPane, Uploader){
+             XContentPane, Uploader){
         var $TDF=TDocsFunctions;
         return declare("TDocStdTable", [BorderContainer], {
             /**
@@ -387,17 +387,15 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 return this;
             },
             /**
-             * params={ style, inputStyle, labelDataItem, loadDropDownURL }
+             * params={ style, selectStyle, labelDataItem, loadDropDownURL }
              */
             addDetailHeaderSelect: function(itemName,label,cellWidth,params){
                 if(!params) params={};
-                if(!params.inputStyle) params.inputStyle="";
+                if(!params.selectStyle) params.selectStyle="";
                 if(!params.style) params.style="";
-                var cell= $TDF.addLeftCellToTableRow(this.detailHeaderTable.lastChild, cellWidth),
-                    input= $TDF.createInputTo(cell, label, params.style),
-                    select= base.instanceFor(input, Select,
-                        {style:params.inputStyle+params.style, labelDataItem:params.labelDataItem,loadDropDownURL:params.loadDropDownURL});
-                select.printParams= {cellWidth:cellWidth, labelText:label, cellStyle:params.style, inputStyle:params.inputStyle};/*it's for print*/
+                var select= $TDF.addTableCellSelectTo(this.detailHeaderTable.lastChild,
+                    { labelText:label, labelStyle:params.style, selectStyle:params.style+"text-align:right;"+params.selectStyle, cellWidth:cellWidth,
+                        selectParams:{labelDataItem:params.labelDataItem,loadDropDownURL:params.loadDropDownURL} });
                 this.detailHeader.addControlElementObject(select, itemName);
                 this.addDetailHeaderElement(false,select);
                 return this;
