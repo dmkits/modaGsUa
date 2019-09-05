@@ -719,7 +719,10 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 }else if(actionButtonName==="deleteHeader"){
                     return function(){ thisInstance.deleteDetailHeaderContent(); }
                 }else if(actionButtonName==="insertDetailTableRow"){
-                    return function(){ thisInstance.detailHTable.insertRowAfterSelected(); }
+                    return function(){
+                        thisInstance.detailHTable.insertRowAfterSelected();
+                        thisInstance.detailHTable.setSelectedRowByIndex(thisInstance.detailHTable.getSelectedRowIndex()+1);
+                    }
                 }else if(actionButtonName==="insertDetailTableCopySelectedRow"){
                     return function(){ thisInstance.detailHTable.insertRowAfterSelected(thisInstance.detailHTable.getSelectedRow()); }
                 }else if(actionButtonName==="allowEditDetailTableSelectedRow"){
