@@ -128,17 +128,23 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         if(source==='loadData' || !parent.onChangeRowsData) return;
                         if(change.length==1){//changed 1 cell
                             var rowInd=change[0][0],prop= change[0][1], oldVal= change[0][2];           //console.log("HTableEditable afterChange changed 1 cell row=",rowInd," cell=",prop," oldVal=",oldVal);
-                            var rowData=this.getContentRow(rowInd), oldRowData= {};
+                            var rowData=this.getContentRow(rowInd), oldRowData= {}, changedRowsItems={};
                             for(var itemName in rowData) oldRowData[itemName]=rowData[itemName];
-                            oldRowData[prop]=oldVal;
-                            var changedRowData= parent.getChangedRowsData(rowData,oldRowData);          //console.log("HTableEditable afterChange changed 1 cell",rowData,oldRowData);
+                            changedRowsItems[prop]=true; oldRowData[prop]=oldVal;
+                            var changedRowData= parent.getChangedRowsData(rowData,oldRowData,changedRowsItems); //console.log("HTableEditable afterChange changed 1 cell",rowData,oldRowData);
                             parent.onChangeRowsData(changedRowData);
                             return;
                         }
                         //changed many cells
-                        var changedRowsData=[],changedRowsOldData=[];
+                        var changedRowsData=[],changedRowsOldData=[], changedRowsItems=[];
                         for(var i=0; i<change.length; i++){
                             var rowInd=change[i][0], prop= change[i][1], oldVal= change[i][2];
+                            var changedRowItems= changedRowsItems[rowInd];
+                            if(!changedRowItems){
+                                changedRowItems={};
+                                changedRowsItems[rowInd]=changedRowItems;
+                            }
+                            changedRowItems[prop]=true;
                             var changedRowData= changedRowsData[rowInd], oldRowData= changedRowsOldData[rowInd];
                             if(!changedRowData){
                                 changedRowData= this.getContentRow(rowInd);
@@ -148,10 +154,10 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                                 changedRowsOldData[rowInd]=oldRowData;
                             }
                             oldRowData[prop]=oldVal;
-                        }                                                                               //console.log("HTableEditable afterChange changed many cell",changedRowsData,changedRowsOldData);
+                        }                                                                               //console.log("HTableEditable afterChange changed many cell",changedRowsData,changedRowsOldData,changedRowsItems);
                         var changedRows= parent.getChangedRowsData();
                         for(var rowInd in changedRowsData){                                             //console.log("HTableEditable afterChange changed many cell",changedRowsData[rowInd],changedRowsOldData[rowInd]);
-                            changedRows.addRowData(changedRowsData[rowInd],changedRowsOldData[rowInd]);
+                            changedRows.addRowData(changedRowsData[rowInd],changedRowsOldData[rowInd],changedRowsItems[rowInd]);
                         }
                         parent.onChangeRowsData(changedRows);
                     }
@@ -339,9 +345,9 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 //TODO actions after deleted table row (params deletedRows has value)
             },
 
-            getChangedRowsData: function (newRowData,oldRowData){
-                function ChangedData(itemName,newRowData,oldRowData){
-                    this.itemName=itemName; this.values=newRowData; this.oldValues=oldRowData;
+            getChangedRowsData: function (newRowData,oldRowData,changedRowItems){
+                function ChangedData(itemName,newRowData,oldRowData,isChanged){
+                    this.itemName=itemName; this.values=newRowData; this.oldValues=oldRowData; this.isDataChanged=isChanged;
                     this.getValue= function(){
                         var value=this.values[this.itemName],oldValue=this.oldValues[this.itemName];
                         if(value===undefined&&oldValue!==undefined) return oldValue;
@@ -378,11 +384,16 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         return (value===undefined||value===null||value==0||value.toString().trim()==="");
                     };
                     this.isChanged= function(){
+                        if(this.isDataChanged===true) return true;
+                        var value=this.values[this.itemName],oldValue=this.oldValues[this.itemName];
+                        return (value===undefined||value!==oldValue);
+                    };
+                    this.isValueChanged= function(){
                         var value=this.values[this.itemName],oldValue=this.oldValues[this.itemName];
                         return (value===undefined||value!==oldValue);
                     };
                 }
-                function newChangedRowData(newRowData,oldRowData){
+                function newChangedRowData(newRowData,oldRowData,changedRowItems){
                     var newInstance= { values:newRowData, oldValues:oldRowData };
                     newInstance.data= function(){
                         return this.values;
@@ -395,15 +406,16 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         }
                         return item;
                     };
-                    newInstance.addItemData= function(itemName,newValues,oldValues){
+                    newInstance.addItemData= function(itemName,newValues,oldValues,isChanged){
                         var rowItemData=this[itemName];
                         if(!rowItemData){
-                            rowItemData=new ChangedData(itemName, newValues, oldValues);
+                            rowItemData=new ChangedData(itemName, newValues, oldValues, isChanged);
                             this[itemName]=rowItemData;
                         }
                         return this;
                     };
-                    for(var rowItemName in newRowData) newInstance.addItemData(rowItemName, newRowData, oldRowData);
+                    for(var rowItemName in newRowData)
+                        newInstance.addItemData(rowItemName, newRowData,oldRowData, (changedRowItems)?changedRowItems[rowItemName]:true);
                     return newInstance;
                 }
                 function newChangedRowsData(){
@@ -411,14 +423,14 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     newInstance.insertRowData= function(newRowData,oldRowData){
                         this.unshift(newChangedRowData(newRowData,oldRowData));
                     };
-                    newInstance.addRowData= function(newRowData,oldRowData){
-                        this.push(newChangedRowData(newRowData,oldRowData));
+                    newInstance.addRowData= function(newRowData,oldRowData,changedRowItems){
+                        this.push(newChangedRowData(newRowData,oldRowData,changedRowItems));
                     };
                     return newInstance;
                 }
 
                 var newChangedRowsData= newChangedRowsData();
-                if(newRowData) newChangedRowsData.addRowData(newRowData,oldRowData);
+                if(newRowData) newChangedRowsData.addRowData(newRowData,oldRowData,changedRowItems);
                 return newChangedRowsData;
             },
             /**
@@ -437,7 +449,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     }
                     setTimeout(function(){
                         thisInstance.onChangeRowData(changedRowData,params,function(){
-                            changeRowsDataProcess(i+1,changedRowsData,params,callUpdateContent);       //console.log("HTableEditable.onChangeRowsData rowsCallback for change=",i+1);
+                            changeRowsDataProcess(i+1,changedRowsData,params,callUpdateContent);            //console.log("HTableEditable.onChangeRowsData rowsCallback for change=",i+1);
                         });
                     },1);
                 };
