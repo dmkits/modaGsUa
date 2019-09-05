@@ -200,7 +200,7 @@ module.exports.init = function(app){
          var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];  console.log('/mobile/exc/storeProdDataByCRUniInput req.body',req.body);
          r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
              if(resultFindProd.error){
-                 res.send(resultFindProd);
+                 res.send({error:{error:resultFindProd.error,userMessage:resultFindProd.errorMessage}});
                  return;
              }
              resultFindProd.prodData["SecID"]=req.dbUserParams["t_SecID"];resultFindProd.prodData["NewSecID"]=req.dbUserParams["t_SecID"];

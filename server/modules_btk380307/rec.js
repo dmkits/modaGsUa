@@ -275,9 +275,9 @@ module.exports.init = function(app){
                 "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
                 "ColorName":storeData["ColorName"],"SizeName":storeData["SizeName"],
                 "InRems":1};
-            r_Prods.storeNewProd(req.dbUC,prodData,req.dbUserParams,function(result){
+            r_Prods.storeNewProdWithProdMQandProdPP0(req.dbUC,prodData,req.dbUserParams,function(result){
                 if(!result.resultItem||result.error){
-                    res.send({error:"Failed crate new product! Reason:"+result.error,userErrorMsg:result.userErrorMsg});
+                    res.send({error:"Failed crate new product! Reason:"+result.error,userErrorMsg:result.errorMessage||result.error});
                     return;
                 }
                 prodID=result.resultItem["ProdID"];

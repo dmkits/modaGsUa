@@ -31,19 +31,24 @@ module.exports.init = function(app){
         {data:"CurrID", name:"Код валюты", width:50, type:"text", align:"center", visible:false, dataSource:"t_Rec", sourceField:"CurrID"},
         {data:"CurrName", name:"Валюта", width:70, type:"text", align:"center", visible:false,
             dataSource:"r_Currs", sourceField:"CurrName", linkCondition:"r_Currs.CurrID=t_Rec.CurrID" },
-        //{data:"KursCC", name:"Курс ВС", width:65, type:"numeric", dataSource:"t_Rec", visible:false },
         {data:"TQty", name:"Кол-во", width:75, type:"numeric",
             childDataSource:"t_RecD", childLinkField:"ChID", parentLinkField:"ChID",
             dataFunction:{function:"sumIsNull", source:"t_RecD", sourceField:"Qty"} },
         {data:"TSumCC_wt", name:"Сумма", width:85, type:"numeric2", dataSource:"t_Rec" },
-        {data:"StateCode", name:"StateCode", width:50, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data:"StateName", name:"Статус", width:250, type:"text",
-            dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" },
         {data:"CodeID1", name:"Признак 1", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
         {data:"CodeID2", name:"Признак 2", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
         {data:"CodeID3", name:"Признак 3", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
         {data:"CodeID4", name:"Признак 4", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data:"CodeID5", name:"Признак 5", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"}
+        {data:"CodeID5", name:"Признак 5", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data:"StateCode", name:"StateCode", width:50, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data:"StateName", name:"Статус", width:250, type:"text",
+            dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" },
+        {data:"CanChangeDoc", name:"CanChangeDoc", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"dbo.zf_CanChangeDoc(11002,t_Rec.ChID,t_Rec.StateCode)"},
+        {data:"StateCodeToConfirmCashier", name:"StateCodeToConfirmCashier", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"CASE t_Rec.StateCode When 0 Then 50 When 52 Then 50 Else NULL END"},
+        {data:"StateCodeToConfirmStockManager", name:"StateCodeToConfirmStockManager", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"CASE t_Rec.StateCode When 0 Then 60 When 62 Then 60 Else NULL END"}
     ];
     app.get("/docs/rec/getDataForRecsListTable",function(req,res){
         var conditions={};
@@ -228,7 +233,7 @@ module.exports.init = function(app){
             });
     };
     /**
-     * callback = function(result), result = { resultItem, error, userMessage }
+     * callback = function(result), result = { resultItem, error,errorMessage }
      */
     t_RecD.storeRecD=function(connection,prodID,storeData,dbUserParams,callback){
         var parentChID=storeData["ParentChID"]||storeData["ChID"];
@@ -249,13 +254,11 @@ module.exports.init = function(app){
                             callback(params);
                         }},
                     function(result){
-                        if(result.error) {
+                        if(result.error){
                             r_Prods.delete(connection,prodID);
-                            var sErr=result.error.error||result.error||"", sErrUM=result.error.userMessage||sErr||"";
-                            result.error={error:sErr};
-                            if(sErrUM)result.error.userMessage=sErrUM;
-                            if(sErr.indexOf("Violation of PRIMARY KEY constraint '_pk_t_RecD'")>=0)
-                                result.error.userMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером."
+                            result.errorMessage= "Не удалось сохранить строку в документ \"Приход товара\"!";
+                            if(result.error.indexOf("Violation of PRIMARY KEY constraint '_pk_t_RecD'")>=0)
+                                result.errorMessage= "Некорректный номер позиции в документе \"Приход товара\"!\n В документе уже есть позиция с таким номером."
                         }
                         callback(result);
                     });
@@ -263,34 +266,30 @@ module.exports.init = function(app){
         });
     };
     app.post("/docs/rec/storeRecDTableData",function(req,res){
-        var storeData=req.body, prodID=storeData["ProdID"];
-        if(prodID===undefined||prodID===null||prodID.trim()==""){
-            var prodData={"ProdName":storeData["ProdName"], "UM":storeData["UM"], "Article1":storeData["Article1"],
-                "Country":storeData["Country"], "Notes":storeData["ProdName"],
-                "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
-                "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
-                "InRems":1};
-            r_Prods.storeNewProd(req.dbUC,prodData,req.dbUserParams,function(result){
-                if(!result.resultItem||result.error){
-                    var storeNewProdErr=result.error||{};
-                    res.send({error:{error:"Failed create new product! Reason:"+(storeNewProdErr.error||storeNewProdErr),userMessage:storeNewProdErr.userMessage}});
-                    return;
-                }
-                prodID=result.resultItem["ProdID"];
-                storeData["ProdID"]=prodID; storeData["Barcode"]=result.resultItem["Barcode"];
-                t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
-                    res.send(result);
-                });
+        var storeData=req.body,
+            prodData={"ProdID":storeData["ProdID"], "ProdName":storeData["ProdName"], "UM":storeData["UM"],
+            "Article1":storeData["Article1"],
+            "Country":storeData["Country"], "Notes":storeData["ProdName"],
+            "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
+            "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
+            "InRems":1,"Barcode":storeData["Barcode"]};
+        r_Prods.checkAndStoreNewProdIfNotExists(req.dbUC,prodData,req.dbUserParams,function(result){
+            if(result&&result.error){
+                res.send({error:{error:result.error,userMessage:result.errorMessage||result.error}});
+                return;
+            }
+            var prodID= result.resultItem["ProdID"], iProdID=parseInt(prodID);
+            storeData["ProdID"]= prodID;
+            storeData["ProdName"]= result.resultItem["ProdName"];
+            storeData["UM"]= result.resultItem["UM"];
+            storeData["Barcode"]= result.resultItem["Barcode"];
+            if(isNaN(iProdID)){
+                res.send({error:"Non correct ProdID!",userMessage:"Не корректный код товара!"});
+                return;
+            }
+            t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
+                res.send(result);
             });
-            return;
-        }
-        var iProdID=parseInt(prodID);
-        if(isNaN(iProdID)){
-            res.send({error:"Non correct ProdID!",userMessage:"Не корректный код товара!"});
-            return;
-        }
-        t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
-            res.send(result);
         });
     });
     app.post("/docs/rec/deleteRecDTableData",function(req,res){

@@ -225,7 +225,7 @@ module.exports.init = function(app){
     /**
      * callback = function(result), result = { resultItem, error, userErrorMsg }
      */
-    t_ExcD.storeRecD=function(connection,prodID,storeData,dbUserParams,callback){
+    t_ExcD.storeExcD=function(connection,prodID,storeData,dbUserParams,callback){
         var parentChID=storeData["ParentChID"]||storeData["ChID"];
         t_ExcD.storeNewProdPP(connection,prodID,parentChID,storeData,function(resultStorePP){
             if(resultStorePP.error){
@@ -255,32 +255,12 @@ module.exports.init = function(app){
     };
     app.post("/docs/exc/storeExcDTableData", function(req, res){
         var storeData=req.body, prodID=storeData["ProdID"];
-        if(prodID===undefined||prodID===null){
-            var prodData={"ProdName":storeData["ProdName"], "UM":storeData["UM"], "Article1":storeData["Article1"],
-                "Country":storeData["Country"], "Notes":storeData["ProdName"],
-                "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
-                "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
-                "ColorName":storeData["ColorName"],"SizeName":storeData["SizeName"],
-                "InRems":1};
-            r_Prods.storeNewProd(req.dbUC,prodData,req.dbUserParams,function(result){
-                if(!result.resultItem||result.error){
-                    res.send({error:"Failed crate new product! Reason:"+result.error,userErrorMsg:result.userErrorMsg});
-                    return;
-                }
-                prodID=result.resultItem["ProdID"];
-                storeData["ProdID"]=prodID; storeData["Barcode"]=result.resultItem["Barcode"];
-                t_ExcD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
-                    res.send(result);
-                });
-            });
-            return;
-        }
         var iProdID=parseInt(prodID);
-        if(isNaN(iProdID)){
+        if(prodID===undefined||prodID===null||isNaN(iProdID)){
             res.send({error:"Non correct ProdID!",userErrorMsg:"Не корректный код товара!"});
             return;
         }
-        t_ExcD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
+        t_ExcD.storeExcD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
             res.send(result);
         });
     });

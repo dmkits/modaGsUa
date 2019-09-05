@@ -19,8 +19,7 @@
                 getDataForNewUrl:"/docs/rec/getNewRecData", postDataUrl:"/docs/rec/storeRecData", postForDeleteDataUrl:"/docs/rec/deleteRecData",
                 docDetailEditable:function(params){
                     if(!params||!params.detailHeaderContentData) return false;
-                    var stateCode=params.detailHeaderContentData["StateCode"];
-                    return stateCode==0;
+                    return params.detailHeaderContentData["CanChangeDoc"];
                 }
             })
             .addDetailHeaderTitle({title:"Приход товара",
@@ -65,17 +64,81 @@
             .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableSelectedRow"})
             .addToolPaneActionButton("Сохранить строку", {btnStyle:"width:200px;", actionButtonName:"storeDetailTableSelectedRow"})
             .addToolPaneActionButton("Удалить строку", {btnStyle:"width:200px;", actionButtonName:"deleteDetailTableSelectedRow"})
-//                        .addToolPane({title:"Статус документа"})
-//                        .addToolPaneActionButton("Установить статус \"Закрыт\"", { btnStyle:"width:200px;",
-//                            actionFunction: function (params) {
-//                                var pinvId =  params.thisInstance.detailHeader.data.ID;    console.log("pinvId=",pinvId);
-//                                Request.postJSONData({url: "/wrh/pInvoices/closePInv", data: {"PINV_ID": pinvId}},
-//                                    function(result){
-//                                        params.thisInstance.setDetailHeaderContentByListSelectedRow(wrh_pinv.detailHeader.lastContentData, {reloadData:true, clearBeforeLoad:true});
-//                                });
-//                            }
-//                        })
-//                        .addToolPaneActionButton("Установить статус \"В работе\"", {btnStyle:"width:200px;"})
+            .addToolPane({title:"Статус"})
+            .addToolPaneActionButton("В статус <br>\"На подтверждении в магазине\"", {btnStyle:"width:200px;",
+                actionFunction:function(ap){
+                    var detailHeaderContentData= ap.detailHeader.getContentData();
+                    if(!detailHeaderContentData){ this.setDisabled(true); return; }
+                    var docStateData= {"StateCode":detailHeaderContentData["StateCode"],"StateName":detailHeaderContentData["StateName"]},
+                            stateCodeCashierConfirm= detailHeaderContentData["StateCodeCashierConfirm"],
+                            detailHeaderContentChangedData= {"StateCode":stateCodeCashierConfirm};
+                    $$.request.getJSONData({url:"/dirsDocs/getDirStateData", resultItemName:"item",
+                                conditions:{"StateCode":detailHeaderContentChangedData["StateCode"]+""},
+                                errorDialogMsg:"Не удалось получить данные для перевода документа в статус "+stateCodeCashierConfirm+"!"},
+                            function(result,error){
+                                if(!result||error)return;
+                                var newStateName= result["StateName"];
+                                detailHeaderContentChangedData["StateName"]= newStateName;
+                                ap.detailHeader.setContentDataItems(detailHeaderContentChangedData,{onlyValues:true,callContentUpdated:true});
+                                $$.request.postJSONData({url:"/docs/excCashier/updExcDataState", resultItemName:"resultItem",
+                                            data:{"ChID":detailHeaderContentData["ChID"],"StateCode":detailHeaderContentChangedData["StateCode"]},
+                                            errorDialogMsg:"Не удалось перевести документ в статус \""+newStateName+"\" ("+stateCodeCashierConfirm+")!"},
+                                        function(result,error){
+                                            if(!result||error){
+                                                ap.detailHeader.setContentDataItems(docStateData,{onlyValues:false,callContentUpdated:true});
+                                                return;
+                                            }
+                                            ap.detailHeader.setContentDataItems({"StateCode":result["StateCode"],"StateName":result["StateName"]},
+                                                    {onlyValues:false,callContentUpdated:true,updatedResultItem:detailHeaderContentChangedData});
+                                        });
+                            });
+                },
+                actionStateFunction:function(ap){
+                    var detailHeaderContentData= ap.detailHeader.getContentData();
+                    if(detailHeaderContentData && !ap.detailHeader.isContentChanged()
+                            && ap.thisDoc.detailTableEditableChecker() && ap.detailHTable.getContent().length>0)
+                        this.setDisabled(false);
+                    else
+                        this.setDisabled(true);
+                }
+            })
+            .addToolPaneActionButton("В статус <br>\"На подтверждении на складе\"", {btnStyle:"width:200px;",
+                actionFunction:function(ap){
+                    var detailHeaderContentData= ap.detailHeader.getContentData();
+                    if(!detailHeaderContentData){ this.setDisabled(true); return; }
+                    var docStateData= {"StateCode":detailHeaderContentData["StateCode"],"StateName":detailHeaderContentData["StateName"]},
+                            stateCodeCashierRetrieve= detailHeaderContentData["StateCodeCashierRetrieve"],
+                            detailHeaderContentChangedData= {"StateCode":stateCodeCashierRetrieve};
+                    $$.request.getJSONData({url:"/dirsDocs/getDirStateData", resultItemName:"item",
+                                conditions:{"StateCode":detailHeaderContentChangedData["StateCode"]+""},
+                                errorDialogMsg:"Не удалось получить данные для перевода документа в статус "+stateCodeCashierRetrieve+"!"},
+                            function(result,error){
+                                if(!result||error)return;
+                                var newStateName= result["StateName"];
+                                detailHeaderContentChangedData["StateName"]= newStateName;
+                                ap.detailHeader.setContentDataItems(detailHeaderContentChangedData,{onlyValues:true,callContentUpdated:true});
+                                $$.request.postJSONData({url:"/docs/excCashier/updExcDataState", resultItemName:"resultItem",
+                                            data:{"ChID":detailHeaderContentData["ChID"],"StateCode":detailHeaderContentChangedData["StateCode"]},
+                                            errorDialogMsg:"Не удалось перевести документ в статус \""+newStateName+"\" ("+stateCodeCashierRetrieve+")!"},
+                                        function(result,error){
+                                            if(!result||error){
+                                                ap.detailHeader.setContentDataItems(docStateData,{onlyValues:false,callContentUpdated:true});
+                                                return;
+                                            }
+                                            ap.detailHeader.setContentDataItems({"StateCode":result["StateCode"],"StateName":result["StateName"]},
+                                                    {onlyValues:false,callContentUpdated:true,updatedResultItem:detailHeaderContentChangedData});
+                                        });
+                            });
+                },
+                actionStateFunction:function(ap){
+                    var detailHeaderContentData= ap.detailHeader.getContentData();
+                    if(detailHeaderContentData && !ap.detailHeader.isContentChanged()
+                            && ap.thisDoc.detailTableEditableChecker())
+                        this.setDisabled(false);
+                    else
+                        this.setDisabled(true);
+                }
+            })
             .addDetailTableMenuItemAction("Добавить строки",{action:"insertDetailTableRowsAfterSelected",rowPosName:"POS"})//rowPosIndexName:"POSIND"
             .addDetailTableMenuItemAction("Изменить строки",{action:"allowEditDetailTableSelectedRows"})
             .addDetailTableMenuItemAction("Сохранить строки",{action:"storeDetailTableSelectedRows"})
@@ -130,15 +193,20 @@
 //                nextCallback();
 //            })
             .addDetailTableRowChangeAction(function(crd/*changedRowData*/, detailTable, thisInstance, nextCallback) {
-                if( (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
+                if( (crd.item("Barcode").isChanged()&&!crd.item("Barcode").isEMPTY())
+                        || (crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
                         || (crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY()) ){
                     var conditions={};
+                    if(crd.item("Barcode").isChanged()&&!crd.item("Barcode").isEMPTY())
+                        conditions["Barcode"]= crd.item("Barcode").getValue();
                     if(crd.item("ProdID").isChanged()&&!crd.item("ProdID").isEMPTY())
                         conditions["ProdID"]= crd.item("ProdID").getValue();
                     if(crd.item("ProdName").isChanged()&&!crd.item("ProdName").isEMPTY())
                         conditions["ProdName"]= encodeURIComponent(crd.item("ProdName").getValue());
-                    $$.request.getJSONData({url:"/dirsProds/getProdDataByIDName", conditions:conditions},
+                    $$.request.getJSONData({url:"/dirsProds/getProdDataByProdBarcodeIDName", conditions:conditions, showErrorDialog:false},
                             function(result){
+                                if(result&&result.error)
+                                    console.error("FAILED getProdDataByProdBarcodeIDName! Reason:",(result.error.error||result.error),(result.error.userMessage||""));
                                 if(!result||!result.item){ nextCallback(); return; }
                                 thisInstance.setDetailTableProdData(crd,result.item);
                                 thisInstance.setDetailTableProdAttrs(crd,result.item);

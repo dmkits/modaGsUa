@@ -191,41 +191,41 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-    t_ExcD.setRecDTaxPriceCCnt=function(connection,prodID,recChID,recDData,callback){
-        database.selectParamsQuery(connection,
-            "select tax=dbo.zf_GetProdRecTax(@p0,OurID,CompID,DocDate) from t_Exc where ChID=@p1",[prodID,recChID],
-            function (result) {/* Возвращает ставку НДС для товара в зависимости от поставщика */
-                var tax=(result&&result.length>0)?result[0]["tax"]:0;
-                recDData["Tax"]=tax; recDData["PriceCC_nt"]=recDData["PriceCC_wt"]-tax;
-                var qty=recDData["Qty"];
-                recDData["TaxSum"]=tax*qty; recDData["SumCC_nt"]=recDData["SumCC_wt"]-tax*qty;
-                callback(recDData);
-            });
-    };
-    /**
-     * callback = function(result), result= { resultItem, error, userErrorMsg }
-     */
-    t_ExcD.storeNewProdPP=function(connection,prodID,recChID,recDData,callback){
-        t_Exc.getDataItem(connection,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
-            function(result){
-                if(result.error||!result.item){
-                    callback({error:"Failed get rec data for create prod PP!"});
-                    return;
-                }
-                var recData=result.item, priceCC_wt=recDData["PriceCC_wt"];
-                r_Prods.storeProdPP(connection,
-                    {"ProdID":prodID,"ProdDate":recData["DocDate"],"CompID":recData["CompID"],"Article":"",
-                        "PriceCC_In":priceCC_wt,"CostCC":priceCC_wt,"PriceMC":priceCC_wt,
-                        "CurrID":recData["CurrID"], "PriceMC_In":priceCC_wt,"CostAC":priceCC_wt},
-                    function(result){
-                        callback(result);
-                    });
-            });
-    };
+    //t_ExcD.setExcDTaxPriceCCnt=function(connection,prodID,recChID,recDData,callback){
+    //    database.selectParamsQuery(connection,
+    //        "select tax=dbo.zf_GetProdRecTax(@p0,OurID,CompID,DocDate) from t_Exc where ChID=@p1",[prodID,recChID],
+    //        function (result) {/* Возвращает ставку НДС для товара в зависимости от поставщика */
+    //            var tax=(result&&result.length>0)?result[0]["tax"]:0;
+    //            recDData["Tax"]=tax; recDData["PriceCC_nt"]=recDData["PriceCC_wt"]-tax;
+    //            var qty=recDData["Qty"];
+    //            recDData["TaxSum"]=tax*qty; recDData["SumCC_nt"]=recDData["SumCC_wt"]-tax*qty;
+    //            callback(recDData);
+    //        });
+    //};
+    ///**
+    // * callback = function(result), result= { resultItem, error, userErrorMsg }
+    // */
+    //t_ExcD.storeNewProdPP=function(connection,prodID,recChID,recDData,callback){
+    //    t_Exc.getDataItem(connection,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
+    //        function(result){
+    //            if(result.error||!result.item){
+    //                callback({error:"Failed get rec data for create prod PP!"});
+    //                return;
+    //            }
+    //            var recData=result.item, priceCC_wt=recDData["PriceCC_wt"];
+    //            r_Prods.storeProdPP(connection,
+    //                {"ProdID":prodID,"ProdDate":recData["DocDate"],"CompID":recData["CompID"],"Article":"",
+    //                    "PriceCC_In":priceCC_wt,"CostCC":priceCC_wt,"PriceMC":priceCC_wt,
+    //                    "CurrID":recData["CurrID"], "PriceMC_In":priceCC_wt,"CostAC":priceCC_wt},
+    //                function(result){
+    //                    callback(result);
+    //                });
+    //        });
+    //};
     /**
      * callback = function(result), result = { resultItem, error, userErrorMsg }
      */
-    t_ExcD.storeRecD=function(connection,prodID,storeData,dbUserParams,callback){
+    t_ExcD.storeExcD=function(connection,prodID,storeData,dbUserParams,callback){
         var parentChID=storeData["ParentChID"]||storeData["ChID"];
         t_ExcD.storeNewProdPP(connection,prodID,parentChID,storeData,function(resultStorePP){
             if(resultStorePP.error){
@@ -235,7 +235,7 @@ module.exports.init = function(app){
             }
             storeData["PPID"]=resultStorePP.resultItem["PPID"];
             storeData["SecID"]=dbUserParams["t_SecID"];
-            t_ExcD.setRecDTaxPriceCCnt(connection,prodID,parentChID,storeData,function(storeData){
+            t_ExcD.setExcDTaxPriceCCnt(connection,prodID,parentChID,storeData,function(storeData){
                 storeData["CostCC"]=storeData["PriceCC_wt"]; storeData["CostSum"]=storeData["SumCC_wt"];
                 t_ExcD.storeTableDataItem(connection,{tableColumns:tRecDTableColumns, idFields:["ChID","SrcPosID"],storeTableData:storeData,
                         calcNewIDValue: function(params, callback){
@@ -255,32 +255,12 @@ module.exports.init = function(app){
     };
     app.post("/docs/exc/storeExcDTableData", function(req, res){
         var storeData=req.body, prodID=storeData["ProdID"];
-        if(prodID===undefined||prodID===null){
-            var prodData={"ProdName":storeData["ProdName"], "UM":storeData["UM"], "Article1":storeData["Article1"],
-                "Country":storeData["Country"], "Notes":storeData["ProdName"],
-                "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
-                "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
-                "ColorName":storeData["ColorName"],"SizeName":storeData["SizeName"],
-                "InRems":1};
-            r_Prods.storeNewProd(req.dbUC,prodData,req.dbUserParams,function(result){
-                if(!result.resultItem||result.error){
-                    res.send({error:"Failed crate new product! Reason:"+result.error,userErrorMsg:result.userErrorMsg});
-                    return;
-                }
-                prodID=result.resultItem["ProdID"];
-                storeData["ProdID"]=prodID; storeData["Barcode"]=result.resultItem["Barcode"];
-                t_ExcD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
-                    res.send(result);
-                });
-            });
-            return;
-        }
         var iProdID=parseInt(prodID);
         if(isNaN(iProdID)){
-            res.send({error:"Non correct ProdID!",userErrorMsg:"Не корректный код товара!"});
+            res.send({error:"Non correct ProdID!",userMessage:"Не корректный код товара!"});
             return;
         }
-        t_ExcD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
+        t_ExcD.storeExcD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
             res.send(result);
         });
     });

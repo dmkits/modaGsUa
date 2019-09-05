@@ -222,8 +222,7 @@ module.exports.init = function(app){
     //     var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];  console.log('req.body',req.body);
     //     r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
     //         if(resultFindProd.error){
-    //             res.send(resultFindProd);
-    //             return;
+    //             res.send({error:{error:resultFindProd.error,userMessage:resultFindProd.errorMessage}});
     //         }
     //         t_VenA.storeVenAProdData(req.dbUC,parentChID,resultFindProd.prodData,storingData["TNewQty"],function (result){
     //             res.send(result);
