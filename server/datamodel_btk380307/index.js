@@ -942,20 +942,23 @@ function _insDataItem(connection, params, resultCallback){
     });
 }
 /**
- * callback = function(params)
+ * params = { tableName, idFieldName,
+ *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
+ * }
+ * callback = function(result,params), result= { data, error,errorMessage }
  */
-function _calcNewIDValueOnInsDataItemWithNewID(params, callback){
+function _calcNewIDValueOnInsDataItemWithNewID(params,callback){
     if(params.insData&&params.idFieldName) params.insData[params.idFieldName]=common.getUIDNumber();
-    callback(params);
+    callback({data:params.insData},params);
 }
 /**
  * params = { tableName, idFieldName,
  *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
- *      calcNewIDValue = function(params, callback), callback= function(params)
+ *      calcNewIDValue = function(params,callback), callback= function(result,params), result= { data, error }
  * }
- * resultCallback = function(result), result = { updateCount, error }
+ * resultCallback = function(result), result = { updateCount, error,errorMessage }
  */
-function _insDataItemWithNewID(connection, params, resultCallback){
+function _insDataItemWithNewID(connection,params,resultCallback){
     if(!params){                                                                                                log.error("FAILED _insDataItemWithNewID! Reason: no parameters!");//test
         resultCallback({error:"Failed insert data item with new ID! Reason:no function parameters!"});
         return;
@@ -967,7 +970,16 @@ function _insDataItemWithNewID(connection, params, resultCallback){
     }
     if(!params.calcNewIDValue) params.calcNewIDValue= this.calcNewIDValueOnInsDataItemWithNewID;
     var thisInstance=this;
-    params.calcNewIDValue(params, function(params){
+    params.calcNewIDValue(params, function(result,params){
+        if(!result||!result.data){                                                                              log.error("FAILED _insDataItemWithNewID calcNewIDValue"+params.tableName+"! Reason: no result of calcNewIDValue!");//test
+            resultCallback({error:"Failed calc new ID value! Reason: no calc result."});
+            return;
+        }
+        if(result.error){                                                                                       log.error("FAILED _insDataItemWithNewID calcNewIDValue"+params.tableName+"! Reason:"+result.error);//test
+            resultCallback({error:result.error,errorMessage:result.errorMessage});
+            return;
+        }
+        params.insData= result.data;//equals
         thisInstance.insDataItem(connection, {tableName:params.tableName, insData:params.insData}, function(result){
             if(result&&result.updateCount>0) result.resultItem= params.insData;
             resultCallback(result);
