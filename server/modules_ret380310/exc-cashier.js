@@ -72,7 +72,7 @@ module.exports.init = function(app){
                 calback(empOperStocksLists);
             });
     };
-    app.get("/docs/excCashier/getDataForExcsListTable", function(req,res){
+    app.get("/docs/excCashier/getDataForExcsListTable",function(req,res){
         var conditions= {};
         for(var condItem in req.query) conditions["t_Exc."+condItem]=req.query[condItem];
         r_Stocks.getEmpOperStocksList(req.dbUC,req.dbUserParams["EmpID"],function(empOperStocksLists){
@@ -85,7 +85,7 @@ module.exports.init = function(app){
                 });
         });
     });
-    app.get("/docs/excCashier/getExcData", function(req, res){
+    app.get("/docs/excCashier/getExcData",function(req,res){
         var conditions= {};
         for(var condItem in req.query) conditions["t_Exc."+condItem]=req.query[condItem];
         t_Exc.getDataItemForTable(req.dbUC,{tableColumns:tExcsListTableColumns,
@@ -94,7 +94,7 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-    app.post("/docs/excCashier/updExcDataState", function(req, res){
+    app.post("/docs/excCashier/updExcDataState",function(req,res){
         var storeData=req.body, chID=storeData["ChID"];
         if(!chID){
             res.send({error:"Non correct ChID!",userErrorMsg:"Не корректные данные сохраняемого документа (код регистрации)!"});
@@ -132,7 +132,7 @@ module.exports.init = function(app){
         {data:"SumCC", name:"Сумма", width:75, type:"numeric2", dataSource:"t_ExcD",sourceField:"SumCC_wt", readOnly:true},
         {data:"NewSumCC", name:"Факт. сумма", width:75, type:"numeric2", dataFunction:"t_ExcD.NewQty*t_ExcD.PriceCC_wt", readOnly:true}
     ];
-    app.get("/docs/excCashier/getDataForExcDTable", function(req, res){
+    app.get("/docs/excCashier/getDataForExcDTable",function(req,res){
         var conditions={};
         for(var condItem in req.query)
             if(condItem.indexOf("ParentChID")==0) conditions["t_ExcD.ChID="]=req.query[condItem];

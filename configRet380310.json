@@ -1,8 +1,8 @@
 {
   "title":"ZAODNO.UA",
-  "icon32x32":"/imgs/logoZ-small-pageTitle.jpg",
-  "imageSmall":"/imgs/logoZ-small-pageTitle.jpg",
-  "imageMain":"/imgs/logoZ-small-pageTitle.jpg",
+  "icon32x32":"/imgs/logoZ-red-ico32.gif",
+  "imageSmall":"/imgs/logoZ-red-2-pageTitle.jpg",
+  "imageMain":"/imgs/logoZ-red-2.jpg",
   "modules":[
     "sysadmin",
     "print",
@@ -11,12 +11,12 @@
     "dirsCommon",
     "dirsForDocs",
     "dirsForProds",
-    "rec"
+    "rec",
     /*"exc",*/
     /*"exc-cashier",*/
     /*"mainPage",*/
-    /*"reportsProds",
-    "reportsCashier"*/
+    "reportsProds",
+    "reportsCashier"
     /*"mobile",
     "mobileVen",
     "mobileExc",

@@ -155,6 +155,18 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
+    app.post("/docs/rec/updRecDataState",function(req,res){
+        var storeData=req.body, chID=storeData["ChID"];
+        if(!chID){
+            res.send({error:"Non correct ChID!",userErrorMsg:"Не корректные данные сохраняемого документа (код регистрации)!"});
+            return;
+        }
+        t_Rec.updTableDataItem(req.dbUC,{tableColumns:tRecsListTableColumns, idFieldName:"ChID",
+                updFileds:["StateCode"], updTableData:{"ChID":chID,"StateCode":storeData["StateCode"]}},
+            function(result){
+                res.send(result);
+            });
+    });
 
     var tRecDTableColumns=[
         {data:"ChID", name:"ChID", width:85, type:"text", dataSource:"t_RecD", identifier:true, readOnly:true, visible:false},
