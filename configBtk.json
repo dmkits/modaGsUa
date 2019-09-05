@@ -1,8 +1,8 @@
 {
   "title":"GABIS.UA",
   "icon32x32":"/imgs/logoGS-red-min-whiteBG-ico32.jpg",
-  "imageSmall":"/imgs/logo red-small.jpg",
-  "imageMain":"/imgs/logo red-small.jpg",
+  "imageSmall":"/imgs/logoGS-red-small-pageTitle.jpg",
+  "imageMain":"/imgs/logoGS-red-small-pageTitle.jpg",
   "modules":[
     "sysadmin",
     "print",

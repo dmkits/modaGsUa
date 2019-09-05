@@ -1,8 +1,8 @@
 {
   "title":"ZAODNO.UA",
-  "icon32x32":"/imgs/logoGS-red-min-whiteBG-ico32.jpg",
-  "imageSmall":"/imgs/logo red-small.jpg",
-  "imageMain":"/imgs/logo red-small.jpg",
+  "icon32x32":"/imgs/logoZ-small-pageTitle.jpg",
+  "imageSmall":"/imgs/logoZ-small-pageTitle.jpg",
+  "imageMain":"/imgs/logoZ-small-pageTitle.jpg",
   "modules":[
     "sysadmin",
     "print",
