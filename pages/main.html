@@ -13,9 +13,6 @@
     <link rel="stylesheet" type="text/css" href="/css/main.css" media="screen">
     <link rel="stylesheet" type="text/css" href="/css/main_nie.css">
     <!--<![endif]-->
-    <!--<script src="/jslib/handsontable-0.29.1/numbro/languages/ru-RU.min.js"></script>-->
-    <!--<script src="/jslib/handsontable-0.29.1/moment/moment.js"></script>-->
-    <!--<script src="/jslib/handsontable-0.29.1/moment/locale/ru.js"></script>-->
     <link rel="stylesheet" type="text/css" href="/css/contentController.css" media="screen">
     <script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>
     <title>MAIN</title>
@@ -31,65 +28,52 @@
             <span id="main_configName" style="margin-left:10px;"></span>
             <span id="sysadmin_appUser" style="margin-left:10px;"></span>
             <span id="main_dbEmpName" style="margin-left:10px;"></span>
-
         </ContentPane>
     </BorderContainer>
     <TabContainer id="main_tabs" region="center" tabPosition="top" class="mainContent"></TabContainer>
 </page>
 </body>
 <script type="text/javascript"> $app.dev(true);
-    $app.startup("#main_page",function(){                                                                   log("START MAIN PAGE...",$$);//!!!IT'S FOR TESTING!!!
+    $app.startup("#main_page",function(){                                                                       log("START MAIN PAGE...",$$);//!!!IT'S FOR TESTING!!!
         function setBrending(appConfig){
             if(appConfig.title) document.title=appConfig.title;
-            if(appConfig.icon32x32)changeFavicon(appConfig.icon32x32);
-            if(appConfig.imageSmall)$$.main_topImg.set("style","background-image: url(\""+appConfig.imageSmall+"\")");
+            if(appConfig.icon32x32) changeFavicon(appConfig.icon32x32);
+            if(appConfig.imageSmall) $$.main_topImg.set("style","background-image: url(\""+appConfig.imageSmall+"\")");
         }
         function changeFavicon(src){
             document.head = document.head || document.getElementsByTagName('head')[0];
-            var link = document.createElement('link'),
-                    oldLink = document.getElementById('dynamic-favicon');
-            link.id = 'dynamic-favicon';link.rel = 'shortcut icon';link.href = src;
-            if(oldLink)document.head.removeChild(oldLink);
+            var link= document.createElement('link'), oldLink= document.getElementById('dynamic-favicon');
+            link.id= 'dynamic-favicon'; link.rel= 'shortcut icon'; link.href= src;
+            if(oldLink) document.head.removeChild(oldLink);
             document.head.appendChild(link);
         }
-        var updateMainState = function(result,error){
+        var updateMainState= function(result,error){
             $$.main_stateFail.innerHTML="";
             if(error||!result){
                 error=error||{message:"NO DATA FROM SERVER!"};
                 $$.main_page.mainContentData = {error:error};
                 $$.main_stateFail.innerHTML='<b>FAILED: </b><span style="color:red">'+error.message+'</span>';
-            }else{
-                $$.main_page.mainContentData = result;
-                $$.main_modeName.innerHTML = "<b>Режим приложения:</b> ";
-                var sDBUserPostfix="";
-                if(result.mode){
-                    sDBUserPostfix=" ["+result.mode+"]";
-                    var sMode=result.mode.toString().toLocaleLowerCase();
-                    if(sMode.indexOf("test")>=0||sMode.indexOf("debug")>=0)
-                        $$.main_modeName.innerHTML+= "<b style='color:red'>"+result.mode+"</b>";
-                    else if(sMode.indexOf("production")>=0)
-                        $$.main_modeName.innerHTML= "";
-                    $$.main_modeName.setAttribute("title",result.mode);
-                }else{
-                    sDBUserPostfix=" [UNKNOWN MODE]";
-                    $$.main_modeName.innerHTML += "<b>UNKNOWN!!!</b>";
-                    $$.main_modeName.setAttribute("title","UNKNOWN!");
-                }
-                $$.sysadmin_appUser.innerHTML="<b>Пользователь: <span style='color:dimgrey'>"+result.dbUserName;
-                $$.sysadmin_appUser.setAttribute("title",result.dbUserName+sDBUserPostfix);
-//                if(!result.sysConfig)result.sysConfig={};
-//                var dbSysConnState=(result.dbSysConnErr)
-//                        ?'<span style="color:red">'+result.dbSysConnErr+'</span>'
-//                        :'<span style="color:dimgrey">Connected</span>';
-////                $$.sysadmin_dbConnectionState.innerHTML ='<b>DB SYSTEM CONNECTION STATE: '+dbSysConnState+'</b>';
-////                $$.sysadmin_dbConnectionState.setAttribute("title",result.dbSysConnErr||"Connected");
-//                var dbValidState=(result.dbValidationErr)
-//                        ?'<span style="color:red">'+result.dbValidationErr+'</span>'
-//                        :'<span style="color:dimgrey">'+result.dbValidation+'</span>';
-////                $$.sysadmin_dbValidateState.innerHTML ='<b>DB VALIDATION STATE: '+dbValidState+'</b>';
-////                $$.sysadmin_dbValidateState.setAttribute("title",result.dbValidationErr||result.dbValidation);
-                setBrending(result.appConfig);
+                return;
             }
+            $$.main_page.mainContentData= result;
+            $$.main_modeName.innerHTML= "<b>Режим приложения:</b> ";
+            var sDBUserPostfix="";
+            if(result.mode){
+                sDBUserPostfix= " ["+result.mode+"]";
+                var sMode=result.mode.toString().toLocaleLowerCase();
+                if(sMode.indexOf("test")>=0||sMode.indexOf("debug")>=0)
+                    $$.main_modeName.innerHTML+= "<b style='color:red'>"+result.mode+"</b>";
+                else if(sMode.indexOf("production")>=0)
+                    $$.main_modeName.innerHTML= "";
+                $$.main_modeName.setAttribute("title",result.mode);
+            }else{
+                sDBUserPostfix= " [UNKNOWN MODE]";
+                $$.main_modeName.innerHTML+= "<b>UNKNOWN!!!</b>";
+                $$.main_modeName.setAttribute("title","UNKNOWN!");
+            }
+            $$.sysadmin_appUser.innerHTML= "<b>Пользователь: <span style='color:dimgrey'>"+result.dbUserName;
+            $$.sysadmin_appUser.setAttribute("title",result.dbUserName+sDBUserPostfix);
+            setBrending(result.appConfig);
         };
         var closeAction= function(menuItemData){
             $$.main_mainMenu.destroy(); $$.main_tabs.destroy();
@@ -101,10 +85,10 @@
                     return;
                 }
                 var cookies = document.cookie.split(";");
-                for(var i = 0; i < cookies.length; i++){
-                    var cookie = cookies[i], eqPos = cookie.indexOf("="),
-                            name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                for(var i=0; i<cookies.length; i++){
+                    var cookie= cookies[i], eqPos = cookie.indexOf("="),
+                            name= eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie= name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
                 }
                 exitContent= "<div>Вы закрыли все окна.</div>";
                 $$.main_page.$.addInnerPage({region:"center", title:menuItemData.menuTitle, closable:false, style:"margin:0;padding:0;",content:exitContent});
@@ -117,56 +101,54 @@
             });
         };
         var runMenuAction= function(itemData){
-            var mainTabs=$$.main_tabs;                                                                              //console.log("mainTabs=",mainTabs);
+            var mainTabs=$$.main_tabs;
             if(itemData.action=="close"){ closeAction(itemData); return; }
             else if(itemData.action=="help_about"){ aboutAction(itemData); return; }
-            var iPageName="innerPage_"+itemData.menuItemName, iPageInstance=mainTabs.$.cid(iPageName);            //console.log(menuItem.id+" "+menuItem.label+" click iPageInstance=",iPageInstance);
+            var iPageName="innerPage_"+itemData.menuItemName, iPageInstance=mainTabs.$.cid(iPageName);
             if(!iPageInstance){
                 mainTabs.$.addInnerPage({id:iPageName, title:itemData.pageTitle, region:"center",style:"margin:0;padding:0;",
                             closable:itemData.closable, href:itemData.contentHref
                         },
                         function(innerPage){
-                            iPageInstance=mainTabs[iPageName]=innerPage;
+                            iPageInstance= mainTabs[iPageName]=innerPage;
                         });
             }
-            var ch=mainTabs.selectChild(iPageName);
+            var ch= mainTabs.selectChild(iPageName);
         };
-        var createMainMenu = function(mainMenuData){                                                        //console.log("mainMenuData",mainMenuData);
-            var menuClickAddInnerPage=function(menuItem,e){                                                 //console.log(menuItem.id+" "+menuItem.label+" click",menuItem,e);
+        var createMainMenu= function(mainMenuData){
+            var menuClickAddInnerPage= function(menuItem,e){
                 runMenuAction(menuItem.itemData);
             };
             var mainMenu=$$.main_mainMenu;
-            for(var i in mainMenuData) {
-                var mainMenuDataItem=mainMenuData[i];
-                if(!mainMenuDataItem.popupMenu||mainMenuDataItem.popupMenu.length==0){                     //console.log("mainMenuDataItem",mainMenuDataItem);
-                    mainMenu.$.addMenu("MenuBarItem", {id:mainMenuDataItem.menuItemName,label:mainMenuDataItem.menuTitle, itemData:mainMenuDataItem,
+            for(var i in mainMenuData){
+                var mainMenuDataItem= mainMenuData[i];
+                if(!mainMenuDataItem.popupMenu||mainMenuDataItem.popupMenu.length==0){
+                    mainMenu.$.addMenu("MenuBarItem", {id:mainMenuDataItem.menuItemName,label:mainMenuDataItem.menuTitle,itemData:mainMenuDataItem,
                         click:menuClickAddInnerPage
                     });
                     continue;
                 }
                 // make sub-menu
-                mainMenu.$.addMenu("PopupMenuBarItem", {id:mainMenuDataItem.menuItemName, label: mainMenuDataItem.menuTitle},
-                        function(menuBar){                                                                 //console.log("menuBar=",menuBar);
+                mainMenu.$.addMenu("PopupMenuBarItem", {id:mainMenuDataItem.menuItemName,label:mainMenuDataItem.menuTitle},
+                        function(menuBar){
                             for(var pi in mainMenuDataItem.popupMenu){
-                                var popupMenuItem=mainMenuDataItem.popupMenu[pi];
-                                var popupMenuItemName = popupMenuItem.menuItemName;
+                                var popupMenuItem= mainMenuDataItem.popupMenu[pi], popupMenuItemName= popupMenuItem.menuItemName;
                                 if(popupMenuItemName&&popupMenuItemName.indexOf("separator")==0){
-                                    menuBar.$.addMenu("MenuSeparator", {id:popupMenuItem.menuItemName});
+                                    menuBar.$.addMenu("MenuSeparator",{id:popupMenuItem.menuItemName});
                                     continue;
                                 }
-                                menuBar.$.addMenu("MenuItem", {id:popupMenuItem.menuItemName,label:popupMenuItem.menuTitle, itemData:popupMenuItem,
+                                menuBar.$.addMenu("MenuItem",{id:popupMenuItem.menuItemName,label:popupMenuItem.menuTitle,itemData:popupMenuItem,
                                     click:menuClickAddInnerPage
                                 });
                             }
                         });
             }
         };
-        var runAutorunActions = function(mainContentData){
+        var runAutorunActions= function(mainContentData){
             if(!mainContentData||!mainContentData.autorun) return;
-            var autorunActions = mainContentData.autorun;
+            var autorunActions= mainContentData.autorun;
             for(var autorunIndex in autorunActions){
-                var autorunMenuItemName = autorunActions[autorunIndex];
-                var mainMenu = mainContentData.menuBar;
+                var autorunMenuItemName= autorunActions[autorunIndex], mainMenu= mainContentData.menuBar;
                 for(var i in mainMenu){// create and add main menu items
                     var item=mainMenu[i];
                     if(item.popupMenu == null || item.popupMenu.length == 0){
@@ -180,8 +162,8 @@
                 }
             }
         };
-        $$.getMainData = function(){
-            $$.request.getJSONData({url:"/getMainData"},function(result,error){                            //console.log("getJSONData /getMainData",result,error);
+        $$.getMainData= function(){
+            $$.request.getJSONData({url:"/getMainData"},function(result,error){
                 updateMainState(result,error);
                 if(!result) return;
                 createMainMenu(result.menuBar);
