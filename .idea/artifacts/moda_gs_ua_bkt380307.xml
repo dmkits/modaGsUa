@@ -37,12 +37,12 @@
       </element>
       <element id="directory" name="logs" />
       <element id="file-copy" path="$PROJECT_DIR$/debugBtkDev2-localhost.cfg" />
-      <element id="file-copy" path="$PROJECT_DIR$/start_8081-productionT.cmd" />
-      <element id="file-copy" path="$PROJECT_DIR$/start_8082-productionT.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/start_8081-productionTBtk.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/start_8082-productionTBtk.cmd" />
       <element id="file-copy" path="$PROJECT_DIR$/start_8181-debugBtk-NoCL.cmd" />
       <element id="file-copy" path="$PROJECT_DIR$/start_58080-btk.cmd" />
       <element id="file-copy" path="$PROJECT_DIR$/productionBtk.cfg" />
-      <element id="file-copy" path="$PROJECT_DIR$/productionBtkT.cfg" />
+      <element id="file-copy" path="$PROJECT_DIR$/productionTBtk.cfg" />
     </root>
   </artifact>
 </component>

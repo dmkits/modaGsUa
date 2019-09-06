@@ -11,6 +11,7 @@
     "dirsCommon",
     "dirsForDocs",
     "dirsForProds",
+    "dirsProducts",
     "rec",
     /*"exc",*/
     /*"exc-cashier",*/
@@ -27,6 +28,7 @@
     { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },
     /*{ "menuItemName":"menuBarItemExc", "menuTitle":"Перемещение товара", "pageTitle":"Перемещение товара", "module":"exc", "closable":true },*/
     /*{ "menuItemName":"menuBarItemExcCashier", "menuTitle":"Перемещение товара на ТТ", "pageTitle":"Перемещение товара на ТТ", "module":"exc-cashier", "closable":true },*/
+    { "menuItemName":"menuBarItemDirsProds", "menuTitle":"Товарные номенлатуры", "pageTitle":"Товарные номенлатуры", "module":"dirsProducts", "closable":true },
     { "menuItemName":"menuBarItemReportsProds", "menuTitle":"Товарные отчеты", "pageTitle":"Товарные отчеты", "module":"reportsProds", "closable":false },
     { "menuItemName":"menuBarItemReportsCashier", "menuTitle":"Отчеты кассира", "pageTitle":"Отчеты кассира", "module":"reportsCashier", "closable":false },
     { "menuItemName":"menuBarItemHelpAbout", "menuTitle":"О программе", "action":"help_about" },
