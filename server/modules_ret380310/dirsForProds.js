@@ -651,21 +651,22 @@ module.exports.init= function(app){
                         r_Prods.storeNewProdWithProdMQandProdPP0(dbUC,prodData,dbUserParams,callback);
                         return;
                     }
-                    if(findProdByNameResult.prodData && !checkExistsProdBarcodeResult.resultItem){//ADD BARCODE FOR EXISTS PRODUCT
-                        r_Prods.checkAndStoreProdMQ(dbUC,prodName,{"ProdID":prodID,"UM":prodUM,"Barcode":prodBarcode},function(resultCheckAndStoreProdMQ){
-                            if(resultCheckAndStoreProdMQ.error){
-                                r_Prods.delete(dbUC,prodID);
-                                callback(resultCheckAndStoreProdMQ);
-                                return;
-                            }
-                            prodData["UM"]= resultCheckAndStoreProdMQ.resultItem["UM"];
-                            callback({resultItem:prodData});
-                        });
-                        return;
-                    }
                     if(!prodID&&existsProdIDByProdName) prodData["ProdID"]=existsProdIDByProdName;
                     if(existsProdUMByProdName&&prodUM!=existsProdUMByProdName) prodData["UM"]=existsProdUMByProdName;
                     if(!prodBarcode&&existsProdBaseBarcodeByProdName) prodData["Barcode"]=existsProdBaseBarcodeByProdName;
+                    if(findProdByNameResult.prodData && !checkExistsProdBarcodeResult.resultItem){//ADD BARCODE FOR EXISTS PRODUCT
+                        r_Prods.checkAndStoreProdMQ(dbUC,prodName,{"ProdID":prodData["ProdID"],"UM":prodData["UM"],"Barcode":prodData["Barcode"]},
+                            function(resultCheckAndStoreProdMQ){
+                                if(resultCheckAndStoreProdMQ.error){
+                                    r_Prods.delete(dbUC,prodID);
+                                    callback(resultCheckAndStoreProdMQ);
+                                    return;
+                                }
+                                prodData["UM"]= resultCheckAndStoreProdMQ.resultItem["UM"];
+                                callback({resultItem:prodData});
+                            });
+                        return;
+                    }
                     callback({resultItem:prodData});
                 })
             });
