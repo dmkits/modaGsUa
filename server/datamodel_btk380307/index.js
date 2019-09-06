@@ -462,7 +462,8 @@ function _getDataItemsForSelect(connection, params, resultCallback){
             var resultItems=result.items;
             result.items=[];
             for(var i in resultItems){
-                var resultItem=resultItems[i], selectItem= {value:resultItem[params.valueField]};
+                var resultItem=resultItems[i], resultItemValue= resultItem[params.valueField],
+                    selectItem= {value:((resultItemValue!=null)?resultItemValue.toString():resultItemValue)};
                 if(params.labelField&&params.labelField!=params.valueField) selectItem.label= resultItem[params.labelField];
                 else selectItem.label= resultItem[params.valueField];
                 result.items.push(selectItem);
