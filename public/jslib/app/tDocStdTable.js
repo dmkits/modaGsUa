@@ -387,7 +387,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 return this;
             },
             /**
-             * params={ style, selectStyle, labelDataItem, loadDropDownURL }
+             * params = { style, selectStyle, labelDataItem, loadDropDownURL }
+             *      loadDropDownURL - URL returned data items for select drop-down list [{label,value},...]
              */
             addDetailHeaderSelect: function(itemName,label,cellWidth,params){
                 if(!params) params={};
