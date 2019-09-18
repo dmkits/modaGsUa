@@ -162,7 +162,7 @@ module.exports.init = function(app){
             return;
         }
         t_Rec.updTableDataItem(req.dbUC,{tableColumns:tRecsListTableColumns, idFieldName:"ChID",
-                updFileds:["StateCode"], updTableData:{"ChID":chID,"StateCode":storeData["StateCode"]}},
+                updFields:["StateCode"], updTableData:{"ChID":chID,"StateCode":storeData["StateCode"]}},
             function(result){
                 res.send(result);
             });
@@ -213,8 +213,8 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-    t_RecD.setRecDTaxPriceCCnt=function(connection,prodID,recChID,recDData,callback){
-        database.selectParamsQuery(connection,
+    t_RecD.setRecDTaxPriceCCnt=function(dbUC,prodID,recChID,recDData,callback){
+        database.selectParamsQuery(dbUC,
             "select tax=dbo.zf_GetProdRecTax(@p0,OurID,CompID,DocDate) from t_Rec where ChID=@p1",[prodID,recChID],
             function(result){/* Возвращает ставку НДС для товара в зависимости от поставщика */
                 var tax=(result&&result.length>0)?result[0]["tax"]:0;
@@ -227,15 +227,15 @@ module.exports.init = function(app){
     /**
      * callback = function(result), result= { resultItem, error, userMessage }
      */
-    t_RecD.storeNewProdPP=function(connection,prodID,recChID,recDData,callback){
-        t_Rec.getDataItem(connection,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
+    t_RecD.storeNewProdPP=function(dbUC,prodID,recChID,recDData,callback){
+        t_Rec.getDataItem(dbUC,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
             function(result){
                 if(result.error||!result.item){
                     callback({error:"Failed get rec data for create prod PP!"});
                     return;
                 }
                 var recData=result.item, priceCC_wt=recDData["PriceCC_wt"];
-                r_Prods.storeProdPP(connection,
+                r_Prods.storeProdPP(dbUC,
                     {"ProdID":prodID,"ProdDate":recData["DocDate"],"CompID":recData["CompID"],"Article":"",
                         "PriceCC_In":priceCC_wt,"CostCC":priceCC_wt,"PriceMC":priceCC_wt,
                         "CurrID":recData["CurrID"], "PriceMC_In":priceCC_wt,"CostAC":priceCC_wt},
@@ -247,27 +247,27 @@ module.exports.init = function(app){
     /**
      * callback = function(result), result = { resultItem, error,errorMessage }
      */
-    t_RecD.storeRecD=function(connection,prodID,storeData,dbUserParams,callback){
+    t_RecD.storeRecD=function(dbUC,prodID,storeData,dbUserParams,callback){
         var parentChID=storeData["ParentChID"]||storeData["ChID"];
-        t_RecD.storeNewProdPP(connection,prodID,parentChID,storeData,function(resultStorePP){
+        t_RecD.storeNewProdPP(dbUC,prodID,parentChID,storeData,function(resultStorePP){
             if(resultStorePP.error){
-                r_Prods.delete(connection,prodID);
+                r_Prods.delete(dbUC,prodID);
                 callback({error:resultStorePP.error});
                 return;
             }
             storeData["PPID"]=resultStorePP.resultItem["PPID"];
             storeData["SecID"]=dbUserParams["t_SecID"];
-            t_RecD.setRecDTaxPriceCCnt(connection,prodID,parentChID,storeData,function(storeData){
+            t_RecD.setRecDTaxPriceCCnt(dbUC,prodID,parentChID,storeData,function(storeData){
                 storeData["CostCC"]=storeData["PriceCC_wt"]; storeData["CostSum"]=storeData["SumCC_wt"];
                 storeData["SupplyPriceCC_nt"]=storeData["SupplyPriceCC_nt"]||storeData["PriceCC_nt"]||0.0;
-                t_RecD.storeTableDataItem(connection,{tableColumns:tRecDTableColumns, idFields:["ChID","SrcPosID"],storeTableData:storeData,
-                        calcNewIDValue: function(params, callback){
+                t_RecD.storeTableDataItem(dbUC,{tableColumns:tRecDTableColumns, idFields:["ChID","SrcPosID"],storeTableData:storeData,
+                        calcNewIDValue: function(params,callback){
                             params.storeTableData["ChID"]=params.storeTableData["ParentChID"];
                             callback(params);
                         }},
                     function(result){
                         if(result.error){
-                            r_Prods.delete(connection,prodID);
+                            r_Prods.delete(dbUC,prodID);
                             result.errorMessage= "Не удалось сохранить строку в документ \"Приход товара\"!";
                             if(result.error.indexOf("Violation of PRIMARY KEY constraint '_pk_t_RecD'")>=0)
                                 result.errorMessage= "Некорректный номер позиции в документе \"Приход товара\"!\n В документе уже есть позиция с таким номером."

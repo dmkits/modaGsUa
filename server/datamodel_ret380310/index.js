@@ -1243,7 +1243,7 @@ function _insTableDataItem(connection, params, resultCallback){
 /**
  * params = { tableName, idFieldName, idFields,
  *      tableColumns=[ {<tableColumnData>},... ],
- *      updFileds = [<tableFieldName>,...]
+ *      updFields = [<tableFieldName>,...]
  *      updTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
  * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
@@ -1272,9 +1272,9 @@ function _updTableDataItem(connection, params, resultCallback){
     if(idFieldName)idFiledsNames[idFieldName]=true;
     else
         for(var i in idFields) idFiledsNames[idFields[i]]=true;
-    if(params.updFileds){
-        for(var i in params.updFileds){
-            var fieldName= params.updFileds[i];
+    if(params.updFields){
+        for(var i in params.updFields){
+            var fieldName= params.updFields[i];
             if(!idFiledsNames[fieldName]) params.updData[fieldName]= params.updTableData[fieldName];
         }
     }else if(this.fields){

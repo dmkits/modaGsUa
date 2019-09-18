@@ -101,7 +101,7 @@ module.exports.init = function(app){
             return;
         }
         t_Exc.updTableDataItem(req.dbUC,{tableColumns:tExcsListTableColumns, idFieldName:"ChID",
-                updFileds:["StateCode"], updTableData:{"ChID":chID,"StateCode":storeData["StateCode"]}},
+                updFields:["StateCode"], updTableData:{"ChID":chID,"StateCode":storeData["StateCode"]}},
             function(result){
                 res.send(result);
             });
@@ -150,7 +150,7 @@ module.exports.init = function(app){
             return;
         }
         t_ExcD.updTableDataItem(req.dbUC,{tableColumns:tExcDTableColumns, idFields:["ChID","SrcPosID"],
-                updFileds:["NewQty"], updTableData:{"ChID":chID,"SrcPosID":srcPosID,"NewQty":storeData["NewQty"]}},
+                updFields:["NewQty"], updTableData:{"ChID":chID,"SrcPosID":srcPosID,"NewQty":storeData["NewQty"]}},
             function(result){
                 res.send(result);
             });
