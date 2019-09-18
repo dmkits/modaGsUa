@@ -28,20 +28,20 @@
     { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },
     /*{ "menuItemName":"menuBarItemExc", "menuTitle":"Перемещение товара", "pageTitle":"Перемещение товара", "module":"exc", "closable":true },*/
     /*{ "menuItemName":"menuBarItemExcCashier", "menuTitle":"Перемещение товара на ТТ", "pageTitle":"Перемещение товара на ТТ", "module":"exc-cashier", "closable":true },*/
-    { "menuItemName":"menuBarItemDirsProds", "menuTitle":"Товарные номенлатуры", "pageTitle":"Товарные номенлатуры", "module":"dirsProducts", "closable":true },
     { "menuItemName":"menuBarItemReportsProds", "menuTitle":"Товарные отчеты", "pageTitle":"Товарные отчеты", "module":"reportsProds", "closable":false },
     { "menuItemName":"menuBarItemReportsCashier", "menuTitle":"Отчеты кассира", "pageTitle":"Отчеты кассира", "module":"reportsCashier", "closable":false },
+    { "menuItemName":"menuBarItemDirsProds", "menuTitle":"Товарные номенлатуры", "pageTitle":"Товарные номенлатуры", "module":"dirsProducts", "closable":true },
     { "menuItemName":"menuBarItemHelpAbout", "menuTitle":"О программе", "action":"help_about" },
     { "menuItemName":"menuBarItemClose", "menuTitle":"Выход", "action":"close" }
   ],
   "usersRoles":{
     "admin":{
-      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
+      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemDirsProds","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemExcCashier","menuBarItemExc","menuBarItemRec"],
       "mobile":["mobileReportsCashier","mobileVen"]
     },
     "manager":{
-      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
+      "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemDirsProds","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
       "mobile":["mobileExc","mobileVen","mobileRec","mobileReportsCashier"]
     },

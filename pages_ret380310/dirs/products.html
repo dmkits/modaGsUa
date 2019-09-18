@@ -1,0 +1,73 @@
+<LayoutContainer id="dirsProducts_PageContainer" style="width:100%;height:100%;">
+    <ContentPane id="dirsProducts_ContentPaneTop" region="top" style="width:100%;margin:0;padding:0;">
+        <table width="100%" style="padding:0;text-align:left;border-top:none;border-left:none;border-right:none" class="dijitBorderContainer-child">
+            <tr><th>
+                <span style="margin-left:20px;margin-right:10px;vertical-align:middle;font-size:14px;font-weight:bold">Товарные номенлатуры:</span>
+                <StackController style="" containerId="dirsProducts_ContentPaneDetailContainer"></StackController>
+            </th></tr>
+        </table>
+    </ContentPane>
+    <StackContainer id="dirsProducts_ContentPaneDetailContainer" region="center" style="width:100%;height:100%; margin:0;padding:0;">
+        <TDocSimpleTableEdt id="dirsProducts_DirProdsWBC" title="Номенклатуры товаров со ШК" iconClass="dijitCheckBoxIcon" style="margin:0;padding:0;"></TDocSimpleTableEdt>
+    </StackContainer>
+</LayoutContainer>
+<script type="text/javascript">
+    $$.dirsProducts_DirProdsWBC
+            .init({titleText: "Номенклатуры товаров со штрихкодами", dataURL:'/dirs/products/getProductsWAllBCsDataForTable', buttonPrint:false,
+                rightPane:{width:300},
+                dataStoreURL:"/dirs/products/storeProductsWBCTableData"
+            })
+            .addSelectBox("Категория номенлатуры",{width:300, loadDropDownURL:"/dirs/products/getDirPCatsForSelect", defValue:">0",
+                contentTableCondition:"PCatID="})
+//            .addCheckBtnCondition("Используемые",{width:90,contentTableConditions:{"InUse~":"1"}})
+//            .addCheckBtnCondition("Неиспользуемые",{width:90,contentTableConditions:{"InUse~":"0"}})
+            .addCheckBtnCondition("Все",{width:90})
+            .addTotalCountNumberBox("ИТОГО строк:", 140, {style:"font-weight:bold;",inputStyle:"width:40px;"})
+            .addToolPane({title:"Информация о номенклатуре",
+                contentTableAction:function(params){
+                    if(!params.contentHTableSelectedRow){ params.thisToolPane.set("content",""); return; }
+                    var info="<b>Код товара</b>:"+params.contentHTableSelectedRow["ProdID"]
+                            +"<br><b>Наименование товара</b>:"+params.contentHTableSelectedRow["ProdName"]
+                            +"<br><b>Осн. Ед.изм.</b>:"+params.contentHTableSelectedRow["BaseUM"]
+                            +"<br><b>Артикул1</b>:"+(params.contentHTableSelectedRow["Article1"]||"")
+                            +"<br><b>Товар участвует в остатках</b>:"+((params.contentHTableSelectedRow["InRems"])?"ДА":"НЕТ")
+                            +"<br><b>У товара дробное количество</b>:"+((params.contentHTableSelectedRow["IsDecQty"])?"ДА":"НЕТ")
+                            +"<br><b>Цена продажи включает НДС</b>:"+((params.contentHTableSelectedRow["PriceWithTax"])?"ДА":"НЕТ")
+                            +"<br><b>Товар в стоп-списке</b>:"+((params.contentHTableSelectedRow["InStopList"])?"ДА":"НЕТ")
+                            +"<br><b>Примечание</b>:"+(params.contentHTableSelectedRow["Notes"]||"")
+                            +"<br><b>Страна-производитель товара</b>:"+(params.contentHTableSelectedRow["Country"]||"")
+                            +"<br><b>Артикул2</b>:"+(params.contentHTableSelectedRow["Article2"]||"")
+                            +"<br><b>Артикул3</b>:"+(params.contentHTableSelectedRow["Article3"]||"")
+                            +"<br><b>Примечание 1</b>:"+(params.contentHTableSelectedRow["Note1"]||"")
+                            +"<br><b>Примечание 2</b>:"+(params.contentHTableSelectedRow["Note2"]||"")
+                            +"<br><b>Примечание 3</b>:"+(params.contentHTableSelectedRow["Note3"]||"")
+                            +"<br><b>Категория товара</b>:"+params.contentHTableSelectedRow["PCatName"]
+                            +"<br><b>Группа товара</b>:"+params.contentHTableSelectedRow["PGrName"]
+                            +"<br><b>Подгруппа 1 товара</b>:"+params.contentHTableSelectedRow["PGrName1"]
+                            +"<br><b>Подгруппа 2 товара</b>:"+params.contentHTableSelectedRow["PGrName2"]
+                            +"<br><b>Подгруппа 3 товара</b>:"+params.contentHTableSelectedRow["PGrName3"]
+                            +"<br><b>Примечание товара</b>:"+(params.contentHTableSelectedRow["Notes"]||"")
+                            +"<br><b>Штрихкод</b>:"+params.contentHTableSelectedRow["Barcode"]
+                            +"<br><b>Ед.изм. ШК</b>:"+params.contentHTableSelectedRow["UM"];
+                    params.thisToolPane.set("content",info);
+                }
+            })
+            .addToolPaneWHTableActionBtns({title:"Действия",
+                buttons:{insertTableRow:"Добавить строку", allowEditTableSelectedRow:"Изменить строку", storeTableSelectedRow:"Сохранить строку"}
+            })
+            .addContentTablePopupMenuTableRowsAction("Добавить строки",{actionName:"insertTableRowsAfterSelected"})
+            .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
+            .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
+            .addContentTableOnChangeRowAction(function(crd/*changedRowData*/, contentTable, params, nextCallback){
+                if(crd.item("PCatName").isChanged())
+                    crd.item("PCatID").setValue(contentTable.getAutocompleteColumnValueForItem("PCatName",crd.item("PCatName").getValue(),"PCatID"));
+                if(crd.item("PGrName").isChanged())
+                    crd.item("PGrID").setValue(contentTable.getAutocompleteColumnValueForItem("PGrName",crd.item("PGrName").getValue(),"PGrID"));
+                nextCallback();
+            });
+    $$.dirsProducts_DirProdsWBC.onShow= function(){
+        if(!$$.dirsProducts_DirProdsWBC.startedUp)$$.dirsProducts_DirProdsWBC.startupDoc();
+    };
+    $$.dirsProducts_DirProdsWBC.onShow();
+</script>
+</html>
