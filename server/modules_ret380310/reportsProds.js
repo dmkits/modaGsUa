@@ -1,14 +1,15 @@
 var dataModel=require(appDataModelPath);
-var t_Rem= require(appDataModelPath+"t_Rem");
-var r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
-    r_CRs= require(appDataModelPath+"r_CRs"),
-    r_Prods=require(appDataModelPath+"r_Prods"), z_Docs=require(appDataModelPath+"z_Docs"),
+var r_Ours= require(appDataModelPath+"r_Ours"), r_CRs= require(appDataModelPath+"r_CRs"),
+    r_Prods=require(appDataModelPath+"r_Prods"),
     t_Sale=require(appDataModelPath+"t_Sale"),t_SaleD=require(appDataModelPath+"t_SaleD"),
     querySalesCRRets=require(appDataModelPath+"querySalesCRRets"),
+    r_Stocks= require(appDataModelPath+"r_Stocks"),
+    t_Rem= require(appDataModelPath+"t_Rem"),
+    z_Docs=require(appDataModelPath+"z_Docs"),
     queryProdMove=require(appDataModelPath+"queryProdMove");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([t_Rem,r_Ours,r_Stocks,r_CRs,r_Prods,t_Sale,t_SaleD,querySalesCRRets,queryProdMove,z_Docs], errs,
+    dataModel.initValidateDataModels([r_Ours,r_CRs,r_Prods,t_Sale,t_SaleD,querySalesCRRets,r_Stocks,t_Rem,z_Docs,queryProdMove], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -17,9 +18,9 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 module.exports.moduleViewURL = "/reports/products";
 module.exports.moduleViewPath = "reports/products.html";
 module.exports.init = function(app){
-    app.get("/reports/products/getDirCRsForSelect",function(req,res){
-        var empID=req.dbUserParams["EmpID"];
-        r_CRs.getDataItemsForSelect(req.dbUC,
+    r_CRs.getDirCRsForReportsSalesSelect= function(dbUC,dbUserParams,dbEmpRole,isMobile,callback){
+        var empID= dbUserParams["EmpID"];
+        r_CRs.getDataItemsForSelect(dbUC,
             {valueField:"CRID",labelField:"CRName",
                 joinedSources:{
                     "r_OperCRs":"r_OperCRs.CRID=r_CRs.CRID",
@@ -29,12 +30,13 @@ module.exports.init = function(app){
                 conditions:{"r_CRs.CRID>":0,"r_Opers.EmpID=":empID},
                 order:"CRName"},
             function(result){
-                if(req.dbEmpRole=="cashier"||req.isMobile){
-                    res.send(result);return;
-                }
+                if(dbEmpRole=="cashier"||isMobile){ res.send(result);return; }
                 if(result.items)result.items=[{value:-1, label:'Все кассы'}].concat(result.items);
-                res.send(result);
+                callback(result);
             });
+    };
+    app.get("/reports/products/getDirCRsForSelect",function(req,res){
+        r_CRs.getDirCRsForReportsSalesSelect(req.dbUC,req.dbUserParams,req.dbEmpRole,req.isMobile,function(result){ res.send(result); });
     });
     var tProdsSalesTableColumns=[
         {data: "ChID", name: "ChID", width: 50, type: "text", visible:false, dataSource:"t_SaleD"},
@@ -90,7 +92,6 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-
     var tProdsSalesCRRetsTableColumns=[
         {data: "ChID", name: "ChID", width: 50, type: "text", visible:false, dataSource:"querySalesCRRets"},
         {data: "OurID", name: "OurID", width: 50, type: "text", visible:false, dataSource:"querySalesCRRets"},
@@ -116,13 +117,13 @@ module.exports.init = function(app){
         {data: "RealSum", name: "Сумма", width: 75, type: "numeric2",source:"querySalesCRRets" },
         {data: "DiscountSum", name: "Сумма скидки", width: 65, type: "numeric2",dataFunction:"(PurPriceCC_wt-RealPrice)*Qty" }
     ];
-    app.get("/reports/products/getProductsSalesCRRets",function(req,res){
+    querySalesCRRets.getProductsSalesCRRets= function(dbUC,reqParams,dbEmpRole,isMobile,callback){
         var conditions={}, allItems=false, queryParams={};
-        for(var condItem in req.query) {
-            var val=req.query[condItem];
-            if(condItem.indexOf("@")==0) queryParams[condItem]=req.query[condItem];
+        for(var condItem in reqParams) {
+            var val= reqParams[condItem];
+            if(condItem.indexOf("@")==0) queryParams[condItem]= reqParams[condItem];
             else if(condItem.indexOf("DiscountP")==0) conditions[condItem.replace("DiscountP","(PurPriceCC_wt-RealPrice)")]=val;
-            else if(condItem.indexOf("CRID")==0&&val=="-1"&&req.dbEmpRole!=="cashier"&&!req.isMobile) {//ALL
+            else if(condItem.indexOf("CRID")==0&&val=="-1"&&dbEmpRole!=="cashier"&&!isMobile) {//ALL
                 conditions["1=1"]=null; allItems=true;
             }else{
                 var newCondItem=condItem;
@@ -141,17 +142,19 @@ module.exports.init = function(app){
                 tColData.visible=allItems; break;
             }
         }
-        querySalesCRRets.getDataForTable(req.dbUC,
-            {tableColumns:tProdsSalesCRRetsTableColumns, identifier:tProdsSalesCRRetsTableColumns[0].data, sourceParams:queryParams, conditions:conditions,
+        querySalesCRRets.getDataForTable(dbUC,
+            {tableColumns:tProdsSalesCRRetsTableColumns, identifier:tProdsSalesCRRetsTableColumns[0].data,
+                sourceParams:queryParams, conditions:conditions,
                 order:"OurID, StockID, CRID, DocDate, DocTime, DocCode desc, DocID, SrcPosID"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ callback(result); });
+    };
+    app.get("/reports/products/getProductsSalesCRRets",function(req,res){
+        querySalesCRRets.getProductsSalesCRRets(req.dbUC,req.query,req.dbEmpRole,req.isMobile,function(result){ res.send(result); });
     });
 
-    app.get("/reports/products/getDirStocksForSelect",function(req,res){
-        var empID=req.dbUserParams["EmpID"];
-        r_Stocks.getDataItemsForSelect(req.dbUC,
+    r_Stocks.getDirStocksForReportsProductsSelect= function(dbUC,dbUserParams,callback){
+        var empID= dbUserParams["EmpID"];
+        r_Stocks.getDataItemsForSelect(dbUC,
             {valueField:"StockID",labelField:"StockName",
                 joinedSources: {
                     "r_CRs": "r_CRs.StockID=r_Stocks.StockID",
@@ -161,9 +164,10 @@ module.exports.init = function(app){
                 groupedFields:["r_Stocks.StockID","r_Stocks.StockName"],
                 conditions:{"r_Stocks.StockID>=":0,"r_Opers.EmpID=":empID},
                 order:"StockName" },
-            function(result){
-                res.send(result);
-            });
+            function(result){ callback(result); });
+    };
+    app.get("/reports/products/getDirStocksForSelect",function(req,res){
+        r_Stocks.getDirStocksForReportsProductsSelect(req.dbUC,req.dbUserParams,function(result){ res.send(result); });
     });
     var tProdsRemsTableColumns=[
         {data: "OurID", name: "OurID", width: 50, type: "text", visible:false, dataSource:"t_Rem"},
@@ -192,17 +196,19 @@ module.exports.init = function(app){
         {data: "TQty", name: "Кол-во", width: 50, type: "numeric",
             dataFunction:{function:"sumIsNull", source:"t_Rem", sourceField:"Qty"}}
     ];
-    app.get("/reports/products/getProductsRems",function(req,res){
+    t_Rem.getProductsRems= function(dbUC,reqParams,callback){
         var conditions={};
-        for(var condItem in req.query) {
-            if(condItem.indexOf("SUM(")<0) conditions["t_Rem."+condItem]=req.query[condItem];
-            else conditions[condItem]=req.query[condItem];
+        for(var condItem in reqParams){
+            if(condItem.indexOf("SUM(")<0) conditions["t_Rem."+condItem]= reqParams[condItem];
+            else conditions[condItem]= reqParams[condItem];
         }
-        t_Rem.getDataForTable(req.dbUC,{tableColumns:tProdsRemsTableColumns, identifier:tProdsRemsTableColumns[0].data,
+        t_Rem.getDataForTable(dbUC,
+            {tableColumns:tProdsRemsTableColumns, identifier:tProdsRemsTableColumns[0].data,
                 conditions:conditions, order:"OurID, StockID, ProdName"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ callback(result); });
+    };
+    app.get("/reports/products/getProductsRems",function(req,res){
+        t_Rem.getProductsRems(req.dbUC,req.query,function(result){ res.send(result); });
     });
 
     var tProdsRemsTableColumnsWSPrice=[
@@ -236,17 +242,18 @@ module.exports.init = function(app){
         {data: "TSumMC", name: "Стоимость в ЦП", width: 85, type: "numeric2", visible:true,
             dataFunction:"Sum(ISNULL(Qty,0))*PriceMC"}
     ];
-    app.get("/reports/products/getProductsRemsWSPrice",function(req,res){
+    t_Rem.getProductsRemsWithSalePrice= function(dbUC,reqParams,callback){
         var conditions={};
-        for(var condItem in req.query) {
-            if(condItem.indexOf("SUM(")<0) conditions["t_Rem."+condItem]=req.query[condItem];
-            else conditions[condItem]=req.query[condItem];
+        for(var condItem in reqParams){
+            if(condItem.indexOf("SUM(")<0) conditions["t_Rem."+condItem]= reqParams[condItem];
+            else conditions[condItem]= reqParams[condItem];
         }
-        t_Rem.getDataForTable(req.dbUC,{tableColumns:tProdsRemsTableColumnsWSPrice, identifier:tProdsRemsTableColumnsWSPrice[0].data,
+        t_Rem.getDataForTable(dbUC,{tableColumns:tProdsRemsTableColumnsWSPrice, identifier:tProdsRemsTableColumnsWSPrice[0].data,
                 conditions:conditions, order:"OurID, StockID, ProdName"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ callback(result); });
+    };
+    app.get("/reports/products/getProductsRemsWSPrice",function(req,res){
+        t_Rem.getProductsRemsWithSalePrice(req.dbUC,req.query,function(result){ res.send(result); });
     });
 
     var tProdsMovesTableColumns=[
@@ -280,23 +287,21 @@ module.exports.init = function(app){
         {data: "Qty", name: "Кол-во", width: 50, type: "numeric"},
         {data: "TQty", name: "Кон. ост.", width: 50, type: "numeric"}
     ];
-    app.get("/reports/products/getProductsMoves",function(req,res){
+    queryProdMove.getProductsMoves= function(dbUC,reqParams,callback){
         var conditions={}, params={};
-        for(var condItem in req.query){
-            if(condItem.indexOf("@")==0)
-                params[condItem]=req.query[condItem];
-            else if(condItem.indexOf("SUM(")==0){
-                conditions[condItem]=req.query[condItem];
-            }else
-                conditions["queryProdMove."+condItem]=req.query[condItem];
+        for(var condItem in reqParams){
+            if(condItem.indexOf("@")==0) params[condItem]= reqParams[condItem];
+            else if(condItem.indexOf("SUM(")==0) conditions[condItem]= reqParams[condItem];
+            else conditions["queryProdMove."+condItem]= reqParams[condItem];
         }
-        queryProdMove.getDataForTable(req.dbUC,
+        queryProdMove.getDataForTable(dbUC,
             {tableColumns:tProdsMovesTableColumns, identifier:tProdsMovesTableColumns[0].data, sourceParams:params, conditions:conditions,
                 order:"ProdID, OurID, StockID, "+
-                    "CASE When BQty is Not NULL Then 0 When Qty is Not NULL Then 1 Else 2 END, "+
-                    "DocDate,OperType desc,OperSNum,DocCode"},
-            function(result){
-                res.send(result);
-            });
+                "CASE When BQty is Not NULL Then 0 When Qty is Not NULL Then 1 Else 2 END, "+
+                "DocDate,OperType desc,OperSNum,DocCode"},
+            function(result){ callback(result); });
+    };
+    app.get("/reports/products/getProductsMoves",function(req,res){
+        queryProdMove.getProductsMoves(req.dbUC,req.query,function(result){ res.send(result); });
     });
 };
