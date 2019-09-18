@@ -11,10 +11,10 @@
     "dirsCommon",
     "dirsForDocs",
     "dirsForProds",
-    "dirsProducts",
-    "rec",
-    /*"exc",*/
-    /*"exc-cashier",*/
+    "dir_products",
+    "doc_rec",
+    /*"doc_exc",*/
+    /*"doc_excCashier",*/
     /*"mainPage",*/
     "reportsProds",
     "reportsCashier"
@@ -25,12 +25,12 @@
     "mobileReportsCashier"*/
   ],
   "appMenu":[
-    { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"rec", "closable":false },
-    /*{ "menuItemName":"menuBarItemExc", "menuTitle":"Перемещение товара", "pageTitle":"Перемещение товара", "module":"exc", "closable":true },*/
-    /*{ "menuItemName":"menuBarItemExcCashier", "menuTitle":"Перемещение товара на ТТ", "pageTitle":"Перемещение товара на ТТ", "module":"exc-cashier", "closable":true },*/
+    { "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"doc_rec", "closable":false },
+    /*{ "menuItemName":"menuBarItemExc", "menuTitle":"Перемещение товара", "pageTitle":"Перемещение товара", "module":"doc_exc", "closable":true },*/
+    /*{ "menuItemName":"menuBarItemExcCashier", "menuTitle":"Перемещение товара на ТТ", "pageTitle":"Перемещение товара на ТТ", "module":"doc_excCashier", "closable":true },*/
     { "menuItemName":"menuBarItemReportsProds", "menuTitle":"Товарные отчеты", "pageTitle":"Товарные отчеты", "module":"reportsProds", "closable":false },
     { "menuItemName":"menuBarItemReportsCashier", "menuTitle":"Отчеты кассира", "pageTitle":"Отчеты кассира", "module":"reportsCashier", "closable":false },
-    { "menuItemName":"menuBarItemDirsProds", "menuTitle":"Товарные номенлатуры", "pageTitle":"Товарные номенлатуры", "module":"dirsProducts", "closable":true },
+    { "menuItemName":"menuBarItemDirsProds", "menuTitle":"Товарные номенлатуры", "pageTitle":"Товарные номенлатуры", "module":"dir_products", "closable":true },
     { "menuItemName":"menuBarItemHelpAbout", "menuTitle":"О программе", "action":"help_about" },
     { "menuItemName":"menuBarItemClose", "menuTitle":"Выход", "action":"close" }
   ],
