@@ -12,7 +12,7 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 };
 
 module.exports.moduleViewURL = "/reports/cashier";
-module.exports.moduleViewPath = "reports/r_cashier.html";
+module.exports.moduleViewPath = "reports/rep_cashier.html";
 module.exports.init = function(app){
     if(!r_CRs.getDirCRsForReportsSalesSelect) throw new Error('NO r_CRs.getDirCRsForReportsSalesSelect!');
     app.get("/reports/cashier/getDirCRsForSelect",function(req,res){

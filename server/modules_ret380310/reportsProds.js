@@ -16,7 +16,7 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 };
 
 module.exports.moduleViewURL = "/reports/products";
-module.exports.moduleViewPath = "reports/r_products.html";
+module.exports.moduleViewPath = "reports/rep_products.html";
 module.exports.init = function(app){
     r_CRs.getDirCRsForReportsSalesSelect= function(dbUC,dbUserParams,dbEmpRole,isMobile,callback){
         var empID= dbUserParams["EmpID"];

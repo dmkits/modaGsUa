@@ -12,7 +12,7 @@ module.exports.validateModule = function(errs,nextValidateModuleCallback){
 };
 
 module.exports.moduleViewURL = "/dirs/products";
-module.exports.moduleViewPath = "dirs/d_products.html";
+module.exports.moduleViewPath = "dirs/dir_products.html";
 module.exports.init = function(app){
     app.get("/dirs/products/getDirPCatsForSelect",function(req,res){
         r_ProdC.getDataItemsForSelect(req.dbUC,{valueField:"PCatID",labelField:"PCatName", order:"PCatName"},
