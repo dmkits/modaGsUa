@@ -257,12 +257,12 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane", "app/request"],
                 selectObj.selectToggleDropDown= selectObj.toggleDropDown;
                 selectObj.toggleDropDown= function(){                                                                   //console.log("ContentController.setSelectDropDown toggleDropDown");
                     Request.getJSONData({url: selectObj.loadDropDownURL},
-                        function (result,error) {
+                        function(result,error){
                             var options=selectObj.get("options"),value = selectObj.get("value");
-                            if (result&&result.items) {
-                                selectObj.set("options", result.items);
-                                selectObj.set("value", value);
-                            } else if (result&&!result.items) console.log("ContentController.setSelectDropDown loadDropDown getJSONData data error:",result);
+                            if(result&&result.items){
+                                selectObj.set("options",result.items);
+                                selectObj.set("value",value);
+                            } else if(result&&!result.items) console.error("ContentController.setSelectDropDown loadDropDown getJSONData data error:",result);
                             selectObj.selectToggleDropDown();
                         });
                 };

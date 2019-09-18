@@ -17,18 +17,18 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 module.exports.moduleViewURL = "/reports/products";
 module.exports.moduleViewPath = "reports/products.html";
 module.exports.init = function(app){
-    app.get("/reports/products/getDirCRsForSelect", function(req, res){
+    app.get("/reports/products/getDirCRsForSelect",function(req,res){
         var empID=req.dbUserParams["EmpID"];
         r_CRs.getDataItemsForSelect(req.dbUC,
             {valueField:"CRID",labelField:"CRName",
-                joinedSources: {
-                    "r_OperCRs": "r_OperCRs.CRID=r_CRs.CRID",
-                    "r_Opers": "r_Opers.OperID=r_OperCRs.OperID"
+                joinedSources:{
+                    "r_OperCRs":"r_OperCRs.CRID=r_CRs.CRID",
+                    "r_Opers":"r_Opers.OperID=r_OperCRs.OperID"
                 },
                 groupedFields:["r_CRs.CRID","r_CRs.CRName"],
                 conditions:{"r_CRs.CRID>":0,"r_Opers.EmpID=":empID},
-                order: "CRName" },
-            function (result) {
+                order:"CRName"},
+            function(result){
                 if(req.dbEmpRole=="cashier"||req.isMobile){
                     res.send(result);return;
                 }
@@ -62,7 +62,7 @@ module.exports.init = function(app){
         {data: "RealSum", name: "Сумма", width: 75, type: "numeric2",source:"t_SaleD" },
         {data: "DiscountSum", name: "Сумма скидки", width: 65, type: "numeric2",dataFunction:"(PurPriceCC_wt-RealPrice)*Qty" }
     ];
-    app.get("/reports/products/getProductsSales", function(req, res){
+    app.get("/reports/products/getProductsSales",function(req,res){
         var conditions={}, allItems=false;//
         for(var condItem in req.query) {
             var val=req.query[condItem];
@@ -116,7 +116,7 @@ module.exports.init = function(app){
         {data: "RealSum", name: "Сумма", width: 75, type: "numeric2",source:"querySalesCRRets" },
         {data: "DiscountSum", name: "Сумма скидки", width: 65, type: "numeric2",dataFunction:"(PurPriceCC_wt-RealPrice)*Qty" }
     ];
-    app.get("/reports/products/getProductsSalesCRRets", function(req, res){
+    app.get("/reports/products/getProductsSalesCRRets",function(req,res){
         var conditions={}, allItems=false, queryParams={};
         for(var condItem in req.query) {
             var val=req.query[condItem];
@@ -149,7 +149,7 @@ module.exports.init = function(app){
             });
     });
 
-    app.get("/reports/products/getDirStocksForSelect", function(req, res){
+    app.get("/reports/products/getDirStocksForSelect",function(req,res){
         var empID=req.dbUserParams["EmpID"];
         r_Stocks.getDataItemsForSelect(req.dbUC,
             {valueField:"StockID",labelField:"StockName",
@@ -159,8 +159,8 @@ module.exports.init = function(app){
                     "r_Opers": "r_Opers.OperID=r_OperCRs.OperID"
                 },
                 groupedFields:["r_Stocks.StockID","r_Stocks.StockName"],
-                conditions:{"r_Stocks.StockID>":0,"r_Opers.EmpID=":empID},
-                order: "StockName" },
+                conditions:{"r_Stocks.StockID>=":0,"r_Opers.EmpID=":empID},
+                order:"StockName" },
             function(result){
                 res.send(result);
             });
@@ -198,7 +198,7 @@ module.exports.init = function(app){
         {data: "TQty", name: "Кол-во", width: 50, type: "numeric",
             dataFunction:{function:"sumIsNull", source:"t_Rem", sourceField:"Qty"}}
     ];
-    app.get("/reports/products/getProductsRems", function(req, res){
+    app.get("/reports/products/getProductsRems",function(req,res){
         var conditions={};
         for(var condItem in req.query) {
             if(condItem.indexOf("SUM(")<0) conditions["t_Rem."+condItem]=req.query[condItem];
@@ -248,7 +248,7 @@ module.exports.init = function(app){
         {data: "TSumMC", name: "Стоимость в ЦП", width: 85, type: "numeric2", visible:true,
             dataFunction:"Sum(ISNULL(Qty,0))*PriceMC"}
     ];
-    app.get("/reports/products/getProductsRemsWSPrice", function(req, res){
+    app.get("/reports/products/getProductsRemsWSPrice",function(req,res){
         var conditions={};
         for(var condItem in req.query) {
             if(condItem.indexOf("SUM(")<0) conditions["t_Rem."+condItem]=req.query[condItem];
@@ -298,7 +298,7 @@ module.exports.init = function(app){
         {data: "Qty", name: "Кол-во", width: 50, type: "numeric"},
         {data: "TQty", name: "Кон. ост.", width: 50, type: "numeric"}
     ];
-    app.get("/reports/products/getProductsMoves", function(req, res){
+    app.get("/reports/products/getProductsMoves",function(req,res){
         var conditions={}, params={};
         for(var condItem in req.query){
             if(condItem.indexOf("@")==0)
