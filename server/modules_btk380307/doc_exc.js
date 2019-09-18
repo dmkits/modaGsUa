@@ -15,7 +15,7 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 };
 
 module.exports.moduleViewURL = "/docs/exc";
-module.exports.moduleViewPath = "docs/exc.html";
+module.exports.moduleViewPath = "docs/doc_exc.html";
 module.exports.init = function(app){
     var tRecsListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Exc"},

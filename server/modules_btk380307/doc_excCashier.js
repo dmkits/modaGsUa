@@ -17,7 +17,7 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 };
 
 module.exports.moduleViewURL = "/docs/excCashier";
-module.exports.moduleViewPath = "docs/exc-cashier.html";
+module.exports.moduleViewPath = "docs/doc_excCashier.html";
 module.exports.init = function(app){
     var tExcsListTableColumns=[
         {data:"ChID", name:"ChID", width:85, type:"text", readOnly:true, visible:false, dataSource:"t_Exc"},
