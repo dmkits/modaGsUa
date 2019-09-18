@@ -203,31 +203,48 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 return this;
             },
             /**
-             * params : { width, selectStyle, labelDataItem, loadDropDownURL, contentTableCondition:"<conditions>" }
+             * params = { width, selectStyle, loadDropDownURL, defValue, contentTableCondition:"<conditions>" }
+             *      loadDropDownURL - URL returned data items for select drop-down list [{label,value},...]
+             *      defValue: "<value>" || "=<value>" || "><value>"
              */
-            addSelectBox:function(label, params){
+            addSelectBox: function(label, params){
                 if(!params) params={};
                 if(!params.width)params.width=275;
                 var select= $TDF.addTableCellSelectTo(this.topTableRow, {labelText:label, labelStyle:"margin-left:5px;",
                     selectStyle:params.selectStyle,
                     cellWidth:params.width,cellStyle:"text-align:right;padding-left:10px;",
-                    selectParams:{labelDataItem:params.labelDataItem,
-                        loadDropDownURL:params.loadDropDownURL,contentTableCondition:params.contentTableCondition} });
+                    selectParams:{loadDropDownURL:params.loadDropDownURL,contentTableCondition:params.contentTableCondition} });
                 if(!this.headerData) this.headerData=[];
                 this.headerData.push({type:"SelectBox",instance:select});
-                select.loadDropDownValuesFromServer= function(callback){
+                select.loadDropDownValuesFromServer= function(callOnUpdate,callback){
                     Request.getJSONData({url: select.loadDropDownURL, resultItemName:"items"},
                         function(resultItems){
-                            var options=select.get("options"),value = select.get("value");
+                            var options= select.get("options"),value= select.get("value");
                             if(resultItems){
-                                select.set("options", resultItems); select.set("value", value);
+                                select.set("options",resultItems,callOnUpdate);
+                                if((value===undefined||value===null||value=="")&&params.defValue){//exists params.defValue
+                                    var pDefValue= params.defValue.toString().trim(), defValue="";
+                                    for(var i in resultItems){
+                                        var itemData=resultItems[i];
+                                        if(itemData.value===undefined||itemData.value===null)continue;
+                                        if( (pDefValue.indexOf("=")==0&&itemData.value==pDefValue.substr(1,pDefValue.length-1))
+                                            ||(pDefValue.indexOf("<")==0&&itemData.value<pDefValue.substr(1,pDefValue.length-1))
+                                            ||(pDefValue.indexOf(">")==0&&itemData.value>pDefValue.substr(1,pDefValue.length-1)) ){
+                                            defValue=itemData.value; break;
+                                        } else if(itemData.value==pDefValue){
+                                            defValue=itemData.value; break;
+                                        }
+                                    }
+                                    select.set("value",defValue,callOnUpdate);
+                                } else
+                                    select.set("value",value,callOnUpdate);
                             }
                             if(callback) callback();
                         });
                 };
                 select.selectToggleDropDown= select.toggleDropDown;
                 select.toggleDropDown= function(){
-                    select.loadDropDownValuesFromServer(function(){
+                    select.loadDropDownValuesFromServer(true,function(){
                         select.selectToggleDropDown();
                     });
                 };
@@ -561,14 +578,28 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(this.buttonPrint!=false&&!this.btnPrint) this.addBtnPrint();
                 if(this.buttonExportToExcel!=false&&!this.btnExportToExcel) this.addBtnExportToExcel();
                 this.layout();
-                if(this.headerData)
-                    for(var i=0;i<this.headerData.length;i++){
-                        var headerDataItem=this.headerData[i], headerInstanceType=headerDataItem.type, headerInstance=headerDataItem.instance;
-                        if(headerInstanceType=="SelectBox"&&headerInstance.loadDropDownValuesFromServer) headerInstance.loadDropDownValuesFromServer();
+                if(!this.headerData||this.headerData.length==0){
+                    this.loadTableContent();
+                    this.startedUp=true;
+                    return;
+                }
+                var initHeaderData= function(headerData,i, fcallback){
+                    var headerDataItem= headerData[i];
+                    if(!headerDataItem){ fcallback(); return; }
+                    var headerInstanceType= headerDataItem.type, headerInstance= headerDataItem.instance;
+                    if(headerInstanceType=="SelectBox"&&headerInstance.loadDropDownValuesFromServer){
+                        headerInstance.loadDropDownValuesFromServer(false,function(){
+                            initHeaderData(headerData,i+1,fcallback);
+                        });
+                        return;
                     }
-                this.loadTableContent();
-                this.startedUp=true;
-                return this;
+                    initHeaderData(headerData,i+1,fcallback);
+                };
+                var self=this;
+                initHeaderData(this.headerData,0,function(){
+                    self.loadTableContent();
+                    self.startedUp=true;
+                });
             },
 
             /**
