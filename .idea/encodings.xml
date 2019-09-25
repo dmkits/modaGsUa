@@ -24,7 +24,7 @@
     <file url="file://$PROJECT_DIR$/start_8080-btk.sh" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/start_8181-debugBtk.cmd" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/start_8181-debugBtk.sh" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/sysAdmins.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/sysadmins.json" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

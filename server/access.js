@@ -1,7 +1,7 @@
 var path=require('path'), fs=require('fs');
-var log=require("./server").log,
-    server=require("./server"),
-    appStartupParams=server.getAppStartupParams(), getSysConfig=server.getSysConfig, getAppConfig=server.getAppConfig,
+var server=require("./server"), log= server.log,
+    appStartupParams= server.getAppStartupParams(), getSysConfig= server.getSysConfig,
+    getAppConfigName= server.getAppConfigName, getAppConfig= server.getAppConfig,
     database=require("./databaseMSSQL"),
     appModules=require(appModulesPath),
     common=require("./common");
@@ -9,6 +9,11 @@ var log=require("./server").log,
 var sysadminsList={};
 
 module.exports= function(app){
+    var getAIDCN= function(){//get application ID or if not exists application config name
+        var appConfig= (getAppConfig)?getAppConfig():null;
+        if(appConfig&&appConfig.appID) return appConfig.appID;
+        return (getAppConfigName)?getAppConfigName():null;
+    };
     var isReqJSON = function(method,headers){
         return (headers && (
             (headers["x-requested-with"] && headers["x-requested-with"] == "application/json; charset=utf-8")
@@ -32,17 +37,14 @@ module.exports= function(app){
     };
     var renderToLogin= function(res,loginMsg){
         var appConfig=getAppConfig();
-        res.render(appPagesPath+"login.ejs", {
-            title: (appConfig&&appConfig.title)?appConfig.title:"",
-            loginMsg: loginMsg
-        });
+        res.render(appPagesPath+"login.ejs", {title:(appConfig&&appConfig.title)?appConfig.title:"",loginMsg:loginMsg});
     };
     var isMobileReq= function(req){
         var userAgent=req.headers["user-agent"];
         if(!userAgent) return false;
         return (userAgent.indexOf("Android")>=0||userAgent.indexOf("Mobile")>=0);
     };
-    var renderIsMobile= function (req,res,next){
+    var renderIsMobile= function(req,res,next){
         if(req.originalUrl.indexOf("/mobile")==0){ req.isMobile=true; next(); return true; }
         if(isMobileReq(req)){
             if(isReqJSON(req.method,req.headers) || isReqInternalPage(req.method,req.headers)){
@@ -53,27 +55,21 @@ module.exports= function(app){
         }
         return false;
     };
-    var renderToAccessFailed= function (req,res,msg){
+    var renderToAccessFailed= function(req,res,msg){
         if(isReqInternalPage(req.method,req.headers)){
-            res.render(appPagesPath+"accessFailedInternal.ejs", {
-                errorReason: msg
-            });
+            res.render(appPagesPath+"accessFailedInternal.ejs", {errorReason:msg});
             return;
         }
         var appConfig=getAppConfig();
-        res.render(appPagesPath+"accessFailed.ejs", {
-            title: (appConfig&&appConfig.title)?appConfig.title:"",
-            bigImg: "imgs/girls_big.jpg",
-            icon: "icons/profits32x32.jpg",
-            errorReason: msg
-        });
+        res.render(appPagesPath+"accessFailed.ejs",
+            {title:(appConfig&&appConfig.title)?appConfig.title:"",errorReason:msg,
+                bigImg:"imgs/girls_big.jpg",icon: "icons/profits32x32.jpg"});
     };
     /**
-     *
      * failResult = { error, userErrorMsg, pageMsg}
      */
-    var accessFail= function (req,res,next,failResult) {
-        if(!failResult)failResult={error:"Access FAIL!", userErrorMsg:"Доступ не удался!", pageMsg:"Доступ не удался!"};
+    var accessFail= function(req,res,next,failResult){
+        if(!failResult)failResult={error:"Access FAIL!",userErrorMsg:"Доступ не удался!",pageMsg:"Доступ не удался!"};
         if(isReqJSON(req.method,req.headers)){
             res.send({error:{error:failResult.error,userMessage:failResult.userErrorMsg}}); return;
         }
@@ -81,25 +77,25 @@ module.exports= function(app){
         if(isReqInternalPage(req.method,req.headers))renderToAccessFailed(req,res,failResult.pageMsg);
         renderToLogin(res,failResult.pageMsg);
     };
-    var readSysadminsUUIDList=function (){
+    var readSysadminsUUIDList= function(){
         try{
-            var readSysadminsList=JSON.parse(fs.readFileSync(path.join(__dirname,"../sysAdmins.json")));
+            var readSysadminsList= JSON.parse(fs.readFileSync(path.join(__dirname,"../sysadmins.json")));
             sysadminsList=readSysadminsList;
         }catch(e){
             if(e.code=='ENOENT'){
                 var readSysadminsList={};
                 try{
-                    fs.writeFileSync(path.join(__dirname,"../sysAdmins.json"), JSON.stringify(readSysadminsList),{flag:"w"});
+                    fs.writeFileSync(path.join(__dirname,"../sysadmins.json"), JSON.stringify(readSysadminsList),{flag:"w"});
                     sysadminsList=readSysadminsList;
                 }catch(e2){
                 }
             }
         }
     };
-    var getSysadminNameByUUID=function(uuid){
+    var getSysadminNameByUUID= function(uuid){
         if(!sysadminsList) return;
         for(var saUUID in sysadminsList)
-            if (saUUID==uuid) return sysadminsList[saUUID];
+            if(saUUID==uuid) return sysadminsList[saUUID];
     };
     /**
      * callback = function(<error message>,{<database user parameters>})
@@ -115,7 +111,7 @@ module.exports= function(app){
             "EmpID=(select EmpID from r_Users where UserName=SUSER_NAME()), "+
             "EmpName=(select EmpName from r_Users u, r_Emps e where e.EmpID=u.EmpID and u.UserName=SUSER_NAME()),"+
             "EmpRole=(select un.Notes from r_Users u, r_Emps e,r_Uni un where e.EmpID=u.EmpID and u.UserName=SUSER_NAME() and un.RefTypeID=10606 and un.RefID=e.ShiftPostID)",
-            function(err, recordset){
+            function(err,recordset){
                 if(err||(recordset&&recordset.length==0)){
                     callback("Не удалось получить данные пользователя из базы даных! Обратитесь к системному администратору.");
                     return;
@@ -123,23 +119,43 @@ module.exports= function(app){
                 callback(null,recordset[0]);
             });
     };
-    app.use(function (req, res, next){                                                                          log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
+    app.use(function(req,res,next){                                                                             log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
         res.header("Access-Control-Allow-Headers","origin, Content-Type,Content-Length, Accept, X-Requested-With, uuid");
         setAccessControlAllowOriginForMapp(req,res);
         if(req.originalUrl.indexOf("/login")==0){ next(); return; }                                             //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
-        var uuid=('uuid' in req.cookies)?req.cookies.uuid:req.headers['uuid'];
-        if(uuid===undefined||uuid===null){
+        var reqAIDCN= ('aidcn' in req.cookies)?req.cookies.aidcn:req.headers['aidcn'], aidcn= getAIDCN(),
+            uuid=('uuid' in req.cookies)?req.cookies.uuid:req.headers['uuid'],
+            sysadminName= getSysadminNameByUUID(uuid);
+        if(reqAIDCN===undefined||reqAIDCN===null){
             accessFail(req,res,next,{
-                error: "Failed to get data! Reason: user is not authorized!",
-                userErrorMsg: "Не удалось получить данные. Пользователь не авторизирован."
+                error: "Failed to get data! Reason: no application config identifier!",
+                userErrorMsg: "Не удалось получить данные. <br>Не удалось определить идентификатор приложения.",
+                pageMsg: "<div>Доступ к приложению невозможен. <br>Не удалось определить идентификатор приложения. "+
+                    "<br>Обратитесь к системному администратору!</div>"
             });
             return;
         }
-        var userConnectionData=database.getUserConnectionData(uuid);
-        var sysadminName=getSysadminNameByUUID(uuid);
-        if(sysadminName)req.dbSysadminName=sysadminName;
+        if(reqAIDCN!=aidcn){
+            var msgPostfix= (!sysadminName)?"Обратитесь к системному администратору.":"Попытка доступа к приложению с идентификатором \""+aidcn+"\".";
+            accessFail(req,res,next,{
+                error: "Failed to get data! Reason: application config identifier non correct!",
+                userErrorMsg: "Не удалось получить данные! <br>Неверный идентификатор приложения. <br>"+msgPostfix,
+                pageMsg: "<div>Доступ к приложению невозможен! <br>Неверный идентификатор приложения. <br>"+msgPostfix+"</div>"
+            });
+            return;
+        }
+        if(uuid===undefined||uuid===null){
+            accessFail(req,res,next,{
+                error: "Failed to get data! Reason: user is not authorized!",
+                userErrorMsg: "Не удалось получить данные. <br>Пользователь не авторизирован. <br>Необходимо авторизироваться.",
+                pageMsg: "<div>Пользователь не авторизирован. <br>Необходимо авторизироваться.</div>"
+            });
+            return;
+        }
+        var userConnectionData= database.getUserConnectionData(uuid);
+        if(sysadminName) req.dbSysadminName= sysadminName;
         if(sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
-            req.dbUC = (userConnectionData)?userConnectionData.connection:null;
+            req.dbUC= (userConnectionData)?userConnectionData.connection:null;
             getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
                 req.dbUserParams=dbUserParameters;
                 if(errMsg){
@@ -153,13 +169,11 @@ module.exports= function(app){
         }
         if(database.getSystemConnectionErr()){
             var msg="Нет системного подключения к базе данных! <br>Обратитесь к системному администратору.";
-            if (isReqJSON(req.method,req.headers)) {
-                res.send({ error:{error:"Failed to get data! Reason: failed get system connection to database!",userMessage:msg} });
+            if(isReqJSON(req.method,req.headers)){
+                res.send({error:{error:"Failed to get data! Reason: failed get system connection to database!",userMessage:msg}});
                 return;
             }
-            if(sysadminName&&req.originalUrl!=="/sysadmin") {
-                res.redirect('/sysadmin');return;
-            }
+            if(sysadminName&&req.originalUrl!=="/sysadmin"){ res.redirect('/sysadmin');return; }
             if(renderIsMobile(req,res,next))return;
             renderToAccessFailed(req,res,msg);
             return;
@@ -167,8 +181,8 @@ module.exports= function(app){
         if(!userConnectionData||!userConnectionData.connection){
             accessFail(req,res,next,{
                 error: "Failed to get data! Reason: user is not authorized!",
-                userErrorMsg: "Не удалось получить данные. Пользователь не авторизирован.",
-                pageMsg: "<div>Время сессии истекло.<br> Необходима авторизация.</div>"
+                userErrorMsg: "Не удалось получить данные. <br>Время авторизированного доступа истекло. <br>Нужно авторизироваться повторно.",
+                pageMsg: "<div>Время сессии истекло. <br>Необходима авторизация.</div>"
             });
             return;
         }
@@ -187,7 +201,8 @@ module.exports= function(app){
                 accessFail(req,res,next,{
                     error: "ailed to get data! Reason: failed to get login user data from database!",
                     userErrorMsg: errMsg,
-                    pageMsg:'<div><p><span style="color:red">Вход невозможен!<br>Не удалось получить данные пользователя из базы данных!<br>Обратитесь к системному администратору!</span></p></div>'
+                    pageMsg:'<div><p><span style="color:red">Вход невозможен! <br>Не удалось получить данные пользователя из базы данных! '+
+                        '<br>Обратитесь к системному администратору!</span></p></div>'
                 });
                 return;
             }
@@ -199,7 +214,8 @@ module.exports= function(app){
                 accessFail(req,res,next,{
                     error: "Failed to get data! Reason: database not valid!",
                     userErrorMsg: "Невозможно получить данные! База данных не прошла проверку! Обратитесь к системному администратору!",
-                    pageMsg:'<div><p><span style="color:red">Вход невозможен!<br>Проверка базы данных завершилась неудачно!<br>Обратитесь к системному администратору!</span></p></div>'
+                    pageMsg:'<div><p><span style="color:red">Вход невозможен! <br>Проверка базы данных завершилась неудачно! '+
+                        '<br>Обратитесь к системному администратору!</span></p></div>'
                 });
                 return;
             }
@@ -208,7 +224,8 @@ module.exports= function(app){
                 accessFail(req,res,next,{
                     error: "Failed to get data! Reason: failed load/init application modules!",
                     userErrorMsg: "Невозможно получить данные! Не все модули приложения были корректно загружены! Обратитесь к системному администратору!",
-                    pageMsg:'<div><p><span style="color:red">Вход невозможен!<br>Не все модули приложения были корректно загружены!<br>Обратитесь к системному администратору!</span></p></div>'
+                    pageMsg:'<div><p><span style="color:red">Вход невозможен! <br>Не все модули приложения были корректно загружены! '+
+                        '<br>Обратитесь к системному администратору!</span></p></div>'
                 });
                 return;
             }
@@ -225,7 +242,7 @@ module.exports= function(app){
      */
     var storeSysadminUUID= function(sysadminData, callback){
         sysadminsList[sysadminData.uuid]=sysadminData.userName;
-        fs.writeFile(path.join(__dirname,"../sysAdmins.json"), JSON.stringify(sysadminsList),{flag:"w"}, function(err){
+        fs.writeFile(path.join(__dirname,"../sysadmins.json"), JSON.stringify(sysadminsList),{flag:"w"}, function(err){
             if(err){                                                                                            log.error("storeSysadminUUID: Failed store sysadmins data! Reason:",err);
             }
             if(callback)callback();
@@ -259,7 +276,9 @@ module.exports= function(app){
                 return;
             }
             if(isSysadmin) storeSysadminUUID({uuid:uuid,userName:userName});
-            res.cookie("uuid", uuid);
+            res.cookie("uuid",uuid);
+            var aidcn= getAIDCN();
+            if(aidcn) res.cookie("aidcn",aidcn);
             getDBUserData(result.dbUC, function(errMsg,dbUserParameters){
                 if(errMsg) outData.dbUserError= errMsg;
                 if(dbUserParameters){

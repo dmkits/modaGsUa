@@ -43,15 +43,16 @@
 <script type="text/javascript"> //$app.dev(true);
     $app.startup("#sysadmin_page",function(){                                                               log("START SYSADMIN PAGE...",this,$$);//!!!IT'S FOR TESTING!!!
         $$.sysadmin_btnLogout.onClick=function(){
-            $$.request.postJSONData({url:"/",data:{action:"exit"},consoleLog:true},function(result){
+            $$.request.postJSONData({url:"/exit",consoleLog:true},function(result){
                 if(result&&result.actionResult=="successful"){
-                    window.location.replace(window.location.href); return;
+                    window.location.replace(window.location.href);
+                    return;
                 }
-                var cookies = document.cookie.split(";");
-                for(var i = 0; i < cookies.length; i++){
-                    var cookie = cookies[i], eqPos = cookie.indexOf("="),
-                            name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                var cookies= document.cookie.split(";");
+                for(var i=0; i<cookies.length; i++){
+                    var cookie= cookies[i], eqPos= cookie.indexOf("="), name= eqPos>-1 ? cookie.substr(0,eqPos) : cookie;
+                    if(name!="uuid") continue;
+                    document.cookie= name+"=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
                 }
                 window.location.replace(window.location.href);
             });

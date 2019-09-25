@@ -53,11 +53,12 @@ module.exports.loadSysConfig= loadSysConfig;                                    
 module.exports.getSysConfig= function(){ return sysConfig };
 module.exports.setSysConfig= function(newSysConfig){ sysConfig= newSysConfig; };
 
-var appConfigFileName= (sysConfig&&sysConfig.configName)?sysConfig.configName:'config.json',
-    appConfig= JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+appConfigFileName,'utf-8')));
-module.exports.getAppConfig=function(){ return appConfig; };
-module.exports.getConfigAppMenu=function(){ return (appConfig&&appConfig.appMenu)?appConfig.appMenu:null; };
-module.exports.getConfigModules=function(){ return (appConfig&&appConfig.modules)?appConfig.modules:null; };
+var getAppConfigName= function(){ return (sysConfig&&sysConfig.configName)?sysConfig.configName:'config';},
+    appConfig= JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+getAppConfigName()+'.json','utf-8')));
+module.exports.getAppConfigName= getAppConfigName;
+module.exports.getAppConfig= function(){ return appConfig; };
+module.exports.getConfigAppMenu= function(){ return (appConfig&&appConfig.appMenu)?appConfig.appMenu:null; };
+module.exports.getConfigModules= function(){ return (appConfig&&appConfig.modules)?appConfig.modules:null; };
 
 var tempExcelRepDir=path.join(__dirname, '/../temp/');
 try {

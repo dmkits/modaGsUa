@@ -84,10 +84,10 @@
                     $$.main_page.$.addInnerPage({region:"center", title:menuItemData.menuTitle, closable:false, style:"margin:0;padding:0;",content:exitContent});
                     return;
                 }
-                var cookies = document.cookie.split(";");
+                var cookies= document.cookie.split(";");
                 for(var i=0; i<cookies.length; i++){
-                    var cookie= cookies[i], eqPos = cookie.indexOf("="),
-                            name= eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    var cookie= cookies[i], eqPos = cookie.indexOf("="), name= eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    if(name!="uuid") continue;
                     document.cookie= name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
                 }
                 exitContent= "<div>Вы закрыли все окна.</div>";
