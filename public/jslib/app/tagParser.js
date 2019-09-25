@@ -1,9 +1,9 @@
-define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/layout/ContentPane",
+define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/layout/ContentPane", "dijit/ConfirmDialog",
         "dijit/layout/TabContainer", "dijit/layout/StackContainer","dijit/layout/StackController", "dijit/TitlePane",
         "dijit/MenuBar", "dijit/MenuBarItem", "dijit/PopupMenuBarItem", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator",
         "dijit/form/Button","dijit/form/ToggleButton", "dijit/form/TextBox","dijit/form/DateTextBox",
         "app/innerComponentFunctions"],
-    function(BorderContainer,LayoutContainer,ContentPane,
+    function(BorderContainer,LayoutContainer,ContentPane, ConfirmDialog,
              TabContainer, StackContainer, StackController, TitlePane,
              MenuBar, MenuBarItem, PopupMenuBarItem, Menu, MenuItem, MenuSeparator,
              Button,ToggleButton, TextBox, DateTextBox,
@@ -41,6 +41,7 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                 if(node.tagName=="BorderContainer".toUpperCase()) tagClass=BorderContainer;
                 else if(node.tagName=="LayoutContainer".toUpperCase()) tagClass=LayoutContainer;
                 else if(node.tagName=="ContentPane".toUpperCase()) tagClass=ContentPane;
+                else if(node.tagName=="ConfirmDialog".toUpperCase()) tagClass=ConfirmDialog;
                 else if(node.tagName=="TabContainer".toUpperCase()) tagClass=TabContainer;
                 else if(node.tagName=="StackContainer".toUpperCase()) tagClass=StackContainer;
                 else if(node.tagName=="StackController".toUpperCase()) tagClass=StackController;
@@ -48,7 +49,7 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                 if(!tagClass)return;
                 var params={tagName:node.tagName};
                 this.parseNodeAttributes(params,node,
-                    ["class","style","region","design","gutters","liveSplitters","splitter","tabPosition","containerId","title","iconClass"],
+                    ["class","style","region","design","gutters","liveSplitters","splitter","tabPosition","containerId","title","iconClass","autofocus"],
                     {"childIconClass":"iconClass"});
                 var d=new tagClass(params,node);                                                            //log('tagParser.createContainerTags: d=',d);
                 d.domNode.setAttribute("tagName",node.tagName);
@@ -124,8 +125,8 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                 if(startupList.length>0)startupList[0].startup();                                           //log("startupList",startupList);
             },
             parseContainer: function(ind,containerNode,$page, startupList){
-                var containerChild=containerNode.children[ind];
-                if(!containerChild)return;                                                                  //log('tagParser.parseContainer: containerChild=', containerChild);
+                var containerChild=containerNode.children[ind];                                             //log('tagParser.parseContainer: containerChild=', containerChild,containerNode.tagName,containerNode.id,$page);
+                if(!containerChild)return;                                                                  //log('tagParser.parseContainer: containerChild=', containerChild,containerChild.tagName,containerChild.id);
                 var newNode=this.createBaseTags(containerChild);
                 if(!newNode)newNode=this.createContainerTags(containerChild, startupList);
                 if(!newNode)newNode=this.createMenuTags(containerChild);
@@ -146,6 +147,7 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                     $page[containerChild.id]=containerChild;$page.$nItems[containerChild.id]=containerChild;
                 }
                 if(containerChild.children.length>0) this.parseContainer(0,containerChild,$page,startupList);
+                else if(newNode&&newNode.tagName=="ConfirmDialog".toUpperCase())this.parseContainer(0,newNode.containerNode,$page,startupList);
                 if(newNode&&newNode.labelTag) ind++;
                 this.parseContainer(ind+1,containerNode,$page,startupList);
             }
