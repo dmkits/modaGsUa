@@ -86,10 +86,12 @@ define(["dojo/request", "app/base","app/dialogs"],
                     })
             },
             /** processJSONDataResult
+             * respJSON = { error:"<error message>", errorMessage="<user error message>", [resultItemName], <other data items> }
+             * OR respJSON = { error:{error,message,errorMessage,userMessage}, [resultItemName], <other data items> }
+             * if exists error and error is string, may be errorMessage
              * params = { showErrorDialog, errorDialogMsg, errorDialogReasonMsg, resultItemName }
-             * resParams={ dlgErrMsgReqErr, dlgErrReasonReqErrState0, dlgErrReasonReqErr, dlgErrMsgRespErr, dlgErrReasonRespErrNoData }
-             * resultCallback = function(<response result>, <error>),
-             *      <error> = { message, errorMessage, userMessage, _reqError }
+             * resParams = { dlgErrMsgReqErr, dlgErrReasonReqErrState0, dlgErrReasonReqErr, dlgErrMsgRespErr, dlgErrReasonRespErrNoData }
+             * resultCallback = function(<response result>, <error>), <error> = { message, errorMessage, userMessage, _reqError }
              * call resultCallback(<response result>) if request success and no result.error
              * call resultCallback(undefined, <error>) if request not success OR
              * call resultCallback(<response result>, <error>) if request success and exists <response result>.error
@@ -112,11 +114,16 @@ define(["dojo/request", "app/base","app/dialogs"],
                     return;
                 }else if(!error&&respJSON&&respJSON.error){// response contain error
                     var respErr=respJSON.error, respErrObj=(typeof(respErr)=="object")?respErr:null,
-                        errMsg=(respErrObj)?(respErrObj.message||"UNKNOWN"):respErr,
-                        resErr={message:errMsg, errorMessage:errMsg};
+                        errMsg=(respErrObj)?(respErrObj.message||"UNKNOWN"):(respJSON.errorMessage||respErr),
+                        resErr={message:(!respErrObj)?respErr:errMsg, errorMessage:errMsg};
+                    if(respErrObj&&respErrObj.errorMessage){
+                        errMsg=respErrObj.errorMessage;
+                        resErr.message=resErr.message||respErr.errorMessage;
+                        resErr.errorMessage=respErr.errorMessage; resErr.userMessage=respErr.errorMessage;
+                    }
                     if(respErrObj&&respErrObj.userMessage){
                         errMsg=respErrObj.userMessage;
-                        resErr.message=respErr.userMessage; resErr.userMessage=respErr.userMessage;
+                        resErr.message=resErr.message||respErr.userMessage; resErr.userMessage=respErr.userMessage;
                     }
                     console.error("Response return error! Error:",respErr,"Result:",respJSON,"Request params:",params);
                     if(requestFailDialog) requestFailDialog(resParams.dlgErrMsgRespErr,errMsg);
@@ -152,6 +159,9 @@ define(["dojo/request", "app/base","app/dialogs"],
             /** jsonData
              * params = { url, method:"get"/"post", conditions, timeout, showErrorDialog, errorDialogMsg,errorDialogReasonMsg, consoleLog, resultItemName }
              * default: method="get", params.showErrorDialog = true, params.consoleLog = true
+             * response result should contain JSON
+             * result JSON may be object as { error:"<error message>", errorMessage="<user error message>", [resultItemName], <other data items> }
+             *          OR { error:{error,message,errorMessage,userMessage}, [resultItemName], <other data items> }
              * resultCallback = function(<response result>, <error>),
              *      <error> = { message, errorMessage, userMessage, _reqError }
              * call resultCallback(<response result>) if request success and no result.error
