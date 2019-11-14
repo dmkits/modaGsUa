@@ -17,7 +17,7 @@
                 rightPane:{width:300},
                 dataStoreURL:"/dirs/products/storeProductsWBCTableData"
             })
-            .addSelectBox("Категория номенлатуры",{width:300, loadDropDownURL:"/dirs/products/getDirPCatsForSelect", defValue:">0",
+            .addSelectBox("Категория номенлатуры",{id:"dirsProducts_selPCats", width:300, loadDropDownURL:"/dirs/products/getDirPCatsForSelect", defValue:">0",
                 contentTableCondition:"PCatID="})
 //            .addCheckBtnCondition("Используемые",{width:90,contentTableConditions:{"InUse~":"1"}})
 //            .addCheckBtnCondition("Неиспользуемые",{width:90,contentTableConditions:{"InUse~":"0"}})
@@ -28,7 +28,7 @@
                     if(!params.contentHTableSelectedRow){ params.thisToolPane.set("content",""); return; }
                     var info="<b>Код товара</b>:"+params.contentHTableSelectedRow["ProdID"]
                             +"<br><b>Наименование товара</b>:"+params.contentHTableSelectedRow["ProdName"]
-                            +"<br><b>Осн. Ед.изм.</b>:"+params.contentHTableSelectedRow["BaseUM"]
+                            +"<br><b>Осн. Ед.изм.</b>:"+params.contentHTableSelectedRow["UM"]
                             +"<br><b>Артикул1</b>:"+(params.contentHTableSelectedRow["Article1"]||"")
                             +"<br><b>Товар участвует в остатках</b>:"+((params.contentHTableSelectedRow["InRems"])?"ДА":"НЕТ")
                             +"<br><b>У товара дробное количество</b>:"+((params.contentHTableSelectedRow["IsDecQty"])?"ДА":"НЕТ")
@@ -48,7 +48,7 @@
                             +"<br><b>Подгруппа 3 товара</b>:"+params.contentHTableSelectedRow["PGrName3"]
                             +"<br><b>Примечание товара</b>:"+(params.contentHTableSelectedRow["Notes"]||"")
                             +"<br><b>Штрихкод</b>:"+params.contentHTableSelectedRow["Barcode"]
-                            +"<br><b>Ед.изм. ШК</b>:"+params.contentHTableSelectedRow["UM"];
+                            +"<br><b>Ед.изм. ШК</b>:"+params.contentHTableSelectedRow["BCUM"];
                     params.thisToolPane.set("content",info);
                 }
             })
@@ -59,10 +59,14 @@
             .addContentTablePopupMenuTableRowsAction("Изменить строки",{actionName:"allowEditTableSelectedRows"})
             .addContentTablePopupMenuTableRowsAction("Сохранить строки",{actionName:"storeTableSelectedRows"})
             .addContentTableOnChangeRowAction(function(crd/*changedRowData*/, contentTable, params, nextCallback){
-                if(crd.item("PCatName").isChanged())
+                var selPCats= params.docHeaderDataItems["dirsProducts_selPCats"];
+                if(selPCats&&selPCats.value!=-1){
+                    crd.item("PCatID").setValue(selPCats.value);
+                    crd.item("PCatName").setValue(selPCats.textDirNode.textContent);
+                }else if(crd.item("PCatName").isValueChanged())
                     crd.item("PCatID").setValue(contentTable.getAutocompleteColumnValueForItem("PCatName",crd.item("PCatName").getValue(),"PCatID"));
-                if(crd.item("PGrName").isChanged())
-                    crd.item("PGrID").setValue(contentTable.getAutocompleteColumnValueForItem("PGrName",crd.item("PGrName").getValue(),"PGrID"));
+                if(crd.item("PGrName").isValueChanged())
+                    crd.item("PGrID").setValue(contentTable.getAutocompleteColumnValueForItem("PGrName", crd.item("PGrName").getValue(), "PGrID"));
                 nextCallback();
             });
     $$.dirsProducts_DirProdsWBC.onShow= function(){

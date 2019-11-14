@@ -97,8 +97,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
             loadTableContent: function(additionalConditions){                                               //console.log("TDocSimpleTable loadTableContent",this.dataURL,this);
                 var conditions = (this.dataURLCondition)?this.dataURLCondition:{};
                 if(this.headerData){
-                    for(var i=0; i<this.headerData.length;i++){
-                        var headerDataItem=this.headerData[i], headerInstanceType=headerDataItem.type, headerInstance=headerDataItem.instance;
+                    for(var hdID in this.headerData){
+                        var headerDataItem= this.headerData[hdID], headerInstanceType=headerDataItem.type, headerInstance=headerDataItem.instance;
                         if(headerInstanceType=="DateBox"&&headerInstance.contentTableCondition){
                             conditions[headerInstance.contentTableCondition.replace("=","~")] =
                                 headerInstance.format(headerInstance.get("value"),{selector:"date",datePattern:"yyyy-MM-dd"});
@@ -161,8 +161,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 var dateBox= $TDF.addTableCellDateBoxTo(this.topTableRow,
                     {labelText:labelText, labelStyle:"margin-left:5px;", cellWidth:params.width, cellStyle:"text-align:right;",
                         initValueDate:initValueDate});
-                if(!this.headerData) this.headerData=[];
-                this.headerData.push({type:"DateBox",instance:dateBox});
+                if(!this.headerData) this.headerData={};
+                this.headerData[dateBox.id]= {type:"DateBox",instance:dateBox};
                 if(params.contentTableCondition) dateBox.contentTableCondition=params.contentTableCondition;
                 if(params.contentTableParam) dateBox.contentTableParam=params.contentTableParam;
                 var instance = this;
@@ -178,21 +178,19 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if (params.width===undefined) params.width=100;
                 var btnChecked= true;
                 if(this.headerData){
-                    for(var i=0;i<this.headerData.length;i++)
-                        if(this.headerData[i].type=="CheckButton"){
-                            btnChecked= false; break;
-                        }
+                    for(var hdID in this.headerData)
+                        if(this.headerData[hdID].type=="CheckButton"){ btnChecked= false; break; }
                 }
                 var checkBtn= $TDF.addTableCellButtonTo(this.btnsTableRow, {labelText:labelText, cellWidth:params.width,
                     cellStyle:"text-align:center;", btnChecked:btnChecked});
-                if(!this.headerData) this.headerData=[];
-                this.headerData.push({type:"CheckButton",instance:checkBtn});
+                if(!this.headerData) this.headerData={};
+                this.headerData[checkBtn.id]= {type:"CheckButton",instance:checkBtn};
                 checkBtn.contentTableConditions=params.contentTableConditions;
                 checkBtn.printParams={cellWidth:params.width, labelText:labelText};
                 var instance = this;
                 checkBtn.onClick = function(){
-                    for(var i=0;i<instance.headerData.length;i++) {
-                        var headerDataItem = instance.headerData[i];
+                    for(var hdID in instance.headerData){
+                        var headerDataItem = instance.headerData[hdID];
                         if(headerDataItem.type=="CheckButton"&&headerDataItem.instance!=this)
                             headerDataItem.instance.set("checked", false, false);
                         else
@@ -203,44 +201,45 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 return this;
             },
             /**
-             * params = { width, selectStyle, loadDropDownURL, defValue, contentTableCondition:"<conditions>" }
+             * params = { id, width, selectStyle, loadDropDownURL, defValue, contentTableCondition:"<conditions>" }
+             *      id - optional,
              *      loadDropDownURL - URL returned data items for select drop-down list [{label,value},...]
              *      defValue: "<value>" || "=<value>" || "><value>"
              */
             addSelectBox: function(label, params){
                 if(!params) params={};
                 if(!params.width)params.width=275;
-                var select= $TDF.addTableCellSelectTo(this.topTableRow, {labelText:label, labelStyle:"margin-left:5px;",
-                    selectStyle:params.selectStyle,
-                    cellWidth:params.width,cellStyle:"text-align:right;padding-left:10px;",
-                    selectParams:{loadDropDownURL:params.loadDropDownURL,contentTableCondition:params.contentTableCondition} });
-                if(!this.headerData) this.headerData=[];
-                this.headerData.push({type:"SelectBox",instance:select});
+                var selectParams= {loadDropDownURL:params.loadDropDownURL,contentTableCondition:params.contentTableCondition};
+                if(params.id) selectParams.id= params.id;
+                var select= $TDF.addTableCellSelectTo(this.topTableRow,
+                    { cellWidth:params.width,cellStyle:"text-align:right;padding-left:10px;",
+                        labelText:label, labelStyle:"margin-left:5px;", selectStyle:params.selectStyle, selectParams:selectParams });
+                if(!this.headerData) this.headerData={};
+                this.headerData[select.id]= {type:"SelectBox",instance:select};
                 select.loadDropDownValuesFromServer= function(callOnUpdate,callback){
-                    Request.getJSONData({url: select.loadDropDownURL, resultItemName:"items"},
-                        function(resultItems){
-                            var options= select.get("options"),value= select.get("value");
-                            if(resultItems){
-                                select.set("options",resultItems,callOnUpdate);
-                                if((value===undefined||value===null||value=="")&&params.defValue){//exists params.defValue
-                                    var pDefValue= params.defValue.toString().trim(), defValue="";
-                                    for(var i in resultItems){
-                                        var itemData=resultItems[i];
-                                        if(itemData.value===undefined||itemData.value===null)continue;
-                                        if( (pDefValue.indexOf("=")==0&&itemData.value==pDefValue.substr(1,pDefValue.length-1))
-                                            ||(pDefValue.indexOf("<")==0&&itemData.value<pDefValue.substr(1,pDefValue.length-1))
-                                            ||(pDefValue.indexOf(">")==0&&itemData.value>pDefValue.substr(1,pDefValue.length-1)) ){
-                                            defValue=itemData.value; break;
-                                        } else if(itemData.value==pDefValue){
-                                            defValue=itemData.value; break;
-                                        }
+                    Request.getJSONData({url: select.loadDropDownURL, resultItemName:"items"},function(resultItems){
+                        var options= select.get("options"),value= select.get("value");
+                        if(resultItems){
+                            select.set("options",resultItems,callOnUpdate);
+                            if((value===undefined||value===null||value=="")&&params.defValue){//exists params.defValue
+                                var pDefValue= params.defValue.toString().trim(), defValue="";
+                                for(var i in resultItems){
+                                    var itemData=resultItems[i];
+                                    if(itemData.value===undefined||itemData.value===null)continue;
+                                    if( (pDefValue.indexOf("=")==0&&itemData.value==pDefValue.substr(1,pDefValue.length-1))
+                                        ||(pDefValue.indexOf("<")==0&&itemData.value<pDefValue.substr(1,pDefValue.length-1))
+                                        ||(pDefValue.indexOf(">")==0&&itemData.value>pDefValue.substr(1,pDefValue.length-1)) ){
+                                        defValue=itemData.value; break;
+                                    }else if(itemData.value==pDefValue){
+                                        defValue=itemData.value; break;
                                     }
-                                    select.set("value",defValue,callOnUpdate);
-                                } else
-                                    select.set("value",value,callOnUpdate);
-                            }
-                            if(callback) callback();
-                        });
+                                }
+                                select.set("value",defValue,callOnUpdate);
+                            }else
+                                select.set("value",value,callOnUpdate);
+                        }
+                        if(callback) callback();
+                    });
                 };
                 select.selectToggleDropDown= select.toggleDropDown;
                 select.toggleDropDown= function(){
@@ -578,25 +577,27 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(this.buttonPrint!=false&&!this.btnPrint) this.addBtnPrint();
                 if(this.buttonExportToExcel!=false&&!this.btnExportToExcel) this.addBtnExportToExcel();
                 this.layout();
-                if(!this.headerData||this.headerData.length==0){
+                if(!this.headerData||!Object.keys(this.headerData).length){
                     this.loadTableContent();
                     this.startedUp=true;
                     return;
                 }
-                var initHeaderData= function(headerData,i, fcallback){
-                    var headerDataItem= headerData[i];
+
+                var headerDataItems= Object.values(this.headerData);
+                var initHeaderData= function(headerDataItems,i, fcallback){
+                    var headerDataItem= headerDataItems[i];
                     if(!headerDataItem){ fcallback(); return; }
                     var headerInstanceType= headerDataItem.type, headerInstance= headerDataItem.instance;
                     if(headerInstanceType=="SelectBox"&&headerInstance.loadDropDownValuesFromServer){
                         headerInstance.loadDropDownValuesFromServer(false,function(){
-                            initHeaderData(headerData,i+1,fcallback);
+                            initHeaderData(headerDataItems,i+1,fcallback);
                         });
                         return;
                     }
-                    initHeaderData(headerData,i+1,fcallback);
+                    initHeaderData(headerDataItems,i+1,fcallback);
                 };
                 var self=this;
-                initHeaderData(this.headerData,0,function(){
+                initHeaderData(headerDataItems,0,function(){
                     self.loadTableContent();
                     self.startedUp=true;
                 });
@@ -614,16 +615,16 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(this.headerData){                                                                        //console.log("TDocSimpleTable doPrint headerData=",this.headerData);
                     $TDF.addPrintDataItemTo(printData, "header", {newTable:true, style:headerTextStyle});
                     $TDF.addPrintDataSubItemTo(printData, "header");
-                    for(var i in this.headerData){
-                        var headerItemData=this.headerData[i], print=true, value="";                        //console.log('TDocSimpleTable doPrint headerItemData=',headerItemData);
-                        if(headerItemData.type=="DateBox") value=headerItemData.instance.textbox.value;
-                        else if(headerItemData.type=="SelectBox") value=headerItemData.instance.textDirNode.textContent;
-                        else if(headerItemData.type=="CheckButton"){
-                            if(headerItemData.instance.checked==true) value=undefined; else print=false;
+                    for(var hdID in this.headerData){
+                        var headerDataItem= this.headerData[hdID], print=true, value="";                    //console.log('TDocSimpleTable doPrint headerItemData=',headerItemData);
+                        if(headerDataItem.type=="DateBox") value=headerDataItem.instance.textbox.value;
+                        else if(headerDataItem.type=="SelectBox") value=headerDataItem.instance.textDirNode.textContent;
+                        else if(headerDataItem.type=="CheckButton"){
+                            if(headerDataItem.instance.checked==true) value=undefined; else print=false;
                         }
                         if(!print)continue;
                         var printParams={};
-                        if(headerItemData.instance&&headerItemData.instance.printParams)printParams = headerItemData.instance.printParams;
+                        if(headerDataItem.instance&&headerDataItem.instance.printParams)printParams = headerDataItem.instance.printParams;
                         $TDF.addPrintDataSubItemTo(printData, "header",{
                             width:Math.round(printParams.cellWidth*1.1)+5, align:"left",style:headerTextStyle+(printParams.printStyle||""), contentStyle:headerContentStyle,
                             label:printParams.labelText,labelStyle:printParams.labelStyle,

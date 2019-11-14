@@ -38,10 +38,17 @@ define(["dojo/_base/declare", "app/tDocsFunctions", "app/base", "app/tDocSimpleT
                 return this;
             },
             /**
-             * callback(changedRowData, contentTableInstance, params, nextCallback)
+             * contentTableOnChangeRowActionFunction(changedRowData, contentTableInstance, rowChangeActionsParams, nextCallback)
+             *      rowChangeActionsParams = { table = <contentHTable>, docHeaderData = {<id>:{type,instance}, ... }, docHeaderDataItems = {<id>:<headerDataInstance>} }
              */
-            addContentTableOnChangeRowAction: function(callback){
-                this.contentHTable.addOnChangeRowAction(callback);
+            addContentTableOnChangeRowAction: function(contentTableOnChangeRowActionFunction){
+                var docHeaderData=this.headerData, docHeaderDataItems= {};
+                for(var sID in docHeaderData) docHeaderDataItems[sID]= docHeaderData[sID].instance;
+                this.contentHTable.addOnChangeRowAction(
+                    function(changedRowData, contentTableInstance, rowChangeActionsParams, nextCallback){
+                        rowChangeActionsParams.docHeaderData= docHeaderData; rowChangeActionsParams.docHeaderDataItems= docHeaderDataItems;
+                        contentTableOnChangeRowActionFunction(changedRowData, contentTableInstance, rowChangeActionsParams, nextCallback);
+                    });
                 return this;
             },
 
