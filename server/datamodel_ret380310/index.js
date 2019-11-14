@@ -990,7 +990,8 @@ function _insDataItemWithNewID(connection,params,resultCallback){
 /**
  * params = { tableName,
  *      updData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
- *      conditions = { <tableFieldNameCondition>:<value>, ... }
+ *      conditions = { <tableFieldNameCondition>:<value>, ... },
+ *      ignoreErrorNoUpdate = true/false
  * }
  * resultCallback = function(result), result = { updateCount, error })
  */
@@ -1035,7 +1036,7 @@ function _updDataItem(connection, params, resultCallback){
             return;
         }
         var updResult={updateCount:updateCount};
-        if(updateCount==0) updResult.error= "Failed update data item! Reason: no updated row count!";
+        if(updateCount==0&&!params.ignoreErrorNoUpdate) updResult.error= "Failed update data item! Reason: no updated row count!";
         resultCallback(updResult);
     });
 }
@@ -1242,10 +1243,14 @@ function _insTableDataItem(connection, params, resultCallback){
 
 /**
  * params = { tableName, idFieldName, idFields,
- *      tableColumns=[ {<tableColumnData>},... ],
- *      updFields = [<tableFieldName>,...]
- *      updTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
+ *      updFields = [<tableFieldName>,...],
+ *      updTableData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
+ *      updTableFieldsData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
+ *      tableColumns=[ {<tableColumnData>},... ], resultItemIDFields = [<idFieldName>,...]
  * }
+ * params may be contain updTableData with or without updFields, OR only updTableFieldsData
+ * tableColumns used for return resultItem data
+ * if exists resultItemConditions resultItem data returned by resultItemConditions
  * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
  */
 function _updTableDataItem(connection, params, resultCallback){
@@ -1258,7 +1263,7 @@ function _updTableDataItem(connection, params, resultCallback){
         resultCallback({error:"Failed update table data item! Reason:no table name!"});
         return;
     }
-    if(!params.updTableData){                                                                                   log.error("FAILED _updTableDataItem "+params.tableName+"! Reason: no data for update!");//test
+    if(!params.updTableData&&!params.updTableFieldsData){                                                       log.error("FAILED _updTableDataItem "+params.tableName+"! Reason: no data for update!");//test
         resultCallback({error:"Failed update table data item! Reason:no data for update!"});
         return;
     }
@@ -1277,6 +1282,9 @@ function _updTableDataItem(connection, params, resultCallback){
             var fieldName= params.updFields[i];
             if(!idFiledsNames[fieldName]) params.updData[fieldName]= params.updTableData[fieldName];
         }
+    }else if(params.updTableFieldsData){
+        for(var updFieldName in params.updTableFieldsData)
+            if(!idFiledsNames[updFieldName]) params.updData[updFieldName]= params.updTableFieldsData[updFieldName];
     }else if(this.fields){
         for(var i in this.fields){
             var fieldName= this.fields[i];
@@ -1287,17 +1295,20 @@ function _updTableDataItem(connection, params, resultCallback){
             if(!idFiledsNames[updFieldName]) params.updData[updFieldName]= params.updTableData[updFieldName];
     }
     params.conditions= {};
-    if(idFieldName)
+    if(idFieldName&&params.updTableData)
         params.conditions[params.tableName+"."+idFieldName+"="]= params.updTableData[idFieldName];
+    else if(idFieldName&&params.updTableFieldsData)
+        params.conditions[params.tableName+"."+idFieldName+"="]= params.updTableFieldsData[idFieldName];
     else
         for(var i in idFields){
-            var idFieldNameItem= idFields[i];
-            params.conditions[params.tableName+"."+idFieldNameItem+"="]= params.updTableData[idFieldNameItem];
+            var idFieldNameItem= idFields[i],
+                idFieldVal= (params.updTableData)?params.updTableData[idFieldNameItem]:params.updTableFieldsData[idFieldNameItem];
+            params.conditions[params.tableName+"."+idFieldNameItem+"="]= idFieldVal;
         }
     var thisInstance=this;
     _updDataItem(connection, params, function(updResult){
         if(updResult.error){ resultCallback(updResult); return; }
-        thisInstance.getDataItemForTable(connection, {source:params.tableName, tableColumns:params.tableColumns, conditions:params.conditions},
+        thisInstance.getDataItemForTable(connection, {source:params.tableName, tableColumns:params.tableColumns, conditions:params.resultItemConditions||params.conditions},
             function(result){
                 if(result.error) updResult.error= "Failed get result updated data item! Reason:"+result.error;
                 if(result.item) updResult.resultItem= result.item;

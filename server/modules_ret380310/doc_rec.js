@@ -179,6 +179,8 @@ module.exports.init = function(app){
         {data:"ProdName", name:"Наименование товара", width:350, type:"text",
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
         {data:"UM", name:"Ед. изм.", width:55, type:"text", align:"center", dataSource:"t_RecD", sourceField:"UM"},
+        {data:"BCUM", name:"Ед. изм. ШК", width:55, type:"text", align:"center", visible:false,
+            childDataSource:"r_ProdMQ", sourceField:"UM", childLinkCondition:"r_ProdMQ.ProdID=t_RecD.ProdID and r_ProdMQ.Barcode=t_RecD.Barcode"},
         {data:"Qty", name:"Кол-во", width:50, type:"numeric", dataSource:"t_RecD"},
         {data:"PPID", name:"Партия", width:60, type:"numeric", visible:false},
         {data:"PriceCC_wt", name:"Цена", width:65, type:"numeric2", dataSource:"t_RecD"},
@@ -235,7 +237,7 @@ module.exports.init = function(app){
                     return;
                 }
                 var recData=result.item, priceCC_wt=recDData["PriceCC_wt"];
-                r_Prods.storeProdPP(dbUC,
+                r_Prods.addProdPP(dbUC,
                     {"ProdID":prodID,"ProdDate":recData["DocDate"],"CompID":recData["CompID"],"Article":"",
                         "PriceCC_In":priceCC_wt,"CostCC":priceCC_wt,"PriceMC":priceCC_wt,
                         "CurrID":recData["CurrID"], "PriceMC_In":priceCC_wt,"CostAC":priceCC_wt},
@@ -277,15 +279,16 @@ module.exports.init = function(app){
             });
         });
     };
+    if(!r_Prods.checkStoreProdWithBarcodeInDocRec) throw new Error('NO r_Prods.checkStoreProdWithBarcodeInDocRec!');
     app.post("/docs/rec/storeRecDTableData",function(req,res){
         var storeData=req.body,
-            prodData={"ProdID":storeData["ProdID"], "ProdName":storeData["ProdName"], "UM":storeData["UM"],
-            "Article1":storeData["Article1"],
-            "Country":storeData["Country"], "Notes":storeData["ProdName"],
-            "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
-            "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
-            "InRems":1,"Barcode":storeData["Barcode"]};
-        r_Prods.checkAndStoreNewProdIfNotExists(req.dbUC,prodData,req.dbUserParams,function(result){
+            prodData={"ProdID":storeData["ProdID"], "ProdName":storeData["ProdName"], "UM":storeData["UM"], "InRems":1,
+                "Article1":storeData["Article1"],
+                "Country":storeData["Country"], "Notes":storeData["ProdName"],
+                "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
+                "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
+                "Barcode":storeData["Barcode"], "BCUM":storeData["BCUM"]};
+        r_Prods.checkStoreProdWithBarcodeInDocRec(req.dbUC,prodData,req.dbUserParams,function(result){
             if(result&&result.error){
                 res.send({error:{error:result.error,userMessage:result.errorMessage||result.error}});
                 return;
@@ -293,8 +296,10 @@ module.exports.init = function(app){
             var prodID= result.resultItem["ProdID"], iProdID=parseInt(prodID);
             storeData["ProdID"]= prodID;
             storeData["ProdName"]= result.resultItem["ProdName"];
-            storeData["UM"]= result.resultItem["UM"];
             storeData["Barcode"]= result.resultItem["Barcode"];
+            var sUM= result.resultItem["BCUM"];
+            //if(sUM==null) sUM=result.resultItem["UM"];
+            storeData["UM"]= sUM;
             if(isNaN(iProdID)){
                 res.send({error:"Non correct ProdID!",userMessage:"Не корректный код товара!"});
                 return;

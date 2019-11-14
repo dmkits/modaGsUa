@@ -61,35 +61,35 @@ module.exports.init= function(app){
             });
     });
     app.get("/dirsProds/getDataForPCatNameCombobox", function(req, res){
-        r_ProdC.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PCatName":"PCatName"},
+        r_ProdC.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PCatName":"PCatName","PCatID":"PCatID"},
                 conditions:{"PCatID>0":null}, order:"PCatName"},
             function(result){
                 res.send(result);
             });
     });
     app.get("/dirsProds/getDataForPGrNameCombobox", function(req, res){
-        r_ProdG.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName":"PGrName"},
+        r_ProdG.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName":"PGrName","PGrID":"PGrID"},
                 conditions:{"PGrID>0":null}, order:"PGrName"},
             function(result){
                 res.send(result);
             });
     });
     app.get("/dirsProds/getDataForPGrName1Combobox", function(req, res){
-        r_ProdG1.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName1":"PGrName1"},
+        r_ProdG1.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName1":"PGrName1","PGrID1":"PGrID1"},
                 conditions:{"PGrID1>0":null}, order:"PGrName1"},
             function(result){
                 res.send(result);
             });
     });
     app.get("/dirsProds/getDataForPGrName2Combobox", function(req, res){
-        r_ProdG2.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName2":"PGrName2"},
+        r_ProdG2.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName2":"PGrName2","PGrID2":"PGrID2"},
                 conditions:{"PGrID2>0":null}, order:"PGrName2"},
             function(result){
                 res.send(result);
             });
     });
     app.get("/dirsProds/getDataForPGrName3Combobox", function(req, res){
-        r_ProdG3.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName3":"PGrName3"},
+        r_ProdG3.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName3":"PGrName3","PGrID3":"PGrID3"},
                 conditions:{"PGrID3>0":null}, order:"PGrName3"},
             function(result){
                 res.send(result);

@@ -22,6 +22,7 @@ module.exports.init= function(app){
         {data:"Article1", name:"Артикул1 товара", width:200, type:"text", sourceField:"Article1" },
         {data:"Barcode", name:"Штрихкод", width:50, type:"text",
             dataSource:"r_ProdMQ", sourceField:"Barcode", linkCondition:"r_Prods.ProdID=r_ProdMQ.ProdID and r_Prods.UM=r_ProdMQ.UM" },
+        {data:"BCUM", name:"Ед.изм. ШК", width:55, type:"text", align:"center", dataSource:"r_ProdMQ", sourceField:"UM" },
         {data:"PCatName", name:"Категория товара", width:140,
             type:"comboboxWN", sourceURL:"/dirsProds/getDataForPCatNameCombobox",
             dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
@@ -41,11 +42,11 @@ module.exports.init= function(app){
     var prodsWAllBarcodesTableColumns=[
         {data:"ProdID", name:"ProdID", width:80, type:"text", readOnly:true, visible:false},
         {data:"ProdName", name:"Наименование товара", width:350, type:"text" },
-        {data:"BaseUM", name:"Осн. Ед.изм.", width:55, type:"text", align:"center" },
+        {data:"UM", name:"Осн. Ед.изм.", width:55, type:"text", align:"center" },
         {data:"Article1", name:"Артикул1 товара", width:200, type:"text", sourceField:"Article1" },
         {data:"Barcode", name:"Штрихкод", width:50, type:"text",
             dataSource:"r_ProdMQ", sourceField:"barcode", linkCondition:"r_Prods.ProdID=r_ProdMQ.ProdID" },
-        {data:"UM", name:"Ед.изм. ШК", width:55, type:"text", align:"center", dataSource:"r_ProdMQ", sourceField:"UM" },
+        {data:"BCUM", name:"Ед.изм. ШК", width:55, type:"text", align:"center", dataSource:"r_ProdMQ", sourceField:"UM" },
         {data:"PCatName", name:"Категория товара", width:140,
             type:"comboboxWN", sourceURL:"/dirsProds/getDataForPCatNameCombobox",
             dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
@@ -76,35 +77,35 @@ module.exports.init= function(app){
             });
     });
     app.get("/dirsProds/getDataForPCatNameCombobox",function(req,res){
-        r_ProdC.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PCatName":"PCatName"},
+        r_ProdC.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PCatName":"PCatName","PCatID":"PCatID"},
                 conditions:{"PCatID>0":null}, order:"PCatName"},
             function(result){
                 res.send(result);
             });
     });
     app.get("/dirsProds/getDataForPGrNameCombobox",function(req,res){
-        r_ProdG.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName":"PGrName"},
+        r_ProdG.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName":"PGrName","PGrID":"PGrID"},
                 conditions:{"PGrID>0":null}, order:"PGrName"},
             function(result){
                 res.send(result);
             });
     });
     app.get("/dirsProds/getDataForPGrName1Combobox",function(req,res){
-        r_ProdG1.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName1":"PGrName1"},
+        r_ProdG1.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName1":"PGrName1","PGrID1":"PGrID1"},
                 conditions:{"PGrID1>0":null}, order:"PGrName1"},
             function(result){
                 res.send(result);
             });
     });
     app.get("/dirsProds/getDataForPGrName2Combobox",function(req,res){
-        r_ProdG2.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName2":"PGrName2"},
+        r_ProdG2.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName2":"PGrName2","PGrID2":"PGrID2"},
                 conditions:{"PGrID2>0":null}, order:"PGrName2"},
             function(result){
                 res.send(result);
             });
     });
     app.get("/dirsProds/getDataForPGrName3Combobox",function(req,res){
-        r_ProdG3.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName3":"PGrName3"},
+        r_ProdG3.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName3":"PGrName3","PGrID3":"PGrID3"},
                 conditions:{"PGrID3>0":null}, order:"PGrName3"},
             function(result){
                 res.send(result);
@@ -385,29 +386,65 @@ module.exports.init= function(app){
             })
     };
     /**
+     * prodMQData = { ProdID, Barcode, UM,Qty, Weight, Notes, ProdBarcode, PLID }
      * callback = function(result), result= { resultItem, error,errorMessage }
      */
-    r_Prods.storeProdMQ= function(connection,prodMQData,callback){
+    r_Prods.addProdMQ= function(dbUC,prodMQData,callback){
         if(!prodMQData) prodMQData={};
-        var qty =prodMQData["Qty"];
-        if(!qty)qty=1;
-        var insProdMQData={"ProdID":prodMQData["ProdID"],"UM":prodMQData["UM"],"Qty":qty,
-            "Weight":0.000,"Notes":null,"Barcode":prodMQData["Barcode"],"ProdBarcode":null,"PLID":0};
+        var qty= prodMQData["Qty"];
+        if(qty===undefined) qty=1;
+        var insProdMQData={"ProdID":prodMQData["ProdID"], "Barcode":prodMQData["Barcode"], "UM":prodMQData["UM"],"Qty":qty,
+            "Weight":0.000,"Notes":null,"ProdBarcode":null,"PLID":0};
         for(var fieldName in insProdMQData)
             if(prodMQData[fieldName]!==undefined) insProdMQData[fieldName]=prodMQData[fieldName];
-        r_ProdMQ.insDataItem(connection,{insData:insProdMQData},
-            function(insResult){
-                if(insResult.error||insResult.updateCount!=1){
-                    callback({error:"Failed create prodMQ!"});
+        r_ProdMQ.insDataItem(dbUC,{insData:insProdMQData}, function(resultInsProdMQ){
+            if(resultInsProdMQ.error||resultInsProdMQ.updateCount!=1){ callback({error:"Failed create prodMQ!"}); return; }
+            callback({resultItem:insProdMQData});
+        });
+    };
+    /**
+     * prodMQData = { ProdID, Barcode, _Barcode_, UM,Qty, Weight, Notes, ProdBarcode, PLID }
+     *      prodMQData._Barcode_ - old barcode, before changed
+     * callback = function(result), result= { resultItem, error,errorMessage, resultItemUpdProdUM = {UM:<updated prod UM>} }
+     * if updated r_Prods.UM result contain resultItemUpdProdUM
+     */
+    r_Prods.updProdMQ= function(dbUC,prodMQData,callback){
+        if(!prodMQData) prodMQData={};
+        var prodID= prodMQData["ProdID"], sOldBarcode= prodMQData["_Barcode_"];
+        r_ProdMQ.getDataItem(dbUC,{fields:["UM"],conditions:{"ProdID=":prodID,"Barcode=":sOldBarcode}},
+            function(resultFindProdMQUM){
+                if(resultFindProdMQUM.error||!resultFindProdMQUM.item){
+                    callback({error:"Failed update prodMQ! Cannot get old barcode UM by Barcode="+sOldBarcode+"."+
+                        " Reason:"+(resultFindProdMQUM.error||"No get result")+"."});
                     return;
                 }
-                callback({resultItem:insProdMQData});
+                var sOldUMBarcode= resultFindProdMQUM.item["UM"], sNewUMBarcode= prodMQData["UM"],
+                    updProdMQData={"Barcode":prodMQData["Barcode"], "UM":sNewUMBarcode},
+                    updProdMQFileds=["Qty","Weight","Notes","ProdBarcode","PLID"];
+                for(var fieldName of updProdMQFileds)
+                    if(prodMQData[fieldName]!==undefined) updProdMQData[fieldName]=prodMQData[fieldName];
+                r_ProdMQ.updDataItem(dbUC,{updData:updProdMQData,conditions:{"ProdID=":prodID,"Barcode=":sOldBarcode}}, function(resultUpdProdMQ){
+                    if(resultUpdProdMQ.error||resultUpdProdMQ.updateCount!=1){ callback({error:"Failed update prodMQ!"}); return; }
+                    var resultUpdProdMQ= {resultItem:updProdMQData};
+                    r_Prods.updDataItem(dbUC,{updData:{"UM":sNewUMBarcode},conditions:{"ProdID=":prodID,"UM=":sOldUMBarcode},ignoreErrorNoUpdate:true},
+                        function(resultUpdProdUM){
+                            if(resultUpdProdUM.error){//||resultUpdProdUM.updateCount!=1
+                                callback({error:"Failed update prod UM to value=\""+sNewUMBarcode+"\"! Reason:"+resultUpdProdUM.error});
+                                return;
+                            }
+                            if(resultUpdProdUM.updateCount) resultUpdProdMQ.resultItemUpdProdUM= {"UM":sNewUMBarcode};
+                            callback(resultUpdProdMQ);
+                        });
+                });
             });
     };
     /**
+     * insProdPPData = { PPID,ProdID,PPDesc,Priority, ProdDate,ProdPPDate, CompID,Article,PPWeight,PPDelay,IsCommission,
+     *          PriceCC_In,CostCC, PriceMC, CurrID, PriceMC_In,CostAC,
+     *          File1,File2,File3, CstProdCode,CstDocCode, ParentDocCode,ParentChID }
      * callback = function(result), result= { resultItem, error,errorMessage }
      */
-    r_Prods.storeProdPP= function(connection,prodPPData,callback){
+    r_Prods.addProdPP= function(dbUC,prodPPData,callback){
         var prodID =prodPPData["ProdID"];
         var insProdPPData={"PPID":0,"ProdID":prodID,"PPDesc":"","Priority":0,
             "ProdDate":null,"ProdPPDate":null,"CompID":0,"Article":"","PPWeight":0,"PPDelay":0,"IsCommission":0,
@@ -417,8 +454,8 @@ module.exports.init= function(app){
             if(prodPPData[fieldName]!==undefined) insProdPPData[fieldName]=prodPPData[fieldName];
         var ppIUD=prodPPData["PPID"];
         if(ppIUD!==undefined){
-            t_PInP.insDataItem(connection,{insData:insProdPPData},function(insResult){
-                if(insResult.error||insResult.updateCount!=1){
+            t_PInP.insDataItem(dbUC,{insData:insProdPPData},function(resultInsPP){
+                if(resultInsPP.error||resultInsPP.updateCount!=1){
                     callback({error:"Failed create prod PP by PPID="+ppIUD+"!"});
                     return;
                 }
@@ -426,14 +463,11 @@ module.exports.init= function(app){
             });
             return;
         }
-        r_DBIs.getNewPPID(connection,prodID,function(newPPID,err){
-            if(err){
-                callback({error:"Failed calc new PPID!"});
-                return;
-            }
+        r_DBIs.getNewPPID(dbUC,prodID,function(newPPID,err){
+            if(err){ callback({error:"Failed calc new PPID!"}); return; }
             insProdPPData["PPID"]=newPPID;
-            t_PInP.insDataItem(connection,{insData:insProdPPData},function(insResult){
-                if(insResult.error||insResult.updateCount!=1){
+            t_PInP.insDataItem(dbUC,{insData:insProdPPData},function(resultInsPP){
+                if(resultInsPP.error||resultInsPP.updateCount!=1){
                     callback({error:"Failed create prod PP by new PPID="+newPPID+"!"});
                     return;
                 }
@@ -444,8 +478,8 @@ module.exports.init= function(app){
     /**
      * callback = function(result), result= { resultItem, error,errorMessage }
      */
-    r_Prods.delete= function(connection,prodID,callback){
-        this.delDataItem(connection,{conditions:{"ProdID=":prodID}},function(result){
+    r_Prods.delete= function(dbUC,prodID,callback){
+        this.delDataItem(dbUC,{conditions:{"ProdID=":prodID}},function(result){
             if(callback)callback(result);
         });
     };
@@ -516,23 +550,23 @@ module.exports.init= function(app){
                         }
                         barcode= common.getEAN13Barcode(iProdID,23);
                     }
-                    r_Prods.storeProdMQ(dbUC,{"ProdID":prodID,"UM":insProdData["UM"],"Barcode":barcode},
-                        function(resultStoreProdMQ){
-                            if(resultStoreProdMQ.error){
-                                callback({error:resultStoreProdMQ.error});
+                    r_Prods.addProdMQ(dbUC,{"ProdID":prodID,"UM":insProdData["UM"],"Barcode":barcode}, function(resultAddProdMQ){
+                        if(resultAddProdMQ.error){
+                            callback({error:resultAddProdMQ.error});
+                            r_Prods.delete(dbUC,prodID);
+                            return;
+                        }
+                        resultItem["Barcode"]= resultAddProdMQ.resultItem["Barcode"];
+                        resultItem["BCUM"]= resultAddProdMQ.resultItem["UM"];
+                        r_Prods.addProdPP(dbUC,{"ProdID":prodID,"PPID":0},function(resultStorePP0){
+                            if(resultStorePP0.error){
                                 r_Prods.delete(dbUC,prodID);
+                                callback({error:resultStorePP0.error});
                                 return;
                             }
-                            resultItem["Barcode"]=barcode;
-                            r_Prods.storeProdPP(dbUC,{"ProdID":prodID,"PPID":0},function(resultStorePP0){
-                                if(resultStorePP0.error){
-                                    r_Prods.delete(dbUC,prodID);
-                                    callback({error:resultStorePP0.error});
-                                    return;
-                                }
-                                callback({resultItem:resultItem});
-                            });
+                            callback({resultItem:resultItem});
                         });
+                    });
                 });
         });
     };
@@ -541,84 +575,138 @@ module.exports.init= function(app){
      * callback = function(result), result= { resultItem, error,errorMessage }
      */
     r_Prods.checkExistsProdID= function(dbUC,prodName,prodID,existsProdIDByProdName,callback){
-        if(!prodID || prodID==existsProdIDByProdName){
-            callback({});
-            return;
-        }
-        r_Prods.findProdByCondition(dbUC,{"r_Prods.ProdID=":prodID,"r_Prods.ProdName<>":prodName},function(findedProdByProdIDResult){
-            if(findedProdByProdIDResult.error){ callback(findedProdByProdIDResult); return; }
-            if(findedProdByProdIDResult.prodData){
-                callback({error:"ProdID already exists!",errorMessage:"Для товара неверно указан код товара!"+
-                    " Товар с указанным кодом уже существует для товара с наименованием \""+findedProdByProdIDResult.prodData["ProdName"]+"\""});
-                return;
-            }
-            callback({resultItem:findedProdByProdIDResult});
-        });
-    };
-    /**
-     * callback = function(result), result= { resultItem, error,errorMessage }
-     */
-    r_Prods.checkExistsProdBarcode= function(dbUC,prodName,prodBarcode,existsProdBaseBarcodeByProdName,callback){
-        if(!prodBarcode || prodBarcode==existsProdBaseBarcodeByProdName){
-            callback({});
-            return;
-        }
-        r_Prods.findProdWAllBCsByCondition(dbUC,{"Barcode=":prodBarcode},function(findedProdByProdBarcodeResult){
-            if(findedProdByProdBarcodeResult.error){ callback(findedProdByProdBarcodeResult); return; }
-            if(findedProdByProdBarcodeResult.prodData && findedProdByProdBarcodeResult.prodData["ProdName"]!=prodName){
-                callback({error:"Barcode already exists!",errorMessage:"Для товара неверно указан штрихкод товара!"+
-                    " Товар с указанным штрихкодом уже существует для товара с наименованием \""+findedProdByProdBarcodeResult.prodData["ProdName"]+"\""});
-                return;
-            }
-            callback({resultItem:findedProdByProdBarcodeResult.prodData});
-        });
-    };
-    /**
-     * callback = function(result), result= { resultItem, error,errorMessage }
-     */
-    r_Prods.checkAndStoreProdMQ= function(connection,prodName,prodMQData,callback){
-        if(!prodMQData) prodMQData={};
-        var sBarcode= prodMQData["Barcode"],sBCUM= prodMQData["UM"];
-        if(!prodMQData["Qty"]) prodMQData["Qty"]=1;
-        var sErrMsg="Не удалось добавить штрихкод \""+prodMQData["Barcode"]+"\" для товара \""+prodName+"\"!";
-        r_ProdMQ.getDataItem(connection,{fields:["Barcode"],conditions:{"ProdID=":prodMQData["ProdID"],"UM=":sBCUM}},
-            function(findProdMQResult){
-                if(findProdMQResult.error){ callback({error:findProdMQResult.error,errorMessage:sErrMsg}); return; }
-                if(!findProdMQResult.item){
-                    r_Prods.storeProdMQ(connection,prodMQData,function(storeProdMQResult){
-                        if(storeProdMQResult.error){ callback({error:storeProdMQResult.error,errorMessage:sErrMsg}); return; }
-                        callback({resultItem:storeProdMQResult.resultItem});
-                    });
+        if(!prodID || prodID==existsProdIDByProdName){ callback({}); return; }
+        r_Prods.getDataItemForTable(dbUC,{tableColumns:prodsTableColumns,conditions:{"r_Prods.ProdID=":prodID,"r_Prods.ProdName<>":prodName}},
+            function(resultFindProdByProdID){
+                if(resultFindProdByProdID.error){ callback(resultFindProdByProdID); return; }
+                if(resultFindProdByProdID.item){
+                    callback({error:"ProdID already exists!",errorMessage:"Для товара неверно указан код товара!"+
+                        " Товар с указанным кодом уже существует для товара с наименованием \""+resultFindProdByProdID.item["ProdName"]+"\""});
                     return;
                 }
-                if(findProdMQResult.item["Barcode"]==sBarcode){ callback({resultItem:prodMQData}); return; }
-                var findMaxProdMQUMCondition={"ProdID=":prodMQData["ProdID"]},
-                    umCondition="((UM like '"+sBCUM+"[0-9]') or (UM like '"+sBCUM+"[0-9][0-9]') or (UM like '"+sBCUM+"[0-9][0-9][0-9]')"+
-                        " or (UM like '"+sBCUM+"[0-9][0-9][0-9][0-9]') or (UM like '"+sBCUM+"[0-9][0-9][0-9][0-9][0-9]')"+
-                        " or (UM like '"+sBCUM+"[0-9][0-9][0-9][0-9][0-9][0-9]') or (UM like '"+sBCUM+"[0-9][0-9][0-9][0-9][0-9][0-9][0-9]'))";
-                findMaxProdMQUMCondition[umCondition]=null;
-                r_ProdMQ.getDataItem(connection,{fields:["MaxBCUMPostfix"],fieldsFunctions:{"MaxBCUMPostfix":"REPLACE(UM,'"+sBCUM+"','')"},
-                        conditions:findMaxProdMQUMCondition, order:"UM desc", top:"TOP 1"},
-                    function(findMaxProdMQUMResult){
-                        if(findMaxProdMQUMResult.error){ callback({error:findMaxProdMQUMResult.error,errorMessage:sErrMsg}); return; }
-                        var sProdMQBCUMPostfix= "1";
-                        if(findMaxProdMQUMResult.item){
-                            sProdMQBCUMPostfix= findMaxProdMQUMResult.item["MaxBCUMPostfix"];
-                            var iProdMQBCUMPostfix= parseInt(sProdMQBCUMPostfix);
-                            sProdMQBCUMPostfix= (isNaN(iProdMQBCUMPostfix))?sProdMQBCUMPostfix+"1":iProdMQBCUMPostfix+1;
-                        }
-                        prodMQData["UM"]= sBCUM+sProdMQBCUMPostfix;
-                        r_Prods.storeProdMQ(connection,prodMQData,function(storeProdMQResult){
-                            if(storeProdMQResult.error){ callback({error:storeProdMQResult.error,errorMessage:sErrMsg}); return; }
-                            callback({resultItem:storeProdMQResult.resultItem});
+                callback({});
+        });
+    };
+    /**
+     * callback = function(result), result= { resultItem, error,errorMessage }
+     */
+    r_Prods.checkExistsProdBarcode= function(dbUC,prodName,prodBarcode,oldProdBarcode,callback){
+        if(prodBarcode==null||prodBarcode==oldProdBarcode){ callback({}); return; }
+        r_Prods.findProdWAllBCsByCondition(dbUC,{"Barcode=":prodBarcode},function(resultFindProdByProdBarcode){
+            if(resultFindProdByProdBarcode.error){ callback(resultFindProdByProdBarcode); return; }
+            if( resultFindProdByProdBarcode.prodData &&
+                    ((oldProdBarcode!=null) || (oldProdBarcode==null && resultFindProdByProdBarcode.prodData["ProdName"]!=prodName)) ){
+                callback({error:"Barcode already exists!",errorMessage:"Для товара неверно указан штрихкод товара!"+
+                    " Товар с указанным штрихкодом уже существует для товара с наименованием \""+resultFindProdByProdBarcode.prodData["ProdName"]+"\""});
+                return;
+            }
+            callback({resultItem:resultFindProdByProdBarcode.prodData});
+        });
+    };
+    /**
+     * prodMQData = { ProdID, Barcode, _Barcode_, UM,Qty, Weight, Notes, ProdBarcode, PLID }
+     *      prodMQData._Barcode_ - old barcode, before changed
+     * callback = function(result), result= { resultItem, error,errorMessage, resultItemUpdProdMQ,resultItemUpdProdUM, resultItemAddProdMQ }
+     */
+    r_Prods.checkAndStoreProdMQ= function(dbUC,prodName,prodMQData,callback){
+        if(!prodMQData) prodMQData={};
+        var prodID=prodMQData["ProdID"],
+            sOldBarcode= prodMQData["_Barcode_"],sNewBarcode= prodMQData["Barcode"],sBCUM= prodMQData["UM"];
+        if(!prodMQData["Qty"]) prodMQData["Qty"]=1;
+        var sErrMsg="Не удалось добавить/изменить штрихкод \""+sNewBarcode+"\" для товара \""+prodName+"\"!";
+        r_ProdMQ.getDataItem(dbUC,{fields:["Barcode"],conditions:{"ProdID=":prodID,"Barcode=":sOldBarcode}},
+            function(resultFindProdMQBarcode){
+                if(resultFindProdMQBarcode.error){ callback({error:resultFindProdMQBarcode.error,errorMessage:sErrMsg}); return; }
+                if(resultFindProdMQBarcode.item){//update r_ProdMQ
+                    sErrMsg="Не удалось изменить штрихкод \""+sNewBarcode+"\" для товара \""+prodName+"\"!";
+                    r_ProdMQ.getDataItem(dbUC,{fields:["Barcode"],conditions:{"ProdID=":prodID,"UM=":sBCUM,"Barcode!=":sOldBarcode}},
+                        function(resultFindProdMQByUM){
+                            if(resultFindProdMQByUM.item){
+                                callback({error:"Failed update prodMQ! UM already exists by ProdID="+prodID+".",
+                                    errorMessage:sErrMsg+" У товара уже есть указанная еденица измерениия."});
+                                return;
+                            }
+                            r_Prods.updProdMQ(dbUC,prodMQData,function(resultUpdProdMQ){
+                                if(resultUpdProdMQ.error){ callback({error:resultUpdProdMQ.error,errorMessage:sErrMsg}); return; }
+                                var resultCheckAndStoreProdMQ= {resultItem:resultUpdProdMQ.resultItem, resultItemUpdProdMQ:resultUpdProdMQ.resultItem};
+                                if(resultUpdProdMQ.resultItemUpdProdUM) resultCheckAndStoreProdMQ.resultItemUpdProdUM= resultUpdProdMQ.resultItemUpdProdUM;
+                                callback(resultCheckAndStoreProdMQ);
+                            });
                         });
+                    return;
+                }
+                //insert new r_ProdMQ
+                sErrMsg="Не удалось добавить штрихкод \""+sNewBarcode+"\" для товара \""+prodName+"\"!";
+                r_ProdMQ.getDataItem(dbUC,{fields:["Barcode"],conditions:{"ProdID=":prodID,"UM=":sBCUM}},
+                    function(resultFindProdMQByUM){
+                        if(resultFindProdMQByUM.error){ callback({error:resultFindProdMQByUM.error,errorMessage:sErrMsg}); return; }
+                        if(!resultFindProdMQByUM.item){
+                            r_Prods.addProdMQ(dbUC,prodMQData,function(resultAddProdMQ){
+                                if(resultAddProdMQ.error){ callback({error:resultAddProdMQ.error,errorMessage:sErrMsg}); return; }
+                                callback({resultItem:resultAddProdMQ.resultItem, resultItemAddProdMQ:resultAddProdMQ.resultItem});
+                            });
+                            return;
+                        }
+                        if(resultFindProdMQByUM.item["Barcode"]==sNewBarcode){ callback({resultItem:prodMQData}); return; }
+                        var findMaxProdMQUMCondition={"ProdID=":prodID},
+                            umCondition="((UM like '"+sBCUM+"[0-9]') or (UM like '"+sBCUM+"[0-9][0-9]') or (UM like '"+sBCUM+"[0-9][0-9][0-9]')"+
+                                " or (UM like '"+sBCUM+"[0-9][0-9][0-9][0-9]') or (UM like '"+sBCUM+"[0-9][0-9][0-9][0-9][0-9]')"+
+                                " or (UM like '"+sBCUM+"[0-9][0-9][0-9][0-9][0-9][0-9]') or (UM like '"+sBCUM+"[0-9][0-9][0-9][0-9][0-9][0-9][0-9]'))";
+                        findMaxProdMQUMCondition[umCondition]=null;
+                        r_ProdMQ.getDataItem(dbUC,{fields:["MaxBCUMPostfix"],fieldsFunctions:{"MaxBCUMPostfix":"REPLACE(UM,'"+sBCUM+"','')"},
+                                conditions:findMaxProdMQUMCondition, order:"UM desc", top:"TOP 1"},
+                            function(resultFindMaxProdMQUM){
+                                if(resultFindMaxProdMQUM.error){ callback({error:resultFindMaxProdMQUM.error,errorMessage:sErrMsg}); return; }
+                                var sProdMQBCUMPostfix= "1";
+                                if(resultFindMaxProdMQUM.item){
+                                    sProdMQBCUMPostfix= resultFindMaxProdMQUM.item["MaxBCUMPostfix"];
+                                    var iProdMQBCUMPostfix= parseInt(sProdMQBCUMPostfix);
+                                    sProdMQBCUMPostfix= (isNaN(iProdMQBCUMPostfix))?sProdMQBCUMPostfix+"1":iProdMQBCUMPostfix+1;
+                                }
+                                prodMQData["UM"]= sBCUM+sProdMQBCUMPostfix;
+                                r_Prods.addProdMQ(dbUC,prodMQData,function(resultAddProdMQ){
+                                    if(resultAddProdMQ.error){ callback({error:resultAddProdMQ.error,errorMessage:sErrMsg}); return; }
+                                    callback({resultItem:resultAddProdMQ.resultItem, resultItemAddProdMQ:resultAddProdMQ.resultItem});
+                                });
+                            });
                     });
             });
     };
     /**
-     * callback = function(result), result= { resultItem, error,errorMessage }
+     * callback = function(result), result = { resultItem, error,errorMessage }
      */
-    r_Prods.checkAndStoreNewProdIfNotExists= function(dbUC,prodData,dbUserParams,callback){
+    r_Prods.updateProdData=function(dbUC,prodData,callback){
+
+        var updProdData={};
+        for(var i=0;i<prodsWAllBarcodesTableColumns.length;i++){
+            var prodsWAllBarcodesTableColumnData= prodsWAllBarcodesTableColumns[i],
+                updFieldName= prodsWAllBarcodesTableColumnData.data,
+                updFieldDS= prodsWAllBarcodesTableColumnData.dataSource;
+            if(updFieldName&&(!updFieldDS||updFieldDS=="r_Prods")) updProdData[updFieldName]= prodData[updFieldName];
+        }
+
+        r_Prods.updTableDataItem(dbUC,{idFieldName:"ProdID", updTableFieldsData:updProdData,
+                tableColumns:prodsWAllBarcodesTableColumns, resultItemConditions:{"r_Prods.ProdID=":updProdData["ProdID"],"Barcode=":prodData["Barcode"]}},
+            function(result){
+                if(result.error){
+                    //r_Prods.delete(dbUC,updProdData["ProdID"]);
+                    result.errorMessage= "Не удалось сохранить товар!";
+                    //if(result.error.indexOf("Violation of PRIMARY KEY constraint '_pk_t_RecD'")>=0)
+                    //    result.errorMessage= "Некорректный номер позиции в документе \"Приход товара\"!\n В документе уже есть позиция с таким номером."
+                }
+                callback(result);
+            });
+
+    };
+    /**
+     * if product not finded by ProdName, create new product with barcode and pp
+     * if product finded by name and not finded barcode, add barcode to exists product
+     * else update product data
+     * callback = function(result), result= { resultItem, error,errorMessage, resultItemNewProd,resultItemNewProdMQ }
+     * if inserted  new product - result contain resultItemNewProd
+     * if inserted only new barcode - result contain resultItemNewProdMQ
+     */
+    r_Prods.checkStoreProdWithBarcodeInDocRec= function(dbUC,prodData,dbUserParams,callback){
         var prodName=prodData["ProdName"];
         if(!prodName||(prodName=prodName.trim())===""){
             callback({error:"No ProdName!",errorMessage:"Не задано наименование товара!"});
@@ -630,43 +718,73 @@ module.exports.init= function(app){
             callback({error:"No Prod UM!",errorMessage:"Не задана единица измерения товара \n(и не определена в настройках по умолчанию для товара)!"});
             return;
         }
-        r_Prods.findProdByFieldsValues(dbUC,{"ProdName":prodName},function(findProdByNameResult){//finding by Barcode/ProdID/ProdName
-            if(findProdByNameResult.error){ callback(findProdByNameResult); return; }
+
+        var oldProdBarcode=prodData["_Barcode_"];//oldProdBarcode used in product directories for update product barcode
+
+        //r_Prods.checkProdByOldBarcode(dbUC,oldProdBarcode,prodData,function(resultFindProdByOldBarcode){
+        //    if(resultFindProdByOldBarcode.error){ callback(resultFindProdByOldBarcode); return; }
+        //
+        //
+        //});
+
+        r_Prods.findProdByFieldsValues(dbUC,{"ProdName":prodName},function(resultFindProdByName){//finding by ProdName
+            if(resultFindProdByName.error){ callback(resultFindProdByName); return; }
             var existsProdIDByProdName=null, existsProdBaseBarcodeByProdName=null,
                 existsProdUMByProdName=null;
-            if(findProdByNameResult.prodData){
-                existsProdIDByProdName= findProdByNameResult.prodData["ProdID"];
-                existsProdBaseBarcodeByProdName= findProdByNameResult.prodData["Barcode"];
-                existsProdUMByProdName= findProdByNameResult.prodData["UM"];
+            if(resultFindProdByName.prodData){
+                existsProdIDByProdName= resultFindProdByName.prodData["ProdID"];
+                existsProdBaseBarcodeByProdName= resultFindProdByName.prodData["Barcode"];
+                existsProdUMByProdName= resultFindProdByName.prodData["UM"];
             }
             var prodID=prodData["ProdID"];
-            if(prodID&&typeof(prodID)=="string") prodID= prodID.toString().trim();
-            r_Prods.checkExistsProdID(dbUC,prodName,prodID,existsProdIDByProdName,function(checkExistsProdIDResult){
-                if(checkExistsProdIDResult.error){ callback(checkExistsProdIDResult); return; }
+            if(prodID!=null&&typeof(prodID)=="string") prodID= prodID.trim();
+            if(resultFindProdByName.prodData&&prodID!=null&&prodID.toString()&&prodID!=existsProdIDByProdName){//update product ProdID by ProdName
+                callback({error:"ProdID not equals ProdID by ProdName!",
+                    errorMessage:"Не верно указан код товара!\nДля товара с наименованием \""+prodName+"\" должен быть указан код товара "+existsProdIDByProdName+"!"});
+                return;
+            }
+            r_Prods.checkExistsProdID(dbUC,prodName,prodID,existsProdIDByProdName,function(resultCheckExistsProdID){
+                if(resultCheckExistsProdID.error){ callback(resultCheckExistsProdID); return; }
                 var prodBarcode=prodData["Barcode"];
                 if(prodBarcode&&typeof(prodBarcode)=="string") prodBarcode= prodBarcode.toString().trim();
-                r_Prods.checkExistsProdBarcode(dbUC,prodName,prodBarcode,existsProdBaseBarcodeByProdName,function(checkExistsProdBarcodeResult){
-                    if(checkExistsProdBarcodeResult.error){ callback(checkExistsProdBarcodeResult); return; }
-                    if(!findProdByNameResult.prodData){//CREATE NEW PRODUCT WITH BARCODE
-                        r_Prods.storeNewProdWithProdMQandProdPP0(dbUC,prodData,dbUserParams,callback);
+                r_Prods.checkExistsProdBarcode(dbUC,prodName,prodBarcode,oldProdBarcode,function(resultCheckExistsProdBarcode){
+                    if(resultCheckExistsProdBarcode.error){ callback(resultCheckExistsProdBarcode); return; }
+                    if(!resultFindProdByName.prodData){//CREATE NEW PRODUCT WITH BARCODE
+                        r_Prods.storeNewProdWithProdMQandProdPP0(dbUC,prodData,dbUserParams,function(resultStoreNewProdWithProdMQandProdPP0){
+                            if(resultStoreNewProdWithProdMQandProdPP0.error) {
+                                callback(resultStoreNewProdWithProdMQandProdPP0);
+                                return;
+                            }
+                            var newProdData= resultStoreNewProdWithProdMQandProdPP0.resultItem;
+                            callback({resultItem:newProdData, resultItemNewProd:newProdData});
+                        });
                         return;
                     }
-                    if(!prodID&&existsProdIDByProdName) prodData["ProdID"]=existsProdIDByProdName;
+                    if((!prodID||!prodID.toString())&&existsProdIDByProdName) prodData["ProdID"]=existsProdIDByProdName;
                     if(existsProdUMByProdName&&prodUM!=existsProdUMByProdName) prodData["UM"]=existsProdUMByProdName;
                     if(!prodBarcode&&existsProdBaseBarcodeByProdName) prodData["Barcode"]=existsProdBaseBarcodeByProdName;
-                    if(findProdByNameResult.prodData && !checkExistsProdBarcodeResult.resultItem){//ADD BARCODE FOR EXISTS PRODUCT
-                        r_Prods.checkAndStoreProdMQ(dbUC,prodName,{"ProdID":prodData["ProdID"],"UM":prodData["UM"],"Barcode":prodData["Barcode"]},
-                            function(resultCheckAndStoreProdMQ){
-                                if(resultCheckAndStoreProdMQ.error){
-                                    r_Prods.delete(dbUC,prodID);
-                                    callback(resultCheckAndStoreProdMQ);
-                                    return;
-                                }
-                                prodData["UM"]= resultCheckAndStoreProdMQ.resultItem["UM"];
-                                callback({resultItem:prodData});
-                            });
+                    if(resultFindProdByName.prodData && !resultCheckExistsProdBarcode.resultItem){//ADD OR UPDATE BARCODE DATA FOR EXISTS PRODUCT
+                        var prodMQData= {"ProdID":prodData["ProdID"], "Barcode":prodData["Barcode"],"_Barcode_":prodData["_Barcode_"],
+                            "UM":prodData["BCUM"],"Qty":prodData["QtyBarcode"]};
+                        if(prodMQData["UM"]==null) prodMQData["UM"]= prodUM;
+                        r_Prods.checkAndStoreProdMQ(dbUC,prodName, prodMQData, function(resultCheckAndStoreProdMQ){
+                            if(resultCheckAndStoreProdMQ.error){
+                                r_Prods.delete(dbUC,prodID);
+                                callback(resultCheckAndStoreProdMQ);
+                                return;
+                            }
+                            prodData["Barcode"]= resultCheckAndStoreProdMQ.resultItem["Barcode"];
+                            prodData["_Barcode_"]= resultCheckAndStoreProdMQ.resultItem["Barcode"];
+                            prodData["BCUM"]= resultCheckAndStoreProdMQ.resultItem["UM"];
+                            prodData["QtyBarcode"]= resultCheckAndStoreProdMQ.resultItem["Qty"];
+                            if(resultCheckAndStoreProdMQ.resultItemUpdProdUM) prodData["UM"]= resultCheckAndStoreProdMQ.resultItemUpdProdUM["UM"];
+                            callback({resultItem:prodData, resultItemNewProdMQ:resultCheckAndStoreProdMQ.resultItem});
+                        });
                         return;
                     }
+
+                    //
+
                     callback({resultItem:prodData});
                 })
             });
