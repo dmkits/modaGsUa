@@ -148,8 +148,9 @@
                         if(!prodData)prodData={};
                         crd.item("ProdID").setValue(prodData["ProdID"]);
                         crd.item("ProdName").setValue(prodData["ProdName"]);
-                        crd.item("UM").setValue(prodData["UM"]);
                         crd.item("Barcode").setValue(prodData["Barcode"]);
+                        var sUM= prodData["BCUM"];
+                        crd.item("UM").setValue(sUM); crd.item("BCUM").setValue(sUM);
                     };
                 if(!thisInstance.setDetailTableProdArticle1Attrs)
                     thisInstance.setDetailTableProdArticle1Attrs= function(crd/*changedRowData*/,prodData){
