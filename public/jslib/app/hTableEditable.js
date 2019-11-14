@@ -465,7 +465,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 nextChangedRowAction();//without fail call this!
             },
             /**
-             * callback(changedRowData, thisInstance, rowChangeActionsParams, nextRowChangeAction)
+             * rowChangeActionFunction(changedRowData, thisInstance, rowChangeActionsParams, nextRowChangeAction)
              */
             addOnChangeRowAction: function(rowChangeActionFunction){
                 if(!this.onChangeRowActions){
