@@ -4,5 +4,7 @@ module.exports.modelData = { tableName:"r_Uni",idField:"RefTypeID",
 };
 module.exports.changeLog = [
     {changeID:"r_Uni__1", changeDatetime:"2019-07-07 17:30:00", changeObj:"r_Uni",
-        changeVal:"insert into r_Uni(RefTypeID,RefID,RefName,Notes)values(10606,3,'Доставка перемещений','sendExcs')"}
+        changeVal:"insert into r_Uni(RefTypeID,RefID,RefName,Notes)values(10606,3,'Доставка перемещений','sendExcs')"},
+    {changeID:"r_Uni__2", changeDatetime:"2019-11-15 11:25:00", changeObj:"r_Uni",
+        changeVal:"insert into r_Uni(RefTypeID,RefID,RefName,Notes)values(10606,4,'Перемещение со склада','excFromStock')"}
 ];

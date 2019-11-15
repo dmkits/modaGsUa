@@ -46,12 +46,18 @@ module.exports.init = function(app){
             res.send({error:"Failed get routes! Reason: no app user role config for mobile!"});return;
         }
         var modules=loadedModules(), userRoutes=[];
-        for (var i = 0; i < userRoleMobileConf.length; i++) {
-            var mModuleName=userRoleMobileConf[i],mModuleRoutes=modules[mModuleName].routes;
+        for(var i=0; i<userRoleMobileConf.length; i++){
+            var mModuleName= userRoleMobileConf[i], mModule= modules[mModuleName],
+                mModuleRoutes= (mModule)?mModule.routes:null;
             if(!mModuleRoutes)continue;
             userRoutes=userRoutes.concat(mModuleRoutes);
         }
-        userRoutes=userRoutes.concat(module.exports.routes);
+        if(userRoutes.length==0){
+            res.send({error:"Failed get routes! Reason: no app user role config for mobile!",
+                errorMessage:"Для роли пользователя нет доступных рабочих модулей!"});
+            return;
+        }
+        userRoutes= userRoutes.concat(module.exports.routes);
         res.send(userRoutes);
     });
 
