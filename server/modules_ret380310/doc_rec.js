@@ -301,7 +301,7 @@ module.exports.init = function(app){
             //if(sUM==null) sUM=result.resultItem["UM"];
             storeData["UM"]= sUM;
             if(isNaN(iProdID)){
-                res.send({error:"Non correct ProdID!",userMessage:"Не корректный код товара!"});
+                res.send({error:"Non correct ProdID!",errorMessage:"Не корректный код товара!"});
                 return;
             }
             t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){

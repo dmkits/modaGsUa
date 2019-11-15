@@ -211,7 +211,7 @@ module.exports.init= function(app){
 
     /**
      *
-     * callback = function(error, prodData), error = {error,userMessage}
+     * callback = function(error, prodData), error = {error}
      */
     r_Prods.getNewProdNameByAttrs= function(dbUC,prodData,callback){
         //if_GetProdNameByMaskValues(ProdID, PCatName,PGrName1,PGrName3,PGrSName3,Article1,Article2,Article3, ColorName,ColorSName, SizeName,ValidSizes, Growth)

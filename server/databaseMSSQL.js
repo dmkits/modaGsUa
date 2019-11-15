@@ -16,7 +16,7 @@ module.exports.cleanConnectionPool=function(){
 };
 /**
  * @param userData = { uuid, login, password }
- * @param callback (err,result), result = { dbUC:<database user connection> }, err = { error, userMessage }
+ * @param callback (err,result), result = { dbUC:<database user connection> }, err = { error,errorMessage }
  */
 function createNewUserDBConnection(userData, callback){
     var uuid= userData.uuid;
@@ -27,7 +27,7 @@ function createNewUserDBConnection(userData, callback){
     var dbConfig=server.getSysConfig();
     if(!dbConfig){
         callback({error:"Failed create database system connection! Reason: no server configuration!",
-            userMessage:"Не удалось подключиться к базе данных!<br> Нет параметров подключения к базе данных!<br> Обратитесь к системному администратору."});
+            errorMessage:"Не удалось подключиться к базе данных!<br> Нет параметров подключения к базе данных!<br> Обратитесь к системному администратору."});
         return;
     }
     var dbUserConnection = new mssql.ConnectionPool({
@@ -47,7 +47,7 @@ function createNewUserDBConnection(userData, callback){
                 connectionData.connection=null;
                 connectionData.user=userData.login;
             }
-            callback({error:err.message,userMessage:err.message});
+            callback({error:err.message,errorMessage:err.message});
             return;
         }
         if(!connectionData)
@@ -68,9 +68,9 @@ module.exports.getDBSystemConnection=function(){
 };
 /**
  * callback= function(err,result)
- *  result = { dbUC:<database user connection> }, err = { error, userMessage }
+ *  result = { dbUC:<database user connection> }, err = { error,errorMessage }
  */
-function setDBSystemConnection(sysConfig, callback){                                                log.debug("database setDBSystemConnection sysConfig:",sysConfig);
+function setDBSystemConnection(sysConfig,callback){                                                 log.debug("database setDBSystemConnection sysConfig:",sysConfig);
     if(!sysConfig){
         callback({error:"Failed create database system connection! Reason: no server configuration!"});
         return;

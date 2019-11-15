@@ -282,7 +282,7 @@ module.exports= function(app){
                     });
                     return;
                 }
-                outData.error= {error:err.error,userMessage:err.userMessage};
+                outData.error= {error:err.error,userMessage:err.errorMessage};
                 res.send(outData);
                 return;
             }

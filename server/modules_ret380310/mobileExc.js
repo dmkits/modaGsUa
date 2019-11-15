@@ -134,7 +134,7 @@ module.exports.init = function(app){
      t_ExcD.storeExcDProdData= function(dbUC,parentChID,excDProdData,newQty,resultCallback){
          if(!("ProdID" in excDProdData)&&!("SrcPosID" in excDProdData)){
              resultCallback({error:"Failed find prod in t_ExcD!<br> No ProdID or SrcPosID!",
-                 userMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
+                 errorMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
              return;
          }
          var conditions={"ChID=":parentChID};
@@ -146,7 +146,7 @@ module.exports.init = function(app){
              function(result){
                  if(result.error){
                      resultCallback({error:"Failed find prod in t_ExcD!<br>"+result.error,
-                         userMessage:"Не удалось найти товар в перемещении!<br>"+result.error});
+                         errorMessage:"Не удалось найти товар в перемещении!<br>"+result.error});
                      return;
                  }
                  var storeData=result.item;
@@ -154,7 +154,7 @@ module.exports.init = function(app){
                      storeData=excDProdData;
                      if(!("ProdID" in storeData)){
                          resultCallback({error:"Failed get prod data for insert into t_ExcD!",
-                             userMessage:"Не удалось получить данные товара для добавления в перемещение!"});
+                             errorMessage:"Не удалось получить данные товара для добавления в перемещение!"});
                          return;
                      }
                      storeData["Barcode"]=excDProdData["Barcode"];
@@ -175,7 +175,7 @@ module.exports.init = function(app){
                                  function(result){
                                      if(result.error){
                                          resultCallback({error:"Failed calc new SrcPosID by prod in t_ExcD!<br>"+result.error,
-                                             userMessage:"Не удалось вычислить новый номер позиции для товара в перемещении!<br>"+result.error});
+                                             errorMessage:"Не удалось вычислить новый номер позиции для товара в перемещении!<br>"+result.error});
                                          return;
                                      }
                                      if(!result.item)params.storeTableData["SrcPosID"]=1;else params.storeTableData["SrcPosID"]=result.item["maxSrcPosID"];
@@ -186,9 +186,9 @@ module.exports.init = function(app){
                      function(result){
                          if(result.error){
                              if(result.error.indexOf("Cannot insert duplicate key row in object 'dbo.t_ExcD' with unique index 'NoDuplicate'")>=0)
-                                 result.userMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером.";
+                                 result.errorMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером.";
                              else
-                                 result.userMessage="Ну удалось сохранить товар в перемещение!<br>"+result.error;
+                                 result.errorMessage="Не удалось сохранить товар в перемещение!<br>"+result.error;
                          }
                          resultCallback(result);
                      });

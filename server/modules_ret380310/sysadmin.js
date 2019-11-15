@@ -98,7 +98,7 @@ module.exports.init = function(app){
             database.setDBSystemConnection(newSysConfig, function(err,result){
                 if(err){
                     outData.message="System config stored and applied.";
-                    outData.dbSysConnErr = "Failed connect to database! Reason: "+err.error;
+                    outData.dbSysConnErr = "Failed connect to database! Reason: "+(err.errorMessage||err.error);
                     res.send(outData);
                     return;
                 }
@@ -348,13 +348,13 @@ module.exports.init = function(app){
         if(!login||login.trim().length==0) login=suname;
         if(!login||login.trim().length==0) {
             result.error="Failed create login! Reason: no login op login is empty!";
-            result.userMessage="Невозможно создать имя входа! Имя входа не указано или пустое!";
+            result.errorMessage="Невозможно создать имя входа! Имя входа не указано или пустое!";
         }else if(login.indexOf("\\")>=0){
             result.error="Failed create login! Reason: cannot create login for type 'WINDOWS_LOGIN'! This function cannot support.";
-            result.userMessage="Не удалось создать или изменить данные имени входа! Создание или изменение имен входа для аутентификации windows не поддерживается!";
+            result.errorMessage="Не удалось создать или изменить данные имени входа! Создание или изменение имен входа для аутентификации windows не поддерживается!";
         }else if(!lpass||lpass.trim().length==0){
             result.error="Failed create login! Reason: no password op password is empty!";
-            result.userMessage="Невозможно созать или изменить пароль для имени входа! Не указан пароль или пароль пустой!";
+            result.errorMessage="Невозможно созать или изменить пароль для имени входа! Не указан пароль или пароль пустой!";
         }
         callback(result,login,lpass,suname);
     };
@@ -378,7 +378,7 @@ module.exports.init = function(app){
         sys_server_principals.getDataItems(dbUC,{fields:["name","type"],conditions:{"name=":login}},function(result){
             if(result.error){
                 prevResult.error="Failed create login! Reason: cannot check if login exists!";
-                prevResult.userMessage="Не удалось создать имя входа! Не удалось проверить существование имени входа!";
+                prevResult.errorMessage="Не удалось создать имя входа! Не удалось проверить существование имени входа!";
                 r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 return;
             }
@@ -389,7 +389,7 @@ module.exports.init = function(app){
                     if(err){
                         prevResult.updateCount=0;
                         prevResult.error="Failed create login! Reason: password no strong!";
-                        prevResult.userMessage="Не удалось создать имя входа! Пароль не удовлетворяет политике безопастности сервера!";
+                        prevResult.errorMessage="Не удалось создать имя входа! Пароль не удовлетворяет политике безопастности сервера!";
                         r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                         return;
                     }
@@ -408,7 +408,7 @@ module.exports.init = function(app){
         sysusers.getDataItems(dbUC,{fields:["name"],conditions:{"islogin=":1,"name=":suname}},function(result) {
             if(result.error){
                 prevResult.error = "Failed create dbuser! Reason: cannot check if dbuser exists!";
-                prevResult.userMessage = "Не удалось создать пользователя базы данных! Не удалось проверить существование пользователя базы данных!";
+                prevResult.errorMessage = "Не удалось создать пользователя базы данных! Не удалось проверить существование пользователя базы данных!";
                 r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 return;
             }
@@ -418,7 +418,7 @@ module.exports.init = function(app){
                     if(err){
                         prevResult.updateCount=0;
                         prevResult.error="Failed create dbuser! Reason: cannot create dbuser for login'"+login+"'!";
-                        prevResult.userMessage="Не удалось создать пользователя базы данных! Не удалось создать пользователя базы данных для имени входа '"+login+"'!";
+                        prevResult.errorMessage="Не удалось создать пользователя базы данных! Не удалось создать пользователя базы данных для имени входа '"+login+"'!";
                         r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                         return;
                     }
@@ -448,7 +448,7 @@ module.exports.init = function(app){
                         if(err){
                             prevResult.updateCount=0;
                             prevResult.error="Failed update login! Reason: database user do not map to a login!";
-                            prevResult.userMessage="Не удалось сопоставить имя входа с пользователем базы данных!";
+                            prevResult.errorMessage="Не удалось сопоставить имя входа с пользователем базы данных!";
                             r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                             return;
                         }
@@ -457,7 +457,7 @@ module.exports.init = function(app){
                                 if(err){
                                     prevResult.updateCount=0;
                                     prevResult.error="Failed update login password! Reason: password no strong!";
-                                    prevResult.userMessage="Не удалось изменить пароль для имени входа! Пароль не удовлетворяет политике безопастности сервера!";
+                                    prevResult.errorMessage="Не удалось изменить пароль для имени входа! Пароль не удовлетворяет политике безопастности сервера!";
                                     r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                                     return
                                 }
@@ -480,7 +480,7 @@ module.exports.init = function(app){
             if(result.error){
                 prevResult.updateCount=0;
                 prevResult.error="Failed update user emp data! Reason: "+result.error+"!";
-                prevResult.userMessage="Не удалось изменить данные служащего для пользователя!";
+                prevResult.errorMessage="Не удалось изменить данные служащего для пользователя!";
                 r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 return;
             }
@@ -495,7 +495,7 @@ module.exports.init = function(app){
             if(result.error){
                 prevResult.updateCount=0;
                 prevResult.error="Failed update user adding data! Reason: "+result.error+"!";
-                prevResult.userMessage="Не удалось изменить доп. данные пользователя! Не удалось проверить налицие доп.данных пользователя!";
+                prevResult.errorMessage="Не удалось изменить доп. данные пользователя! Не удалось проверить налицие доп.данных пользователя!";
                 r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 return
             }
@@ -505,7 +505,7 @@ module.exports.init = function(app){
                     if(result.error){
                         prevResult.updateCount=0;
                         prevResult.error="Failed insert user added data! Reason: "+result.error+"!";
-                        prevResult.userMessage="Не удалось добавить доп. данные для пользователя!";
+                        prevResult.errorMessage="Не удалось добавить доп. данные для пользователя!";
                     }
                     r_Users.getLoginData(dbUC,loginData,prevResult,callback);
                 });
@@ -516,7 +516,7 @@ module.exports.init = function(app){
                 if(result.error){
                     prevResult.updateCount=0;
                     prevResult.error="Failed update user added data! Reason: "+result.error+"!";
-                    prevResult.userMessage="Не удалось изменить доп. данные для пользователя!";
+                    prevResult.errorMessage="Не удалось изменить доп. данные для пользователя!";
                 }
                 r_Users.getLoginData(dbUC,loginData,prevResult,callback);
             });
