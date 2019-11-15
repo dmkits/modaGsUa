@@ -53,6 +53,11 @@
       "autorun":["menuBarItemExcCashier"],
       "mobile":["mobileExc"]
     },
+    "excFromStock":{
+      "menu":["menuBarItemExcFromStock","menuBarItemHelpAbout","menuBarItemClose"],
+      "autorun":["menuBarItemExcFromStock"],
+      "mobile":["mobileExcFromStock"]
+    },
     "cashier":{
       "menu":["menuBarItemReportsCashier","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
