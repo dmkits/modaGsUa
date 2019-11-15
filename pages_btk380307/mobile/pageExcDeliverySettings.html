@@ -1,0 +1,56 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+    <div class="page" id="pageExcDeliverySettings">
+        <div class="navbar">
+            <div class="navbar-inner">
+                <div class="left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-back"></i><i class="icon icon-back"></i>
+                        <!--<span class="ios-only">Назад</span>-->
+                    </a>
+                </div>
+                <div class="title">Настройки <br>перемещений товара на доставку</div>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="block-title">Настройки списка документов</div>
+            <div class="list no-hairlines-md">
+                <ul>
+                    <li class="item-content item-input">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Кол-во документов в списке</div>
+                            <div class="item-input-wrap">
+                                <input id="pageExcDelivery-input" type="text" placeholder="Кол-во документов в списке">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <div class="row" style="margin-top:10px">
+                    <div class="col" style="width:0px"></div>
+                    <button id="pageExcDelivery-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
+                    <div class="col" style="width:0px"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    return {
+        on: {
+            pageAfterIn: function(e,page){
+                $$("#pageExcDelivery-input").val(this.$app.data['excDeliveryListDocCount']);
+            }
+        },
+        methods: {
+            buttonStoreClick: function(){
+                let excDeliveryListDocCount=$$("#pageExcDelivery-input").val();
+                if (typeof(Storage)!=="undefined"&&excDeliveryListDocCount&&excDeliveryListDocCount.toString().trim()!="") {
+                    localStorage.setItem("settings-excDelivery-listDocCount",excDeliveryListDocCount);
+                } else {// Sorry! No Web Storage support..
+                }
+                this.$app.data['excDeliveryListDocCount']=excDeliveryListDocCount;
+                app7.data.pageExcDeliveryList=null;
+            }
+        }
+    }
+</script>

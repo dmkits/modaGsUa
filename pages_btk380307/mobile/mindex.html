@@ -82,7 +82,7 @@
                                         <a href="/pageSettingsRecs" class="panel-close">Приходы товара</a>
                                     </li>
                                     <li>
-                                        <a href="/pageSettingsExcs" class="panel-close">Перемещения товара</a>
+                                        <a href="/pageExcDeliverySettings" class="panel-close">Перемещения товара<br> на доставку</a>
                                     </li>
                                     <li>
                                         <a href="/pageSettingsVens" class="panel-close">Инвентаризации</a>
@@ -183,7 +183,7 @@
         $$('#appbar-user').text("");$$('#appbar-modeMsg').text("");
         app7.data['useBCScanner']=false;
         app7.data['recsListDocCount']=50;
-        app7.data['excsListDocCount']=50;
+        app7.data['excDeliveryListDocCount']=50;
         app7.data['inventsListDocCount']=50;
         if(typeof(Storage)!=="undefined"){
             var serverURI=localStorage.getItem("settings-serverURI");
@@ -192,8 +192,8 @@
             if(useBCScanner)app7.data['useBCScanner']=useBCScanner;
             var recsListDocCount=localStorage.getItem("settings-recs-listDocCount");
             if(recsListDocCount&&!isNaN(parseInt(recsListDocCount)))app7.data['recsListDocCount']=parseInt(recsListDocCount);
-            var excsListDocCount=localStorage.getItem("settings-excs-listDocCount");
-            if(excsListDocCount&&!isNaN(parseInt(excsListDocCount)))app7.data['excsListDocCount']=parseInt(excsListDocCount);
+            var excDeliveryListDocCount=localStorage.getItem("settings-excDelivery-listDocCount");
+            if(excDeliveryListDocCount&&!isNaN(parseInt(excDeliveryListDocCount)))app7.data['excDeliveryListDocCount']=parseInt(excDeliveryListDocCount);
             var inventsListDocCount=localStorage.getItem("settings-inventory-listDocCount");
             if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount)))app7.data['inventsListDocCount']=parseInt(inventsListDocCount);
         }else{// Sorry! No Web Storage support..

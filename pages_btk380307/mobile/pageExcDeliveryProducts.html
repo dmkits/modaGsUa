@@ -1,155 +1,120 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div id="pageExcData" class="page page-with-subnavbar" data-name="pageExcData">
-    <div class="navbar">
-        <div class="navbar-inner">
-            <div class="left">
-                <a href="#" class="link back">
-                    <i class="icon icon-back"></i><i class="icon icon-back"></i>
-                    <!--<span class="ios-only"></span>-->
-                </a>
-            </div>
-
-            <div class="title docHeaderTitle">
-                <span>Перемещение {{item.DocID}} от {{item.SDocDate}}</span><br>
-                <!--<span style="font-size:12px">с {{item.StockName}}<br>на {{item.NewStockName}}</span>-->
-            </div>
-
-            <!--<div class="title-large">-->
-                <!--&lt;!&ndash;<span>Перемещение {{item.DocID}} от {{item.SDocDate}}</span><br>&ndash;&gt;-->
-                <!--&lt;!&ndash;<span style="font-size:12px">с {{item.StockName}}<br>на {{item.NewStockName}}</span>&ndash;&gt;-->
-                <!--&lt;!&ndash;<div class="title-large-text">My App</div>&ndash;&gt;-->
-                <!--<div class="title-large-text">-->
-                    <!--<span style="font-size:12px">с {{item.StockName}}<br>на {{item.NewStockName}}</span>-->
-                <!--</div>-->
-            <!--</div>-->
-
-            <div class="subnavbar docHeaderTitle" id="pageExcDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
-                <div class="subnavbar-inner">
-
-                    <!--<div class="row">-->
-                        <!--<span style="font-size:12px">с {{item.StockName}}<br>на {{item.NewStockName}}</span>-->
-                    <!--</div>-->
-
-                    <div class="row" style="padding-left:16px;padding-right:16px;">
-                        <!--<div class="row">-->
-                            <!--<span style="font-size:12px">с {{item.StockName}}<br>на {{item.NewStockName}}</span>-->
-                        <!--</div>-->
-
-                        <input type="number" class="col" style="height:36px;min-width:200px;" id="pageExcDataBarCodeInput" placeholder="ШК или код товара">
-                        <button class="col button button-outline button-round" id="pageExcDataBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>
-                        <div>
-                            <span id="pageExcDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>
-                            <span id="pageExcDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
+    <div id="pageExcDeliveryProducts" class="page page-with-subnavbar">
+        <div class="navbar">
+            <div class="navbar-inner">
+                <div class="left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-back"></i><i class="icon icon-back"></i>
+                        <!--<span class="ios-only"></span>-->
+                    </a>
+                </div>
+                <div class="title docHeaderTitle">
+                    <span>Перемещение на доставку<br>{{item.DocID}} от {{item.SDocDate}}</span><br>
+                </div>
+                <div class="subnavbar docHeaderTitle" id="pageExcDeliveryProductsToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
+                    <div class="subnavbar-inner">
+                        <div class="row" style="padding-left:16px;padding-right:16px;">
+                            <input type="number" class="col" style="height:36px;min-width:200px;" id="pageExcDeliveryProductsBarCodeInput" placeholder="ШК или код товара">
+                            <button class="col button button-outline button-round" id="pageExcDeliveryProductsBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>
+                            <div>
+                                <span id="pageExcDeliveryProductsStateInfo" style="color:black;font-weight:bold;display:none"></span><br>
+                                <span id="pageExcDeliveryProductsStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
         </div>
-
+        <div class="page-content" id="pageExcDeliveryProductsContent" style="padding-left:1px;padding-right:1px;padding-bottom:1px;">
+            <table height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
+                <thead>
+                <tr class="mobile-table-small-size" style="">
+                    <th width="40px"><span class="table-header-small">№<br>п/п</span></th>
+                    <th><span class="table-header-small">Наименование товара<br>Код товара</span></th>
+                    <!--<th width="50px"><span class="table-header-small">Ед.<br>изм.</span></th>-->
+                    <th width="50px"><span class="table-header-small">Уч.<br>кол-во</span></th>
+                    <th width="50px"><span class="table-header-small">Факт.<br>кол-во</span></th>
+                </tr>
+                <tr class="mobile-table-large-size">
+                    <th width="40px"><div class="table-header-large">№<br>п/п</div></th>
+                    <th width="110px"><div class="table-header-large">Штрихкод</div></th>
+                    <th width="50px"><div class="table-header-large">Код товара</div></th>
+                    <th><div class="table-header-large">Наименование товара</div></th>
+                    <th width="50px"><div class="table-header-large">Ед.<br>изм.</div></th>
+                    <th width="50px"><div class="table-header-large">Уч.<br>кол-во</div></th>
+                    <th width="50px"><div class="table-header-large">Факт.<br>кол-во</div></th>
+                </tr>
+                </thead>
+                <tbody style="display:none">
+                <tr class="mobile-table-small-size" rowSelecting="true">
+                    <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
+                    <td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
+                </tr>
+                <tr class="mobile-table-small-size" rowSelecting="true">
+                    <td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
+                    <!--<td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>-->
+                    <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
+                    <td width="50px" class="tdNewQty" dataItemName="NewQty"
+                        onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
+                </tr>
+                <tr class="mobile-table-large-size" rowSelecting="true">
+                    <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
+                    <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"><div class="table-text"></div></td>
+                    <td width="50px" class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
+                    <td class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
+                    <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
+                    <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
+                    <td width="50px" class="tdNewQty" dataItemName="NewQty"
+                        onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
+                </tr>
+                </tbody>
+            </table>
+            <table style="margin-top:33px;margin-bottom:30px;width:100%"></table>
+            <table height="30px" style="position:fixed;left:1px;bottom:0px;width:calc(100% - 2px);z-index:100">
+                <tfoot>
+                <tr>
+                    <td id="totalRows" width="40px"><span class="table-total">0</span></td>
+                    <td><span class="table-total"></span></td>
+                    <td id="totalQty" width="50px"><span class="table-total">0</span></td>
+                    <td id="totalNewQty" width="50px"><span class="table-total">0</span></td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
     </div>
-    <!--<div class="toolbar" id="pageExcDataToolbar" style="">-->
-        <!--<div class="toolbar-inner">-->
-            <!--<div class="row" style="padding-left:16px;padding-right:16px;">-->
-                <!--<input type="number" class="col" style="height:36px;min-width:200px;" id="pageExcDataBarCodeInput" placeholder="ШК или код товара">-->
-                <!--<button class="col button button-outline button-round" id="pageExcDataBtnBarcodeInputEnter" style="width:80px;">ВВОД</button>-->
-                <!--<div>-->
-                <!--<span id="pageExcDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>-->
-                <!--<span id="pageExcDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-    <!--</div>-->
-
-    <div class="page-content" id="pageContenExcData" style="padding-left:1px;padding-right:1px;padding-bottom:1px;">
-        <!--<div style="width:100%;height:100%"></div>-->
-        <table height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
-            <thead>
-            <tr class="mobile-table-small-size" style="">
-                <th width="40px"><span class="table-header-small">№<br>п/п</span></th>
-                <th><span class="table-header-small">Наименование товара<br>Код товара</span></th>
-                <!--<th width="50px"><span class="table-header-small">Ед.<br>изм.</span></th>-->
-                <th width="50px"><span class="table-header-small">Уч.<br>кол-во</span></th>
-                <th width="50px"><span class="table-header-small">Факт.<br>кол-во</span></th>
-            </tr>
-            <tr class="mobile-table-large-size">
-                <th width="40px"><div class="table-header-large">№<br>п/п</div></th>
-                <th width="110px"><div class="table-header-large">Штрихкод</div></th>
-                <th width="50px"><div class="table-header-large">Код товара</div></th>
-                <th><div class="table-header-large">Наименование товара</div></th>
-                <th width="50px"><div class="table-header-large">Ед.<br>изм.</div></th>
-                <th width="50px"><div class="table-header-large">Уч.<br>кол-во</div></th>
-                <th width="50px"><div class="table-header-large">Факт.<br>кол-во</div></th>
-            </tr>
-            </thead>
-            <tbody style="display:none">
-            <tr class="mobile-table-small-size" rowSelecting="true">
-                <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
-                <td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
-            </tr>
-            <tr class="mobile-table-small-size" rowSelecting="true">
-                <td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
-                <!--<td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>-->
-                <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
-                <td width="50px" class="tdNewQty" dataItemName="NewQty"
-                    onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
-            </tr>
-            <tr class="mobile-table-large-size" rowSelecting="true">
-                <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
-                <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"><div class="table-text"></div></td>
-                <td width="50px" class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
-                <td class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
-                <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
-                <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
-                <td width="50px" class="tdNewQty" dataItemName="NewQty"
-                    onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
-            </tr>
-            </tbody>
-        </table>
-        <table style="margin-top:33px;margin-bottom:30px;width:100%"></table>
-        <table height="30px" style="position:fixed;left:1px;bottom:0px;width:calc(100% - 2px);z-index:100">
-            <tfoot>
-            <tr>
-                <td id="totalRows" width="40px"><span class="table-total">0</span></td>
-                <td><span class="table-total"></span></td>
-                <td id="totalQty" width="50px"><span class="table-total">0</span></td>
-                <td id="totalNewQty" width="50px"><span class="table-total">0</span></td>
-            </tr>
-            </tfoot>
-        </table>
-    </div>
-</div>
 </template>
 <script>
     return {
         on: {
             pageInit: function(e,page){
-                this.pageContenExcData=$$(this.el).children("#pageContenExcData");                              //console.log("this.pageContenExcData",this.pageContenExcData);
-                if(!this.pageContenExcData){ this.setInputProdBarcodeByState(); return; };
-                var dataTables=this.pageContenExcData.children("table");
+                this.pageExcDeliveryProductsContent=$$(this.el).children("#pageExcDeliveryProductsContent");    //console.log("this.pageExcDeliveryProductsContent",this.pageExcDeliveryProductsContent);
+                if(!this.pageExcDeliveryProductsContent){ this.setInputProdBarcodeByState(); return; };
+                var dataTables=this.pageExcDeliveryProductsContent.children("table");
                 if(dataTables&&dataTables[0]) this.dataTableHeader=dataTables[0];
                 if(dataTables&&dataTables[1]) this.dataTableBody=dataTables[1];
                 if(dataTables&&dataTables[2]) this.dataTableFoot=dataTables[2];
                 if(!this.item||(this.item&&!this.item["IsStateOnConfirmation"])){ this.loadExcData(); return; }
                 var self=this;
-                $$('#pageExcDataToolbar #pageExcDataBtnBarcodeInputEnter').on('click',function(){
+                $$('#pageExcDeliveryProductsToolbar #pageExcDeliveryProductsBtnBarcodeInputEnter').on('click',function(){
                     self.barcodeInputEnter();
                 });
-                $$('#pageExcDataToolbar #pageExcDataBarCodeInput').on('keypress',function(e){
+                $$('#pageExcDeliveryProductsToolbar #pageExcDeliveryProductsBarCodeInput').on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
                 });
 //                app7.data.pageExcD_bccallback= function(){
-//                    var pageDom=$$('.view-main #pageExcData');                                              //console.log("pageExcD_bccallback",pageDom.length==0,!pageDom[0],pageDom[0].innerHTML.length==0);
-//                    if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0)return;               console.log("pageExcD_bccallback DO SCAN!!!");
+//                    var pageDom=$$('.view-main #pageExcDeliveryProducts');                                    //console.log("pageExcD_bccallback",pageDom.length==0,!pageDom[0],pageDom[0].innerHTML.length==0);
+//                    if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0)return;                 console.log("pageExcD_bccallback DO SCAN!!!");
 //                }
 //                setTimeout(function(){
 //                    if(app7.data.pageExcD_bccallback)app7.data.pageExcD_bccallback();
 //                },0)
                 if(deviceBarcodeScannerReaderAction){
                     deviceBarcodeScannerReaderAction= function(barcode){
-                        let pageDom=$$('.view-main #pageExcData');
-                        if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0) return;              //alert("pageExcData scan:"+barcode);
+                        let pageDom=$$('.view-main #pageExcDeliveryProducts');
+                        if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0) return;              //alert("pageExcDeliveryProducts scan:"+barcode);
                         if(barcode) barcode= barcode.replace("\n","");
                         self.barcodeInputEnter(barcode);
                     }
@@ -161,7 +126,7 @@
             }
         },
         data: function(){
-            let excData={},listExcs=this.$app.data.pageListExcs.listExcs;
+            let excData={},listExcs=this.$app.data.pageExcDeliveryList.listExcs;
             if(!this.$route.params) return {};
             let excChID=this.$route.params.excChID;
             if(!listExcs||excChID===null||excChID===undefined) return {};
@@ -207,24 +172,24 @@
                 app7.innerPageUpdateTotalTable(this.dataTableFoot,{totalRows:tRows,totalQty:totalQty,totalNewQty:totalNewQty})
             },
             setScroll: function(innerElem){
-                var page=this.pageContenExcData[0],
+                var page=this.pageExcDeliveryProductsContent[0],
                     absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
                 page.scrollTop= absoluteElementTop - (page.clientHeight / 2);//page.scrollTo(1, absoluteElementTop - (page.clientHeight / 2));-fail in mobileApp
             },
-            loadExcData: function(){                                                                            //console.log('pageExcData.html loadExcData excData=',this.item);
+            loadExcData: function(){                                                                            //console.log('pageExcDeliveryProducts.html loadExcData excData=',this.item);
                 this.setInputProdBarcodeByState({focus:true,enable:false});
                 let excData=this.item, excChID=excData.ChID;
                 if(excChID===null||excChID===undefined) return;
-                let self=this;                                                                                  //console.log('pageExcData.html loadExcData excChID=',excChID, this);
+                let self=this;                                                                                  //console.log('pageExcDeliveryProducts.html loadExcData excChID=',excChID, this);
                 app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/exc/getDataForExcDTable',conditions:{'ParentChID=':excChID},
-                        errorDialogMsg:"Не удалось получить товары перемещения с сервера!"},
+                app7.srvRequestJSON({url:'/mobile/excDelivery/getDataForExcDTable',conditions:{'ParentChID=':excChID},
+                        errorDialogMsg:"Не удалось получить товары перемещения на доставку с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
                         let resultItems=(result)?result.items:null;
                         self.items=resultItems;
                         if(!resultItems){ self.setInputProdBarcodeByState(); return; }
-                        app7.data.pageExcData={inventDataItems:resultItems};                                    //console.log('pageExcData.html loadExcData resultItems=',resultItems);
+                        app7.data.pageExcDeliveryProducts={inventDataItems:resultItems};                        //console.log('pageExcDeliveryProducts.html loadExcData resultItems=',resultItems);
                         var params={ dataTableHeader:self.dataTableHeader, dataTableBody:self.dataTableBody,
                             progressAction:function(tableData, ind,tableDataItem){
                                 if(!tableDataItem){ self.setTotalInfo(0,0); return; }
@@ -240,7 +205,7 @@
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
                 var self=this;
-                this.storeInputValueToExc(scanBarcode || $$("#pageExcDataToolbar #pageExcDataBarCodeInput").val(),function(excProdData){
+                this.storeInputValueToExc(scanBarcode || $$("#pageExcDeliveryProductsToolbar #pageExcDeliveryProductsBarCodeInput").val(),function(excProdData){
                     app7.preloader.hide();
                     if(excProdData)self.addProdToTable(excProdData);
                     self.setInputProdBarcodeByState({enable:true,focus:(!scanBarcode),val:""});
@@ -250,32 +215,32 @@
              * opts = { enable, disable, focus, val }
              */
             setInputProdBarcodeByState: function(opts){
-                var pageExcDataBarCodeInput=$$("#pageExcDataToolbar #pageExcDataBarCodeInput"),
-                    pageExcDataBtnBarcodeInputEnter=$$('#pageExcDataToolbar #pageExcDataBtnBarcodeInputEnter'),
-                    pageExcDataStateInfo=$$('#pageExcDataToolbar #pageExcDataStateInfo'),
-                    pageExcDataStateName=$$('#pageExcDataToolbar #pageExcDataStateName');
+                var pageExcDeliveryProductsBarCodeInput=$$("#pageExcDeliveryProductsToolbar #pageExcDeliveryProductsBarCodeInput"),
+                    pageExcDeliveryProductsBtnBarcodeInputEnter=$$('#pageExcDeliveryProductsToolbar #pageExcDeliveryProductsBtnBarcodeInputEnter'),
+                    pageExcDeliveryProductsStateInfo=$$('#pageExcDeliveryProductsToolbar #pageExcDeliveryProductsStateInfo'),
+                    pageExcDeliveryProductsStateName=$$('#pageExcDeliveryProductsToolbar #pageExcDeliveryProductsStateName');
                 if(!this.item||(this.item&&!this.item["IsStateOnConfirmation"])||!this.items){
-                    pageExcDataBarCodeInput.attr('disabled',1);
-                    pageExcDataBtnBarcodeInputEnter.attr('disabled',1);
-                    pageExcDataBarCodeInput.hide();pageExcDataBtnBarcodeInputEnter.hide();
-                    pageExcDataStateInfo.show();pageExcDataStateInfo.text(this.item["StateInfo"]);
-                    pageExcDataStateName.show();pageExcDataStateName.text("("+this.item["StateName"]+")");
+                    pageExcDeliveryProductsBarCodeInput.attr('disabled',1);
+                    pageExcDeliveryProductsBtnBarcodeInputEnter.attr('disabled',1);
+                    pageExcDeliveryProductsBarCodeInput.hide();pageExcDeliveryProductsBtnBarcodeInputEnter.hide();
+                    pageExcDeliveryProductsStateInfo.show();pageExcDeliveryProductsStateInfo.text(this.item["StateInfo"]);
+                    pageExcDeliveryProductsStateName.show();pageExcDeliveryProductsStateName.text("("+this.item["StateName"]+")");
                     return
                 }
                 if(!opts)return;
-                pageExcDataBarCodeInput.show();pageExcDataBtnBarcodeInputEnter.show();
-                pageExcDataStateInfo.hide();pageExcDataStateName.hide();
-                if(opts.val!==undefined) pageExcDataBarCodeInput.val(opts.val);
+                pageExcDeliveryProductsBarCodeInput.show();pageExcDeliveryProductsBtnBarcodeInputEnter.show();
+                pageExcDeliveryProductsStateInfo.hide();pageExcDeliveryProductsStateName.hide();
+                if(opts.val!==undefined) pageExcDeliveryProductsBarCodeInput.val(opts.val);
                 if(opts.enable==true||opts.disable==false){
-                    pageExcDataBarCodeInput.removeAttr('disabled');
-                    pageExcDataBtnBarcodeInputEnter.removeAttr('disabled');
-                    if(opts.focus==true) pageExcDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
+                    pageExcDeliveryProductsBarCodeInput.removeAttr('disabled');
+                    pageExcDeliveryProductsBtnBarcodeInputEnter.removeAttr('disabled');
+                    if(opts.focus==true) pageExcDeliveryProductsBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }else if(opts.disable==true||opts.enable==false){
-                    if(opts.focus==true) pageExcDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
-                    pageExcDataBarCodeInput.attr('disabled',1);
-                    pageExcDataBtnBarcodeInputEnter.attr('disabled',1);
+                    if(opts.focus==true) pageExcDeliveryProductsBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
+                    pageExcDeliveryProductsBarCodeInput.attr('disabled',1);
+                    pageExcDeliveryProductsBtnBarcodeInputEnter.attr('disabled',1);
                 }else if(opts.focus==true){
-                    pageExcDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
+                    pageExcDeliveryProductsBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }
             },
             excDTableTDNewQtyOnClick: function(e,tableDataItem,self){
@@ -338,9 +303,9 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageExcData.html storeInputValueToExc inputValue=',inputValue, this);
+                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageExcDeliveryProducts.html storeInputValueToExc inputValue=',inputValue, this);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/exc/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
+                app7.srvPostRequestJSON({url:'/mobile/excDelivery/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
                         userErrorMsg:"Не удалось добавить товар в перемещение!"},
                     function(result,errmsg){
                         app7.preloader.hide();
@@ -350,9 +315,9 @@
                     })
             },
             storeNewQtyToExcD: function(srcPosID,prodID,newQty,callback){
-                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageExcData.html storeNewQtyToExcD tSrcPosID=',tSrcPosID, tNewQty);
+                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageExcDeliveryProducts.html storeNewQtyToExcD tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/exc/storeNewQtyData',data:{parentChID:parentChID,SrcPosID:srcPosID,NewQty:newQty},
+                app7.srvPostRequestJSON({url:'/mobile/excDelivery/storeNewQtyData',data:{parentChID:parentChID,SrcPosID:srcPosID,NewQty:newQty},
                             showRequestErrorDialog:false},
                     function(result,errmsg){
                         app7.preloader.hide();// Hide Preloader

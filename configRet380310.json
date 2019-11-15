@@ -20,7 +20,7 @@
     "rep_cashier"
     /*"mobile",
     "mobileVen",
-    "mobileExc",
+    "mobileExcDelivery",
     "mobileRec",
     "mobileReportsCashier"*/
   ],
@@ -50,10 +50,10 @@
       "autorun":["menuBarItemRec"],
       "mobile":["mobileRec"]
     },
-    "sendExcs":{
+    "excDelivery":{
       "menu":["menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemExcCashier"],
-      "mobile":["mobileExc"]
+      "mobile":["mobileExcDelivery"]
     },
     "cashier":{
       "menu":["menuBarItemReportsCashier","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],

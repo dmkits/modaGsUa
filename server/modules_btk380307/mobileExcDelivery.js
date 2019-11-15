@@ -15,19 +15,19 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
         });
 };
 
-module.exports.moduleViewURL = "/mobile/pageListExcs";
-module.exports.moduleViewPath = "mobile/pageListExcs.html";
 module.exports.routes=[//-- App routes --
-    { path: '/pageListExcs', componentUrl: '/mobile/pageListExcs', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
-    { path: '/pageExcData/:excChID', componentUrl: '/mobile/pageExcData', options:{ignoreCache:true} },
-    { path: '/pageSettingsExcs', componentUrl: '/mobile/pageSettingsExcs', options:{ignoreCache:true} }
+    { path: '/pageExcDelivery', componentUrl: '/mobile/pageExcDeliveryList', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
+    { path: '/pageExcDeliveryProducts/:excChID', componentUrl: '/mobile/pageExcDeliveryProducts', options:{ignoreCache:true} },
+    { path: '/pageExcDeliverySettings', componentUrl: '/mobile/pageExcDeliverySettings', options:{ignoreCache:true} }
 ];
+module.exports.moduleViewURL = "/mobile/pageExcDeliveryList";
+module.exports.moduleViewPath = "mobile/pageExcDeliveryList.html";
 module.exports.init = function(app){
-    app.get("/mobile/pageSettingsExcs", function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageSettingsExcs.html');
+    app.get("/mobile/pageExcDeliverySettings", function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageExcDeliverySettings.html');
     });
-    app.get("/mobile/pageExcData", function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageExcData.html');
+    app.get("/mobile/pageExcDeliveryProducts", function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageExcDeliveryProducts.html');
     });
     var tExcsListTableColumns=[
         {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Exc"},
@@ -69,7 +69,7 @@ module.exports.init = function(app){
         {data: "StateInfo", name: "Информация статуса", width: 50, type: "text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode not in (50,56,60) Then 'Изменение запрещено' Else 'Изменение разрешено' END" }
     ];
-    app.get("/mobile/exc/getDataForExcsList", function(req,res){
+    app.get("/mobile/excDelivery/getDataForExcList", function(req,res){
         var conditions={}, top="";
         for(var condItem in req.query){
             if(condItem=="top")top="top "+req.query[condItem];
@@ -118,7 +118,7 @@ module.exports.init = function(app){
         //{data: "PriceCC", name: "Цена продажи", width: 65, type: "numeric2", dataSource:"t_ExcD"}
         //{data: "PRICELIST_PRICE", name: "Цена по прайс-листу", width: 75, type: "numeric2"},
     ];
-    app.get("/mobile/exc/getDataForExcDTable", function(req,res){
+    app.get("/mobile/excDelivery/getDataForExcDTable", function(req,res){
         var conditions={};
         for(var condItem in req.query)
             if(condItem.indexOf("ParentChID")==0) conditions["t_ExcD.ChID="]=req.query[condItem];
@@ -196,7 +196,7 @@ module.exports.init = function(app){
 
          //resultCallback(result);
      };
-     app.post("/mobile/exc/storeProdDataByCRUniInput", function(req,res){
+     app.post("/mobile/excDelivery/storeProdDataByCRUniInput", function(req,res){
          var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];  console.log('/mobile/exc/storeProdDataByCRUniInput req.body',req.body);
          r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
              if(resultFindProd.error){
@@ -209,7 +209,7 @@ module.exports.init = function(app){
              })
          });
      });
-     app.post("/mobile/exc/storeNewQtyData", function(req,res){
+     app.post("/mobile/excDelivery/storeNewQtyData", function(req,res){
          var storingData=req.body, parentChID=storingData["parentChID"],excDData={SrcPosID:storingData["SrcPosID"]};   console.log('/mobile/exc/storeNewQtyData req.body',req.body);
          t_ExcD.storeExcDProdData(req.dbUC,parentChID,excDData,storingData["NewQty"],function (result){
              res.send(result);
