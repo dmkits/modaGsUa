@@ -320,8 +320,8 @@
                     errMsg=params.errorDialogMsg+'<br>Данные некорректные!';
                 }
                 if(jsonData&&jsonData.error){
-                    if(typeof(jsonData.error)=="string")errMsg=jsonData.error;
-                    else errMsg=(jsonData.error.userMessage||jsonData.error.message||jsonData.error.error);
+                    if(typeof(jsonData.error)=="string")errMsg= jsonData.errorMessage||jsonData.error;
+                    else errMsg= (jsonData.error.userMessage||jsonData.error.message||jsonData.error.error);
                     errMsg=params.errorDialogMsg+"<br>"+errMsg;
                 }
                 if(errMsg&&params.showRequestErrorDialog==false){ callback(null, errMsg);return; }

@@ -35,7 +35,15 @@
 </head>
 <body>
 <div id="app">
-    <div class="view view-main">
+    <div class="appbar">
+        <div class="appbar-inner">
+            <div style="display:table;width:100%;min-height:25px;text-align:center">
+                <span id="appbar-user" style="display:table-cell;font-size:18px;font-weight:bold"></span>
+                <span id="appbar-modeMsg" style="display:table-cell;color:red;font-size:18px;font-weight:bold"></span>
+            </div>
+        </div>
+    </div>
+    <div class="view view-main" style="height:calc(100% - 25px)">
         <div class="page" data-name="home">
             <div class="panel panel-left panel-cover" id="main-panel-left">
                 <div class="page">
@@ -87,7 +95,7 @@
                             <div class="list links-list">
                                 <ul>
                                     <li>
-                                    <a href="/pageSettingsCommon" class="panel-close">Доступ и устройство</a>
+                                        <a href="/pageSettingsCommon" class="panel-close">Доступ и устройство</a>
                                     </li>
                                 </ul>
                             </div>
@@ -104,9 +112,9 @@
                     </div>
                 </div>
             </div>
-            <div class="page-content login-screen-content" id="mobInv-login-screen">
-                <div class="block main-logo">
-                </div>
+            <div class="page-content login-screen-content" id="mobileLogin-screen">
+                <div id="mobileLogin-mainLogo" class="block main-logo"></div>
+                <div id="mobileLogin-mainModeDebug" class="block" style="display:none;color:red;font-size:27px;font-weight:bold;text-align:center"></div>
                 <!--<div class="login-screen-title">Авторизация</div>-->
                 <div class="list no-hairlines-md" style="margin-bottom:0">
                     <ul>
@@ -114,7 +122,7 @@
                             <div class="item-inner">
                                 <div class="item-title item-label">Имя пользователя</div>
                                 <div class="item-input-wrap">
-                                    <input id="login-username" type="text" placeholder="Имя пользователя">
+                                    <input id="mobileLogin-inputUsername" type="text" placeholder="Имя пользователя">
                                     <span class="input-clear-button"></span>
                                 </div>
                             </div>
@@ -123,7 +131,7 @@
                             <div class="item-inner">
                                 <div class="item-title item-label">Пароль</div>
                                 <div class="item-input-wrap">
-                                    <input id="login-password" type="password" placeholder="Пароль">
+                                    <input id="mobileLogin-inputUPswrd" type="password" placeholder="Пароль">
                                     <span class="input-clear-button"></span>
                                 </div>
                             </div>
@@ -135,16 +143,17 @@
                         <div class="col" style="width:0px"></div>
                         <div class="col" style="width:auto;padding-right:0">
                             <label class="item-checkbox item-content" style="padding-left:0">
-                                <input id="login-storeUser" type="checkbox" value=""/>
+                                <input id="mobileLogin-checkboxStoreUser" type="checkbox" value=""/>
                                 <i class="icon icon-checkbox"></i>
                                 <div class="item-title">Запомнить меня</div>
                             </label>
+
                         </div>
                         <div class="col" style="width:0px"></div>
                     </div>
                     <div class="row">
                         <div class="col" style="width:0px"></div>
-                        <button id="login-button" class="col button button-fill button-round" style="width:200px">ВОЙТИ</button>
+                        <button id="mobileLogin-btnLogin" class="col button button-fill button-round" style="width:200px">ВОЙТИ</button>
                         <div class="col" style="width:0px"></div>
                     </div>
                 </div>
@@ -154,24 +163,24 @@
 </div>
 <script>
     var $$=Dom7,
-        baseRoutes=[//-- App routes --
-            { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
-            { path: '/pageSettingsCommon', componentUrl: 'pageSettingsCommon.html'},
-            { path: '(.*)', url: './actionError' }// Default route (404 page). MUST BE THE LAST
-        ],
-        app7  = new Framework7({// Framework7 App main instance
-            id:'io.framework7.mobile.gabis',
-            root: '#app', // app7 root element
-            theme: 'ios', //for mobile app gabis ios!!! //'auto' - Automatic theme detection, Can be md, ios or aurora
-            routes: baseRoutes,
-            workingDoc:null
-        }),
-        mainView = app7.views.create('.view-main',{domCache:true,stackPages:true});                             //app7.dialog.alert('<span style="font-size:18px">1</span>', "debug")//IT'S FOR TEST
-    //$$('#main-panel-left-settings').hide();//IT'S ONLY FOR MOBILE APP
+            baseRoutes=[//-- App routes --
+                { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
+                { path: '/pageSettingsCommon', componentUrl: 'pageSettingsCommon.html'},
+                { path: '(.*)', url: './actionError' }// Default route (404 page). MUST BE THE LAST
+            ],
+            app7  = new Framework7({// Framework7 App main instance
+                id:'io.framework7.mobile.gabis',
+                root: '#app', // app7 root element
+                theme: 'ios', //for mobile app gabis ios!!! //'auto' - Automatic theme detection, Can be md, ios or aurora
+                routes: baseRoutes,
+                workingDoc:null
+            }),
+            mainView = app7.views.create('.view-main',{domCache:true,stackPages:true});                             //app7.dialog.alert('<span style="font-size:18px">1</span>', "debug")//IT'S FOR TEST
     $$('#main-panel-left-pages').hide();
     app7.initData=function(){
         app7.data={};
-        app7.data.uuid="";document.cookie="uuid=0";
+        app7.data.uuid="";  app7.data.aidcn="gabis";//application id config name
+        $$('#appbar-user').text("");$$('#appbar-modeMsg').text("");
         app7.data['useBCScanner']=false;
         app7.data['recsListDocCount']=50;
         app7.data['excsListDocCount']=50;
@@ -192,21 +201,21 @@
         if(!app7.data['serverURI'])app7.data['serverURI']=(window&&window.origin)?window.origin:"http://159.224.244.224:58181";
     };
     app7.setLoginStoredData=function(){
-        $$('#mobInv-login-screen #login-password').val("");
-        $$('#mobInv-login-screen #login-storeUser').prop('checked',false);
+        $$('#mobileLogin-screen #mobileLogin-inputUPswrd').val("");
+        $$('#mobileLogin-screen #mobileLogin-checkboxStoreUser').prop('checked',false);
         if(typeof(Storage)=="undefined"){
-            $$('#mobInv-login-screen #login-storeUser').attr('disabled',1);
+            $$('#mobileLogin-screen #mobileLogin-checkboxStoreUser').attr('disabled',1);
             return
         }
-        $$('#mobInv-login-screen #login-storeUser').removeAttr('disabled');
-        var username=localStorage.getItem("login-username");
+        $$('#mobileLogin-screen #mobileLogin-checkboxStoreUser').removeAttr('disabled');
+        var username=localStorage.getItem("mobileLogin-username");
         if(!username||username.toString().trim()=="")return;
-        $$('#mobInv-login-screen #login-username').val(username);
-        var storeLoginUserpswrdItemName="login-userpswrd-"+username,
+        $$('#mobileLogin-screen #mobileLogin-inputUsername').val(username);
+        var storeLoginUserpswrdItemName="mobileLogin-upswrd-"+username,
                 storeLoginUserpswrd=localStorage.getItem(storeLoginUserpswrdItemName);
         if(!storeLoginUserpswrd||storeLoginUserpswrd=="null")return;
-        $$('#mobInv-login-screen #login-password').val(storeLoginUserpswrd);
-        $$('#mobInv-login-screen #login-storeUser').prop('checked',true);
+        $$('#mobileLogin-screen #mobileLogin-inputUPswrd').val(storeLoginUserpswrd);
+        $$('#mobileLogin-screen #mobileLogin-checkboxStoreUser').prop('checked',true);
     };
     app7.initData();
     app7.setLoginStoredData();
@@ -214,64 +223,86 @@
         $$('#main-panel-left-pages').hide();
         app7.initData();
         app7.setLoginStoredData();
-        app7.request.setup({ headers: {'uuid':app7.data.uuid} });
-        $$('#mobInv-login-screen #login-username').focus();
+        app7.request.setup({ headers: {'uuid':app7.data.uuid,'aidcn':app7.data.aidcn} });
+        $$('#mobileLogin-screen #mobileLogin-inputUsername').focus();
     });
-    $$('#mobInv-login-screen #login-button').on('click',function(){
+    $$('#mobileLogin-screen #mobileLogin-btnLogin').on('click',function(){
         app7.loginProcess();
     });
-    $$('#mobInv-login-screen #login-password').on('keypress',function(e){
+    $$('#mobileLogin-screen #mobileLogin-inputUPswrd').on('keypress',function(e){
         if(e.keyCode==13||e.key=='Enter')app7.loginProcess();
     });
     app7.loginProcess=function(){
-        var username = $$('#mobInv-login-screen #login-username').val(),
-            password = $$('#mobInv-login-screen #login-password').val();
+        var username = $$('#mobileLogin-screen #mobileLogin-inputUsername').val(),
+                password = $$('#mobileLogin-screen #mobileLogin-inputUPswrd').val();
+        app7.preloader.show();
         this.srvPostRequestJSON({url:'/login',data:{user:username,pswrd:password},errorDialogMsg:"Вход на сервер неудался!"},
-            function(result,errmsg){
-                $$('#mobInv-login-screen #login-password').val("");
-                if(!result||!result.uuid){
-                    $$('#mobInv-login-screen #login-password').focus(); return;
-                }
-                $$('#mobInv-login-screen #login-username').val("");
-                if(typeof(Storage)!=="undefined"){
-                    localStorage.setItem("login-username",username);
-                    var storeLoginUserpswrdItemName="login-userpswrd-"+username;
-                    if($$('#mobInv-login-screen #login-storeUser').prop('checked'))
-                        localStorage.setItem(storeLoginUserpswrdItemName,password);
-                    else
-                        localStorage.setItem(storeLoginUserpswrdItemName,null);
-                }else{// Sorry! No Web Storage support..
-                }
-                app7.data.uuid=result.uuid;
-                app7.request.setup({ headers: {'uuid':result.uuid} });
-                app7.setUserRoutes();
-            });
+                function(result,errmsg){
+                    app7.preloader.hide();
+                    $$('#mobileLogin-screen #mobileLogin-inputUPswrd').val("");
+                    var mode=(result)?result.mode:null,modeIsDebug=(result)?result.modeIsDebug:null;
+                    app7.data["appMode"]=mode; app7.data["appModeMsg"]= "";
+                    if(modeIsDebug){
+                        $$('#mobileLogin-screen #mobileLogin-mainLogo').hide();
+                        $$('#mobileLogin-screen #mobileLogin-mainModeDebug').show()
+                                .html('ТЕСТОВЫЙ РЕЖИМ!!!'+((mode)?'<br><span style="font-size:18px">('+mode+')</span>':''));
+                        app7.data["appModeMsg"]= "!ТЕСТОВЫЙ РЕЖИМ!";
+                        $$('#appbar-modeMsg').text(app7.data["appModeMsg"]);
+                    }else{
+                        $$('#mobileLogin-screen #mobileLogin-mainLogo').show();
+                        $$('#mobileLogin-screen #mobileLogin-mainModeDebug').hide();
+                        $$('#appbar-modeMsg').text("");
+                    }
+                    app7.data["dbName"]= (result)?result.dbName:null;
+                    app7.data["dbUserError"]= (result)?result.dbUserError:null;
+                    app7.data["dbUserName"]= (result)?result.dbUserName:null;
+                    $$('#appbar-user').text(app7.data["dbUserName"]);
+                    app7.data["dbEmpRole"]= (result)?result.dbEmpRole:null;
+                    if(!result||!result.uuid){
+                        $$('#mobileLogin-screen #mobileLogin-inputUPswrd').focus(); return;
+                    }
+                    $$('#mobileLogin-screen #mobileLogin-inputUsername').val("");
+                    if(typeof(Storage)!=="undefined"){
+                        localStorage.setItem("mobileLogin-username",username);
+                        var storeLoginUserpswrdItemName="mobileLogin-upswrd-"+username;
+                        if($$('#mobileLogin-screen #mobileLogin-checkboxStoreUser').prop('checked'))
+                            localStorage.setItem(storeLoginUserpswrdItemName,password);
+                        else
+                            localStorage.setItem(storeLoginUserpswrdItemName,null);
+                    }else{// Sorry! No Web Storage support..
+                    }
+                    app7.data.uuid=result.uuid;
+                    app7.request.setup({ headers: {'uuid':result.uuid,'aidcn':app7.data.aidcn} });
+                    app7.setUserRoutes();
+                });
     };
     app7.setUserRoutes=function(){
+        app7.preloader.show();
         this.srvRequestJSON({url:'/mobile/getUserRoutes', errorDialogMsg:"Не удалось получить данные для загрузки!"},
-            function(result,errmsg){
-                if(!result){
-                    mainView.router.navigate('/home');return;
-                }
-                mainView.router.routes=result;
-                var userRoutes={}, definePath;
-                for(var i=0; i<result.length; i++){
-                    var userRoutesItem=result[i];
-                    userRoutes[userRoutesItem.path]=true;
-                    if(!definePath&&userRoutesItem&&userRoutesItem.define) definePath=userRoutesItem.path;
-                    if(userRoutesItem&&userRoutesItem.url) userRoutesItem.url=userRoutesItem.url.replace("./mobile/","");
-                    if(userRoutesItem&&userRoutesItem.componentUrl) userRoutesItem.componentUrl=userRoutesItem.componentUrl.replace("/mobile/","")+".html";
-                }
-                var panelItems=$$("#main-panel-left-pages li a"),hasVisible=false;
-                for(var i=0; i<panelItems.length; i++){
-                    var panelItem=panelItems[i], visible=userRoutes[panelItem.getAttribute("href")];
-                    if(visible)$$(panelItem).show();else $$(panelItem).hide();
-                    hasVisible=visible||hasVisible;
-                }
-                if(hasVisible)$$('#main-panel-left-pages').show();
-                if(!definePath)return;
-                mainView.router.navigate(definePath);
-            });
+                function(result,errmsg){
+                    app7.preloader.hide();
+                    if(!result){
+                        mainView.router.navigate('/home');return;
+                    }
+                    mainView.router.routes=result;
+                    var userRoutes={}, definePath;
+                    for(var i=0; i<result.length; i++){
+                        var userRoutesItem=result[i];
+                        userRoutes[userRoutesItem.path]=true;
+                        if(!definePath&&userRoutesItem&&userRoutesItem.define) definePath=userRoutesItem.path;
+                        if(userRoutesItem&&userRoutesItem.url) userRoutesItem.url=userRoutesItem.url.replace("./mobile/","");
+                        if(userRoutesItem&&userRoutesItem.componentUrl) userRoutesItem.componentUrl=userRoutesItem.componentUrl.replace("/mobile/","")+".html";
+                    }
+                    var panelItems=$$("#main-panel-left-pages li a"),hasVisible=false;
+                    for(var i=0; i<panelItems.length; i++){
+                        var panelItem=panelItems[i], visible=userRoutes[panelItem.getAttribute("href")];
+                        if(visible)$$(panelItem).show();else $$(panelItem).hide();
+                        hasVisible=visible||hasVisible;
+                    }
+                    if(hasVisible)$$('#main-panel-left-pages').show();
+                    if(!definePath)return;
+                    mainView.router.navigate(definePath);
+                });
     };
 
     /**
@@ -293,7 +324,7 @@
         else if(params.conditions)
             for(var cName in params.conditions) requestData[cName.replace('=','~')]=params.conditions[cName];   //console.log('srvRequestJSON app7.request',params.url,'requestData=',requestData);
         this.request({method:params.method,url:params.url,data:requestData,
-                headers:{ 'x-requested-with': 'application/json; charset=utf-8' },
+            headers:{ 'x-requested-with':'application/json; charset=utf-8' },
             success:function(data){                                                                             //console.log('srvRequestJSON app7.request',params.url,'success data=',data); //app7.dialog.alert('<div style="height:500px;max-height:500px;font-size:8px;overflow:scroll">'+JSON.stringify(data)+'</span>', "debug")
                 var errMsg;
                 if(!params.errorDialogMsg)params.errorDialogMsg='Не удалось получить данные с сервера!';
@@ -308,8 +339,8 @@
                     errMsg=params.errorDialogMsg+'<br>Данные некорректные!';
                 }
                 if(jsonData&&jsonData.error){
-                    if(typeof(jsonData.error)=="string")errMsg=jsonData.error;
-                    else errMsg=(jsonData.error.userMessage||jsonData.error.message||jsonData.error.error);
+                    if(typeof(jsonData.error)=="string")errMsg= jsonData.errorMessage||jsonData.error;
+                    else errMsg= (jsonData.error.userMessage||jsonData.error.message||jsonData.error.error);
                     errMsg=params.errorDialogMsg+"<br>"+errMsg;
                 }
                 if(errMsg&&params.showRequestErrorDialog==false){ callback(null, errMsg);return; }
@@ -325,13 +356,13 @@
             },
             error:function(xhr, status){                                                                    //console.log('srvRequestJSON app7.request',params.url,'error err=',xhr);
                 var state=status,
-                    msg=(!params.errorDialogMsg)?'Не удалось получить данные с сервера!':params.errorDialogMsg;
+                        msg=(!params.errorDialogMsg)?'Не удалось получить данные с сервера!':params.errorDialogMsg;
                 if(params.showRequestErrorDialog==false){
                     callback(undefined,msg+"<br>Статус="+state);return;
                 }
                 if(state===0){
                     msg+="<br>Неправильный или недействительный адрес сервера"+
-                        "<br>или доступ по указанному адресу сервера запрещен.";
+                            "<br>или доступ по указанному адресу сервера запрещен.";
                 } else
                     msg+="<br>Не удалось установить связь с сервером по указанному адресу.";
                 if(app7.srvRequestJSONDialogErr){
@@ -419,10 +450,10 @@
             var dthTR=dataTableHeaderRows[i], newTR;
             newTRs.push(newTR=dthTR.cloneNode(true)); dataTableBody.appendChild(newTR);
             var rowSelecting=newTR.getAttribute("rowSelecting"),
-                tdOnClickFunction=function(e){
-                    $$(dataTableBody).children('.tdSelectedRow').removeClass('tdSelectedRow');
-                    for(var i=0; i<newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
-                };
+                    tdOnClickFunction=function(e){
+                        $$(dataTableBody).children('.tdSelectedRow').removeClass('tdSelectedRow');
+                        for(var i=0; i<newTRs.length; i++) newTRs[i].classList.add('tdSelectedRow');
+                    };
             for(var j=0; j<newTR.children.length; j++){
                 var newTD=newTR.children[j], dataTableItemName=newTD.getAttribute("dataItemName"), val;
                 newTD.dataTableRowData=tableDataItem;
