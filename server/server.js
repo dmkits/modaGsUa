@@ -90,9 +90,9 @@ var server = express();
 module.exports.getApp=function(){ return server; };
 var bodyParser = require('body-parser');                                                            log.info('body-parser loaded on ', new Date().getTime()-startTime );
 var cookieParser = require('cookie-parser');                                                        log.info('cookie-parser loaded on ', new Date().getTime()-startTime );
-server.use(function (req, res, next) {
-    next();
-});
+//server.use(function(req,res,next){/*IT'S FOR TEST*/                                                 log.info("SERVER:",req.method,req.path,"params=",req.query,{});//log.info("SERVER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
+//    next();
+//});
 server.use(cookieParser());
 server.use(bodyParser.urlencoded({extended: true,limit: '5mb'}));
 server.use(bodyParser.json({limit: '5mb'}));

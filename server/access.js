@@ -23,26 +23,36 @@ module.exports= function(app){
     var isReqInternalPage = function(method,headers){
         return (headers && headers["x-requested-with"] == "XMLHttpRequest" && headers["content-type"] == "application/x-www-form-urlencoded");
     };
+    var isMobileReq= function(req){
+        var userAgent=req.headers["user-agent"];
+        if(!userAgent) return false;
+        return (userAgent.indexOf("Android")>=0||userAgent.indexOf("Mobile")>=0);
+    };
+    var getIsMobileApp= function(req){//if req from mobile application
+        //'user-agent': 'Mozilla/5.0 (Linux; Android 4.4.2; CipherLab RS30 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Crosswalk/23.53.589.4 Mobile Safari/537.36', - device CipherLab RS30
+        //'user-agent': 'Mozilla/5.0 (Linux; Android 4.4.2; Android SDK built for x86 Build/KK) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Crosswalk/23.53.589.4 Mobile Safari/537.36', -AndroidStudio
+        //'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1', -Chrome mobile test like iPhine
+        //'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Mobile Safari/537.36', -Chrome mobile test like Responsive
+        if(!req||!req.headers) return false;
+        var reqHeadersUserAgent= req.headers['user-agent'];
+        return (reqHeadersUserAgent&&reqHeadersUserAgent.indexOf("Crosswalk/")>=0);
+    };
     var setAccessControlAllowOriginForMapp= function(req,res){
-        if(isMobileReq(req)&&req.method=="OPTIONS"&&req.headers["origin"]=="file://"&&req.path=="/login"&&req.headers["access-control-request-method"]=="POST"){
+        var isMobileApp= getIsMobileApp(req);
+        if(isMobileApp&&req.method=="OPTIONS"&&req.headers["origin"]=="file://"&&req.path=="/login"&&req.headers["access-control-request-method"]=="POST"){
             res.header("Access-Control-Allow-Method","POST");
             res.header("Access-Control-Allow-Origin","file://");
-        }else if(isMobileReq(req)&&req.method=="OPTIONS"&&req.headers["origin"]=="file://"&&req.headers["access-control-request-headers"]
+        }else if(isMobileApp&&req.method=="OPTIONS"&&req.headers["origin"]=="file://"&&req.headers["access-control-request-headers"]
                 &&req.headers["access-control-request-headers"].indexOf("x-requested-with")>=0
                 &&req.headers["access-control-request-headers"].indexOf("uuid")>=0){
             res.header("Access-Control-Allow-Origin","file://");
-        }else if(isMobileReq(req)&&req.method!=="OPTIONS"&&req.headers["origin"]=="file://"&&isReqJSON(req.method,req.headers)){
+        }else if(isMobileApp&&req.method!=="OPTIONS"&&req.headers["origin"]=="file://"&&isReqJSON(req.method,req.headers)){
             res.header("Access-Control-Allow-Origin","file://");
         }
     };
     var renderToLogin= function(res,loginMsg){
         var appConfig=getAppConfig();
         res.render(appPagesPath+"login.ejs", {title:(appConfig&&appConfig.title)?appConfig.title:"",loginMsg:loginMsg});
-    };
-    var isMobileReq= function(req){
-        var userAgent=req.headers["user-agent"];
-        if(!userAgent) return false;
-        return (userAgent.indexOf("Android")>=0||userAgent.indexOf("Mobile")>=0);
     };
     var renderIsMobile= function(req,res,next){
         if(req.originalUrl.indexOf("/mobile")==0){ req.isMobile=true; next(); return true; }
@@ -120,11 +130,12 @@ module.exports= function(app){
             });
     };
     app.use(function(req,res,next){                                                                             log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
-        res.header("Access-Control-Allow-Headers","origin, Content-Type,Content-Length, Accept, X-Requested-With, uuid");
+        var isMobileApp= getIsMobileApp(req);
+        if(isMobileApp) res.header("Access-Control-Allow-Headers","origin, Content-Type,Content-Length, Accept, X-Requested-With, uuid,aidcn");
         setAccessControlAllowOriginForMapp(req,res);
-        if(req.originalUrl.indexOf("/login")==0){ next(); return; }                                             //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
-        var reqAIDCN= ('aidcn' in req.cookies)?req.cookies.aidcn:req.headers['aidcn'], aidcn= getAIDCN(),
-            uuid=('uuid' in req.cookies)?req.cookies.uuid:req.headers['uuid'],
+        if(req.originalUrl.indexOf("/login")==0){ next(); return; }                                             log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
+        var reqAIDCN= (isMobileApp)?req.headers['aidcn']:req.cookies['aidcn'], aidcn= getAIDCN(),
+            uuid=(isMobileApp)?req.headers['uuid']:req.cookies['uuid'],
             sysadminName= getSysadminNameByUUID(uuid);
         if(reqAIDCN===undefined||reqAIDCN===null){
             accessFail(req,res,next,{
@@ -276,9 +287,11 @@ module.exports= function(app){
                 return;
             }
             if(isSysadmin) storeSysadminUUID({uuid:uuid,userName:userName});
-            res.cookie("uuid",uuid);
-            var aidcn= getAIDCN();
-            if(aidcn) res.cookie("aidcn",aidcn);
+            if(!getIsMobileApp(req)){
+                res.cookie("uuid",uuid);
+                var aidcn= getAIDCN();
+                if(aidcn) res.cookie("aidcn",aidcn);
+            }
             getDBUserData(result.dbUC, function(errMsg,dbUserParameters){
                 if(errMsg) outData.dbUserError= errMsg;
                 if(dbUserParameters){
