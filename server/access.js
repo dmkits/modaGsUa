@@ -133,7 +133,7 @@ module.exports= function(app){
         var isMobileApp= getIsMobileApp(req);
         if(isMobileApp) res.header("Access-Control-Allow-Headers","origin, Content-Type,Content-Length, Accept, X-Requested-With, uuid,aidcn");
         setAccessControlAllowOriginForMapp(req,res);
-        if(req.originalUrl.indexOf("/login")==0){ next(); return; }                                             log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
+        if(req.originalUrl.indexOf("/login")==0){ next(); return; }                                             //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
         var reqAIDCN= (isMobileApp)?req.headers['aidcn']:req.cookies['aidcn'], aidcn= getAIDCN(),
             uuid=(isMobileApp)?req.headers['uuid']:req.cookies['uuid'],
             sysadminName= getSysadminNameByUUID(uuid);

@@ -131,7 +131,7 @@ module.exports.init = function(app){
      /**
       * prodData = { ProdID, UM, Barcode, TNewQty }
       */
-     t_ExcD.storeExcDProdData= function(dbUC,parentChID,excDProdData,newQty,resultCallback){
+     t_ExcD.storeExcDProdDataWNewQty= function(dbUC,parentChID,excDProdData,newQty,resultCallback){
          if(!("ProdID" in excDProdData)&&!("SrcPosID" in excDProdData)){
              resultCallback({error:"Failed find prod in t_ExcD!<br> No ProdID or SrcPosID!",
                  errorMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
@@ -204,14 +204,14 @@ module.exports.init = function(app){
                  return;
              }
              resultFindProd.prodData["SecID"]=req.dbUserParams["t_SecID"];resultFindProd.prodData["NewSecID"]=req.dbUserParams["t_SecID"];
-             t_ExcD.storeExcDProdData(req.dbUC,parentChID,resultFindProd.prodData,storingData["NewQty"],function (result){
+             t_ExcD.storeExcDProdDataWNewQty(req.dbUC,parentChID,resultFindProd.prodData,storingData["NewQty"],function (result){
                  res.send(result);
              })
          });
      });
      app.post("/mobile/excDelivery/storeNewQtyData", function(req,res){
          var storingData=req.body, parentChID=storingData["parentChID"],excDData={SrcPosID:storingData["SrcPosID"]};   console.log('/mobile/exc/storeNewQtyData req.body',req.body);
-         t_ExcD.storeExcDProdData(req.dbUC,parentChID,excDData,storingData["NewQty"],function (result){
+         t_ExcD.storeExcDProdDataWNewQty(req.dbUC,parentChID,excDData,storingData["NewQty"],function (result){
              res.send(result);
          });
      });

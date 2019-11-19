@@ -1240,7 +1240,7 @@ function _insTableDataItem(connection, params, resultCallback){
  * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
  */
 function _updTableDataItem(connection, params, resultCallback){
-    if(!params) {                                                                                               log.error("FAILED _updTableDataItem! Reason: no parameters!");//test
+    if(!params){                                                                                               log.error("FAILED _updTableDataItem! Reason: no parameters!");//test
         resultCallback({error:"Failed update table data item! Reason:no function parameters!"});
         return;
     }

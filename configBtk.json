@@ -20,6 +20,7 @@
     "mobile",
     "mobileVen",
     "mobileExcDelivery",
+    "mobileExcFromStock",
     "mobileRec",
     "mobileReportsCashier"
   ],
@@ -54,8 +55,7 @@
       "mobile":["mobileExcDelivery"]
     },
     "excFromStock":{
-      "menu":["menuBarItemExcFromStock","menuBarItemHelpAbout","menuBarItemClose"],
-      "autorun":["menuBarItemExcFromStock"],
+      "menu":["menuBarItemHelpAbout","menuBarItemClose"],
       "mobile":["mobileExcFromStock"]
     },
     "cashier":{

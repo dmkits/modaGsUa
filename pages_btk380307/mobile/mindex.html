@@ -85,6 +85,9 @@
                                         <a href="/pageExcDeliverySettings" class="panel-close">Перемещения товара<br> на доставку</a>
                                     </li>
                                     <li>
+                                        <a href="/pageExcFromStockSettings" class="panel-close">Перемещения товара<br> со склада</a>
+                                    </li>
+                                    <li>
                                         <a href="/pageSettingsVens" class="panel-close">Инвентаризации</a>
                                     </li>
                                 </ul>
@@ -163,19 +166,19 @@
 </div>
 <script>
     var $$=Dom7,
-            baseRoutes=[//-- App routes --
+            baseRoutes= [//-- App routes --
                 { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
                 { path: '/pageSettingsCommon', componentUrl: 'pageSettingsCommon.html'},
                 { path: '(.*)', url: './actionError' }// Default route (404 page). MUST BE THE LAST
             ],
-            app7  = new Framework7({// Framework7 App main instance
+            app7= new Framework7({// Framework7 App main instance
                 id:'io.framework7.mobile.gabis',
                 root: '#app', // app7 root element
                 theme: 'ios', //for mobile app gabis ios!!! //'auto' - Automatic theme detection, Can be md, ios or aurora
                 routes: baseRoutes,
                 workingDoc:null
             }),
-            mainView = app7.views.create('.view-main',{domCache:true,stackPages:true});                             //app7.dialog.alert('<span style="font-size:18px">1</span>', "debug")//IT'S FOR TEST
+            mainView= app7.views.create('.view-main',{domCache:true,stackPages:true});                             //app7.dialog.alert('<span style="font-size:18px">1</span>', "debug")//IT'S FOR TEST
     $$('#main-panel-left-pages').hide();
     app7.initData=function(){
         app7.data={};
@@ -184,6 +187,7 @@
         app7.data['useBCScanner']=false;
         app7.data['recsListDocCount']=50;
         app7.data['excDeliveryListDocCount']=50;
+        app7.data['excFromStockListDocCount']=50;
         app7.data['inventsListDocCount']=50;
         if(typeof(Storage)!=="undefined"){
             var serverURI=localStorage.getItem("settings-serverURI");
@@ -194,6 +198,8 @@
             if(recsListDocCount&&!isNaN(parseInt(recsListDocCount)))app7.data['recsListDocCount']=parseInt(recsListDocCount);
             var excDeliveryListDocCount=localStorage.getItem("settings-excDelivery-listDocCount");
             if(excDeliveryListDocCount&&!isNaN(parseInt(excDeliveryListDocCount)))app7.data['excDeliveryListDocCount']=parseInt(excDeliveryListDocCount);
+            var excFromStockListDocCount=localStorage.getItem("settings-excFromStock-listDocCount");
+            if(excFromStockListDocCount&&!isNaN(parseInt(excFromStockListDocCount)))app7.data['excFromStockListDocCount']=parseInt(excFromStockListDocCount);
             var inventsListDocCount=localStorage.getItem("settings-inventory-listDocCount");
             if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount)))app7.data['inventsListDocCount']=parseInt(inventsListDocCount);
         }else{// Sorry! No Web Storage support..

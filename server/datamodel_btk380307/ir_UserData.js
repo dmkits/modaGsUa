@@ -6,7 +6,7 @@ module.exports.changeLog = [
             "PswrdNote varchar(1000),\n"+
             "CONSTRAINT ir_UserData_FK_UserID FOREIGN KEY (UserID) REFERENCES r_Users(UserID),\n"+
             "CONSTRAINT ir_UserData_FK_UserID_Unique UNIQUE(UserID))",
-        tableName:"ir_UserData", id:"UserID",
+        tableName:"ir_UserData", idField:"UserID",
         fields:["UserID","PswrdNote"]
     }
 ];

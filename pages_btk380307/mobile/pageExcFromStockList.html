@@ -1,0 +1,130 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+    <div class="page page-with-subnavbar" id="pageExcFromStockList">
+        <div class="navbar">
+            <div class="navbar-inner">
+                <div class="left">
+                    <a href="#" class="link icon-only panel-open" data-panel="left">
+                        <i class="icon f7-icons">menu</i>
+                    </a>
+                </div>
+                <div class="title">Перемещения товара<br>со склада</div>
+                <div class="subnavbar" style="top:calc(100% - 1px);">
+                    <div class="subnavbar-inner">
+                        <div class="list" style="width:100%">
+                            <ul>
+                                <li>
+                                    <a href="#" id="pageExcFromStockList-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageExcFromStockListStockClose">
+                                        <div class="item-content" style="font-size:16px">
+                                            <div class="item-inner">
+                                                <div class="item-title" style="font-weight:bold">по складу</div>
+                                                <div id="pageExcFromStockList-stock-label" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
+                                            </div>
+                                        </div>
+                                        <select id="pageExcFromStockList-stock-select">
+                                            {{#each listStocks}}
+                                            <option value={{StockID}}>{{StockName}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-content ptr-content">
+            <div class="ptr-preloader">
+                <div class="preloader"></div>
+                <div class="ptr-arrow"></div>
+            </div>
+            <div class="list media-list" style="margin:0">
+                <ul>
+                    {{#each listExcs}}
+                    <li>
+                        <a class="item-link item-content" href="/pageExcFromStockProducts/{{ChID}}"
+                           style="background-color:lightgrey;background-color:{{#if IsStateCreated}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
+                            <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
+                                <div class="item-title-row" style="padding-right:16px">
+                                    <div class="item-title" style="width:100%">
+                                        <div class="item-title">
+                                            <div class="item-header" style="display:inline-block;float:left;max-width:150px;font-weight:inherit">{{DocID}} от {{SDocDate}}</div>
+                                            <div class="item-header" style="display:inline-block;float:right;max-width:130px;text-align:right;font-weight:inherit">{{StateName}}</div>
+                                        </div>
+                                        <div class="item-title docsListStockName" style="font-weight:normal">с {{StockName}}</div>
+                                        <div class="item-title docsListStockName" style="font-weight:normal">на {{NewStockName}}</div>
+                                    </div>
+                                    <div class="item-after" style="min-width:70px">
+                                        <div style="width:100%;text-align:right">{{TSumCC_wt}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    return {
+        on: {
+            pageAfterIn: function(e,page){                                                                      //console.log("app7.data.pageExcFromStockList",app7.data.pageExcFromStockList);
+                var self=this;
+                $$('#pageExcFromStockList .ptr-content').on('ptr:refresh',function(e){
+                    setTimeout(function(){
+                        self.loadExcFromStockList();
+                        app7.ptr.done(); // or e.detail();
+                    },1000);
+                });
+                if(app7.data.pageExcFromStockList){
+                    this.stockIDFilter=app7.data.pageExcFromStockList.stockIDFilter;
+                    this.stockNameFilter=app7.data.pageExcFromStockList.stockNameFilter;
+                    if(this.stockIDFilter!==undefined) $$('#pageExcFromStockList-stock-select').val(this.stockIDFilter);
+                    if(this.stockNameFilter) $$('#pageExcFromStockList-stock').find("#pageExcFromStockList-stock-label").text(this.stockNameFilter);
+                    this.$setState({
+                        listStocks:app7.data.pageExcFromStockList.listStocks,
+                        stockIDFilter:this.stockIDFilter, stockNameFilter:this.stockNameFilter,
+                        listExcs:app7.data.pageExcFromStockList.listExcs
+                    });
+                    return;
+                }
+                if(this.stockIDFilter===undefined)this.stockIDFilter="";
+                if(this.stockNameFilter===undefined)this.stockNameFilter="";
+                this.loadExcFromStockList();
+            }
+        },
+        methods:{
+            loadExcFromStockList: function(){
+                let cInstance=this,
+                    stockIDFilter=this.stockIDFilter,stockNameFilter=this.stockNameFilter;
+                app7.preloader.show();
+                var conditions={top:app7.data['excFromStockListDocCount']};
+                if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
+                app7.srvRequestJSON({url:'/mobile/excFromStock/getDataForExcList',conditions:conditions,
+                        errorDialogMsg:"Не удалось получить с сервера список перемещений товара со склада!"},
+                    function(result,error){
+                        app7.preloader.hide();
+                        if(!result)return;
+                        app7.data.pageExcFromStockList={
+                            listStocks:result.listStocks,
+                            stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
+                            listExcs:result.listExcsByStockID
+                        };                                                                                  //console.log('pageExcFromStockList.html pageAfterIn app.data.pageExcFromStockList 2=',app.data.pageExcFromStockList);
+                        cInstance.$setState({
+                            listStocks:result.listStocks,
+                            stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
+                            listExcs:result.listExcsByStockID
+                        });
+                    })
+            },
+            pageExcFromStockListStockClose: function(e){
+                this.stockIDFilter=$$('#pageExcFromStockList-stock-select').val();
+                this.stockNameFilter=$$('#pageExcFromStockList-stock-label').text();
+                app7.data.pageExcFromStockList=null;
+            }
+        }
+    }
+</script>

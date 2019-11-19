@@ -310,8 +310,8 @@
                     function(result,errmsg){
                         app7.preloader.hide();
                         if(!result||!result.resultItem){ callback(null); return; }
-                        let inventProdData=result.resultItem;
-                        callback(inventProdData);
+                        let excProdData=result.resultItem;
+                        callback(excProdData);
                     })
             },
             storeNewQtyToExcD: function(srcPosID,prodID,newQty,callback){
