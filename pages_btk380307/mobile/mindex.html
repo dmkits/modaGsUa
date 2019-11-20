@@ -94,6 +94,14 @@
                             </div>
                         </div>
                         <div class="block" id="main-panel-left-settings">
+                            <div class="block-title">Справка</div>
+                            <div class="list links-list">
+                                <ul>
+                                    <li>
+                                        <a href="/pageHelpAbout" class="panel-close">О программе</a>
+                                    </li>
+                                </ul>
+                            </div>
                             <div class="block-title">Общие настройки</div>
                             <div class="list links-list">
                                 <ul>
@@ -168,11 +176,12 @@
     var $$=Dom7,
             baseRoutes= [//-- App routes --
                 { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
+                { path: '/pageHelpAbout', componentUrl: 'pageHelpAbout.html'},
                 { path: '/pageSettingsCommon', componentUrl: 'pageSettingsCommon.html'},
                 { path: '(.*)', url: './actionError' }// Default route (404 page). MUST BE THE LAST
             ],
             app7= new Framework7({// Framework7 App main instance
-                id:'io.framework7.mobile.gabis',
+                id:'io.framework7.mobile.gabis', version:"3.0.0",
                 root: '#app', // app7 root element
                 theme: 'ios', //for mobile app gabis ios!!! //'auto' - Automatic theme detection, Can be md, ios or aurora
                 routes: baseRoutes,
@@ -181,8 +190,7 @@
             mainView= app7.views.create('.view-main',{domCache:true,stackPages:true});                             //app7.dialog.alert('<span style="font-size:18px">1</span>', "debug")//IT'S FOR TEST
     $$('#main-panel-left-pages').hide();
     app7.initData=function(){
-        app7.data={};
-        app7.data.uuid="";  app7.data.aidcn="gabis";//application id config name
+        app7.data={uuid:"", aidcn:"gabis"};//aidcn - application id config name
         $$('#appbar-user').text("");$$('#appbar-modeMsg').text("");
         app7.data['useBCScanner']=false;
         app7.data['recsListDocCount']=50;
@@ -204,7 +212,7 @@
             if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount)))app7.data['inventsListDocCount']=parseInt(inventsListDocCount);
         }else{// Sorry! No Web Storage support..
         }
-        if(!app7.data['serverURI'])app7.data['serverURI']=(window&&window.origin)?window.origin:"http://159.224.244.224:58181";
+        if(!app7.data['serverURI'])app7.data['serverURI']=(window&&window.origin)?window.origin:"http://192.162.238.68:58080";//"http://192.168.56.21:8181"--USE FOR TEST!!!
     };
     app7.setLoginStoredData=function(){
         $$('#mobileLogin-screen #mobileLogin-inputUPswrd').val("");
@@ -246,7 +254,10 @@
                 function(result,errmsg){
                     app7.preloader.hide();
                     $$('#mobileLogin-screen #mobileLogin-inputUPswrd').val("");
-                    var mode=(result)?result.mode:null,modeIsDebug=(result)?result.modeIsDebug:null;
+                    var appName=(result)?result.appName:"UNKNOWN", appVerSrv=(result)?result.appVerSrv:null,
+                            appCVer=(result&&result.appCVer!=null)?result.appCVer:appVerSrv,
+                            mode=(result)?result.mode:null,modeIsDebug=(result)?result.modeIsDebug:null;
+                    app7.data["appName"]=appName; app7.data["appVerSrv"]=appVerSrv; app7.data["appCVer"]=appCVer;
                     app7.data["appMode"]=mode; app7.data["appModeMsg"]= "";
                     if(modeIsDebug){
                         $$('#mobileLogin-screen #mobileLogin-mainLogo').hide();
@@ -265,7 +276,17 @@
                     $$('#appbar-user').text(app7.data["dbUserName"]);
                     app7.data["dbEmpRole"]= (result)?result.dbEmpRole:null;
                     if(!result||!result.uuid){
-                        $$('#mobileLogin-screen #mobileLogin-inputUPswrd').focus(); return;
+                        $$('#mobileLogin-screen #mobileLogin-inputUPswrd').focus();
+                        return;
+                    }
+                    var sErrMsg=null;
+                    if(!app7.version)sErrMsg= "Неизвестная версия приложения!";
+                    else if(!app7.data.appVerSrv)sErrMsg= "Неизвестная версия сервера!";
+                    else if(app7.version.toString().indexOf(appCVer.toString())!=0)sErrMsg= "Несовместимые версии  приложения и сервера!";
+                    if(sErrMsg){
+                        sErrMsg+= "<br>Работа с приложением невозможна!<br>Обратитесь к системному администратору.";
+                        app7.dialog.alert(sErrMsg,"Внимание",function(){});
+                        return;
                     }
                     $$('#mobileLogin-screen #mobileLogin-inputUsername').val("");
                     if(typeof(Storage)!=="undefined"){
@@ -278,7 +299,7 @@
                     }else{// Sorry! No Web Storage support..
                     }
                     app7.data.uuid=result.uuid;
-                    app7.request.setup({ headers: {'uuid':result.uuid,'aidcn':app7.data.aidcn} });
+                    app7.request.setup({ headers:{'uuid':result.uuid,'aidcn':app7.data.aidcn} });
                     app7.setUserRoutes();
                 });
     };
@@ -352,7 +373,7 @@
                 if(errMsg&&params.showRequestErrorDialog==false){ callback(null, errMsg);return; }
                 if(errMsg&&app7.srvRequestJSONDialogErr){ app7.srvRequestJSONDialogErr.open(); return; }
                 else if(errMsg){
-                    app7.srvRequestJSONDialogErr = app7.dialog.alert(errMsg, "Внимание", function () {
+                    app7.srvRequestJSONDialogErr = app7.dialog.alert(errMsg,"Внимание",function(){
                         app7.srvRequestJSONDialogErr = null;
                         callback(null, errMsg);
                     });

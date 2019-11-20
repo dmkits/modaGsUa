@@ -13,12 +13,16 @@ module.exports.moduleViewURL = "/mobile";
 module.exports.moduleViewPath = "mobile/index.html";
 module.exports.routes=[//-- App routes --
     { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
+    { path: '/pageHelpAbout', componentUrl: '/mobile/pageHelpAbout'},
     { path: '/pageSettingsCommon', componentUrl: '/mobile/pageSettingsCommon'},
     { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
 ];
 module.exports.init = function(app){
+    app.get("/mobile/pageHelpAbout", function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageHelpAbout.html');
+    });
     app.get("/mobile/pageSettingsCommon", function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageSettingsCommonWeb.html');
+        res.sendFile(appViewsPath+'mobile/pageSettingsCommon.html');
     });
     app.get("/mobile/getUserRoutes", function(req,res){
         if(!req.dbEmpRole){
@@ -29,8 +33,8 @@ module.exports.init = function(app){
             for (var moduleName in modules) {
                 var moduleRoutes=modules[moduleName].routes;
                 if(!moduleRoutes)continue;
-                for (var j = 0; j < moduleRoutes.length; j++){
-                    var route=new function(){ return moduleRoutes[j]; };
+                for (var j=0; j<moduleRoutes.length; j++){
+                    var route= new function(){ return moduleRoutes[j]; };
                     if(route&&route.path=="(.*)") lastRoute=route; else saRoutes.push(route);
                 }
             }
@@ -41,7 +45,7 @@ module.exports.init = function(app){
         if(!appConfig||!appConfig.usersRoles){
             res.send({error:"Failed get routes! Reason: no app config users roles!"});return;
         }
-        var userRoleConfig=appConfig.usersRoles[req.dbEmpRole], userRoleMobileConf=(userRoleConfig)?userRoleConfig.mobile:null;
+        var userRoleConfig= appConfig.usersRoles[req.dbEmpRole], userRoleMobileConf= (userRoleConfig)?userRoleConfig.mobile:null;
         if(!userRoleMobileConf||userRoleMobileConf.length===undefined){
             res.send({error:"Failed get routes! Reason: no app user role config for mobile!"});return;
         }

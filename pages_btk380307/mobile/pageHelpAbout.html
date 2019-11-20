@@ -9,14 +9,26 @@
                     <!--<span class="ios-only">Назад</span>-->
                 </a>
             </div>
-            <div class="title">Общие настройки</div>
+            <div class="title">Справка</div>
         </div>
     </div>
     <div class="page-content">
-        <div class="block-title">Приложение</div>
+        <div class="block-title">О программе</div>
         <div class="list no-hairlines-md">
             <ul>
                 <li class="row item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Приложение</div>
+                            <div id="settingsCommon-appName" class="item-input" style="margin-top:10px"></div>
+                        </div>
+                    </div>
+                    <div class="item-inner">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Версия</div>
+                            <div id="settingsCommon-appVer" class="item-input" style="margin-top:10px"></div>
+                        </div>
+                    </div>
                     <div class="item-inner">
                         <div class="item-inner">
                             <div class="item-title item-label">Режим</div>
@@ -51,6 +63,14 @@
     return {
         on: {
             pageAfterIn: function(e,page){
+                $$("#settingsCommon-appName").html(this.$app.data['appName']);
+                var appVer= "Приложение: "+this.$app.version,
+                        appVerSrv= this.$app.data['appVerSrv'], appCVer= this.$app.data['appCVer'];
+                if(appVerSrv!=null){
+                    appVer+= ", Сервер: "+appVerSrv;
+                    if(appCVer!=null) appVer+= " ("+appCVer+")";
+                }
+                $$("#settingsCommon-appVer").html(appVer);
                 $$("#settingsCommon-appMode").html(this.$app.data['appMode']);
                 $$("#settingsCommon-dbName").html(this.$app.data['dbName']);
                 $$("#settingsCommon-dbUserName").html(this.$app.data['dbUserName']);

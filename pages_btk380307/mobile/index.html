@@ -89,11 +89,11 @@
                             </div>
                         </div>
                         <div class="block" id="main-panel-left-settings">
-                            <div class="block-title">Настройки</div>
+                            <div class="block-title">Справка</div>
                             <div class="list links-list">
                                 <ul>
                                     <li>
-                                        <a href="/pageSettingsCommon" class="panel-close">Приложение</a>
+                                        <a href="/pageHelpAbout" class="panel-close">О программе</a>
                                     </li>
                                 </ul>
                             </div>
@@ -163,11 +163,11 @@
     var $$=Dom7,
             baseRoutes= [//-- App routes --
                 { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
-                { path: '/pageSettingsCommon', componentUrl: '/mobile/pageSettingsCommon'},
+                { path: '/pageHelpAbout', componentUrl: '/mobile/pageHelpAbout'},
                 { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
             ],
             app7= new Framework7({// Framework7 App main instance
-                id:'io.framework7.mobile.gabis',
+                id:'io.framework7.mobile.gabis', version:"3.0.0",
                 root: '#app', // app7 root element
                 theme: 'ios', // 'auto' - Automatic theme detection, Can be md, ios or aurora
                 routes: baseRoutes,
@@ -177,8 +177,8 @@
     deviceBarcodeScannerReaderAction= function(){};//IT'S USED IN MOBILE APP
     $$('#main-panel-left-pages').hide();
     app7.initData=function(){
-        app7.data={};
-        app7.data.uuid="";document.cookie="uuid=0";
+        app7.data={uuid:""};
+        document.cookie="uuid=0";
         $$('#appbar-user').text("");$$('#appbar-modeMsg').text("");
         app7.data['recsListDocCount']=50;
         app7.data['excDeliveryListDocCount']=50;
@@ -231,10 +231,15 @@
     app7.loginProcess=function(){
         var username = $$('#mobileLogin-screen #mobileLogin-inputUsername').val(),
                 password = $$('#mobileLogin-screen #mobileLogin-inputUPswrd').val();
+        app7.preloader.show();
         this.srvPostRequestJSON({url:'/login',data:{user:username,pswrd:password},errorDialogMsg:"Вход на сервер неудался!"},
                 function(result,errmsg){
+                    app7.preloader.hide();
                     $$('#mobileLogin-screen #mobileLogin-inputUPswrd').val("");
-                    var mode=(result)?result.mode:null,modeIsDebug=(result)?result.modeIsDebug:null;
+                    var appName=(result)?result.appName:"UNKNOWN", appVerSrv=(result)?result.appVerSrv:null,
+                            appCVer=(result&&result.appCVer!=null)?result.appCVer:appVerSrv,
+                            mode=(result)?result.mode:null,modeIsDebug=(result)?result.modeIsDebug:null;
+                    app7.data["appName"]=appName; app7.data["appVerSrv"]=appVerSrv; app7.data["appCVer"]=appCVer;
                     app7.data["appMode"]=mode; app7.data["appModeMsg"]= "";
                     if(modeIsDebug){
                         $$('#mobileLogin-screen #mobileLogin-mainLogo').hide();
@@ -254,6 +259,15 @@
                     app7.data["dbEmpRole"]= (result)?result.dbEmpRole:null;
                     if(!result||!result.uuid){
                         $$('#mobileLogin-screen #mobileLogin-inputUPswrd').focus(); return;
+                    }
+                    var sErrMsg=null;
+                    if(!app7.version)sErrMsg= "Неизвестная версия приложения!";
+                    else if(!app7.data.appVerSrv)sErrMsg= "Неизвестная версия сервера!";
+                    else if(app7.version.toString().indexOf(appCVer.toString())!=0)sErrMsg= "Несовместимые версии  приложения и сервера!";
+                    if(sErrMsg){
+                        sErrMsg+= "<br>Работа с приложением невозможна!<br>Обратитесь к системному администратору.";
+                        app7.dialog.alert(sErrMsg,"Внимание",function(){});
+                        return;
                     }
                     $$('#mobileLogin-screen #mobileLogin-inputUsername').val("");
                     if(typeof(Storage)!=="undefined"){
@@ -333,7 +347,7 @@
                 if(errMsg&&params.showRequestErrorDialog==false){ callback(null, errMsg);return; }
                 if(errMsg&&app7.srvRequestJSONDialogErr){ app7.srvRequestJSONDialogErr.open(); return; }
                 else if(errMsg){
-                    app7.srvRequestJSONDialogErr = app7.dialog.alert(errMsg, "Внимание", function(){
+                    app7.srvRequestJSONDialogErr = app7.dialog.alert(errMsg,"Внимание",function(){
                         app7.srvRequestJSONDialogErr = null;
                         callback(null, errMsg);
                     });

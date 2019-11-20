@@ -271,8 +271,14 @@ module.exports= function(app){
                 appMode=(appStartupParams)?appStartupParams.mode:null,
                 appModeIsDebug=!appMode
                     ||(appMode.toLocaleLowerCase().indexOf("debug")>=0)
-                    ||(appMode.toLocaleLowerCase().indexOf("test")>=0);
-            var outData={"uuid":uuid, mode:appMode, modeIsDebug:appModeIsDebug, dbName:sysConfig.dbName};
+                    ||(appMode.toLocaleLowerCase().indexOf("test")>=0),
+                appConfig= (getAppConfig)?getAppConfig():null,
+                appName= (appConfig)?(appConfig.title||appConfig.appID):"UNKNOWN",
+                appVer= (appConfig)?appConfig.appVer:null, appCVer= (appConfig)?appConfig.appCVer:null;
+            var outData={"uuid":uuid,
+                appName:appName, appVerSrv:appVer, appCVer:appCVer,
+                mode:appMode, modeIsDebug:appModeIsDebug, dbName:sysConfig.dbName
+            };
             if(sysConfig && userName==sysConfig.dbUser && userPswrd==sysConfig.dbUserPass) isSysadmin=true;
             if(err){
                 if(isSysadmin){
