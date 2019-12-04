@@ -163,7 +163,6 @@
             initData: function(){
                 app7.data.uuid=""; document.cookie="uuid=0;path=/;";
                 $$('#appbar-user').text("");$$('#appbar-modeMsg').text("");
-
                 app7.data['recsListDocCount']=50;
                 app7.data['excDeliveryListDocCount']=50;
                 app7.data['excFromStockListDocCount']=50;
@@ -179,7 +178,6 @@
                     if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount))) app7.data['inventsListDocCount']= parseInt(inventsListDocCount);
                 }else{// Sorry! No Web Storage support..
                 }
-
             },
             setLoginStoredData: function(){
                 $$('#pageMain-mobileLogin #mobileLogin-inputUPswrd').val("");
