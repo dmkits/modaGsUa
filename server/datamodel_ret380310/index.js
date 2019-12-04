@@ -901,7 +901,7 @@ function _setDataItemForTable(params, resultCallback){
  *      insData = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...}
  * }
  * <value> instanceof Date converted to sting by format yyyy-mm-dd HH:MM:ss !!!
- * resultCallback = function(result), result = { updateCount, error }
+ * resultCallback = function(result), result = { updateCount, error,errorMessage }
  */
 function _insDataItem(connection, params, resultCallback){
     if(!params){                                                                                                log.error("FAILED _insDataItem! Reason: no parameters!");//test
@@ -930,14 +930,12 @@ function _insDataItem(connection, params, resultCallback){
         queryInputParams.push(insDataItemValue);
     }
     var insQuery="insert into "+params.tableName+"("+queryFields+") values("+queryFieldsValues+")";
-    database.executeParamsQuery(connection, insQuery,queryInputParams, function(err, updateCount){
-        var insResult= {};
+    database.executeParamsQuery(connection, insQuery,queryInputParams,function(err,updateCount){
         if(err){
-            insResult.error= "Failed insert data item! Reason:"+err.message;
-            resultCallback(insResult);
+            resultCallback({error:err.message,errorMessage:"Failed insert data item! Reason:"+err.message});
             return;
         }
-        insResult.updateCount= updateCount;
+        var insResult= {updateCount:updateCount};
         if(updateCount==0) insResult.error= "Failed insert data item! Reason: no inserted row count!";
         resultCallback(insResult);
     });
@@ -993,7 +991,7 @@ function _insDataItemWithNewID(connection,params,resultCallback){
  *      conditions = { <tableFieldNameCondition>:<value>, ... },
  *      ignoreErrorNoUpdate = true/false
  * }
- * resultCallback = function(result), result = { updateCount, error })
+ * resultCallback = function(result), result = { updateCount, error,errorMessage })
  */
 function _updDataItem(connection, params, resultCallback){
     if(!params){                                                                                                log.error("FAILED _updDataItem! Reason: no parameters!");//test
@@ -1032,7 +1030,7 @@ function _updDataItem(connection, params, resultCallback){
     updQuery+= " where "+queryConditions;
     database.executeParamsQuery(connection,updQuery,fieldsValues,function(err,updateCount){
         if(err){
-            resultCallback({error:{error:"Failed update data item! Reason:"+err.message, message:err.message}});
+            resultCallback({error:err.message,errorMessage:"Failed update data item! Reason:"+err.message});
             return;
         }
         var updResult={updateCount:updateCount};

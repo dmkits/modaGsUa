@@ -6,5 +6,5 @@ module.exports.changeLog = [
             "CHANGE_OBJ VARCHAR(255) NOT NULL, CHANGE_VAL VARCHAR(8000) NOT NULL," +
             "APPLIED_DATETIME DATETIME NOT NULL)",
         tableName:"change_log",
-        fields:["ID","CHANGE_DATETIME","CHANGE_OBJ","CHANGE_VAL","APPLIED_DATETIME"] , id:"ID"}
+        fields:["ID","CHANGE_DATETIME","CHANGE_OBJ","CHANGE_VAL","APPLIED_DATETIME"] , idField:"ID"}
 ];
