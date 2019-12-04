@@ -1,12 +1,12 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page" id="settingsCommon-view">
+<div class="page" id="pageSetsMAppCommon-view">
     <div class="navbar">
         <div class="navbar-inner sliding">
             <div class="left">
                 <a href="#" class="link back">
-                    <i class="icon icon-back"></i>
-                    <span class="ios-only">Назад</span>
+                    <i class="icon icon-back"></i><i class="icon icon-back"></i>
+                    <!--<span class="ios-only">Назад</span>-->
                 </a>
             </div>
             <div class="title">Общие настройки</div>
@@ -20,7 +20,7 @@
                     <div class="item-inner">
                         <div class="item-title item-label">Адрес сервера</div>
                         <div class="item-input-wrap">
-                            <input id="settingsCommon-inputServerURI" type="text" placeholder="Адрес сервера">
+                            <input id="pageSetsMAppCommon-inputServerURI" type="text" placeholder="Адрес сервера">
                         </div>
                     </div>
                 </li>
@@ -33,7 +33,7 @@
                     <div class="item-inner">
                         <div class="item-title item-label">Сканер штрихкодов</div>
                         <label class="item-checkbox item-content" style="padding-left:0;display:-webkit-inline-box">
-                            <input id="settingsCommon-checkboxUseBCScanner" type="checkbox" value=""/>
+                            <input id="pageSetsMAppCommon-checkboxUseBCScanner" type="checkbox" value=""/>
                             <i class="icon icon-checkbox"></i>
                             <div class="item-title">Активировать сканер штрихкодов</div>
                         </label>
@@ -53,14 +53,14 @@
     return {
         on: {
             pageAfterIn: function(e,page){
-                $$("#settingsCommon-inputServerURI").val(this.$app.data['serverURI']);
-                $$("#settingsCommon-checkboxUseBCScanner").prop("checked",this.$app.data['useBCScanner']);
+                $$("#pageSetsMAppCommon-inputServerURI").val(this.$app.data['serverURI']);
+                $$("#pageSetsMAppCommon-checkboxUseBCScanner").prop("checked",this.$app.data['useBCScanner']);
             }
         },
         methods: {
             btnStoreClick: function(){
-                let srvURI=$$("#settingsCommon-inputServerURI").val(),
-                        useBCScanner=$$("#settingsCommon-checkboxUseBCScanner").prop("checked");
+                let srvURI=$$("#pageSetsMAppCommon-inputServerURI").val(),
+                        useBCScanner=$$("#pageSetsMAppCommon-checkboxUseBCScanner").prop("checked");
                 if(typeof(Storage)!=="undefined"&&srvURI&&srvURI.toString().trim()!=""){
                     localStorage.setItem("settings-serverURI",srvURI);
                     localStorage.setItem("settings-useBCScanner",useBCScanner);

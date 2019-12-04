@@ -1,0 +1,289 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page" data-name="pageMain">
+    <div class="panel panel-left panel-cover" id="main-panel-left">
+        <div class="page">
+            <div class="page-content">
+                <div class="block">
+                    <div class="list links-list">
+                        <ul>
+                            <li>
+                                <a href="/pageMain" class="panel-close" data-force="true" data-ignore-cache="true">Вход</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="block" id="main-panel-left-pages">
+                    <div class="block-title">Страницы</div>
+                    <div class="list links-list">
+                        <ul>
+                            <li>
+                                <a href="/pageListRecs" class="panel-close" data-force="true" data-ignore-cache="true">Приходы товара</a>
+                            </li>
+                            <li>
+                                <a href="/pageExcDelivery" class="panel-close" data-force="true" data-ignore-cache="true">Перемещения товара<br> на доставку</a>
+                            </li>
+                            <li>
+                                <a href="/pageExcFromStock" class="panel-close" data-force="true" data-ignore-cache="true">Перемещения товара<br> со склада</a>
+                            </li>
+                            <li>
+                                <a href="/pageListVens" class="panel-close" data-force="true" data-ignore-cache="true">Инвентаризации</a>
+                            </li>
+                            <li>
+                                <a href="/pageReportsCashier" class="panel-close" data-force="true" data-ignore-cache="true">Отчеты кассира</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="block-title">Настройки страниц</div>
+                    <div class="list links-list">
+                        <ul>
+                            <li>
+                                <a href="/pageSettingsRecs" class="panel-close">Приходы товара</a>
+                            </li>
+                            <li>
+                                <a href="/pageExcDeliverySettings" class="panel-close">Перемещения товара<br> на доставку</a>
+                            </li>
+                            <li>
+                                <a href="/pageExcFromStockSettings" class="panel-close">Перемещения товара<br> со склада</a>
+                            </li>
+                            <li>
+                                <a href="/pageSettingsVens" class="panel-close">Инвентаризации</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="block" id="main-panel-left-mAppSettings" style="display:none">
+                    <div class="block-title">Общие настройки</div>
+                    <div class="list links-list">
+                        <ul>
+                            <li>
+                                <a href="/pageSettingsMAppCommon" class="panel-close">Доступ и устройство</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="block" id="main-panel-left-help">
+                    <div class="block-title">Справка</div>
+                    <div class="list links-list">
+                        <ul>
+                            <li>
+                                <a href="/pageHelpAbout" class="panel-close">О программе</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link icon-only panel-open" data-panel="left">
+                    <i class="icon f7-icons">menu</i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="page-content login-screen-content" id="pageMain-mobileLogin">
+        <div id="mobileLogin-mainLogo" class="block main-logo"></div>
+        <div id="mobileLogin-mainModeDebug" class="block" style="display:none;color:red;font-size:27px;font-weight:bold;text-align:center"></div>
+        <!--<div class="login-screen-title">Авторизация</div>-->
+        <div class="list no-hairlines-md" style="margin-bottom:0">
+            <ul>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Имя пользователя</div>
+                        <div class="item-input-wrap">
+                            <input id="mobileLogin-inputUsername" type="text" placeholder="Имя пользователя">
+                            <span class="input-clear-button"></span>
+                        </div>
+                    </div>
+                </li>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Пароль</div>
+                        <div class="item-input-wrap">
+                            <input id="mobileLogin-inputUPswrd" type="password" placeholder="Пароль">
+                            <span class="input-clear-button"></span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="block" style="margin-top:0">
+            <div class="row list" style="margin-top:0;margin-bottom:0">
+                <div class="col" style="width:0px"></div>
+                <div class="col" style="width:auto;padding-right:0">
+                    <label class="item-checkbox item-content" style="padding-left:0">
+                        <input id="mobileLogin-checkboxStoreUser" type="checkbox" value=""/>
+                        <i class="icon icon-checkbox"></i>
+                        <div class="item-title">Запомнить меня</div>
+                    </label>
+
+                </div>
+                <div class="col" style="width:0px"></div>
+            </div>
+            <div class="row">
+                <div class="col" style="width:0px"></div>
+                <button id="mobileLogin-btnLogin" class="col button button-fill button-round" style="width:200px">ВОЙТИ</button>
+                <div class="col" style="width:0px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        on: {
+            pageInit: function(e,page){
+                if(!app7.panelLeft) app7.panelLeft= app7.panel.create({el:'.panel-left',
+                    resizable: true, visibleBreakpoint:1024, collapsedBreakpoint:768
+                });
+                if(app7.initViewMApp) app7.initViewMApp($$("#main-panel-left-mAppSettings"));
+                var self=this;
+                $$('#pageMain-mobileLogin #mobileLogin-btnLogin').on('click',function(){ self.loginProcess(); });
+                $$('#pageMain-mobileLogin #mobileLogin-inputUPswrd').on('keypress',function(e){
+                    if(e.keyCode==13||e.key=='Enter') self.loginProcess();
+                });
+            },
+            pageAfterIn: function(e,page){
+                mainView.router.routes= baseRoutes;
+                app7.panelLeft.$el.find('#main-panel-left-pages').hide();
+                this.initData();
+                this.setLoginStoredData();
+                $$('#pageMain-mobileLogin #mobileLogin-inputUsername').focus();
+            },
+            pageAfterOut: function(e,page){
+            }
+        },
+        data: function(){
+            return {};
+        },
+        methods: {
+            initData: function(){
+                app7.data.uuid=""; document.cookie="uuid=0;path=/;";
+                $$('#appbar-user').text("");$$('#appbar-modeMsg').text("");
+
+                app7.data['recsListDocCount']=50;
+                app7.data['excDeliveryListDocCount']=50;
+                app7.data['excFromStockListDocCount']=50;
+                app7.data['inventsListDocCount']=50;
+                if(typeof(Storage)!=="undefined"){
+                    var recsListDocCount= localStorage.getItem("settings-recs-listDocCount");
+                    if(recsListDocCount&&!isNaN(parseInt(recsListDocCount))) app7.data['recsListDocCount']= parseInt(recsListDocCount);
+                    var excDeliveryListDocCount= localStorage.getItem("settings-excDelivery-listDocCount");
+                    if(excDeliveryListDocCount&&!isNaN(parseInt(excDeliveryListDocCount))) app7.data['excDeliveryListDocCount']= parseInt(excDeliveryListDocCount);
+                    var excFromStockListDocCount= localStorage.getItem("settings-excFromStock-listDocCount");
+                    if(excFromStockListDocCount&&!isNaN(parseInt(excFromStockListDocCount))) app7.data['excFromStockListDocCount']= parseInt(excFromStockListDocCount);
+                    var inventsListDocCount= localStorage.getItem("settings-inventory-listDocCount");
+                    if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount))) app7.data['inventsListDocCount']= parseInt(inventsListDocCount);
+                }else{// Sorry! No Web Storage support..
+                }
+
+            },
+            setLoginStoredData: function(){
+                $$('#pageMain-mobileLogin #mobileLogin-inputUPswrd').val("");
+                $$('#pageMain-mobileLogin #mobileLogin-checkboxStoreUser').prop('checked',false);
+                if(typeof(Storage)=="undefined"){
+                    $$('#pageMain-mobileLogin #mobileLogin-checkboxStoreUser').attr('disabled',1);
+                    return
+                }
+                $$('#pageMain-mobileLogin #mobileLogin-checkboxStoreUser').removeAttr('disabled');
+                var username=localStorage.getItem("mobileLogin-username");
+                if(!username||username.toString().trim()=="")return;
+                $$('#pageMain-mobileLogin #mobileLogin-inputUsername').val(username);
+                var storeLoginUserpswrdItemName="mobileLogin-upswrd-"+username,
+                        storeLoginUserpswrd=localStorage.getItem(storeLoginUserpswrdItemName);
+                if(!storeLoginUserpswrd||storeLoginUserpswrd=="null")return;
+                $$('#pageMain-mobileLogin #mobileLogin-inputUPswrd').val(storeLoginUserpswrd);
+                $$('#pageMain-mobileLogin #mobileLogin-checkboxStoreUser').prop('checked',true);
+            },
+            loginProcess: function(){
+                $$('#appbar-user').text("");$$('#appbar-modeMsg').text("");
+                var username = $$('#pageMain-mobileLogin #mobileLogin-inputUsername').val(),
+                        password = $$('#pageMain-mobileLogin #mobileLogin-inputUPswrd').val(),
+                        self=this;
+                app7.preloader.show();
+                app7.srvPostRequestJSON({url:'/login',data:{user:username,pswrd:password},errorDialogMsg:"Вход на сервер неудался!"},
+                        function(result,errmsg){
+                            app7.preloader.hide();
+                            $$('#pageMain-mobileLogin #mobileLogin-inputUPswrd').val("");
+                            var appName=(result)?result.appName:"UNKNOWN", appVerSrv=(result)?result.appVerSrv:null,
+                                    appCVer=(result&&result.appCVer!=null)?result.appCVer:appVerSrv,
+                                    mode=(result)?result.mode:null,modeIsDebug=(result)?result.modeIsDebug:null;
+                            app7.data["appName"]=appName; app7.data["appVerSrv"]=appVerSrv; app7.data["appCVer"]=appCVer;
+                            app7.data["appMode"]=mode; app7.data["appModeMsg"]= "";
+                            if(modeIsDebug){
+                                $$('#pageMain-mobileLogin #mobileLogin-mainLogo').hide();
+                                $$('#pageMain-mobileLogin #mobileLogin-mainModeDebug').show()
+                                        .html('ТЕСТОВЫЙ РЕЖИМ!!!'+((mode)?'<br><span style="font-size:18px">('+mode+')</span>':''));
+                                app7.data["appModeMsg"]= "!ТЕСТОВЫЙ РЕЖИМ!";
+                                $$('#appbar-modeMsg').text(app7.data["appModeMsg"]);
+                            }else{
+                                $$('#pageMain-mobileLogin #mobileLogin-mainLogo').show();
+                                $$('#pageMain-mobileLogin #mobileLogin-mainModeDebug').hide();
+                                $$('#appbar-modeMsg').text("");
+                            }
+                            app7.data["dbName"]= (result)?result.dbName:null;
+                            app7.data["dbUserError"]= (result)?result.dbUserError:null;
+                            app7.data["dbUserName"]= (result)?result.dbUserName:null;
+                            var dbEmpName= (result)?result.dbEmpName:null;
+                            app7.data["dbEmpName"]= dbEmpName; app7.data["dbEmpRole"]= (result)?result.dbEmpRole:null;
+                            if(!result||!result.uuid){ $$('#pageMain-mobileLogin #mobileLogin-inputUPswrd').focus(); return; }
+                            var sErrMsg=null;
+                            if(!app7.version)sErrMsg= "Неизвестная версия приложения!";
+                            else if(!app7.data.appVerSrv)sErrMsg= "Неизвестная версия сервера!";
+                            else if(app7.version.toString().indexOf(appCVer.toString())!=0)sErrMsg= "Несовместимые версии  приложения и сервера!";
+                            if(sErrMsg){
+                                sErrMsg+= "<br>Работа с приложением невозможна!<br>Обратитесь к системному администратору.";
+                                app7.dialog.alert(sErrMsg,"Внимание",function(){});
+                                return;
+                            }
+                            $$('#appbar-user').text(app7.data["dbUserName"]+((dbEmpName)?" ("+dbEmpName+")":""));
+                            $$('#pageMain-mobileLogin #mobileLogin-inputUsername').val("");
+                            if(typeof(Storage)!=="undefined"){
+                                localStorage.setItem("mobileLogin-username",username);
+                                var storeLoginUserpswrdItemName="mobileLogin-upswrd-"+username;
+                                if($$('#pageMain-mobileLogin #mobileLogin-checkboxStoreUser').prop('checked'))
+                                    localStorage.setItem(storeLoginUserpswrdItemName,password);
+                                else
+                                    localStorage.setItem(storeLoginUserpswrdItemName,null);
+                            }else{// Sorry! No Web Storage support..
+                            }
+                            app7.data.uuid=result.uuid;
+                            if(app7.mAppAcceessToServer) app7.mAppAcceessToServer(result.uuid);
+                            self.setUserRoutes();
+                        });
+            },
+            setUserRoutes: function(){
+                var lPanelPagesItems= $$("#main-panel-left-pages li a");
+                app7.panelLeft.$el.find('#main-panel-left-pages').hide();
+                app7.srvRequestJSON({url:'/mobile/getUserRoutes', errorDialogMsg:"Не удалось получить данные для загрузки!"},
+                        function(result,errmsg){
+                            if(!result){
+                                mainView.router.navigate('/pageMain');
+                                mainView.router.routes= baseRoutes;
+                                return;
+                            }
+                            if(app7.setMAppRoutes) app7.setMAppRoutes(result);
+                            if(app7.convertRoutesForMApp) app7.convertRoutesForMApp(result);
+                            mainView.router.routes=result;
+                            var userRoutes={}, definePath;
+                            for(var userRoutesItem of result){
+                                userRoutes[userRoutesItem.path]=true;
+                                if(!definePath&&userRoutesItem&&userRoutesItem.define) definePath=userRoutesItem.path;
+                            }
+                            var hasVisible=false;
+                            for(var i=0;i<lPanelPagesItems.length;i++){
+                                var panelItem= lPanelPagesItems[i], visible= userRoutes[panelItem.getAttribute("href")];
+                                if(visible) $$(panelItem).show();
+                                hasVisible= visible||hasVisible;
+                            }
+                            if(hasVisible) app7.panelLeft.$el.find('#main-panel-left-pages').show();
+                            if(!definePath)return;
+                            mainView.router.navigate(definePath);
+                        });
+            }
+        }
+    }
+</script>

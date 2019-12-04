@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-    <div id="pageExcFromStockProducts" class="page page-with-subnavbar">
+    <div id="pageExcFromStockProducts" class="page page-with-subnavbar" tabindex="1">
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="left">
@@ -24,9 +24,7 @@
                         </div>
                     </div>
                 </div>
-
             </div>
-
         </div>
         <div class="page-content" id="pageExcFromStockProductsContent" style="padding-left:1px;padding-right:1px;padding-bottom:1px;">
             <table height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
@@ -106,6 +104,27 @@
                 $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBarCodeInput').on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
                 });
+
+                //pageExcFromStockProducts
+//                $$('#pageExcFromStockProducts').keypress(function(e){              alert("keypress|"+e.keyCode+"|"+e.key);//IT'S FOR TEST
+//                    //if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
+//                });
+
+                $$('#pageExcFromStockProducts').on('keypress',function(e){                                             console.log("keypress");
+                        //alert(e.keyCode+"|"+e.key);//IT'S FOR TEST
+                    //if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
+                });
+                                                            console.log("pageExcFromStockProducts",$$('#pageExcFromStockProducts'));
+//                $$('#pageExcFromStockProducts').on('keyup',function(e){              alert("keyup|"+e.keyCode+"|"+e.key);//IT'S FOR TEST
+//                    //if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
+//                });
+                $$('#pageExcFromStockProducts')[0].onkeypress= function(e){              alert("onkeypress|"+e.keyCode+"|"+e.key);//IT'S FOR TEST
+                    //if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
+                };
+                $$('#pageExcFromStockProducts')[0].onkeyup= function(e){              alert("onkeyup|"+e.keyCode+"|"+e.key);//IT'S FOR TEST
+                    //if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
+                };
+
                 if(deviceBarcodeScannerReaderAction){
                     deviceBarcodeScannerReaderAction= function(barcode){
                         let pageDom=$$('.view-main #pageExcFromStockProducts');

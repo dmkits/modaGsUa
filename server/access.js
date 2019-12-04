@@ -217,8 +217,8 @@ module.exports= function(app){
                 });
                 return;
             }
-            req.dbUserParams=dbUserParameters;
-            req.dbUserName=dbUserParameters.dbUserName;                                                         log.info('ACCESS CONTROLLER: dbUserName=',req.dbUserName,'dbUserParams=',req.dbUserParams);
+            req.dbUserParams= dbUserParameters;
+            req.dbUserName= dbUserParameters["dbUserName"]; req.dbEmpName= dbUserParameters["EmpName"];         log.info('ACCESS CONTROLLER: dbUserName=',req.dbUserName,'dbUserParams=',req.dbUserParams);
             req.dbEmpRole=(dbUserParameters)?dbUserParameters["EmpRole"]:null;
             var validateError=appModules.getValidateError();
             if(validateError){
@@ -301,8 +301,8 @@ module.exports= function(app){
             getDBUserData(result.dbUC, function(errMsg,dbUserParameters){
                 if(errMsg) outData.dbUserError= errMsg;
                 if(dbUserParameters){
-                    outData.dbUserName= dbUserParameters.dbUserName;
-                    outData.dbEmpRole= dbUserParameters["EmpRole"];
+                    outData.dbUserName= dbUserParameters["dbUserName"];
+                    outData.dbEmpName= dbUserParameters["EmpName"]; outData.dbEmpRole= dbUserParameters["EmpRole"];
                 }
                 res.send(outData);
             });

@@ -9,20 +9,19 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
     //     });
 };
 
-module.exports.moduleViewURL = "/mobile";
-module.exports.moduleViewPath = "mobile/index.html";
+module.exports.moduleViewURL= "/mobile";
+module.exports.moduleViewPath= "mobile/main.html";
 module.exports.routes=[//-- App routes --
-    { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
-    { path: '/pageHelpAbout', componentUrl: '/mobile/pageHelpAbout'},
-    { path: '/pageSettingsCommon', componentUrl: '/mobile/pageSettingsCommon'},
-    { path: '(.*)', url: './mobile/actionError' }// Default route (404 page). MUST BE THE LAST
+    { path:'/pageMain', componentUrl:'/mobile/pageMain', options:{clearPreviousHistory:true,ignoreCache:true} },
+    { path:'/pageHelpAbout', componentUrl:'/mobile/pageHelpAbout'},
+    { path:'(.*)', url:'/mobile/actionError' }// Default route (404 page). MUST BE THE LAST
 ];
 module.exports.init = function(app){
+    app.get("/mobile/pageMain", function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageMain.html');
+    });
     app.get("/mobile/pageHelpAbout", function(req,res){
         res.sendFile(appViewsPath+'mobile/pageHelpAbout.html');
-    });
-    app.get("/mobile/pageSettingsCommon", function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageSettingsCommon.html');
     });
     app.get("/mobile/getUserRoutes", function(req,res){
         if(!req.dbEmpRole){

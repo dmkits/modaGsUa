@@ -10,7 +10,7 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 };
 
 module.exports.moduleViewURL = "/mobile";
-module.exports.moduleViewPath = "mobile/index.html";
+module.exports.moduleViewPath = "mobile/main.html";
 module.exports.routes=[//-- App routes --
     { path: '/home', pageName: 'home', options:{clearPreviousHistory:true,ignoreCache:true} },
     { path: '/pageHelpAbout', componentUrl: '/mobile/pageHelpAbout'},

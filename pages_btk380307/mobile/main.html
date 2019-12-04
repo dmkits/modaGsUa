@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+    -->
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline' gap: https://ssl.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">-->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:">
+    <meta charset=utf-8>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
+    <!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2196f3">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <link rel="shortcut icon" href="/img/logoGS-red-min-app.png">
+    <script src="/jslib/framework7/js/framework7.min.js"></script>
+    <link rel="stylesheet" href="/jslib/framework7/css/framework7.min.css">
+    <link rel="stylesheet" type="text/css" href="/cssm/mobileIndex.css">
+    <link rel="stylesheet" type="text/css" href="/cssm/mobileIcons.css">
+    <link rel="stylesheet" type="text/css" href="/cssm/mobileApp.css">
+    <script src="/jslib/fr7MUIFuncts.js"></script>
+    <script src="/jslib/moment/moment.js"></script>
+    <title>GABIS Mobile</title>
+</head>
+<body>
+<div id="app">
+    <div class="appbar">
+        <div class="appbar-inner">
+            <div style="display:table;width:100%;min-height:25px;text-align:center">
+                <span id="appbar-user" style="display:table-cell;font-size:18px;font-weight:bold;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+                <span id="appbar-modeMsg" style="display:table-cell;color:red;font-size:18px;font-weight:bold;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+            </div>
+        </div>
+    </div>
+    <div class="view view-main" style="height:calc(100% - 25px)">
+        <div class="page" data-name="home"></div>
+    </div>
+</div>
+<script>
+    var $$=Dom7,
+            baseRoutes= [//-- App routes --
+                { path:'/pageMain', componentUrl:'/mobile/pageMain', options:{clearPreviousHistory:true,ignoreCache:true} },
+                { path:'/pageHelpAbout', componentUrl:'/mobile/pageHelpAbout'},
+                { path:'(.*)', url:'/mobile/actionError' }// Default route (404 page). MUST BE THE LAST
+            ],
+            app7= new Framework7({// Framework7 App main instance
+                id:'io.framework7.mobile.gabis', version:"3.0.0",
+                root: '#app', // app7 root element
+                theme: 'ios', // 'auto' - Automatic theme detection, Can be md, ios or aurora
+                routes: baseRoutes,
+                workingDoc:null
+            }),
+            mainView= app7.views.create('.view-main',{domCache:true,stackPages:true});
+    framework7MUIFunctions.init(app7);
+    deviceBarcodeScannerReaderAction= function(){};//IT'S USED IN MOBILE APP
+    app7.request.setup({ headers: {'uuid':app7.data.uuid} });
+    mainView.router.navigate("/pageMain");
+</script>
+</body>
+</html>
