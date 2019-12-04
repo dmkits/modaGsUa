@@ -63,6 +63,10 @@ tfoot td{
     border-color: #E4E4E4;;
 }
 
+#login-button-div{
+    text-align: center;
+}
+
 .docsListStockName{
     font-size:14px;
 }
@@ -71,10 +75,9 @@ tfoot td{
     line-height: 1.0 !important;
 }
 
-#login-button-div{
-    text-align: center;
+.mobile-table-small-size{
+    display:table;
 }
-
 .mobile-table-large-size{
     display:none;
 }
@@ -83,7 +86,7 @@ tfoot td{
         display:none;
     }
     .mobile-table-large-size{
-        display:table-row;
+        display:table;
     }
 }
 .table-header-small{
@@ -94,9 +97,16 @@ tfoot td{
 .table-header-large{
 
 }
+.mobile-table-selectedRow{
+    background-color:#cfd5da;
+}
 .table-text{
-    margin-left:5px;
-    margin-right:5px;
+    margin-left:3px;
+    margin-right:3px;
+}
+.table-text-mi{/*min ident*/
+    margin-left:2px;
+    margin-right:2px;
 }
 .text-centered{
     text-align: center;
@@ -116,9 +126,6 @@ tfoot td{
 .tdNewQty{
     text-align: center;
     font-weight: bold;
-}
-.tdSelectedRow{
-    background-color:#cfd5da;
 }
 .tdSumCC{
     text-align: right;

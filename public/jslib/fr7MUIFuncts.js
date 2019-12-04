@@ -212,12 +212,20 @@ var framework7MUIFunctions= {
      *         </tr>
      *     </tfoot>
      * </table>
+     * contentTableFootDomEl may be array = [<contentTableFootDomEl1>, <contentTableFootDomEl2>, ... ]
      * params = { <td id value>:<value>, .. }
      */
-    innerPageUpdateTotalTable:function(contentTableFootDomEl, params){
+    innerPageUpdateTotalTable:function(contentTableFootDomElVal, params){
         if(!params)return;
-        var contentTableFootTR= $$(contentTableFootDomEl).find("tr");
-        for(var valueName in params) contentTableFootTR.find("td#"+valueName).html(params[valueName]);
+        if(!Array.isArray(contentTableFootDomElVal)){
+            var contentTableFootTR= $$(contentTableFootDomElVal).find("tr");
+            for(var valueName in params) contentTableFootTR.find("td#"+valueName).html(params[valueName]);
+            return;
+        }
+        for(var contentTableFootDomEl of contentTableFootDomElVal){
+            var contentTableFootTR= $$(contentTableFootDomEl).find("tr");
+            for(var valueName in params) contentTableFootTR.find("td#"+valueName).html(params[valueName]);
+        }
     },
     /** IT'S USED IN INNER PAGE TEMPLATES
      * self = component instance
