@@ -1,0 +1,110 @@
+1. Install node js id not installed
+------ last stable version installation-
+$ sudo apt-get update
+$ sudo apt-get install nodejs
+
+-------or through node version manager
+run this command:
+curl https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | bash
+
+change source for installing file by this command:
+source ~/.bashrc
+
+now check the version of NVM installed by:
+nvm --version
+
+for checking latest available version of node you can run this command in terminal:
+nvm ls-remote
+
+All version is listed down in your terminal now you can install any of the version available you can use this command:
+nvm install v6.11.0
+
+where v6.11.0 is the version of node you can change it accordingly. you can install more than one node version.
+
+Node with v6.11.0 is installed you need to use them by command:
+nvm use v6.11.0
+
+2. Install Cordova globally:
+work: npm install -g cordova@8.1.2
+with err on 20190710: npm install cordova -g
+
+
+3. install java if not installed
+add JAVA_HOME
+$ export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+$ echo $JAVA_HOME
+change java current version
+sudo update-alternatives --config java
+sudo update-alternatives --config javac
+
+4. install Gradle:
+$ sudo add-apt-repository ppa:cwchien/gradle
+$ sudo apt-get update
+$ sudo apt-get install gradle
+
+5. Download and Install AndroidStudio
+create new AndroidStudio project
+or open exists AndroidStudio project
+
+6. set  ENV AND  PATH variables
+$ export ANDROID_HOME=/home/dmkits/Android/Sdk
+$ export PATH=$PATH:$ANDROID_HOME/tools
+$ echo $ANDROID_HOME
+
+7. Create an empty cordova progect
+pathTo/yourProgectsFolder: 
+$ cordova create ProgectFolderName com.yourUnigueReversedDomainName AppName
+
+8. cordova platform add android
+
+change in gradle.properties
+cdvMinSdkVersion=19
+
+9. build your project.
+cordova build
+OR
+cordova build android
+
+OR for release build:
+cordova build android --release
+
+cordova build android --release -- --gradleArg=-PcdvMinSdkVersion=19
+
+It will create apk file in projectdirectory/platforms/android/build/outputs/apk/debug
+
+10. create AndroidStudio emulator
+$ /home/dmkits/android-studio/bin/studio.sh
+(you can create an empty project or open existing one)
+AndroidStudio > Tools > AVD Manager
+and start Your Virtual Device (Nexus 5X API 29 x86)
+
+if not start AndroidStudio AVD run:
+$ sudo chmod a=rw /dev/kvm
+
+$ cordova emulate android
+
+fix fail startup emulate
+Cordova android emulation - Error: Cannot read property 'semver' of null
+fix:
+find the path <project_root>/platforms/android/cordova/lib/emulator.js
+find the line avd.target = 'Android ' + level.semver + ' (API level ' + api_level + ')';
+replace it with avd.target = 'Android ' + (level ? level.semver : '') + ' (API level ' + api_level + ')';
+
+//avd.target = 'Android ' + level.semver + ' (API level ' + api_level + ')';
+avd.target = 'Android ' + (level ? level.semver : '') + ' (API level ' + api_level + ')';
+
+11. crosswalk plugin
+
+cordova plugin add cordova-plugin-crosswalk-webview
+cordova plugin add cordova-plugin-splashscreen
+
+12. other plugins
+
+cordova plugin add cordova-plugin-keyboard
+use:
+    window.Keyboard.shrinkView(false);
+    //window.Keyboard.hideFormAccessoryBar(true);
+
+cordova plugin add cordova-plugin-statusbar
+use:
+    window.StatusBar
