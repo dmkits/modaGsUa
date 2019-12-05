@@ -118,8 +118,10 @@
                 $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBtnBarcodeInputEnter').on('click',function(){
                     self.barcodeInputEnter();
                 });
-                $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBarCodeInput').on('keypress',function(e){
+                this.pageExcFromStockProductsBarCodeInput= $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBarCodeInput');
+                this.pageExcFromStockProductsBarCodeInput.on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter') self.barcodeInputEnter();
+                    e.stopPropagation();
                 });
                 if(deviceBarcodeScannerReaderAction){
                     deviceBarcodeScannerReaderAction= function(barcode){
@@ -130,6 +132,30 @@
                     }
                 }
                 this.loadExcData();
+            },
+            pageAfterIn: function(e,page){
+                var self=this, thisEl=this.el;
+                this.keypressBuffer="";
+                document.onkeypress= function(e){
+                    if(thisEl!=mainView.router.currentPageEl)return;
+                    if(app7.srvRequestJSONDialogErr)return;
+                    if(!e||e.key==null)return;
+                    if(e.key=="Enter"){
+                        self.barcodeInputEnter(self.keypressBuffer);
+                        self.keypressBuffer="";
+                    }else {
+                        if(e.key.length==1) self.keypressBuffer+=e.key;
+                        self.pageExcFromStockProductsBarCodeInput.val(self.keypressBuffer);
+                    }
+                }
+                document.onkeydown= function(e){
+                    if(thisEl!=mainView.router.currentPageEl)return;
+                    if(!e||e.key==null)return;
+                    if(e.key=="Escape"){
+                        self.keypressBuffer="";
+                        self.pageExcFromStockProductsBarCodeInput.val(self.keypressBuffer);
+                    }
+                }
             },
             pageAfterOut: function(e,page){
                 if(this.progressBarEl) this.$app.progressbar.hide(this.progressBarEl);
@@ -151,8 +177,8 @@
                 return !this.item||( !(this.item["IsStateCreated"]||this.item["IsStateReturned"]) );
             },
             loadExcData: function(){
-                this.contentTableTotalData={};
-                this.setInputProdBarcodeByState({focus:true,enable:false});
+                this.contentTableDataDomTRs={}; this.contentTableDataItems={}; this.contentTableTotalData={};
+                this.setInputProdBarcodeByState({focus:false,enable:false});
                 var excData=this.item, excChID=excData.ChID;
                 if(excChID===null||excChID===undefined)return;
                 var self=this;
@@ -176,7 +202,7 @@
                             };
                             app7.innerPageFillTableData(self,resultItems,params,function(contentTableData,contentTableDataDomTRs){
                                 self.contentTableDataDomTRs= contentTableDataDomTRs;
-                                self.setInputProdBarcodeByState({focus:true,enable:true});
+                                self.setInputProdBarcodeByState({focus:false,enable:true});
                             });
                         })
             },
@@ -209,7 +235,10 @@
                 if(!opts)return;
                 pageExcFromStockProductsBarCodeInput.show(); pageExcFromStockProductsBtnBarcodeInputEnter.show();
                 pageExcFromStockProductsStateInfo.hide(); pageExcFromStockProductsStateName.hide();
-                if(opts.val!==undefined) pageExcFromStockProductsBarCodeInput.val(opts.val);
+                if(opts.val!==undefined){
+                    pageExcFromStockProductsBarCodeInput.val(opts.val);
+                    this.keypressBuffer= opts.val;
+                }
                 if(opts.enable==true||opts.disable==false){
                     pageExcFromStockProductsBarCodeInput.removeAttr('disabled');
                     pageExcFromStockProductsBtnBarcodeInputEnter.removeAttr('disabled');
@@ -230,7 +259,7 @@
                         function(excProdData){
                             app7.preloader.hide();
                             if(excProdData) self.updContentTableData(excProdData);
-                            self.setInputProdBarcodeByState({enable:true,focus:(!scanBarcode),val:""});
+                            self.setInputProdBarcodeByState({enable:true,focus:false/*(!scanBarcode)*/,val:""});
                         });
             },
             /**
@@ -263,6 +292,8 @@
                 var srcPosID= prodData["SrcPosID"], ctTRs= this.contentTableDataDomTRs[srcPosID], ctDataItem= this.contentTableDataItems[srcPosID];
                 if(!ctTRs){//not exists - add new
                     ctTRs= app7.innerPageCreateTableRow(this.contentTableHeaderDomEl,this.contentTableDataDomEl,prodData,this);
+                    if(this.contentTableLHeaderDomEl&&this.contentTableLDataDomEl)
+                        ctTRs= ctTRs.concat(app7.innerPageCreateTableRow(this.contentTableLHeaderDomEl,this.contentTableLDataDomEl,prodData,this));
                     this.contentTableDataDomTRs[srcPosID]= ctTRs;
                     if(!this.contentTableData) this.contentTableData=[];
                     this.contentTableData.push(prodData);
@@ -281,14 +312,15 @@
                     this.setScroll(ctTR);
                 }
             },
-            contentTableTDQtyOnClick: function(e,ownerTR,contentTableDataItem,self){
+            contentTableTDQtyOnClick: function(e,ownerTD,contentTableDataItem,self){
                 if(this.isReadOnly())return;
                 var tdQty=e.target, self=this;
                 this.showDialogEditQty(contentTableDataItem,/*ok/Enter*/function(inputValQty,actionSuccess,actionError){
                     self.storeQtyToExcD(contentTableDataItem["SrcPosID"],contentTableDataItem["ProdID"],inputValQty,
                             function(storeResult,errMsg){
                                 if(errMsg){ if(actionError) actionError(errMsg); return; }
-                                ownerTR.firstChild.innerText= inputValQty;
+                                var srcPosID= contentTableDataItem["SrcPosID"], ctTRs= self.contentTableDataDomTRs[srcPosID];
+                                for(var ctTR of ctTRs) $$(ctTR).find("td[dataItemName=Qty] div").text(inputValQty);
                                 var oldQty= contentTableDataItem["Qty"];
                                 contentTableDataItem["Qty"]= inputValQty; //oldQty.innerText= val.toString();
                                 self.setTotalInfo(inputValQty-oldQty);
@@ -311,9 +343,13 @@
                             open:function(){
                                 $$("#dialogExcDEditQtyErrMsg").html("");
                                 $$("#inputExcDQty").val(oldQty).focus(); document.getElementById("inputExcDQty").select();
+                                document.getElementById("inputExcDQty").onkeypress= function(e){
+                                    e.stopPropagation();
+                                };
                                 document.getElementById("inputExcDQty").onkeydown= function(e){
                                     if(e.key=="Escape"||e.code=="Escape"||e.keyCode==27) dialogEditQty.close();
                                     else if(e.key=="Enter"||e.code=="Enter"||e.keyCode==13) dialogEditQty.params.buttons[0].onClick();
+                                    e.stopPropagation();
                                 };
                             },
                         },
@@ -332,7 +368,7 @@
                                 });
                             } },
                             { text:"ОТМЕНА",close:true,keyCodes:[27] } ]
-                    }).open().on("closed",function(){ thisInstance.setInputProdBarcodeByState({focus:true}); });
+                    }).open().on("closed",function(){ thisInstance.setInputProdBarcodeByState({focus:false}); });
             },
             storeQtyToExcD: function(srcPosID,prodID,qty,callback){
                 var parentChID= this.item["ChID"];
