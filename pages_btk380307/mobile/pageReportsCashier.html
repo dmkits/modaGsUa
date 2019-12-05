@@ -14,12 +14,6 @@
     <div class="subnavbar docHeaderTitle" id="pageVenDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
         <div class="subnavbar-inner">
             <div class="row" style="padding-left:16px;padding-right:16px;width:100%;display:table">
-                <!--<input type="number" class="col" style="height:36px;min-width:200px;" id="pageVenDataBarCodeInput" placeholder="ШК или код товара">-->
-                <!--<button class="col button button-outline button-round" id="pageVenDataBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>-->
-                <!--<div>-->
-                    <!--<span id="pageVenDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>-->
-                    <!--<span id="pageVenDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>-->
-                <!--</div>-->
                 <a href="#" id="pageReportsCashier-cr" class="col item-link smart-select" style="display:table-cell;min-width:180px;" @smartselect:closed="pageReportsCashierCRClosed">
                     <div class="item-content">
                         <div class="item-inner" style="min-height:30px">
@@ -27,7 +21,7 @@
                             <div id="pageReportsCashier-cr-label" class="item-after" style="display:contents;margin-left:0px;max-width:80%;color:#212121"></div>
                         </div>
                     </div>
-                    <select id="pageReportsCashier-cr-select">
+                    <select id="pageReportsCashier-cr-select">`
                         {{#each listCRs}}
                         <option value={{value}}>{{label}}</option>
                         {{/each}}
@@ -42,7 +36,6 @@
                             </div>
                         </div>
                     </div>
-
                 </a>
             </div>
         </div>
@@ -76,6 +69,19 @@
             </tr>
             </tbody>
         </table>
+        <table width="100%" class="mobile-table-small-size tableReport tableReportCashierSales" style="margin-top:55px;margin-bottom:30px;"></table>
+        <table width="100%" class="mobile-table-small-size tableReport tableReportCashierSales" style="position:fixed;left:0px;bottom:0px;z-index:100">
+            <tfoot>
+            <tr>
+                <td id="totalRows" width="65px" class="datetime-cell">0</td>
+                <td></td>
+                <td id="totalQty" width="45px">0</td>
+                <td width="50px"></td>
+                <td id="totalRealSum" width="60px">0</td>
+                <td width="50px"></td>
+            </tr>
+            </tfoot>
+        </table>
         <table width="100%" class="mobile-table-large-size tableReport tableReportCashierSales" style="position:fixed;left:0px;top:88px; z-index:100;" >
             <thead>
             <tr>
@@ -102,20 +108,7 @@
             </tr>
             </tbody>
         </table>
-        <table width="100%" class="mobile-table-small-size tableReport tableReportCashierSales" style="margin-top:55px;margin-bottom:30px;"></table>
         <table width="100%" class="mobile-table-large-size tableReport tableReportCashierSales" style="margin-top:55px;margin-bottom:30px;"></table>
-        <table width="100%" class="mobile-table-small-size tableReport tableReportCashierSales" style="position:fixed;left:0px;bottom:0px;z-index:100">
-            <tfoot>
-            <tr>
-                <td id="totalRows" width="65px" class="datetime-cell">0</td>
-                <td></td>
-                <td id="totalQty" width="45px">0</td>
-                <td width="50px"></td>
-                <td id="totalRealSum" width="60px">0</td>
-                <td width="50px"></td>
-            </tr>
-            </tfoot>
-        </table>
         <table width="100%" class="mobile-table-large-size tableReport tableReportCashierSales" style="position:fixed;left:0px;bottom:0px;z-index:100">
             <tfoot>
             <tr>
@@ -137,10 +130,10 @@
             pageInit: function(e,page){
                 var dataTables=$$(this.el).children(".page-content").children("table");
                 if(dataTables&&dataTables[0]) this.contentTableHeaderDomEl= dataTables[0];
-                if(dataTables&&dataTables[1]) this.contentTableLHeaderDomEl= dataTables[1];
-                if(dataTables&&dataTables[2]) this.contentTableDataDomEl= dataTables[2];
-                if(dataTables&&dataTables[3]) this.contentTableLDataDomEl= dataTables[3];
-                if(dataTables&&dataTables[4]) this.contentTableFootDomEl= dataTables[4];
+                if(dataTables&&dataTables[1]) this.contentTableDataDomEl= dataTables[1];
+                if(dataTables&&dataTables[2]) this.contentTableFootDomEl= dataTables[2];
+                if(dataTables&&dataTables[3]) this.contentTableLHeaderDomEl= dataTables[3];
+                if(dataTables&&dataTables[4]) this.contentTableLDataDomEl= dataTables[4];
                 if(dataTables&&dataTables[5]) this.contentTableLFootDomEl= dataTables[5];
                 if(this.crIDFilter===undefined) this.crIDFilter="";
                 var calendarRange= app7.calendar.create({ inputEl:'#pageReportsCashierDatesRange',
