@@ -124,7 +124,7 @@ var framework7MUIFunctions= {
      *      tr,td onCreated - name of function called after td has been created,
      *          function(tr/td,tableDataItem,newTRs,methods), newTRs=[] - array or tr, methods={ rowSelectingMethod, <onClick function name if exists> }
      *      tr,td onClick - name of function called after td click,
-     *          function(e,owner,dataTableItemName,self), e-onclick event, owner - owner of onClick action function, self-component instance
+     *          function(e,owner,contentTableDataItem,self), e-onclick event, owner - owner of onClick action function (tr/td dom element), self-component instance
      * contentTableData =
      * <table width="100%" style="margin-bottom: 43px;"></table>
      * totalTable =
@@ -146,10 +146,10 @@ var framework7MUIFunctions= {
     innerPageCreateTableRow: function(contentTableHeaderDomEl, contentTableDataDomEl, contentTableDataItem, self){
         if(!contentTableHeaderDomEl||!contentTableDataDomEl) return;
         var contentTableHeaderRows= $$(contentTableHeaderDomEl).children("tbody").children("tr");
-        if(!contentTableHeaderRows||contentTableHeaderRows.length==0) return;
+        if(!contentTableHeaderRows||contentTableHeaderRows.length==0)return;
         if(!contentTableDataItem) contentTableDataItem={};
         var newTRs=[];
-        for(var i=0; i<contentTableHeaderRows.length; i++){
+        for(var i=0;i<contentTableHeaderRows.length;i++){
             var dthTR= contentTableHeaderRows[i], newTR;
             newTRs.push(newTR=dthTR.cloneNode(true)); contentTableDataDomEl.appendChild(newTR);
             var rowSelecting= newTR.getAttribute("rowSelecting"),
@@ -161,7 +161,8 @@ var framework7MUIFunctions= {
                 trOnClickMethodName= newTR.getAttribute("onClick");
             if(trOnCreatedMethodName){
                 var methods={};
-                if(trOnClickMethodName)methods[trOnClickMethodName]= self[trOnClickMethodName];
+                if(rowSelecting) methods["rowSelectingMethod"]= selectOnClickFunction;
+                if(trOnClickMethodName) methods[trOnClickMethodName]= self[trOnClickMethodName];
                 self[trOnCreatedMethodName](newTR,contentTableDataItem,newTRs,methods);
             }
             if(trOnClickMethodName&&rowSelecting){
@@ -182,11 +183,10 @@ var framework7MUIFunctions= {
                 if(contentTableDataItemName!==undefined) val= contentTableDataItem[contentTableDataItemName];
                 var newTDText=newTD.firstChild||newTD;
                 newTDText.innerText= (val==null)?"":val.toString();
-                var tdOnCreatedMethodName= newTD.getAttribute("onCreated"),
-                    tdOnClickMethodName= newTD.getAttribute("onClick");
+                var tdOnCreatedMethodName= newTD.getAttribute("onCreated"), tdOnClickMethodName= newTD.getAttribute("onClick");
                 if(tdOnCreatedMethodName){
                     var methods={};
-                    if(rowSelecting)methods["rowSelectingMethod"]= selectOnClickFunction;
+                    if(rowSelecting) methods["rowSelectingMethod"]= selectOnClickFunction;
                     if(tdOnClickMethodName) methods[tdOnClickMethodName]= self[tdOnClickMethodName];
                     self[tdOnCreatedMethodName](newTD,contentTableDataItem,newTRs,methods);
                 }
@@ -233,7 +233,8 @@ var framework7MUIFunctions= {
      *      contentTable2Header,contentTable2Data - if exists, used for fill second data table,
      *      contentTableDataIDName, contentTableDataDomTRs,
      *      progressAction = function(tableData,ind,tableDataItem), if no ind and no tableDataItem, do last progressAction
-     * finishedCallback = function(tableData)
+     * finishedCallback = function(contentTableData,contentTableDataDomTRs)
+     *      contentTableDataDomTRs - array of arrays created content table TR elements, create/fill only exists params.contentTableDataIDName
      */
     innerPageFillTableData: function(self, contentTableData, params, finishedCallback){
         var progress = 0, progressStep=100/contentTableData.length;
@@ -266,7 +267,8 @@ var framework7MUIFunctions= {
      *              progressBarEl,progress,progressStep, progressAction,
      *              contentTableDataIDName, contentTableDataDomTRs }
      *      progressAction = function(tableData,ind,tableDataItem)
-     * finishedCallback = function(tableData)
+     * finishedCallback = function(contentTableData,contentTableDataDomTRs)
+     *      contentTableDataDomTRs - array of arrays created content table TR elements, create/fill only exists params.contentTableDataIDName
      */
     fillInnerPageTableDataProgress: function(self, ind,contentTableData, params, finishedCallback){
         var timeout= 10+Math.round(ind/100), i=ind, contentTableDataItem;
