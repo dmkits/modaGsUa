@@ -254,30 +254,26 @@
                         });
             },
             setUserRoutes: function(){
-                var lPanelPagesItems= $$("#main-panel-left-pages li a");
+                var lPanelPagesItems= app7.panelLeft.$el.find("#main-panel-left-pages li a");
                 app7.panelLeft.$el.find('#main-panel-left-pages').hide();
                 app7.srvRequestJSON({url:'/mobile/getUserRoutes', errorDialogMsg:"Не удалось получить данные для загрузки!"},
                         function(result,errmsg){
-                            if(!result){
-                                mainView.router.navigate('/pageMain');
-                                mainView.router.routes= baseRoutes;
-                                return;
-                            }
-                            if(app7.setMAppRoutes) app7.setMAppRoutes(result);
-                            if(app7.convertRoutesForMApp) app7.convertRoutesForMApp(result);
-                            mainView.router.routes=result;
-                            var userRoutes={}, definePath;
-                            for(var userRoutesItem of result){
-                                userRoutes[userRoutesItem.path]=true;
-                                if(!definePath&&userRoutesItem&&userRoutesItem.define) definePath=userRoutesItem.path;
+                            var userRoutes= (result&&result.length>0)?result:baseRoutes,
+                                    userRoutesItems={}, definePath=null;
+                            for(var userRoutesItem of userRoutes){
+                                userRoutesItems[userRoutesItem.path]=true;
+                                if(!definePath&&userRoutesItem&&userRoutesItem.define) definePath= userRoutesItem.path;
                             }
                             var hasVisible=false;
                             for(var i=0;i<lPanelPagesItems.length;i++){
-                                var panelItem= lPanelPagesItems[i], visible= userRoutes[panelItem.getAttribute("href")];
-                                if(visible) $$(panelItem).show();
+                                var panelItem= lPanelPagesItems[i], visible= userRoutesItems[panelItem.getAttribute("href")];
+                                if(visible) $$(panelItem).show(); else $$(panelItem).hide();
                                 hasVisible= visible||hasVisible;
                             }
                             if(hasVisible) app7.panelLeft.$el.find('#main-panel-left-pages').show();
+                            if(app7.setMAppRoutes) app7.setMAppRoutes(userRoutes);
+                            if(app7.convertRoutesForMApp) app7.convertRoutesForMApp(userRoutes);
+                            mainView.router.routes= userRoutes;
                             if(!definePath)return;
                             mainView.router.navigate(definePath);
                         });
