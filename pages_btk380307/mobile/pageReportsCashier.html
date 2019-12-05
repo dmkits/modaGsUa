@@ -128,13 +128,13 @@
     return {
         on: {
             pageInit: function(e,page){
-                var dataTables=$$(this.el).children(".page-content").children("table");
-                if(dataTables&&dataTables[0]) this.contentTableHeaderDomEl= dataTables[0];
-                if(dataTables&&dataTables[1]) this.contentTableDataDomEl= dataTables[1];
-                if(dataTables&&dataTables[2]) this.contentTableFootDomEl= dataTables[2];
-                if(dataTables&&dataTables[3]) this.contentTableLHeaderDomEl= dataTables[3];
-                if(dataTables&&dataTables[4]) this.contentTableLDataDomEl= dataTables[4];
-                if(dataTables&&dataTables[5]) this.contentTableLFootDomEl= dataTables[5];
+                var contentTables= $$(this.el).children(".page-content").children("table");
+                if(contentTables&&contentTables[0]) this.contentTableHeaderDomEl= contentTables[0];
+                if(contentTables&&contentTables[1]) this.contentTableDataDomEl= contentTables[1];
+                if(contentTables&&contentTables[2]) this.contentTableFootDomEl= contentTables[2];
+                if(contentTables&&contentTables[3]) this.contentTableLHeaderDomEl= contentTables[3];
+                if(contentTables&&contentTables[4]) this.contentTableLDataDomEl= contentTables[4];
+                if(contentTables&&contentTables[5]) this.contentTableLFootDomEl= contentTables[5];
                 if(this.crIDFilter===undefined) this.crIDFilter="";
                 var calendarRange= app7.calendar.create({ inputEl:'#pageReportsCashierDatesRange',
                     dateFormat:'dd.mm.yyyy', rangePicker:true, value:[new Date()] });
@@ -190,7 +190,7 @@
             },
             fillCashierReportTable: function(reportData,finishedCallback){
                 app7.innerPageUpdateTotalTable([this.contentTableFootDomEl,this.contentTableLFootDomEl],{totalRows:0,totalQty:0,totalRealSum:0});
-                this.contentTableFoot={};
+                this.contentTableTotalData={};
                 var self=this,
                         params={ contentTableHeaderDomEl:this.contentTableHeaderDomEl, contentTableDataDomEl:this.contentTableDataDomEl,
                                 contentTable2HeaderDomEl:this.contentTableLHeaderDomEl, contentTable2DataDomEl:this.contentTableLDataDomEl,
@@ -204,10 +204,10 @@
             setTotalInfo: function(qty,realSum,tLoadedRows){
                 var sTotalRows= this.items.length.toString();
                 if(tLoadedRows!==undefined) sTotalRows= tLoadedRows.toString()+"/<br>"+sTotalRows;
-                this.contentTableFoot["totalQty"]= this.contentTableFoot["totalQty"]||0; this.contentTableFoot["totalQty"]+= qty;
-                this.contentTableFoot["totalRealSum"]= this.contentTableFoot["totalRealSum"]||0; this.contentTableFoot["totalRealSum"]+= realSum;
+                this.contentTableTotalData["totalQty"]= this.contentTableTotalData["totalQty"]||0; this.contentTableTotalData["totalQty"]+= qty;
+                this.contentTableTotalData["totalRealSum"]= this.contentTableTotalData["totalRealSum"]||0; this.contentTableTotalData["totalRealSum"]+= realSum;
                 app7.innerPageUpdateTotalTable([this.contentTableFootDomEl,this.contentTableLFootDomEl],
-                        {totalRows:sTotalRows,totalQty:this.contentTableFoot["totalQty"],totalRealSum:this.contentTableFoot["totalRealSum"]});
+                        {totalRows:sTotalRows,totalQty:this.contentTableTotalData["totalQty"],totalRealSum:this.contentTableTotalData["totalRealSum"]});
             },
             pageReportsCashierCRClosed:function(e){
                 this.crIDFilter= $$('#pageReportsCashier-cr-select').val();
