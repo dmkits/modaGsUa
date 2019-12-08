@@ -5,7 +5,7 @@ var framework7MUIFunctions= {
         app7.innerPageCreateTableRow= this.innerPageCreateTableRow;
         app7.innerPageUpdateTotalTable= this.innerPageUpdateTotalTable;
         app7.innerPageFillTableData= this.innerPageFillTableData;
-        app7.fillInnerPageTableDataProgress= this.fillInnerPageTableDataProgress;
+        app7.innerPageFillTableDataProgress= this.innerPageFillTableDataProgress;
     },
     /**
      * params = { method, url, data/conditions, showRequestErrorDialog, errorDialogMsg }
@@ -252,7 +252,7 @@ var framework7MUIFunctions= {
             $$(params.contentTable2DataDomEl).children("tr").remove();
         }
         params.progressBarEl=params.progressBarEl; params.progress=progress; params.progressStep=progressStep;
-        app7.fillInnerPageTableDataProgress(self, 0,contentTableData,params, function(contentTableData,contentTableDataDomTRs){
+        app7.innerPageFillTableDataProgress(self, 0,contentTableData,params, function(contentTableData,contentTableDataDomTRs){
             app7.progressbar.hide(params.progressBarEl);
             app7.preloader.hide();
             if(params.contentTableDataDomEl) params.contentTableDataDomEl.style.display= stDisplay;
@@ -270,18 +270,16 @@ var framework7MUIFunctions= {
      * finishedCallback = function(contentTableData,contentTableDataDomTRs)
      *      contentTableDataDomTRs - array of arrays created content table TR elements, create/fill only exists params.contentTableDataIDName
      */
-    fillInnerPageTableDataProgress: function(self, ind,contentTableData, params, finishedCallback){
+    innerPageFillTableDataProgress: function(self, ind,contentTableData, params, finishedCallback){
         var timeout= 10+Math.round(ind/100), i=ind, contentTableDataItem;
+        if(params.contentTableDataIDName&&!params.contentTableDataDomTRs) params.contentTableDataDomTRs={};
         while(i<ind+10){
             contentTableDataItem= contentTableData[i];
             if(!contentTableDataItem)break;
             var createdTRs=[].concat(app7.innerPageCreateTableRow(params.contentTableHeaderDomEl,params.contentTableDataDomEl, contentTableDataItem, self));
             if(params.contentTable2HeaderDomEl&&params.contentTable2DataDomEl)
                 createdTRs= createdTRs.concat(app7.innerPageCreateTableRow(params.contentTable2HeaderDomEl,params.contentTable2DataDomEl, contentTableDataItem, self));
-            if(params.contentTableDataIDName){
-                 if(!params.contentTableDataDomTRs) params.contentTableDataDomTRs={};
-                params.contentTableDataDomTRs[contentTableDataItem[params.contentTableDataIDName]]= createdTRs;
-            }
+            if(params.contentTableDataIDName) params.contentTableDataDomTRs[contentTableDataItem[params.contentTableDataIDName]]= createdTRs;
             if(params.progressAction) params.progressAction(contentTableData, ind,contentTableDataItem);
             params.progress+= params.progressStep;
             i++;
@@ -292,7 +290,7 @@ var framework7MUIFunctions= {
             return;
         }
         setTimeout(function(){
-            app7.fillInnerPageTableDataProgress(self, i,contentTableData, params, finishedCallback)
+            app7.innerPageFillTableDataProgress(self, i,contentTableData, params, finishedCallback)
         },timeout)
     }
 };

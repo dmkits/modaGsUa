@@ -162,12 +162,10 @@ module.exports.init= function(app){
     r_Prods.findProdByCondition= function(dbUC,conditions,callback){//IT'S used for get prod data from mobile invent
         r_Prods.getDataItemForTable(dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
             function(result){
-                if(!result||!result.item){
-                    var error="Cannot find r_Prods prod data!",errMsg="Не удалось найти товар!";
-                    if(result&&result.error){
-                        error+="\n"+result.error;errMsg+="\n"+result.error;
-                    }
-                    callback({error:error,errorMessage:errMsg});
+                if(!result||result.error){
+                    var sErr= "Failed find r_Prods prod data!",sErrMsg= "Не удалось найти товар!";
+                    sErr+="\n"+result.error; sErrMsg+="\n"+result.error;
+                    callback({error:sErr,errorMessage:sErrMsg});
                     return;
                 }
                 callback({prodData:result.item});
@@ -195,13 +193,16 @@ module.exports.init= function(app){
                 if(uniInputAction==1/*barcode*/)findProdConditions["Barcode="]=value;
                 else/*result.item==2 ProdID*/findProdConditions["r_Prods.ProdID="]=value;
                 r_Prods.findProdByCondition(dbUC,findProdConditions,function(resultFindProd){
-                    if(!resultFindProd||!resultFindProd.prodData){
-                        var error="Cannot find r_Prods prod data by "+(uniInputAction==1)?"Barcode=":"r_Prods.ProdID="+value+"!",
-                            errMsg="Не удалось найти товар по значению "+value+"!";
-                        if(resultFindProd&&resultFindProd.error){
-                            error+="\n"+resultFindProd.error; errMsg+="\n"+resultFindProd.errorMessage;
-                        }
-                        callback({error:error,errorMessage:errMsg});
+                    if(!resultFindProd||resultFindProd.error){
+                        var sErr="Failed find r_Prods prod data by "+(uniInputAction==1)?"Barcode=\""+value+"\"!":"r_Prods.ProdID="+value+"!",
+                            sErrMsg="Не удалось найти товар по значению "+value+"!";
+                        sErr+="\n"+resultFindProd.error; sErrMsg+="\n"+resultFindProd.errorMessage;
+                        callback({error:sErr,errorMessage:sErrMsg});
+                        return;
+                    }else if(!resultFindProd.prodData){
+                        var sErr="Cannot find r_Prods prod data by "+(uniInputAction==1)?"Barcode=\""+value+"\"!":"r_Prods.ProdID="+value+"!",
+                            sErrMsg="Товар по значению "+value+" не найден!";
+                        callback({error:sErr,errorMessage:sErrMsg});
                         return;
                     }
                     callback({prodData:resultFindProd.prodData});

@@ -16,111 +16,109 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 };
 
 module.exports.routes=[//-- App routes --
-    { path: '/pageExcFromStock', componentUrl: '/mobile/pageExcFromStockList', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
-    { path: '/pageExcFromStockProducts/:excChID', componentUrl: '/mobile/pageExcFromStockProducts', options:{ignoreCache:true} },
-    { path: '/pageExcFromStockSettings', componentUrl: '/mobile/pageExcFromStockSettings', options:{ignoreCache:true} }
+    { path:'/pageExcFromStock', componentUrl:'/mobile/pageExcFromStockList', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
+    { path:'/pageExcFromStockProducts/:excChID', componentUrl:'/mobile/pageExcFromStockProducts', options:{ignoreCache:true} },
+    { path:'/pageExcFromStockSettings', componentUrl:'/mobile/pageExcFromStockSettings', options:{ignoreCache:true} }
 ];
-module.exports.moduleViewURL = "/mobile/pageExcFromStockList";
-module.exports.moduleViewPath = "mobile/pageExcFromStockList.html";
+module.exports.moduleViewURL= "/mobile/pageExcFromStockList";
+module.exports.moduleViewPath= "mobile/pageExcFromStockList.html";
 module.exports.init = function(app){
-    app.get("/mobile/pageExcFromStockSettings", function(req,res){
+    app.get("/mobile/pageExcFromStockSettings",function(req,res){
         res.sendFile(appViewsPath+'mobile/pageExcFromStockSettings.html');
     });
-    app.get("/mobile/pageExcFromStockProducts", function(req,res){
+    app.get("/mobile/pageExcFromStockProducts",function(req,res){
         res.sendFile(appViewsPath+'mobile/pageExcFromStockProducts.html');
     });
     var tExcFromStockListTableColumns=[
-        {data: "ChID", name: "ChID", width: 85, type: "text", readOnly:true, visible:false, dataSource:"t_Exc"},
-        {data: "DocID", name: "Номер", width: 85, type: "text", align:"right", dataSource:"t_Exc"},
-        {data: "IntDocID", name: "Вн. номер", width: 85, type: "text", align:"right", dataSource:"t_Exc"},
-        {data: "DocDate", name: "Дата", width: 60, type: "dateAsText",align:"center", dataSource:"t_Exc"},
-        {data: "SDocDate", name: "Дата", width: 60, type: "test",align:"center", dataFunction:"CONVERT(varchar(10),DocDate,104)" },
-        {data: "OurName", name: "Фирма", width: 150, type: "text",
+        {data:"ChID", name:"ChID", width:85, type:"text", readOnly:true, visible:false, dataSource:"t_Exc"},
+        {data:"DocID", name:"Номер", width:85, type:"text", align:"right", dataSource:"t_Exc"},
+        {data:"IntDocID", name:"Вн. номер", width:85, type:"text", align:"right", dataSource:"t_Exc"},
+        {data:"DocDate", name:"Дата", width:60, type:"dateAsText",align:"center", dataSource:"t_Exc"},
+        {data:"SDocDate", name:"Дата", width:60, type:"test",align:"center", dataFunction:"CONVERT(varchar(10),DocDate,104)" },
+        {data:"OurName", name:"Фирма", width:150, type:"text",
             dataSource:"r_Ours", sourceField:"OurName", linkCondition:"r_Ours.OurID=t_Exc.OurID" },
-        {data: "StockName", name: "Склад", width: 150, type: "text",
+        {data:"StockName", name:"Склад", width:150, type:"text",
             dataSource:"r_Stocks", sourceField:"StockName", linkCondition:"r_Stocks.StockID=t_Exc.StockID" },
-        {data: "NewStockName", name: "На склад", width: 150, type: "text",
+        {data:"NewStockName", name:"На склад", width:150, type:"text",
             dataSource:"r_Stocks as st2", sourceField:"StockName", linkCondition:"st2.StockID=t_Exc.NewStockID" },
-        {data: "CurrID", name: "Код валюты", width: 50, type: "text", align:"center", visible:false, dataSource:"t_Exc", sourceField:"CurrID"},
-        {data: "CurrName", name: "Валюта", width: 70, type: "text", align:"center", visible:false,
+        {data:"CurrID", name:"Код валюты", width:50, type:"text", align:"center", visible:false, dataSource:"t_Exc", sourceField:"CurrID"},
+        {data:"CurrName", name:"Валюта", width:70, type:"text", align:"center", visible:false,
             dataSource:"r_Currs", sourceField:"CurrName", linkCondition:"r_Currs.CurrID=t_Exc.CurrID" },
-        {data: "Qty", name: "Кол-во", width: 75, type: "numeric",
+        {data:"Qty", name:"Кол-во", width:75, type:"numeric",
             childDataSource:"t_ExcD", childLinkField:"ChID", parentLinkField:"ChID",
             dataFunction:{function:"sumIsNull", source:"t_ExcD", sourceField:"Qty"} },
-        {data: "TSumCC_wt", name: "Сумма", width: 85, type: "numeric2", dataSource:"t_Exc" },
-        {data: "StockEmpID", name: "StockEmpID", width: 80, type: "text",
+        {data:"TSumCC_wt", name:"Сумма", width:85, type:"numeric2", dataSource:"t_Exc" },
+        {data:"StockEmpID", name:"StockEmpID", width:80, type:"text",
             dataSource:"ir_EmpStockForExc", sourceField:"EmpID", linkCondition:"ir_EmpStockForExc.StockID=t_Exc.StockID" },
-        {data: "StateCode", name: "StateCode", width: 50, type: "text", readOnly:true, visible:false, dataSource:"t_Exc"},
-        {data: "IsStateCreated", name: "Создан", width: 50, type: "text", readOnly:true, visible:false,
+        {data:"StateCode", name:"StateCode", width:50, type:"text", readOnly:true, visible:false, dataSource:"t_Exc"},
+        {data:"IsStateCreated", name:"Создан", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode in (0) Then 1 Else 0 END" },
-        {data: "IsStateOnConfirmation", name: "На подтверждении", width: 50, type: "text", readOnly:true, visible:false,
+        {data:"IsStateOnConfirmation", name:"На подтверждении", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode in (50,60) Then 1 Else 0 END" },
-        {data: "IsStateReturned", name: "Возвращен", width: 50, type: "text", readOnly:true, visible:false,
+        {data:"IsStateReturned", name:"Возвращен", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode in (52,62) Then 1 Else 0 END" },
-        {data: "IsStateClosedOrConfirmed", name: "Закрыт/Подтвержден", width: 50, type: "text", readOnly:true, visible:false,
+        {data:"IsStateClosedOrConfirmed", name:"Закрыт/Подтвержден", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode in (145,51,61) Then 1 Else 0 END" },
-        {data: "StateName", name: "Статус", width: 250, type: "text",
+        {data:"StateName", name:"Статус", width:250, type:"text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Exc.StateCode" },
-        {data: "StateInfo", name: "Информация статуса", width: 50, type: "text", readOnly:true, visible:false,
+        {data:"StateInfo", name:"Информация статуса", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode not in (0,52,60,62) Then 'Изменение запрещено' Else 'Изменение разрешено' END" }
     ];
-    app.get("/mobile/excFromStock/getDataForExcList", function(req,res){
+    app.get("/mobile/excFromStock/getDataForExcList",function(req,res){
         var conditions={}, top="";
         for(var condItem in req.query){
             if(condItem=="top")top="top "+req.query[condItem];
             else if(condItem&&condItem.indexOf("StockID")==0){
-                var sCond=condItem.replace("StockID","").replace("~","=")+req.query[condItem];
+                var sCond= condItem.replace("StockID","").replace("~","=")+req.query[condItem];
                 sCond=sCond.replace("=-1",">0");
                 conditions["(t_Exc.StockID"+sCond+" or t_Exc.NewStockID"+sCond+")"]=null;
             }else conditions["t_Exc."+condItem]=req.query[condItem];
         }
-        conditions["ir_EmpStockForExc.EmpID="]=req.dbUserParams["EmpID"];
+        conditions["ir_EmpStockForExc.EmpID="]= req.dbUserParams["EmpID"];
         conditions["t_Exc.StateCode in (0,50,52,60,62)"]=null;
-        r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'], conditions:{"StockID>":0}, order:"StockName"},
+        r_Stocks.getDataItems(req.dbUC,{fields:['StockID','StockName'],conditions:{"StockID>":0},order:"StockName"},
             function(result){
-                var error=(result.error)?result.error:'',listStocks=(result)?result.items:null;
-                if(listStocks)listStocks=[{StockID:-1, StockName:'Все склады'}].concat(listStocks);
-                t_Exc.getDataItemsForTable(req.dbUC,{tableColumns:tExcFromStockListTableColumns, conditions:conditions,
-                        order:"DocDate desc, DocID desc", top:top},
+                var error= (result.error)?result.error:'', listStocks= (result)?result.items:null;
+                if(listStocks) listStocks=[{StockID:-1, StockName:'Все склады'}].concat(listStocks);
+                t_Exc.getDataItemsForTable(req.dbUC,{tableColumns:tExcFromStockListTableColumns,conditions:conditions,
+                        order:"DocDate desc, DocID desc",top:top},
                     function(result){
-                        error+=(result.error)?result.error:'';
-                        var outData={listStocks:listStocks,listExcsByStockID:(result)?result.items:null};
-                        if(error!='')outData.error=error;
+                        error+= (result.error)?result.error:'';
+                        var outData= {listStocks:listStocks,listExcsByStockID:(result)?result.items:null};
+                        if(error!='') outData.error=error;
                         res.send(outData);
                     });
             });
     });
     var tExcFromStockProductsTableColumns=[
-        {data: "ChID", name: "ChID", width: 85, type: "text", dataSource:"t_ExcD", identifier:true, readOnly:true, visible:false},
-        {data: "SrcPosID", name: "№ п/п", width: 45, type: "numeric", dataSource:"t_ExcD", identifier:true },
-        {data: "ProdID", name: "Код товара", width: 50, type: "text", dataSource:"t_ExcD", visible:true},
-        {data: "Barcode", name: "Штрихкод", width: 75, type: "text", dataSource:"t_ExcD", visible:false},
-        {data: "ProdName", name: "Наименование товара", width: 350, type: "text",
+        {data:"ChID", name:"ChID", width:85, type:"text", dataSource:"t_ExcD", identifier:true, readOnly:true, visible:false},
+        {data:"SrcPosID", name:"№ п/п", width:45, type:"numeric", dataSource:"t_ExcD", identifier:true },
+        {data:"ProdID", name:"Код товара", width:50, type:"text", dataSource:"t_ExcD", visible:true},
+        {data:"Barcode", name:"Штрихкод", width:75, type:"text", dataSource:"t_ExcD", visible:false},
+        {data:"ProdName", name:"Наименование товара", width:350, type:"text",
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_ExcD.ProdID" },
-        {data: "UM", name: "Ед. изм.", width: 55, type: "text", align:"center", dataSource:"t_ExcD", sourceField:"UM"},
-        {data: "Qty", name: "Кол-во", width: 50, type: "numeric", dataSource:"t_ExcD"},
-        {data: "PPID", name: "Партия", width: 50, type: "numeric", dataSource:"t_ExcD"},
-        {data: "SecID", name: "Секция", width: 50, type: "numeric", dataSource:"t_ExcD"},
-        {data: "NewSecID", name: "Нов.секция", width: 50, type: "numeric", dataSource:"t_ExcD"},
-        {data: "NewSecName", name: "Статус товара", width: 80, type: "text", readOnly:true, visible:false,
+        {data:"UM", name:"Ед. изм.", width:55, type:"text", align:"center", dataSource:"t_ExcD", sourceField:"UM"},
+        {data:"Qty", name:"Кол-во", width:50, type:"numeric", dataSource:"t_ExcD"},
+        {data:"PPID", name:"Партия", width:50, type:"numeric", dataSource:"t_ExcD"},
+        {data:"SecID", name:"Секция", width:50, type:"numeric", dataSource:"t_ExcD"},
+        {data:"NewSecID", name:"Нов.секция", width:50, type:"numeric", dataSource:"t_ExcD"},
+        {data:"NewSecName", name:"Статус товара", width:80, type:"text", readOnly:true, visible:false,
             dataSource:"r_Secs", sourceField:"SecName", linkCondition:"r_Secs.SecID=t_ExcD.NewSecID" },
-        {data: "NewQty", name: "Нов кол-во", width: 50, type: "numeric", dataSource:"t_ExcD"},
-        {data: "PriceCC_nt", name: "Цена без НДС", width: 65, type: "numeric2", dataSource:"t_ExcD"},
-        {data: "Tax", name: "НДС Цены", width: 65, type: "numeric2", dataSource:"t_ExcD"},
-        {data: "PriceCC_wt", name: "Цена", width: 65, type: "numeric2", dataSource:"t_ExcD"},
-        {data: "SumCC_nt", name: "Сумма без НДС", width: 75, type: "numeric2", dataSource:"t_ExcD"},
-        {data: "TaxSum", name: "НДС", width: 75, type: "numeric2", dataSource:"t_ExcD"},
-        {data: "SumCC_wt", name: "Сумма", width: 75, type: "numeric2", dataSource:"t_ExcD"}
+        {data:"NewQty", name:"Нов кол-во", width:50, type:"numeric", dataSource:"t_ExcD"},
+        {data:"PriceCC_nt", name:"Цена без НДС", width:65, type:"numeric2", dataSource:"t_ExcD"},
+        {data:"Tax", name:"НДС Цены", width:65, type:"numeric2", dataSource:"t_ExcD"},
+        {data:"PriceCC_wt", name:"Цена", width:65, type:"numeric2", dataSource:"t_ExcD"},
+        {data:"SumCC_nt", name:"Сумма без НДС", width:75, type:"numeric2", dataSource:"t_ExcD"},
+        {data:"TaxSum", name:"НДС", width:75, type:"numeric2", dataSource:"t_ExcD"},
+        {data:"SumCC_wt", name:"Сумма", width:75, type:"numeric2", dataSource:"t_ExcD"}
     ];
-    app.get("/mobile/excFromStock/getDataForExcDTable", function(req,res){
+    app.get("/mobile/excFromStock/getDataForExcDTable",function(req,res){
         var conditions={};
         for(var condItem in req.query)
-            if(condItem.indexOf("ParentChID")==0) conditions["t_ExcD.ChID="]=req.query[condItem];
-            else conditions["t_ExcD."+condItem]=req.query[condItem];
-        t_ExcD.getDataItemsForTable(req.dbUC,{tableColumns:tExcFromStockProductsTableColumns, conditions:conditions, order:"SrcPosID"},
-            function(result){
-                res.send(result);
-            });
+            if(condItem.indexOf("ParentChID")==0) conditions["t_ExcD.ChID="]= req.query[condItem];
+            else conditions["t_ExcD."+condItem]= req.query[condItem];
+        t_ExcD.getDataItemsForTable(req.dbUC,{tableColumns:tExcFromStockProductsTableColumns,conditions:conditions,order:"SrcPosID"},
+            function(result){ res.send(result); });
     });
 
     /**
@@ -134,7 +132,7 @@ module.exports.init = function(app){
                         errorMessage:"Не удалось получить данные из заголовка перемещения (Склад, Курс ОВ, Валюта)!"});
                     return;
                 }
-                var excData=result.item;
+                var excData= result.item;
                 r_Stocks.getDataItem(dbUC,{fields:["PLID"],conditions:{"StockID=":excData["StockID"]}},
                     function(resultStockData){
                         if(resultStockData.error||!resultStockData.item){
@@ -295,89 +293,151 @@ module.exports.init = function(app){
         });
     };
     /**
-      * excDProdData = { ProdID, UM, Barcode, Qty }
+      * excDProdData = { Barcode, ProdID, UM, Qty }
       */
-     t_ExcD.findAndStoreProdInExcD= function(dbUC,excChID,excDProdData,qty,resultCallback){
-         if(!("ProdID" in excDProdData)&&!("SrcPosID" in excDProdData)){
-             resultCallback({error:"Failed find prod in t_ExcD!<br> No ProdID or SrcPosID!",
-                 errorMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
-             return;
-         }
-         var conditions={"ChID=":excChID}, prodID= excDProdData["ProdID"];
-         if("ProdID" in excDProdData)conditions["ProdID="]=prodID;
-         if("SrcPosID" in excDProdData)conditions["SrcPosID="]=excDProdData["SrcPosID"];
-         t_ExcD.getDataItems(dbUC,{conditions:conditions,
-                 fields:["SrcPosID","Barcode","ProdID","UM","Qty","PPID","SecID","NewSecID","NewQty",
-                     "PriceCC_nt","Tax","PriceCC_wt","SumCC_nt","TaxSum","SumCC_wt"],
-                 order:"SrcPosID desc" },
-             function(result){
-                 if(result.error){
-                     resultCallback({error:"Failed find prod in t_ExcD!<br>"+result.error.error,
-                         errorMessage:"Не удалось найти товар в перемещении!<br>"+result.error.message});
-                     return;
-                 }
-                 t_ExcD.getExcData(dbUC,excChID,function(resultGetExcData){
-                     if(resultGetExcData.error){
-                         resultCallback({error:"Failed store new position in ExcD! Reason: "+resultGetExcData.error,
-                             errorMessage:"Не удалось добавить новую позицию в перемещение! Причина: "+resultGetExcData.errorMessage});
-                         return;
-                     }
-                     var storeExcDProdDataParams= {
-                         "KursMC":resultGetExcData.resultItem["KursMC"], "PLID":resultGetExcData.resultItem["PLID"],
-                         "DocDate":resultGetExcData.resultItem["DocDate"]
-                     };
-                     var storeData=result.items[0];
-                     if(!storeData){//insert
-                         storeData=excDProdData;
-                         if(!("ProdID" in storeData)){
-                             resultCallback({error:"Failed get prod data for insert into t_ExcD!",
-                                 errorMessage:"Не удалось получить данные товара для добавления в перемещение!"});
-                             return;
-                         }
-                         storeData["Qty"]=1; storeData["NewQty"]=0; storeData["PPID"]=0;
-                         storeData["PriceCC_nt"]=0; storeData["Tax"]=0; storeData["PriceCC_wt"]=0;
-                         storeData["SumCC_nt"]=0; storeData["TaxSum"]=0; storeData["SumCC_wt"]=0;
-                         var getProdRemPPDataParams= { "DocCode":11021,
-                             "OurID":resultGetExcData.resultItem["OurID"], "StockID":resultGetExcData.resultItem["StockID"],
-                             "SecD":excDProdData["SecID"], "ProdID":prodID };
-                         t_ExcD.getProdRemPPData(dbUC,getProdRemPPDataParams,function(resultGetProdRemPPData){
-                             if(resultGetProdRemPPData.error){
-                                 resultCallback({error:"Failed store new position in ExcD! Reason: "+resultGetProdRemPPData.error,
-                                     errorMessage:"Не удалось добавить новую позицию в перемещение! Причина: "+resultGetProdRemPPData.errorMessage});
-                                 return;
-                             }
-                             excDProdData["PPID"]= resultGetProdRemPPData.resultItem["PPID"];
-                             t_ExcD.storeExcDProdData(dbUC,excChID,excDProdData,storeExcDProdDataParams, function(resultStoreExcDProdData){
-                                 resultCallback(resultStoreExcDProdData);
-                             });
-                         });
-                         return;
-                     }
-                     //update exists position Qty by SrcPosID
-                     if(qty===undefined)storeData["Qty"]++; else storeData["Qty"]=qty;
-                     t_ExcD.storeExcDProdData(dbUC,excChID,storeData, storeExcDProdDataParams, function(resultStoreExcDProdData){
-                         resultCallback(resultStoreExcDProdData);
-                     });
-                 });
-         });
-     };
-     app.post("/mobile/excFromStock/storeProdDataByCRUniInput", function(req,res){
-         var storingData=req.body, value=(storingData)?storingData["value"]:null, parentChID=storingData["parentChID"];
-         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
-             if(resultFindProd.error){
-                 res.send({error:{error:resultFindProd.error,userMessage:resultFindProd.errorMessage}});
-                 return;
-             }
-             resultFindProd.prodData["SecID"]=req.dbUserParams["t_SecID"];resultFindProd.prodData["NewSecID"]=req.dbUserParams["t_SecID"];
-             t_ExcD.findAndStoreProdInExcD(req.dbUC,parentChID,resultFindProd.prodData,storingData["Qty"],function (result){
-                 res.send(result);
-             })
-         });
-     });
-     app.post("/mobile/excFromStock/storeQtyData", function(req,res){
-         var storingData=req.body, parentChID=storingData["parentChID"],excDData={SrcPosID:storingData["SrcPosID"]};   console.log('/mobile/exc/storeNewQtyData req.body',req.body);
-         t_ExcD.findAndStoreProdInExcD(req.dbUC,parentChID,excDData,storingData["Qty"],function (result){
-             res.send(result);
-         });
-     });
+    t_ExcD.findAndStoreProdInExcD= function(dbUC,excChID,prodDataForStore,addQty,resultCallback){
+        if(!("Barcode" in prodDataForStore)&&!("SrcPosID" in prodDataForStore)){
+            resultCallback({error:"Failed find prod in t_ExcD!<br> No ProdID or SrcPosID!",
+                errorMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
+            return;
+        }
+        var conditions={"ChID=":excChID}, prodID= prodDataForStore["ProdID"];
+        if("Barcode" in prodDataForStore) conditions["Barcode="]= prodDataForStore["Barcode"];
+        if("SrcPosID" in prodDataForStore) conditions["SrcPosID="]= prodDataForStore["SrcPosID"];
+        t_ExcD.getDataItems(dbUC,{conditions:conditions,
+                fields:["SrcPosID","Barcode","ProdID","UM","Qty","PPID","SecID","NewSecID","NewQty",
+                    "PriceCC_nt","Tax","PriceCC_wt","SumCC_nt","TaxSum","SumCC_wt"],
+                order:"SrcPosID desc" },
+            function(result){
+                if(result.error){
+                    resultCallback({error:"Failed find prod in t_ExcD!<br>"+result.error.error,
+                        errorMessage:"Не удалось найти товар в перемещении!<br>"+result.error.message});
+                    return;
+                }
+                t_ExcD.getExcData(dbUC,excChID,function(resultGetExcData){
+                    if(resultGetExcData.error){
+                        resultCallback({error:"Failed get Exc data for store new position in ExcD! Reason: "+resultGetExcData.error,
+                            errorMessage:"Не удалось получить данные документа для добавления новой позиции в перемещение!"});
+                        return;
+                    }
+                    var storeExcDProdDataParams= {
+                        "KursMC":resultGetExcData.resultItem["KursMC"], "PLID":resultGetExcData.resultItem["PLID"],
+                        "DocDate":resultGetExcData.resultItem["DocDate"]
+                    };
+                    var storeData= result.items[0], prodDataQty= prodDataForStore["Qty"];
+                    if(!storeData){//insert
+                        storeData= prodDataForStore;
+                        if(!("ProdID" in storeData)){
+                            resultCallback({error:"Failed get prod data for insert into t_ExcD!",
+                                errorMessage:"Не удалось получить данные товара для добавления в перемещение!"});
+                            return;
+                        }
+                        if(prodDataQty==null) prodDataQty=0;
+                        if(addQty) prodDataQty+= parseFloat(addQty);
+                        storeData["Qty"]=prodDataQty; storeData["NewQty"]=0; storeData["PPID"]=0;
+                        storeData["PriceCC_nt"]=0; storeData["Tax"]=0; storeData["PriceCC_wt"]=0;
+                        storeData["SumCC_nt"]=0; storeData["TaxSum"]=0; storeData["SumCC_wt"]=0;
+                        var getProdRemPPDataParams= { "DocCode":11021,
+                            "OurID":resultGetExcData.resultItem["OurID"], "StockID":resultGetExcData.resultItem["StockID"],
+                            "SecD":prodDataForStore["SecID"], "ProdID":prodID };
+                        t_ExcD.getProdRemPPData(dbUC,getProdRemPPDataParams,function(resultGetProdRemPPData){
+                            if(resultGetProdRemPPData.error){
+                                resultCallback({error:"Failed store new position in ExcD! Reason: "+resultGetProdRemPPData.error,
+                                    errorMessage:"Не удалось добавить новую позицию в перемещение! Причина: "+resultGetProdRemPPData.errorMessage});
+                                return;
+                            }
+                            prodDataForStore["PPID"]= resultGetProdRemPPData.resultItem["PPID"];
+                            t_ExcD.storeExcDProdData(dbUC,excChID,prodDataForStore,storeExcDProdDataParams, function(resultStoreExcDProdData){
+                                resultCallback(resultStoreExcDProdData);
+                            });
+                        });
+                        return;
+                    }
+                    //update exists position Qty by SrcPosID
+                    if(prodDataQty!=null) storeData["Qty"]=prodDataQty;
+                    if(addQty) storeData["Qty"]+= parseFloat(addQty);
+                    t_ExcD.storeExcDProdData(dbUC,excChID,storeData, storeExcDProdDataParams, function(resultStoreExcDProdData){
+                        resultCallback(resultStoreExcDProdData);
+                    });
+                });
+            });
+    };
+    app.post("/mobile/excFromStock/storeProdDataByCRUniInput",function(req,res){
+        var storingData= req.body||{}, parentChID= storingData["parentChID"], value= storingData["value"];
+        r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
+            if(resultFindProd.error){
+                res.send({error:{error:resultFindProd.error,userMessage:resultFindProd.errorMessage}});
+                return;
+            }
+            var prodDataForStoreToExcD= {"ProdID":resultFindProd.prodData["ProdID"],"UM":resultFindProd.prodData["UM"],
+                "Barcode":resultFindProd.prodData["Barcode"],
+                "SecID":req.dbUserParams["t_SecID"],"NewSecID":req.dbUserParams["t_SecID"]
+            };
+            t_ExcD.findAndStoreProdInExcD(req.dbUC,parentChID,prodDataForStoreToExcD,storingData["addQty"],function (result){ res.send(result); })
+        });
+    });
+    app.post("/mobile/excFromStock/storeQtyData",function(req,res){
+        var storingData= req.body||{}, parentChID= storingData["parentChID"],
+            excDData= {SrcPosID:storingData["SrcPosID"],"Qty":storingData["Qty"]};
+        t_ExcD.findAndStoreProdInExcD(req.dbUC,parentChID,excDData,0,function(result){
+            res.send(result);
+        });
+    });
+    app.get("/mobile/excFromStock/findProdDataByBarcode",function(req,res){
+        var barcode= req.query["Barcode~"], docChID= req.query["docChID~"];
+        r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
+            if(!resultFindProd||resultFindProd.error){
+                var sErr="Failed find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Не удалось найти товар по штрихкоду \""+barcode+"\"!";
+                sErr+="\n"+resultFindProd.error; sErrMsg+="\n"+resultFindProd.errorMessage;
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }else if(!resultFindProd.prodData){
+                var sErr="Cannot find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Товар по штрихкоду \""+barcode+"\" не найден!";
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }
+            var prodData= resultFindProd.prodData;
+            t_ExcD.getDataItems(req.dbUC,{conditions:{"ChID=":docChID, "Barcode=":barcode},
+                    fields:["SrcPosID","Barcode","ProdID","UM","Qty","PPID","SecID","NewSecID","NewQty",
+                        "PriceCC_nt","Tax","PriceCC_wt","SumCC_nt","TaxSum","SumCC_wt"],
+                    order:"SrcPosID desc" },
+                function(resultFindProdInExcD){
+                    if(resultFindProdInExcD.error){
+                        res.send({error:"Failed find prod in t_ExcD!<br>"+resultFindProdInExcD.error.error,
+                            errorMessage:"Не удалось найти товар в перемещении!<br>"+resultFindProdInExcD.error.message});
+                        return;
+                    }                                                                                           console.log("resultFindProd",resultFindProd,resultFindProdInExcD);
+                    if(resultFindProdInExcD.items&&resultFindProdInExcD.items.length>0){
+                        var findedExcDData= resultFindProdInExcD.items[0];
+                        prodData["SrcPosID"]= findedExcDData["SrcPosID"];
+                        prodData["Qty"]= findedExcDData["Qty"];
+                    }
+                    res.send({item:prodData});
+                });
+        });
+    });
+    app.post("/mobile/excFromStock/storeProdBarcodeWithQty",function(req,res){
+        var storingData= req.body||{}, docChID= storingData["docChID"], barcode= storingData["Barcode"];
+        r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
+            if(!resultFindProd||resultFindProd.error){
+                var sErr="Failed find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Не удалось найти товар по штрихкоду \""+barcode+"\"!";
+                sErr+="\n"+resultFindProd.error; sErrMsg+="\n"+resultFindProd.errorMessage;
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }else if(!resultFindProd.prodData){
+                var sErr="Cannot find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Товар по штрихкоду \""+barcode+"\" не найден!";
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }
+            var prodData= resultFindProd.prodData,
+                prodDataForStoreToExcD= {"ProdID":prodData["ProdID"],"UM":prodData["UM"], "Barcode":barcode,
+                "Qty":storingData["Qty"], "SecID":req.dbUserParams["t_SecID"],"NewSecID":req.dbUserParams["t_SecID"]
+            };
+            t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,prodDataForStoreToExcD,0,function (result){ res.send(result); })
+        });
+    });
 };

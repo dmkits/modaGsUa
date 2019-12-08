@@ -113,7 +113,7 @@
                 if(contentTables&&contentTables[3]) this.contentTableLHeaderDomEl= contentTables[3];
                 if(contentTables&&contentTables[4]) this.contentTableLDataDomEl= contentTables[4];
                 if(contentTables&&contentTables[5]) this.contentTableLFootDomEl= contentTables[5];
-                if(this.isReadOnly()){ this.loadExcData(); return; }
+                if(this.isDocReadOnly()){ this.loadExcData(); return; }
                 var self=this;
                 $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBtnBarcodeInputEnter').on('click',function(){
                     self.barcodeInputEnter();
@@ -123,14 +123,6 @@
                     if(e.keyCode==13||e.key=='Enter') self.barcodeInputEnter();
                     e.stopPropagation();
                 });
-                if(deviceBarcodeScannerReaderAction){
-                    deviceBarcodeScannerReaderAction= function(barcode){
-                        var pageDom= $$('.view-main #pageExcFromStockProducts');
-                        if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0)return;              //alert("pageExcFromStockProducts scan:"+barcode);
-                        if(barcode) barcode= barcode.replace("\n","");
-                        self.barcodeInputEnter(barcode);
-                    }
-                }
                 this.loadExcData();
             },
             pageAfterIn: function(e,page){
@@ -138,7 +130,9 @@
                 this.keypressBuffer="";
                 document.onkeypress= function(e){
                     if(thisEl!=mainView.router.currentPageEl)return;
-                    if(app7.srvRequestJSONDialogErr)return;
+                    if(self.isDocReadOnly())return;
+                    if(app7.srvRequestJSONDialogErr)return;//if error dialog show and don't close
+                    if(self.dialogEditQty&&self.dialogEditQty.opened)return;//if show dialog edit qty
                     if(!e||e.key==null)return;
                     if(e.key=="Enter"){
                         self.barcodeInputEnter(self.keypressBuffer);
@@ -150,10 +144,72 @@
                 }
                 document.onkeydown= function(e){
                     if(thisEl!=mainView.router.currentPageEl)return;
+                    if(self.isDocReadOnly())return;
+                    if(self.dialogEditQty&&self.dialogEditQty.opened)return;//if show dialog edit qty
                     if(!e||e.key==null)return;
                     if(e.key=="Escape"){
                         self.keypressBuffer="";
                         self.pageExcFromStockProductsBarCodeInput.val(self.keypressBuffer);
+                    }else if(document.device&&document.device.barcodeScannerReaderAction&& e.keyCode==0&&!document.device.barcodeScannerStart){
+                        self.barcodeScannerStartWithEditQty= true;
+                        document.device.barcodeScannerRequestScan();
+                        document.device.barcodeScannerStart= true;
+                    }
+                }
+                document.onkeyup= function(e){
+                    if(thisEl!=mainView.router.currentPageEl)return;
+                    if(self.isDocReadOnly())return;
+                    if(self.dialogEditQty&&self.dialogEditQty.opened)return;//if show dialog edit qty
+                    if(!e||e.key==null)return;
+                    if(e.key=="Escape"){
+                        self.keypressBuffer="";
+                        self.pageExcFromStockProductsBarCodeInput.val(self.keypressBuffer);
+                    }else if(document.device&&document.device.barcodeScannerStart)
+                        document.device.barcodeScannerStart= false;
+                }
+                if(document.device&&document.device.barcodeScannerReaderAction){
+                    document.device.barcodeScannerReaderAction= function(barcode){
+                        if(thisEl!=mainView.router.currentPageEl)return;
+                        if(self.isDocReadOnly())return;
+                        if(app7.srvRequestJSONDialogErr)return;//if error dialog show and don't close
+                        if(self.dialogEditQty&&self.dialogEditQty.opened)return;//if show dialog edit qty
+                        if(barcode) barcode= barcode.replace("\n","");
+                        if(!self.barcodeScannerStartWithEditQty){
+                            self.barcodeInputEnter(barcode);
+                            return;
+                        }
+                        self.setInputProdBarcodeByState({disable:true});
+                        self.barcodeScannerStartWithEditQty= false;
+                        self.barcodeScannerStartEditQtyProcess= true;
+                        var docData=self.item, docChID= (docData)?docData["ChID"]:null;
+                        self.findProdByBarcode(barcode,docChID,function(prodData){
+                            if(!prodData){
+                                self.barcodeScannerStartEditQtyProcess= false;
+                                self.setInputProdBarcodeByState({enable:true,focus:false,val:""});
+                                return;
+                            }
+                            var srcPosID= prodData["SrcPosID"];
+                            if(srcPosID!=null){
+                                var ctTRs= self.contentTableDataDomTRs[srcPosID];
+                                for(var ctTR of ctTRs){
+                                    ctTR.doSelect();
+                                    if(ctTR.clientHeight==0||ctTR.clientWidth==0) continue;
+                                    self.setScroll(ctTR);
+                                }
+                            }
+                            var qty= prodData["Qty"];
+                            if(qty==null) qty=0;
+                            self.showDialogEditQty({"ProdName":prodData["ProdName"],"Qty":qty},
+                                    /*okAction*/function(inputValQty,actionSuccess,actionError){
+                                        self.storeBarcodeWithQtyToExc(prodData["Barcode"],inputValQty,function(excProdData){
+                                            actionSuccess();
+                                            if(excProdData) self.updContentTableData(excProdData);
+                                        });
+                                    },/*closedAction*/function(){
+                                        self.barcodeScannerStartEditQtyProcess= false;
+                                        self.setInputProdBarcodeByState({enable:true,focus:false,val:""});
+                                    });
+                        });
                     }
                 }
             },
@@ -173,24 +229,33 @@
             return {item:excData};
         },
         methods: {
-            isReadOnly: function(){
+            isDocReadOnly: function(){
                 return !this.item||( !(this.item["IsStateCreated"]||this.item["IsStateReturned"]) );
             },
             loadExcData: function(){
-                this.contentTableDataDomTRs={}; this.contentTableDataItems={}; this.contentTableTotalData={};
+                this.contentTableDataDomTRs={}; this.contentTableDataItems={}; this.contentTableDataBarcodes={};
+                this.contentTableTotalData={};
                 this.setInputProdBarcodeByState({focus:false,enable:false});
-                var excData=this.item, excChID=excData.ChID;
-                if(excChID===null||excChID===undefined)return;
+                var docData=this.item, docChID= docData["ChID"];
+                if(docChID===null||docChID===undefined)return;
                 var self=this;
                 app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/excFromStock/getDataForExcDTable',conditions:{'ParentChID=':excChID},
+                app7.srvRequestJSON({url:'/mobile/excFromStock/getDataForExcDTable',conditions:{'ParentChID=':docChID},
                             errorDialogMsg:"Не удалось получить с сервера товары перемещения со склада!"},
                         function(result,error){
                             app7.preloader.hide();
                             var resultItems= (result)?result.items:null;
                             self.contentTableData= resultItems; app7.data.pageExcFromStockProducts={contentTableData:resultItems};
                             self.contentTableDataItems=
-                                    (!resultItems)?{}:resultItems.reduce(function(result,arrItem,index,array){ result[arrItem["SrcPosID"]]= arrItem; return result; },{});
+                                    (!resultItems)?{}:resultItems.reduce(function(result,arrItem,index,array){
+                                        result[arrItem["SrcPosID"]]= arrItem; return result;
+                                    },{});
+                            self.contentTableDataBarcodes=
+                                    (!resultItems)?{}:resultItems.reduce(function(result,arrItem,index,array){
+                                        result[arrItem["Barcode"]]=
+                                                {"Barcode":arrItem["Barcode"],"ProdID":arrItem["ProdID"],"ProdName":arrItem["ProdName"],"UM":arrItem["UM"]};
+                                        return result;
+                                    },{});
                             if(!resultItems){ self.setInputProdBarcodeByState(); return; }
                             var params={ contentTableHeaderDomEl:self.contentTableHeaderDomEl, contentTableDataDomEl:self.contentTableDataDomEl,
                                 contentTable2HeaderDomEl:self.contentTableLHeaderDomEl, contentTable2DataDomEl:self.contentTableLDataDomEl,
@@ -224,7 +289,7 @@
                         pageExcFromStockProductsBtnBarcodeInputEnter= $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBtnBarcodeInputEnter'),
                         pageExcFromStockProductsStateInfo= $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsStateInfo'),
                         pageExcFromStockProductsStateName= $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsStateName');
-                if(this.isReadOnly()){
+                if(this.isDocReadOnly()){
                     pageExcFromStockProductsBarCodeInput.attr('disabled',1);
                     pageExcFromStockProductsBtnBarcodeInputEnter.attr('disabled',1);
                     pageExcFromStockProductsBarCodeInput.hide(); pageExcFromStockProductsBtnBarcodeInputEnter.hide();
@@ -251,11 +316,12 @@
                     pageExcFromStockProductsBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }
             },
-            barcodeInputEnter: function(scanBarcode){
+            barcodeInputEnter: function(scanBarcode,qty){
+                if(qty==null) qty=1;
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
                 var self=this;
-                this.storeInputValueToExc(scanBarcode || $$("#pageExcFromStockProductsToolbar #pageExcFromStockProductsBarCodeInput").val(),
+                this.storeInputValueToExc(scanBarcode || $$("#pageExcFromStockProductsToolbar #pageExcFromStockProductsBarCodeInput").val(),qty,
                         function(excProdData){
                             app7.preloader.hide();
                             if(excProdData) self.updContentTableData(excProdData);
@@ -263,9 +329,9 @@
                         });
             },
             /**
-             * callback = function(prodData,err)
+             * callback = function(excProdData)
              */
-            storeInputValueToExc: function(inputValue,callback){
+            storeInputValueToExc: function(inputValue,qty,callback){
                 if(!inputValue||inputValue.toString().trim()==''){
                     var self=this;
                     if(!this.dialogAlertNoBarcode)
@@ -276,9 +342,9 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                var parentChID=this.item["ChID"];
+                var parentChID= this.item["ChID"];
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/excFromStock/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
+                app7.srvPostRequestJSON({url:'/mobile/excFromStock/storeProdDataByCRUniInput',data:{parentChID:parentChID,value:inputValue,addQty:qty},
                             userErrorMsg:"Не удалось добавить товар в перемещение!"},
                         function(result,errmsg){
                             app7.preloader.hide();
@@ -288,7 +354,7 @@
                         });
             },
             updContentTableData: function(prodData){
-                if(!prodData) prodData={Qty:0};
+                if(!prodData) prodData={};
                 var srcPosID= prodData["SrcPosID"], ctTRs= this.contentTableDataDomTRs[srcPosID], ctDataItem= this.contentTableDataItems[srcPosID];
                 if(!ctTRs){//not exists - add new
                     ctTRs= app7.innerPageCreateTableRow(this.contentTableHeaderDomEl,this.contentTableDataDomEl,prodData,this);
@@ -299,6 +365,8 @@
                     this.contentTableData.push(prodData);
                     if(!this.contentTableDataItems) this.contentTableDataItems={};
                     this.contentTableDataItems[srcPosID]= prodData;
+                    this.contentTableDataBarcodes[prodData["Barcode"]]=
+                            {"Barcode":prodData["Barcode"],"ProdID":prodData["ProdID"],"ProdName":prodData["ProdName"],"UM":prodData["UM"]};
                     this.setTotalInfo(prodData["Qty"]);
                 }else{//exists - update exists
                     var oldQty= ctDataItem["Qty"], qty= prodData["Qty"];
@@ -313,7 +381,7 @@
                 }
             },
             contentTableTDQtyOnClick: function(e,ownerTD,contentTableDataItem,self){
-                if(this.isReadOnly())return;
+                if(this.isDocReadOnly())return;
                 var tdQty=e.target, self=this;
                 this.showDialogEditQty(contentTableDataItem,/*ok/Enter*/function(inputValQty,actionSuccess,actionError){
                     self.storeQtyToExcD(contentTableDataItem["SrcPosID"],contentTableDataItem["ProdID"],inputValQty,
@@ -329,31 +397,37 @@
                 });
             },
             /**
+             * params = { ProdName, Qty }
              * okAction = function(inputValQty,actionSuccess,actionError)
              *      actionSuccess = function(), actionError = function(errMsg)
+             * closedAction = function(dialog)
              * actionSuccess - close dialog
              * actionError - don't close dialog, show error message in dialog and focus to input
              */
-            showDialogEditQty: function(contentTableDataItem,okAction){
-                var thisInstance=this, oldQty= contentTableDataItem["Qty"],
-                    dialogEditQty= app7.dialog.create({ title:"Количество перемещения", destroyOnClose:true, text:contentTableDataItem.ProdName,
-                        content:'<span id="dialogExcDEditQtyErrMsg" style="color:red;font-weight:bold;font-size:14px;line-height:1;"></span>'+
+            showDialogEditQty: function(params,okAction,closedAction){
+                var self=this, oldQty= params["Qty"];
+                this.dialogEditQty= app7.dialog.create({ title:"Количество перемещения", destroyOnClose:true, text:params.ProdName,
+                    content:'<span id="dialogExcDEditQtyErrMsg" style="color:red;font-weight:bold;font-size:14px;line-height:1;"></span>'+
                             '<br><input id="inputExcDQty" type="number" style="text-align:center;border:solid 1px grey;padding:5px"></<input>',
-                        on:{
-                            open:function(){
-                                $$("#dialogExcDEditQtyErrMsg").html("");
-                                $$("#inputExcDQty").val(oldQty).focus(); document.getElementById("inputExcDQty").select();
-                                document.getElementById("inputExcDQty").onkeypress= function(e){
-                                    e.stopPropagation();
-                                };
-                                document.getElementById("inputExcDQty").onkeydown= function(e){
-                                    if(e.key=="Escape"||e.code=="Escape"||e.keyCode==27) dialogEditQty.close();
-                                    else if(e.key=="Enter"||e.code=="Enter"||e.keyCode==13) dialogEditQty.params.buttons[0].onClick();
-                                    e.stopPropagation();
-                                };
-                            },
+                    on:{
+                        open:function(){
+                            $$("#dialogExcDEditQtyErrMsg").html("");
+                            $$("#inputExcDQty").val(oldQty).focus(); document.getElementById("inputExcDQty").select();
+                            document.getElementById("inputExcDQty").onkeypress= function(e){
+                                e.stopPropagation();
+                            };
+                            document.getElementById("inputExcDQty").onkeydown= function(e){
+                                if(e.key=="Escape"||e.code=="Escape"||e.keyCode==27) self.dialogEditQty.close();
+                                else if(e.key=="Enter"||e.code=="Enter"||e.keyCode==13) self.dialogEditQty.params.buttons[0].onClick();
+                                e.stopPropagation();
+                            };
                         },
-                        buttons:[
+                        closed:function(){
+                            if(closedAction) closedAction(self.dialogEditQty);
+                            self.setInputProdBarcodeByState({focus:false});
+                        }
+                    },
+                    buttons:[
                             { text:"ВВОД",close:false,keyCodes:[13],onClick:function(){
                                 var inputValQty= parseFloat($$("#inputExcDQty").val());
                                 if(isNaN(inputValQty)||(inputValQty-0)<0){
@@ -361,14 +435,14 @@
                                     $$("#inputExcDQty").focus(); document.getElementById("inputExcDQty").select();
                                     return;
                                 }
-                                if(!okAction) { dialogEditQty.close(); return; }
-                                okAction(inputValQty,/*success*/function(){ dialogEditQty.close(); },/*error*/function(errMsg){
+                                if(!okAction) { self.dialogEditQty.close(); return; }
+                                okAction(inputValQty,/*success*/function(){ self.dialogEditQty.close(); },/*error*/function(errMsg){
                                     $$("#dialogExcDEditQtyErrMsg").html(errMsg);
                                     $$("#inputExcDQty").focus(); document.getElementById("inputExcDQty").select();
                                 });
                             } },
                             { text:"ОТМЕНА",close:true,keyCodes:[27] } ]
-                    }).open().on("closed",function(){ thisInstance.setInputProdBarcodeByState({focus:false}); });
+                    }).open();
             },
             storeQtyToExcD: function(srcPosID,prodID,qty,callback){
                 var parentChID= this.item["ChID"];
@@ -381,6 +455,43 @@
                         var excDData= result.resultItem;
                         callback(excDData);
                     })
+            },
+            findProdByBarcode: function(barcode,docChid,callback){
+                if(!barcode||barcode.toString().trim()=='')return;
+                app7.preloader.show();
+                app7.srvRequestJSON({url:'/mobile/excFromStock/findProdDataByBarcode',conditions:{"docChID=":docChid,"Barcode=":barcode},
+                            userErrorMsg:"Не удалось найти товар по штрихкоду!"},
+                        function(result,errmsg){
+                            app7.preloader.hide();
+                            if(!result||!result.item){ callback(null); return; }
+                            var prodData=result.item;
+                            callback(prodData);
+                        });
+            },
+            /**
+             * callback = function(excProdData)
+             */
+            storeBarcodeWithQtyToExc: function(barcode,qty,callback){
+                if(!barcode||barcode.toString().trim()==''){
+                    var self=this;
+                    if(!this.dialogAlertNoBarcode)
+                        this.dialogAlertNoBarcode=
+                                app7.dialog.alert("Не удалось считать штрихкод или код товара!","Внимание",
+                                        function(){ self.dialogAlertNoBarcode=null; callback(null); });
+                    else
+                        this.dialogAlertNoBarcode.open();
+                    return;
+                }
+                var docChID= (this.item)?this.item["ChID"]:null;
+                app7.preloader.show();
+                app7.srvPostRequestJSON({url:'/mobile/excFromStock/storeProdBarcodeWithQty',data:{docChID:docChID,Barcode:barcode,Qty:qty},
+                            userErrorMsg:"Не удалось добавить товар по штрихкоду в перемещение!"},
+                        function(result,errmsg){
+                            app7.preloader.hide();
+                            if(!result||!result.resultItem){ callback(null); return; }
+                            var excProdData=result.resultItem;
+                            callback(excProdData);
+                        });
             },
             setScroll: function(innerElem){
                 var page= this.pageExcFromStockProductsContent[0],
