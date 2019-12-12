@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-    <div id="pageExcFromStockProducts" class="page page-with-subnavbar" tabindex="1">
+    <div id="pageDocExcFromStockProdsData" class="page page-with-subnavbar" tabindex="1">
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="left">
@@ -12,21 +12,21 @@
                 <div class="title docHeaderTitle">
                     <span>Перемещение со склада<br>{{item.DocID}} от {{item.SDocDate}}</span><br>
                 </div>
-                <div class="subnavbar docHeaderTitle" id="pageExcFromStockProductsToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
+                <div class="subnavbar docHeaderTitle" id="pageDocExcFromStockProdsDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
                     <div class="subnavbar-inner">
                         <div class="row" style="padding-left:16px;padding-right:16px;">
-                            <input type="number" class="col" style="height:36px;min-width:200px;" id="pageExcFromStockProductsBarCodeInput" placeholder="ШК или код товара">
-                            <button class="col button button-outline button-round" id="pageExcFromStockProductsBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>
+                            <input type="number" class="col" style="height:36px;min-width:200px;" id="pageDocExcFromStockProdsDataBarCodeInput" placeholder="ШК или код товара">
+                            <button class="col button button-outline button-round" id="pageDocExcFromStockProdsDataBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>
                             <div>
-                                <span id="pageExcFromStockProductsStateInfo" style="color:black;font-weight:bold;display:none"></span><br>
-                                <span id="pageExcFromStockProductsStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
+                                <span id="pageDocExcFromStockProdsDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>
+                                <span id="pageDocExcFromStockProdsDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="page-content" id="pageExcFromStockProductsContent" style="padding-left:1px;padding-right:1px;padding-bottom:1px;">
+        <div class="page-content" id="pageDocExcFromStockProdsDataContent" style="padding-left:1px;padding-right:1px;padding-bottom:1px;">
             <table class="mobile-table-small-size" height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
                 <thead>
                 <tr>
@@ -104,9 +104,9 @@
     return {
         on: {
             pageInit: function(e,page){
-                this.pageExcFromStockProductsContent= $$(this.el).children("#pageExcFromStockProductsContent");
-                if(!this.pageExcFromStockProductsContent){ this.setInputProdBarcodeByState(); return; };
-                var contentTables= this.pageExcFromStockProductsContent.children("table");
+                this.pageDocExcFromStockProdsDataContent= $$(this.el).children("#pageDocExcFromStockProdsDataContent");
+                if(!this.pageDocExcFromStockProdsDataContent){ this.setInputProdBarcodeByState(); return; };
+                var contentTables= this.pageDocExcFromStockProdsDataContent.children("table");
                 if(contentTables&&contentTables[0]) this.contentTableHeaderDomEl= contentTables[0];
                 if(contentTables&&contentTables[1]) this.contentTableDataDomEl= contentTables[1];
                 if(contentTables&&contentTables[2]) this.contentTableFootDomEl= contentTables[2];
@@ -115,11 +115,11 @@
                 if(contentTables&&contentTables[5]) this.contentTableLFootDomEl= contentTables[5];
                 if(this.isDocReadOnly()){ this.loadExcData(); return; }
                 var self=this;
-                $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBtnBarcodeInputEnter').on('click',function(){
+                $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBtnBarcodeInputEnter').on('click',function(){
                     self.barcodeInputEnter();
                 });
-                this.pageExcFromStockProductsBarCodeInput= $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBarCodeInput');
-                this.pageExcFromStockProductsBarCodeInput.on('keypress',function(e){
+                this.pageDocExcFromStockProdsDataBarCodeInput= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBarCodeInput');
+                this.pageDocExcFromStockProdsDataBarCodeInput.on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter') self.barcodeInputEnter();
                     e.stopPropagation();
                 });
@@ -139,7 +139,7 @@
                         self.keypressBuffer="";
                     }else {
                         if(e.key.length==1) self.keypressBuffer+=e.key;
-                        self.pageExcFromStockProductsBarCodeInput.val(self.keypressBuffer);
+                        self.pageDocExcFromStockProdsDataBarCodeInput.val(self.keypressBuffer);
                     }
                 }
                 document.onkeydown= function(e){
@@ -149,9 +149,9 @@
                     if(!e||e.key==null)return;
                     if(e.key=="Escape"){
                         self.keypressBuffer="";
-                        self.pageExcFromStockProductsBarCodeInput.val(self.keypressBuffer);
-                    }else if(document.device&&document.device.barcodeScannerReaderAction&& e.keyCode==0&&!document.device.barcodeScannerStart){
-                        self.barcodeScannerStartWithEditQty= true;
+                        self.pageDocExcFromStockProdsDataBarCodeInput.val(self.keypressBuffer);
+                    }else if(document.device&&document.device.barcodeScannerReaderAction&&e.keyCode==0&&!document.device.barcodeScannerStart){
+                        self.barcodeScannerWithEditQtyStart= true;
                         document.device.barcodeScannerRequestScan();
                         document.device.barcodeScannerStart= true;
                     }
@@ -163,7 +163,7 @@
                     if(!e||e.key==null)return;
                     if(e.key=="Escape"){
                         self.keypressBuffer="";
-                        self.pageExcFromStockProductsBarCodeInput.val(self.keypressBuffer);
+                        self.pageDocExcFromStockProdsDataBarCodeInput.val(self.keypressBuffer);
                     }else if(document.device&&document.device.barcodeScannerStart)
                         document.device.barcodeScannerStart= false;
                 }
@@ -173,18 +173,19 @@
                         if(self.isDocReadOnly())return;
                         if(app7.srvRequestJSONDialogErr)return;//if error dialog show and don't close
                         if(self.dialogEditQty&&self.dialogEditQty.opened)return;//if show dialog edit qty
+                        if(self.barcodeScannerWithEditQtyProcess)return;
                         if(barcode) barcode= barcode.replace("\n","");
-                        if(!self.barcodeScannerStartWithEditQty){
+                        if(!self.barcodeScannerWithEditQtyStart){
                             self.barcodeInputEnter(barcode);
                             return;
                         }
                         self.setInputProdBarcodeByState({disable:true});
-                        self.barcodeScannerStartWithEditQty= false;
-                        self.barcodeScannerStartEditQtyProcess= true;
+                        self.barcodeScannerWithEditQtyStart= false;
+                        self.barcodeScannerWithEditQtyProcess= true;
                         var docData=self.item, docChID= (docData)?docData["ChID"]:null;
                         self.findProdByBarcode(barcode,docChID,function(prodData){
                             if(!prodData){
-                                self.barcodeScannerStartEditQtyProcess= false;
+                                self.barcodeScannerWithEditQtyProcess= false;
                                 self.setInputProdBarcodeByState({enable:true,focus:false,val:""});
                                 return;
                             }
@@ -192,7 +193,7 @@
                             if(srcPosID!=null){
                                 var ctTRs= self.contentTableDataDomTRs[srcPosID];
                                 for(var ctTR of ctTRs){
-                                    ctTR.doSelect();
+                                    if(ctTR.doSelect) ctTR.doSelect();
                                     if(ctTR.clientHeight==0||ctTR.clientWidth==0) continue;
                                     self.setScroll(ctTR);
                                 }
@@ -206,7 +207,7 @@
                                             if(excProdData) self.updContentTableData(excProdData);
                                         });
                                     },/*closedAction*/function(){
-                                        self.barcodeScannerStartEditQtyProcess= false;
+                                        self.barcodeScannerWithEditQtyProcess= false;
                                         self.setInputProdBarcodeByState({enable:true,focus:false,val:""});
                                     });
                         });
@@ -218,7 +219,7 @@
             }
         },
         data: function(){
-            var excData={},listExcs= this.$app.data.pageExcFromStockList.listExcs;
+            var excData={},listExcs= this.$app.data.pageDocExcFromStockDocsList.listDocs;
             if(!this.$route.params)return {};
             var excChID= this.$route.params.excChID;
             if(!listExcs||excChID===null||excChID===undefined)return {};
@@ -245,7 +246,7 @@
                         function(result,error){
                             app7.preloader.hide();
                             var resultItems= (result)?result.items:null;
-                            self.contentTableData= resultItems; app7.data.pageExcFromStockProducts={contentTableData:resultItems};
+                            self.contentTableData= resultItems; app7.data.pageDocExcFromStockProdsData= {contentTableData:resultItems};
                             self.contentTableDataItems=
                                     (!resultItems)?{}:resultItems.reduce(function(result,arrItem,index,array){
                                         result[arrItem["SrcPosID"]]= arrItem; return result;
@@ -285,35 +286,32 @@
              * opts = { enable, disable, focus, val }
              */
             setInputProdBarcodeByState: function(opts){
-                var pageExcFromStockProductsBarCodeInput= $$("#pageExcFromStockProductsToolbar #pageExcFromStockProductsBarCodeInput"),
-                        pageExcFromStockProductsBtnBarcodeInputEnter= $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsBtnBarcodeInputEnter'),
-                        pageExcFromStockProductsStateInfo= $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsStateInfo'),
-                        pageExcFromStockProductsStateName= $$('#pageExcFromStockProductsToolbar #pageExcFromStockProductsStateName');
+                var barcodeInput= $$("#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBarCodeInput"),
+                        btnBarcodeInputEnter= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBtnBarcodeInputEnter'),
+                        stateInfo= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataStateInfo'),
+                        stateName= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataStateName');
                 if(this.isDocReadOnly()){
-                    pageExcFromStockProductsBarCodeInput.attr('disabled',1);
-                    pageExcFromStockProductsBtnBarcodeInputEnter.attr('disabled',1);
-                    pageExcFromStockProductsBarCodeInput.hide(); pageExcFromStockProductsBtnBarcodeInputEnter.hide();
-                    pageExcFromStockProductsStateInfo.show(); pageExcFromStockProductsStateInfo.text(this.item["StateInfo"]);
-                    pageExcFromStockProductsStateName.show(); pageExcFromStockProductsStateName.text("("+this.item["StateName"]+")");
+                    barcodeInput.attr('disabled',1); btnBarcodeInputEnter.attr('disabled',1);
+                    barcodeInput.hide(); btnBarcodeInputEnter.hide();
+                    stateInfo.show(); stateInfo.text(this.item["StateInfo"]);
+                    stateName.show(); stateName.text("("+this.item["StateName"]+")");
                     return
                 }
                 if(!opts)return;
-                pageExcFromStockProductsBarCodeInput.show(); pageExcFromStockProductsBtnBarcodeInputEnter.show();
-                pageExcFromStockProductsStateInfo.hide(); pageExcFromStockProductsStateName.hide();
+                barcodeInput.show(); btnBarcodeInputEnter.show();
+                stateInfo.hide(); stateName.hide();
                 if(opts.val!==undefined){
-                    pageExcFromStockProductsBarCodeInput.val(opts.val);
+                    barcodeInput.val(opts.val);
                     this.keypressBuffer= opts.val;
                 }
                 if(opts.enable==true||opts.disable==false){
-                    pageExcFromStockProductsBarCodeInput.removeAttr('disabled');
-                    pageExcFromStockProductsBtnBarcodeInputEnter.removeAttr('disabled');
-                    if(opts.focus==true) pageExcFromStockProductsBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
+                    barcodeInput.removeAttr('disabled'); btnBarcodeInputEnter.removeAttr('disabled');
+                    if(opts.focus==true) barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }else if(opts.disable==true||opts.enable==false){
-                    if(opts.focus==true) pageExcFromStockProductsBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
-                    pageExcFromStockProductsBarCodeInput.attr('disabled',1);
-                    pageExcFromStockProductsBtnBarcodeInputEnter.attr('disabled',1);
+                    if(opts.focus==true) barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
+                    barcodeInput.attr('disabled',1); btnBarcodeInputEnter.attr('disabled',1);
                 }else if(opts.focus==true){
-                    pageExcFromStockProductsBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
+                    barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }
             },
             barcodeInputEnter: function(scanBarcode,qty){
@@ -321,7 +319,7 @@
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
                 var self=this;
-                this.storeInputValueToExc(scanBarcode || $$("#pageExcFromStockProductsToolbar #pageExcFromStockProductsBarCodeInput").val(),qty,
+                this.storeInputValueToExc(scanBarcode || $$("#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBarCodeInput").val(),qty,
                         function(excProdData){
                             app7.preloader.hide();
                             if(excProdData) self.updContentTableData(excProdData);
@@ -342,9 +340,10 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                var parentChID= this.item["ChID"];
+                var docChID= this.item["ChID"];
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/excFromStock/storeProdDataByCRUniInput',data:{parentChID:parentChID,value:inputValue,addQty:qty},
+                app7.srvPostRequestJSON({url:'/mobile/excFromStock/storeProdDataByCRUniInput',
+                            data:{docChID:docChID,value:inputValue,addQty:qty},
                             userErrorMsg:"Не удалось добавить товар в перемещение!"},
                         function(result,errmsg){
                             app7.preloader.hide();
@@ -375,7 +374,7 @@
                 }
                 for(var ctTR of ctTRs){
                     $$(ctTR).find("td[dataItemName=Qty] div").text(qty);
-                    ctTR.doSelect();
+                    if(ctTR.doSelect) ctTR.doSelect();
                     if(ctTR.clientHeight==0||ctTR.clientWidth==0) continue;
                     this.setScroll(ctTR);
                 }
@@ -445,9 +444,9 @@
                     }).open();
             },
             storeQtyToExcD: function(srcPosID,prodID,qty,callback){
-                var parentChID= this.item["ChID"];
+                var docChID= this.item["ChID"];
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/excFromStock/storeQtyData',data:{parentChID:parentChID,SrcPosID:srcPosID,Qty:qty},
+                app7.srvPostRequestJSON({url:'/mobile/excFromStock/storeQtyData',data:{docChID:docChID,SrcPosID:srcPosID,Qty:qty},
                             showRequestErrorDialog:false},
                     function(result,errmsg){
                         app7.preloader.hide();// Hide Preloader
@@ -456,10 +455,10 @@
                         callback(excDData);
                     })
             },
-            findProdByBarcode: function(barcode,docChid,callback){
+            findProdByBarcode: function(barcode,docChID,callback){
                 if(!barcode||barcode.toString().trim()=='')return;
                 app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/excFromStock/findProdDataByBarcode',conditions:{"docChID=":docChid,"Barcode=":barcode},
+                app7.srvRequestJSON({url:'/mobile/excFromStock/findProdDataByBarcode',conditions:{"docChID=":docChID,"Barcode=":barcode},
                             userErrorMsg:"Не удалось найти товар по штрихкоду!"},
                         function(result,errmsg){
                             app7.preloader.hide();
@@ -494,7 +493,7 @@
                         });
             },
             setScroll: function(innerElem){
-                var page= this.pageExcFromStockProductsContent[0],
+                var page= this.pageDocExcFromStockProdsDataContent[0],
                         absoluteElementTop= innerElem.getBoundingClientRect().top + page.scrollTop;
                 page.scrollTop= absoluteElementTop - (page.clientHeight / 2);
             }

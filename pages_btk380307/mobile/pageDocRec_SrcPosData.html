@@ -54,7 +54,7 @@
 <script>
     return {
         on: {
-            pageInit: function(e, page) {                                                               //console.log('pageRecData.html pageInit', page, this);
+            pageInit: function(e, page) {                                                               //console.log('pageDocRec_ProdsData.html pageInit', page, this);
                 var fruits=["123","2345","34567","4567890","56789","6789","789","89","9","0"]
                 var autocompleteStandaloneSimple = app7.autocomplete.create({
                     openIn: 'page', //open in page
@@ -108,15 +108,15 @@
 
                 // app7.swipeout.open($$("#asd123456"), "left", function(){})
             },
-            // pageAfterIn: function(e, page) {                                                            //console.log('pageRecData.html pageAfterIn', page);
+            // pageAfterIn: function(e, page) {                                                            //console.log('pageDocRec_ProdsData.html pageAfterIn', page);
             //     $$("#barCodeInput").focus();
             // },
-            pageAfterOut: function(e, page) {                                                           //console.log('pageRecData.html pageAfterOut', page);
+            pageAfterOut: function(e, page) {                                                           //console.log('pageDocRec_ProdsData.html pageAfterOut', page);
                 if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl);
             },
         },
-        data: function data() {                                                                         //console.log('pageRecData.html data',this.$route.params);
-            let recData={},listRecsData=this.$app.data.pageListRecs.listRecs;
+        data: function data() {                                                                         //console.log('pageDocRec_ProdsData.html data',this.$route.params);
+            let recData={},listRecsData=this.$app.data.pageRecList.listRecs;
             if(!this.$route.params) return {doc:recData,item:{}};
             let recChID=this.$route.params.recChID;
             if(!listRecsData||recChID===null||recChID===undefined) return {doc:recData,item:{}};
@@ -189,7 +189,7 @@
                 //         if(!result){
                 //             cInstance.disableInputProdBarcode(true); return;
                 //         }
-                //         app.data.pageRecData={inventDataItems:result.items};                          console.log('pageRecData.html loadRecData items=',result.items);
+                //         app.data.pageRecData={inventDataItems:result.items};                          console.log('pageDocRec_ProdsData.html loadRecData items=',result.items);
                 //         cInstance.$setState({
                 //             item:recData,items:result.items
                 //         });
@@ -304,7 +304,7 @@
                 }
                 let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageRecData.html storeInputValueToInvent inputValue=',inputValue, this);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/Invent/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
+                app7.srvPostRequestJSON({url:'/mobile/docRec/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
                         userErrorMsg:"Не удалось добавить товар в инвентаризацию!"},
                     function(result,errmsg){
                         app7.preloader.hide();// Hide Preloader
@@ -318,7 +318,7 @@
             storeExistsToInvent:function(tSrcPosID,prodID,tNewQty,callback){
                 let cInstance=this, parentChID=this.item.ChID;                                          console.log('pageRecData.html storeExistsToInvent tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/Invent/storeExistsPosProdData',
+                app7.srvPostRequestJSON({url:'/mobile/docRec/storeExistsPosProdData',
                         data:{parentChID:parentChID,TSrcPosID:tSrcPosID,TNewQty:tNewQty},
                         userErrorMsg:"Не удалось сохранить данные на сервере!",showRequestErrorDialog:false},
                     function(result,errmsg){

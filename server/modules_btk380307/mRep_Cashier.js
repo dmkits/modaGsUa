@@ -1,24 +1,25 @@
-var dataModel=require(appDataModelPath),
-    dateFormat = require('dateformat');
+var dataModel=require(appDataModelPath);
 var t_Sale= require(appDataModelPath+"t_Sale"), t_SaleD= require(appDataModelPath+"t_SaleD"),
     querySalesCRRets=require(appDataModelPath+"querySalesCRRets"),
-    r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
+    r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"), r_CRs= require(appDataModelPath+"r_CRs"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_States= require(appDataModelPath+"r_States"),
     r_Prods=require(appDataModelPath+"r_Prods");
 
-module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([t_Sale,t_SaleD,querySalesCRRets,r_Ours,r_Stocks,r_Comps,r_States,r_Prods], errs,
-        function(){
-            nextValidateModuleCallback();
-        });
+module.exports.validateModule= function(errs,nextValidateModuleCallback){
+    dataModel.initValidateDataModels([t_Sale,t_SaleD,querySalesCRRets,r_Ours,r_Stocks,r_CRs,r_Comps,r_States,r_Prods], errs,
+        function(){ nextValidateModuleCallback(); });
 };
 
-module.exports.moduleViewURL= "/mobile/pageReportsCashier";
-module.exports.moduleViewPath= "mobile/pageReportsCashier.html";
 module.exports.routes=[//-- App routes --
-    { path:'/pageReportsCashier', componentUrl:'/mobile/pageReportsCashier', options:{clearPreviousHistory:true,ignoreCache:true}, define:true }
+    { path:'/pageRepCashier', componentUrl:'/mobile/pageRepCashier', options:{clearPreviousHistory:true,ignoreCache:true}, define:true }
 ];
+module.exports.moduleViewURL= "/mobile/pageRepCashier";
+module.exports.moduleViewPath= "mobile/pageRepCashier.html";
 module.exports.init = function(app){
+    if(!r_CRs.getDirCRsForReportsSalesSelect) throw new Error('NO r_CRs.getDirCRsForReportsSalesSelect!');
+    app.get("/reports/repCashier/getDirCRsForSelect",function(req,res){
+        r_CRs.getDirCRsForReportsSalesSelect(req.dbUC,req.dbUserParams,req.dbEmpRole,req.isMobile,function(result){ res.send(result); });
+    });
     //var tSalesForCashierTableColumns=[
     //    {data:"ChID", name:"ChID", width:85, type:"text", dataSource:"t_Sale", identifier:true, readOnly:true, visible:false},
     //    {data:"DocID", name:"Номер", width:85, type:"text", align:"right", dataSource:"t_Sale"},
@@ -71,7 +72,7 @@ module.exports.init = function(app){
         {data:"RealSum", name:"Сумма", width:75, type:"numeric2", dataSource:"querySalesCRRets"},
         {data:"DiscountP", name:"Скидка", width:65, type:"numeric",dataFunction:"Round((1-RealPrice/PurPriceCC_wt)*100,0)" }
     ];
-    app.get("/mobile/reports/getSalesCRRetsForCashier", function(req, res){
+    app.get("/mobile/repCashier/getSalesCRRetsForCashier",function(req,res){
         var conditions={}, queryParams={};
         for(var condItem in req.query){
             if(condItem.indexOf("@")==0) queryParams[condItem]= req.query[condItem];

@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-    <div class="page page-with-subnavbar" id="pageExcDeliveryList">
+    <div class="page page-with-subnavbar" id="pageDocExcDeliveryList">
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="left">
@@ -14,20 +14,19 @@
                         <div class="list" style="width:100%">
                             <ul>
                                 <li>
-                                    <a href="#" id="pageExcDeliveryList-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageExcDeliveryListStockClose">
+                                    <a href="#" id="pageDocExcDeliveryList-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageExcDeliveryListStockClose">
                                         <div class="item-content" style="font-size:16px">
                                             <div class="item-inner">
                                                 <div class="item-title" style="font-weight:bold">Склад</div>
-                                                <div id="pageExcDeliveryList-stock-label" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
+                                                <div id="pageDocExcDeliveryList-stockLabel" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
                                             </div>
                                         </div>
-                                        <select id="pageExcDeliveryList-stock-select">
+                                        <select id="pageDocExcDeliveryList-stockSelect">
                                             {{#each listStocks}}
                                             <option value={{StockID}}>{{StockName}}</option>
                                             {{/each}}
                                         </select>
                                     </a>
-
                                 </li>
                             </ul>
                         </div>
@@ -42,9 +41,9 @@
             </div>
             <div class="list media-list" style="margin:0">
                 <ul>
-                    {{#each listExcs}}
+                    {{#each listDocs}}
                     <li>
-                        <a class="item-link item-content" href="/pageExcDeliveryProducts/{{ChID}}"
+                        <a class="item-link item-content" href="/pageDocExcDeliveryProdsData/{{ChID}}"
                            style="background-color:lightgrey;background-color:{{#if IsStateCreated}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                             <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                                 <div class="item-title-row" style="padding-right:16px">
@@ -72,23 +71,23 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e,page){                                                                      //console.log("app7.data.pageExcDeliveryList",app7.data.pageExcDeliveryList);
+            pageAfterIn: function(e,page){
                 var self=this;
-                $$('#pageExcDeliveryList .ptr-content').on('ptr:refresh',function(e){
+                $$('#pageDocExcDeliveryList .ptr-content').on('ptr:refresh',function(e){
                     setTimeout(function(){
                         self.loadExcDeliveryList();
                         app7.ptr.done(); // or e.detail();
                     },1000);
                 });
-                if(app7.data.pageExcDeliveryList){
-                    this.stockIDFilter=app7.data.pageExcDeliveryList.stockIDFilter;
-                    this.stockNameFilter=app7.data.pageExcDeliveryList.stockNameFilter;
-                    if(this.stockIDFilter!==undefined) $$('#pageExcDeliveryList-stock-select').val(this.stockIDFilter);
-                    if(this.stockNameFilter) $$('#pageExcDeliveryList-stock').find("#pageExcDeliveryList-stock-label").text(this.stockNameFilter);
+                if(app7.data.pageDocExcDeliveryList){
+                    this.stockIDFilter= app7.data.pageDocExcDeliveryList.stockIDFilter;
+                    this.stockNameFilter= app7.data.pageDocExcDeliveryList.stockNameFilter;
+                    if(this.stockIDFilter!==undefined) $$('#pageDocExcDeliveryList-stockSelect').val(this.stockIDFilter);
+                    if(this.stockNameFilter) $$('#pageDocExcDeliveryList-stock').find("#pageDocExcDeliveryList-stockLabel").text(this.stockNameFilter);
                     this.$setState({
-                        listStocks:app7.data.pageExcDeliveryList.listStocks,
+                        listStocks:app7.data.pageDocExcDeliveryList.listStocks,
                         stockIDFilter:this.stockIDFilter, stockNameFilter:this.stockNameFilter,
-                        listExcs:app7.data.pageExcDeliveryList.listExcs
+                        listDocs:app7.data.pageDocExcDeliveryList.listDocs
                     });
                     return;
                 }
@@ -99,32 +98,31 @@
         },
         methods:{
             loadExcDeliveryList: function(){
-                let cInstance=this,
-                    stockIDFilter=this.stockIDFilter,stockNameFilter=this.stockNameFilter;
+                var stockIDFilter= this.stockIDFilter, stockNameFilter=this.stockNameFilter, self=this;
                 app7.preloader.show();
-                var conditions={top:app7.data['excDeliveryListDocCount']};
-                if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
+                var conditions= {top:app7.data['docExcDeliveryDocsListCount']};
+                if(stockIDFilter=='') conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
                 app7.srvRequestJSON({url:'/mobile/excDelivery/getDataForExcList',conditions:conditions,
                         errorDialogMsg:"Не удалось получить список перемещений товара на доставку с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
                         if(!result)return;
-                        app7.data.pageExcDeliveryList={
+                        app7.data.pageDocExcDeliveryList={
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
-                            listExcs:result.listExcsByStockID
-                        };                                                                                  //console.log('pageExcDeliveryList.html pageAfterIn app.data.pageExcDeliveryList 2=',app.data.pageExcDeliveryList);
-                        cInstance.$setState({
+                            listDocs:result.listExcsByStockID
+                        };
+                        self.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
-                            listExcs:result.listExcsByStockID
+                            listDocs:result.listExcsByStockID
                         });
                     })
             },
             pageExcDeliveryListStockClose: function(e){
-                this.stockIDFilter=$$('#pageExcDeliveryList-stock-select').val();
-                this.stockNameFilter=$$('#pageExcDeliveryList-stock-label').text();
-                app7.data.pageExcDeliveryList=null;
+                this.stockIDFilter= $$('#pageDocExcDeliveryList-stockSelect').val();
+                this.stockNameFilter= $$('#pageDocExcDeliveryList-stockLabel').text();
+                app7.data.pageDocExcDeliveryList=null;
             }
         }
     }

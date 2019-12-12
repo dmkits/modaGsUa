@@ -211,11 +211,11 @@
                     absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
                 page.scrollTop= absoluteElementTop - (page.clientHeight / 2);//page.scrollTo(1, absoluteElementTop - (page.clientHeight / 2));-fail in mobileApp
             },
-            loadExcData: function(){                                                                            //console.log('pageExcDeliveryProducts.html loadExcData excData=',this.item);
+            loadExcData: function(){                                                                            //console.log('pageDocExcDelivery_ProdsData.html loadExcData excData=',this.item);
                 this.setInputProdBarcodeByState({focus:true,enable:false});
                 let excData=this.item, excChID=excData.ChID;
                 if(excChID===null||excChID===undefined) return;
-                let self=this;                                                                                  //console.log('pageExcDeliveryProducts.html loadExcData excChID=',excChID, this);
+                let self=this;                                                                                  //console.log('pageDocExcDelivery_ProdsData.html loadExcData excChID=',excChID, this);
                 app7.preloader.show();
                 app7.srvRequestJSON({url:'/mobile/excDelivery/getDataForExcDTable',conditions:{'ParentChID=':excChID},
                         errorDialogMsg:"Не удалось получить товары перемещения на доставку с сервера!"},
@@ -224,7 +224,7 @@
                         let resultItems=(result)?result.items:null;
                         self.items=resultItems;
                         if(!resultItems){ self.setInputProdBarcodeByState(); return; }
-                        app7.data.pageExcDeliveryProducts={inventDataItems:resultItems};                                    //console.log('pageExcDeliveryProducts.html loadExcData resultItems=',resultItems);
+                        app7.data.pageExcDeliveryProducts={inventDataItems:resultItems};                                    //console.log('pageDocExcDelivery_ProdsData.html loadExcData resultItems=',resultItems);
                         var params={ dataTableHeader:self.dataTableHeader, dataTableBody:self.dataTableBody,
                             progressAction:function(tableData, ind,tableDataItem){
                                 if(!tableDataItem){ self.setTotalInfo(0,0); return; }
@@ -338,7 +338,7 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageExcDeliveryProducts.html storeInputValueToExc inputValue=',inputValue, this);
+                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageDocExcDelivery_ProdsData.html storeInputValueToExc inputValue=',inputValue, this);
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/excDelivery/storeProdDataByCRUniInput',data:{value:inputValue,parentChID:parentChID},
                         userErrorMsg:"Не удалось добавить товар в перемещение!"},
@@ -350,7 +350,7 @@
                     })
             },
             storeNewQtyToExcD: function(srcPosID,prodID,newQty,callback){
-                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageExcDeliveryProducts.html storeNewQtyToExcD tSrcPosID=',tSrcPosID, tNewQty);
+                let cInstance=this, parentChID=this.item.ChID;                                                  //console.log('pageDocExcDelivery_ProdsData.html storeNewQtyToExcD tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/excDelivery/storeNewQtyData',data:{parentChID:parentChID,SrcPosID:srcPosID,NewQty:newQty},
                             showRequestErrorDialog:false},

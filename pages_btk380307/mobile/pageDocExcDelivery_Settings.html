@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-    <div class="page" id="pageExcFromStockSettings">
+    <div class="page" id="pageDocExcDeliverySettings">
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="left">
@@ -20,14 +20,14 @@
                         <div class="item-inner">
                             <div class="item-title item-label">Кол-во документов в списке</div>
                             <div class="item-input-wrap">
-                                <input id="pageExcFromStock-input" type="text" placeholder="Кол-во документов в списке">
+                                <input id="pageDocExcDeliverySettings-input" type="text" placeholder="Кол-во документов в списке">
                             </div>
                         </div>
                     </li>
                 </ul>
                 <div class="row" style="margin-top:10px">
                     <div class="col" style="width:0px"></div>
-                    <button id="pageExcFromStock-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
+                    <button class="col button button-fill button-round" style="width:200px" @click="btnStoreDocExcDeliverySettingsClick">СОХРАНИТЬ</button>
                     <div class="col" style="width:0px"></div>
                 </div>
             </div>
@@ -38,18 +38,18 @@
     return {
         on: {
             pageAfterIn: function(e,page){
-                $$("#pageExcFromStock-input").val(this.$app.data['excFromStockListDocCount']);
+                $$("#pageDocExcDeliverySettings-input").val(app7.data['docExcDeliveryDocsListCount']);
             }
         },
         methods: {
-            buttonStoreClick: function(){
-                let excFromStockListDocCount=$$("#pageExcFromStock-input").val();
-                if (typeof(Storage)!=="undefined"&&excFromStockListDocCount&&excFromStockListDocCount.toString().trim()!="") {
-                    localStorage.setItem("settings-excFromStock-listDocCount",excFromStockListDocCount);
+            btnStoreDocExcDeliverySettingsClick: function(){
+                let pageExcDeliveryDocsListCount= $$("#pageDocExcDeliverySettings-input").val();
+                if(typeof(Storage)!=="undefined"&&pageExcDeliveryDocsListCount&&pageExcDeliveryDocsListCount.toString().trim()!=""){
+                    localStorage.setItem("docExcDeliverySettings-docsListCount",pageExcDeliveryDocsListCount);
                 } else {// Sorry! No Web Storage support..
                 }
-                this.$app.data['excFromStockListDocCount']=excFromStockListDocCount;
-                app7.data.pageExcFromStockList=null;
+                app7.data['docExcDeliveryDocsListCount']= pageExcDeliveryDocsListCount;
+                app7.data.pageDocExcDeliveryList=null;
             }
         }
     }

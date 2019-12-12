@@ -17,9 +17,9 @@ module.exports.validateModule = function(errs, nextValidateModuleCallback){
 module.exports.moduleViewURL = "/reports/products";
 module.exports.moduleViewPath = "reports/dir_products.html";
 module.exports.init = function(app){
-    app.get("/reports/products/getDirCRsForSelect", function(req, res){
-        var empID=req.dbUserParams["EmpID"];
-        r_CRs.getDataItemsForSelect(req.dbUC,
+    r_CRs.getDirCRsForReportsSalesSelect= function(dbUC,dbUserParams,dbEmpRole,isMobile,callback){
+        var empID= dbUserParams["EmpID"];
+        r_CRs.getDataItemsForSelect(dbUC,
             {valueField:"CRID",labelField:"CRName",
                 joinedSources: {
                     "r_OperCRs": "r_OperCRs.CRID=r_CRs.CRID",
@@ -28,13 +28,14 @@ module.exports.init = function(app){
                 groupedFields:["r_CRs.CRID","r_CRs.CRName"],
                 conditions:{"r_CRs.CRID>":0,"r_Opers.EmpID=":empID},
                 order: "CRName" },
-            function (result) {
-                if(req.dbEmpRole=="cashier"||req.isMobile){
-                    res.send(result);return;
-                }
-                if(result.items)result.items=[{value:-1, label:'Все кассы'}].concat(result.items);
-                res.send(result);
+            function(result){
+                if(dbEmpRole=="cashier"||isMobile){ callback(result);return; }
+                if(result.items) result.items=[{value:-1, label:'Все кассы'}].concat(result.items);
+                callback(result);
             });
+    };
+    app.get("/reports/products/getDirCRsForSelect",function(req,res){
+        r_CRs.getDirCRsForReportsSalesSelect(req.dbUC,req.dbUserParams,req.dbEmpRole,req.isMobile,function(result){ res.send(result); });
     });
     var tProdsSalesTableColumns=[
         {data: "ChID", name: "ChID", width: 50, type: "text", visible:false, dataSource:"t_SaleD"},

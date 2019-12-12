@@ -30,8 +30,8 @@ module.exports.init = function(app){
                 conditions:{"r_CRs.CRID>":0,"r_Opers.EmpID=":empID},
                 order:"CRName"},
             function(result){
-                if(dbEmpRole=="cashier"||isMobile){ res.send(result);return; }
-                if(result.items)result.items=[{value:-1, label:'Все кассы'}].concat(result.items);
+                if(dbEmpRole=="cashier"||isMobile){ callback(result);return; }
+                if(result.items)result.items=[{value:-1,label:'Все кассы'}].concat(result.items);
                 callback(result);
             });
     };

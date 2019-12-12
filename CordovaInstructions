@@ -57,31 +57,47 @@ $ cordova create ProgectFolderName com.yourUnigueReversedDomainName AppName
 
 8. cordova platform add android
 
-change in gradle.properties
-cdvMinSdkVersion=19
+9. config.xml settings:
+use this settings for mobile application:
+<preference...
+    <preference name="android-minSdkVersion" value="23" />
+    <preference name="Fullscreen" value="true" />
+    <preference name="KeyboardShrinksView" value="false" /> #if added keyboard plugin
+<platform ...
 
-9. build your project.
+android-minSdkVersion=23 #for android 6
+or
+android-minSdkVersion=19 #for android 4
+
+also if exists gradle.properties you may change it if build error:
+cdvMinSdkVersion=<version>
+
+10. build your project.
 cordova build
 OR
 cordova build android
 
-OR for release build:
-cordova build android --release
+if error for clean and rebuild may use:
+cordova clean android
 
-cordova build android --release -- --gradleArg=-PcdvMinSdkVersion=19
+if error you also may do:
+cordova clean android
+remove platforms/android
+cordova platform add android
 
 It will create apk file in projectdirectory/platforms/android/build/outputs/apk/debug
 
-10. create AndroidStudio emulator
+11. create AndroidStudio emulator
 $ /home/dmkits/android-studio/bin/studio.sh
 (you can create an empty project or open existing one)
 AndroidStudio > Tools > AVD Manager
 and start Your Virtual Device (Nexus 5X API 29 x86)
 
 if not start AndroidStudio AVD run:
-$ sudo chmod a=rw /dev/kvm
+sudo chmod a=rw /dev/kvm
 
-$ cordova emulate android
+for emulate android run:
+cordova emulate android
 
 fix fail startup emulate
 Cordova android emulation - Error: Cannot read property 'semver' of null
@@ -93,12 +109,18 @@ replace it with avd.target = 'Android ' + (level ? level.semver : '') + ' (API l
 //avd.target = 'Android ' + level.semver + ' (API level ' + api_level + ')';
 avd.target = 'Android ' + (level ? level.semver : '') + ' (API level ' + api_level + ')';
 
-11. crosswalk plugin
+12. plugins: crosswalk plugin
 
 cordova plugin add cordova-plugin-crosswalk-webview
+
+for use one apk with embedded crosswalk add to config.xml this:
+<platform name="android">
+    <preference name="xwalkMultipleApk" value="false" />
+</platform>
+
 cordova plugin add cordova-plugin-splashscreen
 
-12. other plugins
+13. other plugins
 
 cordova plugin add cordova-plugin-keyboard
 use:
@@ -108,3 +130,14 @@ use:
 cordova plugin add cordova-plugin-statusbar
 use:
     window.StatusBar
+
+14. for release build:
+cordova build android --release
+
+cordova build android --release -- --gradleArg=-PcdvMinSdkVersion=19
+
+before build release do this:
+keytool -genkey -v -keystore key-name.keystore -alias alias-name -keyalg RSA -keysize 2048 -validity 10000
+#Gabis1151
+cordova build android --release -- --keystore="/path/to/keystore" --storePassword=password --alias=alias_name --password=password
+#password will be prompted if you have any

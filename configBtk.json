@@ -1,4 +1,4 @@
-{ "appID":"gabis", "appVer":"3.1.0", "appCVer":"3.1",
+{ "appID":"gabis", "appVer":"3.2.0", "appCVer":"3.2",
   "title":"GABIS.UA",
   "icon32x32":"/imgs/logoGS-red-min-whiteBG-ico32.jpg",
   "imageSmall":"/imgs/logoGS-red-small-pageTitle.jpg",
@@ -18,11 +18,11 @@
     "rep_products",
     "rep_cashier",
     "mobile",
-    "mobileVen",
-    "mobileExcDelivery",
-    "mobileExcFromStock",
-    "mobileRec",
-    "mobileReportsCashier"
+    "mDoc_Ven",
+    "mDoc_ExcDelivery",
+    "mDoc_ExcFromStock",
+    "mDoc_Rec",
+    "mRep_Cashier"
   ],
   "appMenu":[
     /*{ "menuItemName":"menuBarItemRec", "menuTitle":"Приход товара", "pageTitle":"Приход товара", "module":"doc_rec", "closable":false },*/
@@ -37,31 +37,31 @@
     "admin":{
       "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemExcCashier","menuBarItemExc","menuBarItemRec"],
-      "mobile":["mobileReportsCashier","mobileVen"]
+      "mobile":["mRep_Cashier","mDoc_Ven"]
     },
     "manager":{
       "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
-      "mobile":["mobileExc","mobileVen","mobileRec","mobileReportsCashier"]
+      "mobile":["mDoc_Ven","mDoc_Rec","mRep_Cashier"]
     },
     "operatorRec":{
       "menu":["menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemRec"],
-      "mobile":["mobileRec"]
+      "mobile":["mDoc_Rec"]
     },
     "excDelivery":{
       "menu":["menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemExcCashier"],
-      "mobile":["mobileExcDelivery"]
+      "mobile":["mDoc_ExcDelivery"]
     },
     "excFromStock":{
       "menu":["menuBarItemHelpAbout","menuBarItemClose"],
-      "mobile":["mobileExcFromStock"]
+      "mobile":["mDoc_ExcFromStock"]
     },
     "cashier":{
       "menu":["menuBarItemReportsCashier","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
-      "mobile":["mobileReportsCashier"]
+      "mobile":["mRep_Cashier"]
     }
   }
 }

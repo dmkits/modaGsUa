@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page page-with-subnavbar" id="pageListVens">
+<div class="page page-with-subnavbar" id="pageDocVenDocsList">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -14,14 +14,14 @@
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" id="pageListVens-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageListVensStockClose">
+                                <a href="#" id="pageDocVenDocsList-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageDocVenListStockClose">
                                     <div class="item-content">
                                         <div class="item-inner">
                                             <div class="item-title" style="font-weight:bold">Склад</div>
-                                            <div id="pageListVens-stock-label" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
+                                            <div id="pageDocVenDocsList-stockLabel" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
                                         </div>
                                     </div>
-                                    <select id="pageListVens-stock-select">
+                                    <select id="pageDocVenDocsList-stockSelect">
                                         {{#each listStocks}}
                                         <option value={{StockID}}>{{StockName}}</option>
                                         {{/each}}
@@ -41,9 +41,9 @@
         </div>
         <div class="list media-list" style="margin:0">
             <ul>
-                {{#each listVens}}
+                {{#each listDocs}}
                 <li>
-                    <a class="item-link item-content" href="/pageVenData/{{ChID}}"
+                    <a class="item-link item-content" href="/pageDocVenProdsData/{{ChID}}"
                             style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row">
@@ -70,59 +70,58 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e,page){                                                                      //console.log('pageListVens.html pageAfterIn', app7.data.pageListVens);
+            pageAfterIn: function(e,page){                                                                      //console.log('pageDocVen_DocsList.html pageAfterIn', app7.data.pageDocVenDocsList);
                 var self=this;
-                $$('#pageListVens .ptr-content').on('ptr:refresh',function(e){
+                $$('#pageDocVenDocsList .ptr-content').on('ptr:refresh',function(e){
                     setTimeout(function(){
-                        self.loadListInventsData();
+                        self.loadListVensData();
                         app7.ptr.done(); // or e.detail();
                     },1000);
                 });
-                if(app7.data.pageListVens) {
-                    this.stockIDFilter=app7.data.pageListVens.stockIDFilter;
-                    this.stockNameFilter=app7.data.pageListVens.stockNameFilter;
-                    if(this.stockIDFilter!==undefined) $$('#pageListVens-stock-select').val(this.stockIDFilter);
-                    if(this.stockNameFilter) $$('#pageListVens-stock').find("#pageListVens-stock-label").text(this.stockNameFilter);
+                if(app7.data.pageDocVenDocsList){
+                    this.stockIDFilter= app7.data.pageDocVenDocsList.stockIDFilter;
+                    this.stockNameFilter= app7.data.pageDocVenDocsList.stockNameFilter;
+                    if(this.stockIDFilter!==undefined) $$('#pageDocVenDocsList-stockSelect').val(this.stockIDFilter);
+                    if(this.stockNameFilter) $$('#pageDocVenDocsList-stock').find("#pageDocVenDocsList-stockLabel").text(this.stockNameFilter);
                     this.$setState({
-                        listStocks:app7.data.pageListVens.listStocks,
-                        stockIDFilter:this.stockIDFilter,stockNameFilter:this.stockNameFilter,
-                        listVens:app7.data.pageListVens.listVens
+                        listStocks:app7.data.pageDocVenDocsList.listStocks,
+                        stockIDFilter:this.stockIDFilter, stockNameFilter:this.stockNameFilter,
+                        listDocs:app7.data.pageDocVenDocsList.listDocs
                     });
                     return;
                 }
                 if(this.stockIDFilter===undefined)this.stockIDFilter="";
                 if(this.stockNameFilter===undefined)this.stockNameFilter="";
-                this.loadListInventsData();
+                this.loadListVensData();
             }
         },
         methods:{
-            loadListInventsData:function(){
-                let cInstance=this,
-                    stockIDFilter=this.stockIDFilter, stockNameFilter=this.stockNameFilter;
+            loadListVensData:function(){
+                var stockIDFilter=this.stockIDFilter, stockNameFilter=this.stockNameFilter, self=this;
                 app7.preloader.show();
-                var conditions={top:app7.data['inventsListDocCount']};
+                var conditions={top:app7.data['docVenDocsListCount']};
                 if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
-                app7.srvRequestJSON({url:'/mobile/invent/getDataForVensList',conditions:conditions,
+                app7.srvRequestJSON({url:'/mobile/docVen/getDataForVensList',conditions:conditions,
                         errorDialogMsg:"Не удалось получить список инвентаризаций с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
                         if(!result)return;
-                        app7.data.pageListVens={
+                        app7.data.pageDocVenDocsList={
                             listStocks:result.listStocks,
-                            stockIDFilter:stockIDFilter,stockNameFilter:stockNameFilter,
-                            listVens:result.listVensByStockID
-                        };                                                                                      //console.log('pageListVens.html pageAfterIn app.data.pageListVens 2=',app.data.pageListVens);
-                        cInstance.$setState({
+                            stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
+                            listDocs:result.listVensByStockID
+                        };                                                                                      //console.log('pageDocVen_DocsList.html pageAfterIn app.data.pageDocVenDocsList 2=',app.data.pageDocVenDocsList);
+                        self.$setState({
                             listStocks:result.listStocks,
-                            stockIDFilter:stockIDFilter,stockNameFilter:stockNameFilter,
-                            listVens:result.listVensByStockID
+                            stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
+                            listDocs:result.listVensByStockID
                         });
                     })
             },
-            pageListVensStockClose:function(e){
-                this.stockIDFilter=$$('#pageListVens-stock-select').val();
-                this.stockNameFilter=$$('#pageListVens-stock-label').text();
-                app7.data.pageListVens=null;
+            pageDocVenListStockClose:function(e){
+                this.stockIDFilter= $$('#pageDocVenDocsList-stockSelect').val();
+                this.stockNameFilter= $$('#pageDocVenDocsList-stockLabel').text();
+                app7.data.pageDocVenDocsList=null;
             }
         }
     }

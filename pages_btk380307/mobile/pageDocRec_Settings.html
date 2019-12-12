@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page" id="settings-recs-view">
+<div class="page" id="pageDocRecSettings">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -20,14 +20,14 @@
                     <div class="item-inner">
                         <div class="item-title item-label">Кол-во документов в списке</div>
                         <div class="item-input-wrap">
-                            <input id="settings-recs-input" type="text" placeholder="Кол-во документов в списке">
+                            <input id="pageDocRecSettings-input" type="text" placeholder="Кол-во документов в списке">
                         </div>
                     </div>
                 </li>
             </ul>
             <div class="row" style="margin-top:10px">
                 <div class="col" style="width:0px"></div>
-                <button id="settings-recs-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
+                <button class="col button button-fill button-round" style="width:200px" @click="btnStoreDocRecSettingsClick">СОХРАНИТЬ</button>
                 <div class="col" style="width:0px"></div>
             </div>
         </div>
@@ -38,18 +38,18 @@
     return {
         on: {
             pageAfterIn: function(e,page){
-                $$("#settings-recs-input").val(this.$app.data['recsListDocCount']);
+                $$("#pageDocRecSettings-input").val(app7.data['docRecDocsListCount']);
             }
         },
         methods: {
-            buttonStoreClick: function(){
-                let recsListDocCount=$$("#settings-recs-input").val();
-                if (typeof(Storage)!=="undefined"&&recsListDocCount&&recsListDocCount.toString().trim()!="") {
-                    localStorage.setItem("settings-recs-listDocCount",recsListDocCount);
+            btnStoreDocRecSettingsClick: function(){
+                let docRecDocsListCount= $$("#pageDocRecSettings-input").val();
+                if(typeof(Storage)!=="undefined"&&docRecDocsListCount&&docRecDocsListCount.toString().trim()!=""){
+                    localStorage.setItem("docRecSettings-docsListCount",docRecDocsListCount);
                 } else {// Sorry! No Web Storage support..
                 }
-                this.$app.data['recsListDocCount']=recsListDocCount;
-                app7.data.pageListRecs=null;
+                app7.data['docRecDocsListCount']= docRecDocsListCount;
+                app7.data.pageDocRecDocsList=null;
             }
         }
     }

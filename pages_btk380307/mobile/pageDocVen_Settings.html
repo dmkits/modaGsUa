@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-<div class="page" id="pageSettingsVens">
+<div class="page" id="pageDocVenSettings">
     <div class="navbar">
         <div class="navbar-inner">
             <div class="left">
@@ -20,14 +20,14 @@
                     <div class="item-inner">
                         <div class="item-title item-label">Кол-во документов в списке</div>
                         <div class="item-input-wrap">
-                            <input id="settings-invents-input" type="text" placeholder="Кол-во документов в списке">
+                            <input id="pageDocVenSettings-input" type="text" placeholder="Кол-во документов в списке">
                         </div>
                     </div>
                 </li>
             </ul>
             <div class="row" style="margin-top:10px">
                 <div class="col" style="width:0px"></div>
-                <button id="settings-invents-store-button" class="col button button-fill button-round" style="width:200px" @click="buttonStoreClick">СОХРАНИТЬ</button>
+                <button class="col button button-fill button-round" style="width:200px" @click="btnStoreDocVenSettingsClick">СОХРАНИТЬ</button>
                 <div class="col" style="width:0px"></div>
             </div>
         </div>
@@ -38,18 +38,18 @@
     return {
         on: {
             pageAfterIn: function(e,page){
-                $$("#settings-invents-input").val(this.$app.data['inventsListDocCount']);
+                $$("#pageDocVenSettings-input").val(app7.data['docVenDocsListCount']);
             }
         },
         methods: {
-            buttonStoreClick: function(){
-                let inventsListDocCount=$$("#settings-invents-input").val();
-                if (typeof(Storage)!=="undefined"&&inventsListDocCount&&inventsListDocCount.toString().trim()!="") {
-                    localStorage.setItem("settings-invents-listDocCount",inventsListDocCount);
+            btnStoreDocVenSettingsClick: function(){
+                let docVenDocsListCount= $$("#pageDocVenSettings-input").val();
+                if(typeof(Storage)!=="undefined"&&docVenDocsListCount&&docVenDocsListCount.toString().trim()!=""){
+                    localStorage.setItem("docVenSettings-docsListCount",docVenDocsListCount);
                 } else {// Sorry! No Web Storage support..
                 }
-                this.$app.data['inventsListDocCount']=inventsListDocCount;
-                app7.data.pageListVens=null;
+                app7.data['docVenDocsListCount']=docVenDocsListCount;
+                app7.data.pageDocVenDocsList=null;
             }
         }
     }

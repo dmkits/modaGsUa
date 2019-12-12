@@ -150,20 +150,19 @@
         },
         methods:{
             loadStocksForCashierData:function(callback){
-                let cInstance=this;
-                app7.srvRequestJSON({url:'/reports/products/getDirCRsForSelect',
+                var self=this;
+                app7.srvRequestJSON({url:'/reports/repCashier/getDirCRsForSelect',
                             errorDialogMsg:"Не удалось получить список касс для кассира с сервера!"},
-                        function(result,error){                                                             //console.log('pageReportsCashier.html loadStocksForCashierData result=',result);
+                        function(result,error){
                             app7.preloader.hide();
                             if(!result){ if(callback)callback(); return; }
-                            app7.data.pageReportsCashier= {listCRs:result.items,crIDFilter:cInstance.crIDFilter,items:null};
-                            cInstance.$setState({listCRs:result.items,crIDFilter:cInstance.crIDFilter,items:null});
+                            app7.data.pageReportsCashier= {listCRs:result.items,crIDFilter:self.crIDFilter,items:null};
+                            self.$setState({listCRs:result.items,crIDFilter:self.crIDFilter,items:null});
                             if(callback)callback(result.items);
                         })
             },
             loadSalesForCashierData:function(){
-                let cInstance=this,
-                        crIDFilter=this.crIDFilter;
+                var crIDFilter=this.crIDFilter, self=this;
                 app7.preloader.show();
                 var conditions={}, sdates=$$("#pageReportsCashierDatesRange").val();
                 if(sdates){
@@ -178,14 +177,14 @@
                         }
                 }
                 if(crIDFilter=='') conditions['CRID is NULL']="null"; else conditions['CRID=']= crIDFilter;
-                app7.srvRequestJSON({url:'/mobile/reports/getSalesCRRetsForCashier',conditions:conditions,
+                app7.srvRequestJSON({url:'/mobile/repCashier/getSalesCRRetsForCashier',conditions:conditions,
                             errorDialogMsg:"Не удалось получить продажи с сервера!"},
                         function(result,error){
                             app7.preloader.hide();
                             if(!result)return;
-                            app7.data.pageReportsCashier= {listCRs:cInstance.listCRs,crIDFilter:crIDFilter,items:result.items};
-                            cInstance.$setState({listCRs:cInstance.listCRs,crIDFilter:crIDFilter,items:result.items});
-                            cInstance.fillCashierReportTable(result.items);
+                            app7.data.pageReportsCashier= {listCRs:self.listCRs,crIDFilter:crIDFilter,items:result.items};
+                            self.$setState({listCRs:self.listCRs,crIDFilter:crIDFilter,items:result.items});
+                            self.fillCashierReportTable(result.items);
                         })
             },
             fillCashierReportTable: function(reportData,finishedCallback){

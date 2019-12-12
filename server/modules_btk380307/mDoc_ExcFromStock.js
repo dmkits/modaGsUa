@@ -1,33 +1,28 @@
-var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
-    dateFormat = require('dateformat');
+var dataModel=require(appDataModelPath), database= require("../databaseMSSQL");
 var t_Exc= require(appDataModelPath+"t_Exc"), t_ExcD= require(appDataModelPath+"t_ExcD"),
     r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     ir_EmpStockForExc= require(appDataModelPath+"ir_EmpStockForExc"),
-    r_Comps= require(appDataModelPath+"r_Comps"),
-    r_Currs= require(appDataModelPath+"r_Currs"),
-    r_States= require(appDataModelPath+"r_States"),
+    r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"), r_States= require(appDataModelPath+"r_States"),
     r_Prods=require(appDataModelPath+"r_Prods");
 
-module.exports.validateModule = function(errs, nextValidateModuleCallback){
+module.exports.validateModule= function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([t_Exc,t_ExcD,r_Ours,r_Stocks,ir_EmpStockForExc,r_Comps,r_Currs,r_States,r_Prods], errs,
-        function(){
-            nextValidateModuleCallback();
-        });
+        function(){ nextValidateModuleCallback(); });
 };
 
 module.exports.routes=[//-- App routes --
-    { path:'/pageExcFromStock', componentUrl:'/mobile/pageExcFromStockList', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
-    { path:'/pageExcFromStockProducts/:excChID', componentUrl:'/mobile/pageExcFromStockProducts', options:{ignoreCache:true} },
-    { path:'/pageExcFromStockSettings', componentUrl:'/mobile/pageExcFromStockSettings', options:{ignoreCache:true} }
+    { path:'/pageDocExcFromStock', componentUrl:'/mobile/pageDocExcFromStock_DocsList', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
+    { path:'/pageDocExcFromStockProdsData/:excChID', componentUrl:'/mobile/pageDocExcFromStock_ProdsData', options:{ignoreCache:true} },
+    { path:'/pageDocExcFromStockSettings', componentUrl:'/mobile/pageDocExcFromStock_Settings', options:{ignoreCache:true} }
 ];
-module.exports.moduleViewURL= "/mobile/pageExcFromStockList";
-module.exports.moduleViewPath= "mobile/pageExcFromStockList.html";
+module.exports.moduleViewURL= "/mobile/pageDocExcFromStock_DocsList";
+module.exports.moduleViewPath= "mobile/pageDocExcFromStock_DocsList.html";
 module.exports.init = function(app){
-    app.get("/mobile/pageExcFromStockSettings",function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageExcFromStockSettings.html');
+    app.get("/mobile/pageDocExcFromStock_Settings",function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageDocExcFromStock_Settings.html');
     });
-    app.get("/mobile/pageExcFromStockProducts",function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageExcFromStockProducts.html');
+    app.get("/mobile/pageDocExcFromStock_ProdsData",function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageDocExcFromStock_ProdsData.html');
     });
     var tExcFromStockListTableColumns=[
         {data:"ChID", name:"ChID", width:85, type:"text", readOnly:true, visible:false, dataSource:"t_Exc"},
@@ -124,8 +119,8 @@ module.exports.init = function(app){
     /**
      * resultCallback = function(result), result.resultItem= { "OurID","StockID","KursMC","CurrID","DocDate", "PLID" }
      */
-    t_ExcD.getExcData= function(dbUC,excChID,resultCallback){
-        t_Exc.getDataItem(dbUC,{fields:["OurID","StockID","KursMC","CurrID","DocDate"],conditions:{"ChID=":excChID}},
+    t_ExcD.getExcData= function(dbUC,docChID,resultCallback){
+        t_Exc.getDataItem(dbUC,{fields:["OurID","StockID","KursMC","CurrID","DocDate"],conditions:{"ChID=":docChID}},
             function(result){
                 if(result.error||!result.item){
                     resultCallback({error:"Failed get exc data! Reason: "+(result.error||"No data!"),
@@ -248,8 +243,8 @@ module.exports.init = function(app){
      * params = { KursMC,PLID,DocDate }
      * resultCallback(result={ updateCount, resultItem, error={...} }), resultItem=<storeTableDataItem>
      */
-    t_ExcD.storeExcDProdData= function(dbUC,excChID,excDProdData,params,resultCallback){
-        var getExcDPriceParams={"DocCode":11021, "ChID":excChID, "ProdID":excDProdData["ProdID"],
+    t_ExcD.storeExcDProdData= function(dbUC,docChID,excDProdData,params,resultCallback){
+        var getExcDPriceParams={"DocCode":11021, "ChID":docChID, "ProdID":excDProdData["ProdID"],
             "PPID":excDProdData["PPID"], "RateMC":params["KursMC"], "Discount":0.0, "PLID":params["PLID"] };
         t_ExcD.getExcDPrice(dbUC,getExcDPriceParams,function(resultGetExcDPrice){
             if(resultGetExcDPrice.error){
@@ -265,11 +260,11 @@ module.exports.init = function(app){
                         errorMessage:"Не удалось получить налог для новой позиции!"});
                     return;
                 }
-                excDProdData["ChID"]=excChID;
+                excDProdData["ChID"]=docChID;
                 t_ExcD.storeTableDataItem(dbUC,{tableColumns:tExcFromStockProductsTableColumns, idFields:["ChID","SrcPosID"],storeTableData:excDProdData,
                         calcNewIDValue: function(params, callback){
                             t_ExcD.getDataItem(dbUC,{fields:["maxSrcPosID"],
-                                    fieldsFunctions:{maxSrcPosID:{function:"maxPlus1",sourceField:"SrcPosID"}},conditions:{"ChID=":excChID}},
+                                    fieldsFunctions:{maxSrcPosID:{function:"maxPlus1",sourceField:"SrcPosID"}},conditions:{"ChID=":docChID}},
                                 function(result){
                                     if(result.error){
                                         resultCallback({error:"Failed calc new SrcPosID by prod in t_ExcD!<br>"+result.error,
@@ -295,13 +290,13 @@ module.exports.init = function(app){
     /**
       * excDProdData = { Barcode, ProdID, UM, Qty }
       */
-    t_ExcD.findAndStoreProdInExcD= function(dbUC,excChID,prodDataForStore,addQty,resultCallback){
+    t_ExcD.findAndStoreProdInExcD= function(dbUC,docChID,prodDataForStore,addQty,resultCallback){
         if(!("Barcode" in prodDataForStore)&&!("SrcPosID" in prodDataForStore)){
             resultCallback({error:"Failed find prod in t_ExcD!<br> No ProdID or SrcPosID!",
                 errorMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
             return;
         }
-        var conditions={"ChID=":excChID}, prodID= prodDataForStore["ProdID"];
+        var conditions={"ChID=":docChID}, prodID= prodDataForStore["ProdID"];
         if("Barcode" in prodDataForStore) conditions["Barcode="]= prodDataForStore["Barcode"];
         if("SrcPosID" in prodDataForStore) conditions["SrcPosID="]= prodDataForStore["SrcPosID"];
         t_ExcD.getDataItems(dbUC,{conditions:conditions,
@@ -314,7 +309,7 @@ module.exports.init = function(app){
                         errorMessage:"Не удалось найти товар в перемещении!<br>"+result.error.message});
                     return;
                 }
-                t_ExcD.getExcData(dbUC,excChID,function(resultGetExcData){
+                t_ExcD.getExcData(dbUC,docChID,function(resultGetExcData){
                     if(resultGetExcData.error){
                         resultCallback({error:"Failed get Exc data for store new position in ExcD! Reason: "+resultGetExcData.error,
                             errorMessage:"Не удалось получить данные документа для добавления новой позиции в перемещение!"});
@@ -347,7 +342,7 @@ module.exports.init = function(app){
                                 return;
                             }
                             prodDataForStore["PPID"]= resultGetProdRemPPData.resultItem["PPID"];
-                            t_ExcD.storeExcDProdData(dbUC,excChID,prodDataForStore,storeExcDProdDataParams, function(resultStoreExcDProdData){
+                            t_ExcD.storeExcDProdData(dbUC,docChID,prodDataForStore,storeExcDProdDataParams, function(resultStoreExcDProdData){
                                 resultCallback(resultStoreExcDProdData);
                             });
                         });
@@ -356,14 +351,14 @@ module.exports.init = function(app){
                     //update exists position Qty by SrcPosID
                     if(prodDataQty!=null) storeData["Qty"]=prodDataQty;
                     if(addQty) storeData["Qty"]+= parseFloat(addQty);
-                    t_ExcD.storeExcDProdData(dbUC,excChID,storeData, storeExcDProdDataParams, function(resultStoreExcDProdData){
+                    t_ExcD.storeExcDProdData(dbUC,docChID,storeData, storeExcDProdDataParams, function(resultStoreExcDProdData){
                         resultCallback(resultStoreExcDProdData);
                     });
                 });
             });
     };
     app.post("/mobile/excFromStock/storeProdDataByCRUniInput",function(req,res){
-        var storingData= req.body||{}, parentChID= storingData["parentChID"], value= storingData["value"];
+        var storingData= req.body||{}, docChID= storingData["docChID"], value= storingData["value"];
         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
             if(resultFindProd.error){
                 res.send({error:{error:resultFindProd.error,userMessage:resultFindProd.errorMessage}});
@@ -373,15 +368,13 @@ module.exports.init = function(app){
                 "Barcode":resultFindProd.prodData["Barcode"],
                 "SecID":req.dbUserParams["t_SecID"],"NewSecID":req.dbUserParams["t_SecID"]
             };
-            t_ExcD.findAndStoreProdInExcD(req.dbUC,parentChID,prodDataForStoreToExcD,storingData["addQty"],function (result){ res.send(result); })
+            t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,prodDataForStoreToExcD,storingData["addQty"],function (result){ res.send(result); })
         });
     });
     app.post("/mobile/excFromStock/storeQtyData",function(req,res){
-        var storingData= req.body||{}, parentChID= storingData["parentChID"],
+        var storingData= req.body||{}, docChID= storingData["docChID"],
             excDData= {SrcPosID:storingData["SrcPosID"],"Qty":storingData["Qty"]};
-        t_ExcD.findAndStoreProdInExcD(req.dbUC,parentChID,excDData,0,function(result){
-            res.send(result);
-        });
+        t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,excDData,0,function(result){ res.send(result); });
     });
     app.get("/mobile/excFromStock/findProdDataByBarcode",function(req,res){
         var barcode= req.query["Barcode~"], docChID= req.query["docChID~"];
@@ -437,7 +430,7 @@ module.exports.init = function(app){
                 prodDataForStoreToExcD= {"ProdID":prodData["ProdID"],"UM":prodData["UM"], "Barcode":barcode,
                 "Qty":storingData["Qty"], "SecID":req.dbUserParams["t_SecID"],"NewSecID":req.dbUserParams["t_SecID"]
             };
-            t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,prodDataForStoreToExcD,0,function (result){ res.send(result); })
+            t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,prodDataForStoreToExcD,0,function(result){ res.send(result); })
         });
     });
 };

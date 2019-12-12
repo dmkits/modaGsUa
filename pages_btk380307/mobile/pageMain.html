@@ -18,19 +18,19 @@
                     <div class="list links-list">
                         <ul>
                             <li>
-                                <a href="/pageListRecs" class="panel-close" data-force="true" data-ignore-cache="true">Приходы товара</a>
+                                <a href="/pageDocRec" class="panel-close" data-force="true" data-ignore-cache="true">Приходы товара</a>
                             </li>
                             <li>
-                                <a href="/pageExcDelivery" class="panel-close" data-force="true" data-ignore-cache="true">Перемещения товара<br> на доставку</a>
+                                <a href="/pageDocExcDelivery" class="panel-close" data-force="true" data-ignore-cache="true">Перемещения товара<br> на доставку</a>
                             </li>
                             <li>
-                                <a href="/pageExcFromStock" class="panel-close" data-force="true" data-ignore-cache="true">Перемещения товара<br> со склада</a>
+                                <a href="/pageDocExcFromStock" class="panel-close" data-force="true" data-ignore-cache="true">Перемещения товара<br> со склада</a>
                             </li>
                             <li>
-                                <a href="/pageListVens" class="panel-close" data-force="true" data-ignore-cache="true">Инвентаризации</a>
+                                <a href="/pageDocVen" class="panel-close" data-force="true" data-ignore-cache="true">Инвентаризации</a>
                             </li>
                             <li>
-                                <a href="/pageReportsCashier" class="panel-close" data-force="true" data-ignore-cache="true">Отчеты кассира</a>
+                                <a href="/pageRepCashier" class="panel-close" data-force="true" data-ignore-cache="true">Отчеты кассира</a>
                             </li>
                         </ul>
                     </div>
@@ -38,16 +38,16 @@
                     <div class="list links-list">
                         <ul>
                             <li>
-                                <a href="/pageSettingsRecs" class="panel-close">Приходы товара</a>
+                                <a href="/pageDocRecSettings" class="panel-close">Приходы товара</a>
                             </li>
                             <li>
-                                <a href="/pageExcDeliverySettings" class="panel-close">Перемещения товара<br> на доставку</a>
+                                <a href="/pageDocExcDeliverySettings" class="panel-close">Перемещения товара<br> на доставку</a>
                             </li>
                             <li>
-                                <a href="/pageExcFromStockSettings" class="panel-close">Перемещения товара<br> со склада</a>
+                                <a href="/pageDocExcFromStockSettings" class="panel-close">Перемещения товара<br> со склада</a>
                             </li>
                             <li>
-                                <a href="/pageSettingsVens" class="panel-close">Инвентаризации</a>
+                                <a href="/pageDocVenSettings" class="panel-close">Инвентаризации</a>
                             </li>
                         </ul>
                     </div>
@@ -57,7 +57,7 @@
                     <div class="list links-list">
                         <ul>
                             <li>
-                                <a href="/pageSettingsMAppCommon" class="panel-close">Доступ и устройство</a>
+                                <a href="/pageMAppSettingsCommon" class="panel-close">Доступ и устройство</a>
                             </li>
                         </ul>
                     </div>
@@ -163,19 +163,23 @@
             initData: function(){
                 app7.data.uuid=""; document.cookie="uuid=0;path=/;";
                 $$('#appbar-user').text("");$$('#appbar-modeMsg').text("");
-                app7.data['recsListDocCount']=50;
-                app7.data['excDeliveryListDocCount']=50;
-                app7.data['excFromStockListDocCount']=50;
-                app7.data['inventsListDocCount']=50;
+                app7.data['docRecDocsListCount']=50;
+                app7.data['docExcDeliveryDocsListCount']=50;
+                app7.data['docExcFromStockDocsListCount']=50;
+                app7.data['docVenDocsListCount']=50;
                 if(typeof(Storage)!=="undefined"){
-                    var recsListDocCount= localStorage.getItem("settings-recs-listDocCount");
-                    if(recsListDocCount&&!isNaN(parseInt(recsListDocCount))) app7.data['recsListDocCount']= parseInt(recsListDocCount);
-                    var excDeliveryListDocCount= localStorage.getItem("settings-excDelivery-listDocCount");
-                    if(excDeliveryListDocCount&&!isNaN(parseInt(excDeliveryListDocCount))) app7.data['excDeliveryListDocCount']= parseInt(excDeliveryListDocCount);
-                    var excFromStockListDocCount= localStorage.getItem("settings-excFromStock-listDocCount");
-                    if(excFromStockListDocCount&&!isNaN(parseInt(excFromStockListDocCount))) app7.data['excFromStockListDocCount']= parseInt(excFromStockListDocCount);
-                    var inventsListDocCount= localStorage.getItem("settings-inventory-listDocCount");
-                    if(inventsListDocCount&&!isNaN(parseInt(inventsListDocCount))) app7.data['inventsListDocCount']= parseInt(inventsListDocCount);
+                    var docRecDocsListCount= localStorage.getItem("docRecSettings-docsListCount");
+                    if(docRecDocsListCount&&!isNaN(parseInt(docRecDocsListCount)))
+                        app7.data['docRecDocsListCount']= parseInt(docRecDocsListCount);
+                    var docExcDeliveryDocsListCount= localStorage.getItem("docExcDeliverySettings-docsListCount");
+                    if(docExcDeliveryDocsListCount&&!isNaN(parseInt(docExcDeliveryDocsListCount)))
+                        app7.data['docExcDeliveryDocsListCount']= parseInt(docExcDeliveryDocsListCount);
+                    var docExcFromStockDocsListCount= localStorage.getItem("docExcFromStock-docsListCount");
+                    if(docExcFromStockDocsListCount&&!isNaN(parseInt(docExcFromStockDocsListCount)))
+                        app7.data['docExcFromStockDocsListCount']= parseInt(docExcFromStockDocsListCount);
+                    var docVenDocsListCount= localStorage.getItem("docVenSettings-docsListCount");
+                    if(docVenDocsListCount&&!isNaN(parseInt(docVenDocsListCount)))
+                        app7.data['docVenDocsListCount']= parseInt(docVenDocsListCount);
                 }else{// Sorry! No Web Storage support..
                 }
             },

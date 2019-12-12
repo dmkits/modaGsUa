@@ -1,0 +1,238 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page page-with-subnavbar" data-name="pageDocRecProdsData">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link back">
+                    <i class="icon icon-back"></i><i class="icon icon-back"></i>
+                    <!--<span class="ios-only">Назад</span>-->
+                </a>
+            </div>
+            <div class="title docHeaderTitle">
+                <span class="title docHeaderTitle">Приход товара {{item.DocID}} от {{item.SDocDate}}</span><br>
+                <span style="font-size:14px;font-weight:normal">{{item.StockName}}</span>
+            </div>
+            <div class="subnavbar docHeaderTitle" id="pageDocRecProdsDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
+                <div class="subnavbar-inner">
+                    <div class="row" style="padding-left:16px;padding-right:16px;">
+                        <button class="col button button-outline button-round" id="pageDocRecProdsDataBtnNewPos" style="width:100px;">Добавить</button>
+                        <button class="col button button-outline button-round" id="pageDocRecProdsDataBtnEdtSel" style="width:100px;">Изменить</button>
+                        <button class="col button button-outline button-round" id="pageDocRecProdsDataBtnDelSel" style="width:100px;">Удалить</button>
+                        <div>
+                            <span id="pageDocRecProdsDataState" style="color:black;font-weight:bold;display:none"></span>
+                            <!--<span id="pageVenDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>-->
+                            <!--<span id="pageVenDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="page-content" id="pageContentRecData">
+        <table class="mobile-table-small-size" width="100%" style="position:fixed;left:0px;top:88px;z-index:100">
+            <thead>
+            <tr>
+                <th width="40px">№<br>п/п</th>
+                <th>Наименование товара<br>Штрихкод</th>
+                <th width="50px">Ед.<br>изм.</th>
+                <th width="50px">Кол-во</th>
+                <th width="70px">Сумма</th>
+            </tr>
+            </thead>
+            <tbody style="display:none">
+            <tr class="swipeout swipeout-opened" rowSelecting="true">
+                <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"></td>
+                <td colSpan="4" class="tdProdName" dataItemName="ProdName"></td>
+            </tr>
+            <tr class="swipeout swipeout-opened" rowSelecting="true">
+                <td dataItemName="Barcode"></td>
+                <td width="50px" class="text-centered" dataItemName="UM"></td>
+                <td width="50px" class="tdQty" dataItemName="Qty"></td>
+                <td width="70px" class="tdSumCC" dataItemName="SumCC_wt"
+                    onCreated="recTableTDSumCCOnCreated" onClick="recTableTDNewQtyOnClick"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="mobile-table-small-size" width="100%" style="margin-top:33px;margin-bottom:30px;"></table>
+        <table class="mobile-table-small-size" width="100%" style="position:fixed;left:0px;bottom:0px;z-index:100">
+            <tfoot>
+            <tr>
+                <td id="totalRows" width="40px">0</td>
+                <td></td>
+                <td id="totalQty" width="50px">0</td>
+                <td id="totalSumCC_wt" width="70px">0</td>
+            </tr>
+            </tfoot>
+        </table>
+        <table class="mobile-table-large-size" width="100%" style="position:fixed;left:0px;top:88px;z-index:100">
+            <thead>
+            <tr>
+                <th width="40px">№<br>п/п</th>
+                <th width="110px">Штрихкод</th>
+                <th width="50px">Код товара</th>
+                <th>Наименование товара</th>
+                <th width="50px">Ед.<br>изм.</th>
+                <th width="50px">Кол-во</th>
+                <th width="70px">Сумма</th>
+            </tr>
+            </thead>
+            <tbody style="display:none">
+            <tr rowSelecting="true">
+                <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"></td>
+                <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"></td>
+                <td width="50px" class="text-centered" dataItemName="ProdID"></td>
+                <td class="tdProdName" dataItemName="ProdName"></td>
+                <td width="50px" class="text-centered" dataItemName="UM"></td>
+                <td width="50px" class="tdQty" dataItemName="Qty"></td>
+                <td width="70px" class="tdSumCC" dataItemName="SumCC_wt"
+                    onCreated="recTableTDSumCCOnCreated" onClick="recTableTDNewQtyOnClick"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="mobile-table-large-size" width="100%" style="margin-top:33px;margin-bottom:30px;"></table>
+        <table class="mobile-table-large-size" width="100%" style="position:fixed;left:0px;bottom:0px;z-index:100">
+            <tfoot>
+            <tr>
+                <td id="totalRows" width="40px">0</td>
+                <td></td>
+                <td id="totalQty" width="50px">0</td>
+                <td id="totalSumCC_wt" width="70px">0</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        on: {
+            pageInit: function(e,page){                                                                         //console.log('pageDocRec_ProdsData.html pageInit', page, this);
+//                var contentTables=$$(this.el).children(".page-content").children("table");
+                this.pageContentRecData= $$(this.el).children("#pageContentRecData");
+//                if(!this.pageContentRecData){ this.setInputProdBarcodeByState(); return; }
+                var contentTables= this.pageContentRecData.children("table");
+                if(contentTables&&contentTables[0]) this.contentTableHeaderDomEl= contentTables[0];
+                if(contentTables&&contentTables[1]) this.contentTableDataDomEl= contentTables[1];
+                if(contentTables&&contentTables[2]) this.contentTableFootDomEl= contentTables[2];
+                if(contentTables&&contentTables[3]) this.contentTableLHeaderDomEl= contentTables[3];
+                if(contentTables&&contentTables[4]) this.contentTableLDataDomEl= contentTables[4];
+                if(contentTables&&contentTables[5]) this.contentTableLFootDomEl= contentTables[5];
+                if(!this.item||(this.item&&this.item["StateCode"]!==0)){ this.loadRecData(); return; }
+                var self=this;
+                $$('#pageDocRecProdsDataToolbar #pageDocRecProdsDataBtnNewPos').on('click',function(){
+                    app7.router.navigate("/pageRecPosData/"+self.item["ChID"]+"/new/0",{})
+                });
+                $$('#pageDocRecProdsDataToolbar #pageDocRecProdsDataBtnEdtSel').on('click',function(){
+                    app7.router.navigate("/pageRecPosData/"+self.item["ChID"]+"/edit/"+self.item["SrcPosID"],{})
+                });
+                $$('#pageDocRecProdsDataToolbar #pageDocRecProdsDataBtnDelSel').on('click',function(){
+                    app7.router.navigate("/pageRecPosData/"+self.item["ChID"]+"/del/"+self.item["SrcPosID"],{})
+                });
+                this.loadRecData();
+            },
+            pageAfterOut: function(e,page){                                                                     //console.log('pageDocRec_ProdsData.html pageAfterOut', page);
+                if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl);
+            },
+        },
+        data: function data(){                                                                                  //console.log('pageDocRec_ProdsData.html data',this.$route.params);
+            var recData={},listRecsData= app7.data.pageDocRecDocsList.listDocs;
+            if(!this.$route.params) return {item:recData,items:[]};
+            var recChID= this.$route.params.recChID;
+            if(!listRecsData||recChID===null||recChID===undefined) return {item:recData,items:[]};
+            for(var ind in listRecsData){
+                var itemRecData=listRecsData[ind];
+                if(itemRecData&&itemRecData.ChID==recChID){ recData=itemRecData; break; }
+            }
+            return {item:recData,items:[]};
+        },
+        methods: {
+            loadRecData:function(){                                                                             //console.log('pageDocRec_ProdsData.html loadRecData inventData=',this.item);
+                var recData=this.item, recChID=recData.ChID;
+                if(recChID===null||recChID===undefined) return;
+                var self=this;
+                self.disableActionButtons();
+                app7.preloader.show();
+                app7.srvRequestJSON({url:'/mobile/rec/getDataForRecDTable',conditions:{'ParentChID=':recChID},
+                            errorDialogMsg:"Не удалось получить список товаров прихода товара с сервера!"},
+                        function(result,error){
+                            app7.preloader.hide();
+                            if(!result){ self.disableActionButtons(true); return; }
+                            self.items=result.items;
+//                        if(!result.items){ self.setInputProdBarcodeByState(); return; }
+                            app7.data.pageDocRecProdsData= {docProdsItems:result.items};                                      //console.log('pageDocRec_ProdsData.html loadRecData items=',result.items);
+                            self.fillRecDTable(result.items,function(){
+                                self.disableActionButtons(false);
+                                // $$("#barCodeInput").focus();
+                            });
+                        })
+            },
+            fillRecDTable: function(docProdsData,finishedCallback){
+                var self=this,
+                        params={ contentTableHeaderDomEl:this.contentTableHeaderDomEl,contentTableDataDomEl:this.contentTableDataDomEl,
+                            contentTable2HeaderDomEl:this.contentTableLHeaderDomEl,contentTable2DataDomEl:this.contentTableLDataDomEl,
+                            progressAction:function(tableData, ind,tableDataItem){
+                                if(!tableDataItem){ self.setTotalInfo(0,0); return; }
+                                self.setTotalInfo(tableDataItem["Qty"],tableDataItem["SumCC_wt"],ind+1);
+                            }
+                        };
+                app7.innerPageFillTableData(this, docProdsData, params, finishedCallback);
+            },
+            setTotalInfo: function(tQty,tSumCC_wt,tLoadedRows){
+                var tRows=this.items.length.toString();
+                if(tLoadedRows!==undefined) tRows=tLoadedRows.toString()+"/<br>"+tRows;
+                var contentTableFootTR=$$(this.contentTableFootDomEl).find("tr"),
+                        totalQty=parseFloat(contentTableFootTR.find("td#totalQty").text())+tQty,
+                        totalSumCC_wt=parseFloat(contentTableFootTR.find("td#totalSumCC_wt").text())+tSumCC_wt;
+                app7.innerPageUpdateTotalTable([this.contentTableFootDomEl,this.contentTableLFootDomEl],
+                        {totalRows:tRows,totalQty:totalQty,totalSumCC_wt:totalSumCC_wt})
+            },
+            recTableTDSumCCOnCreated:function(td,tableDataItem,methods){
+                // td.id="id_"+tableDataItem["ChID"].toString()+'_'+tableDataItem["TSrcPosID"].toString();
+                // td.ChID=tableDataItem["ChID"].toString();td.TSrcPosID=tableDataItem["TSrcPosID"].toString();
+                // td.ProdID=tableDataItem["ProdID"].toString();td.ProdName=tableDataItem["ProdName"].toString();
+                // td.TQty=tableDataItem["TQty"].toString();
+                // td.doSelect=methods["rowSelectingMethod"];
+                // tableDataItem.tableTDNewQty= td;
+            },
+            // addProdToTable:function(prodData){
+            //     if(!prodData) prodData={TQty:0,TNewQty:0};
+            //     var existstTD=$$(this.contentTableDataDomEl).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["SrcPosID"])[0];
+            //     if(existstTD){
+            //         var oldQty=parseFloat(existstTD.Qty), dataQty=prodData["Qty"],
+            //             oldSumCC_wt=parseFloat(existstTD.innerText), dataSumCC_wt=prodData["SumCC_wt"];
+            //         existstTD.innerText=dataSumCC_wt; existstTD.Qty=dataQty;
+            //         existstTD.doSelect();
+            //         this.setScroll(existstTD);
+            //         this.setTotalInfo(dataQty-oldQty,dataSumCC_wt-oldSumCC_wt);
+            //         return;
+            //     }
+            //     app7.innerPageCreateTableRow(this.contentTableHeaderDomEl,this.contentTableDataDomEl, prodData, this);
+            //     prodData.tableTDNewQty.doSelect();
+            //     this.setTotalInfo(prodData["Qty"],prodData["SumCC_wt"]);
+            //     this.setScroll(prodData.tableTDNewQty);
+            // },
+
+
+            disableActionButtons:function(disable){
+                // if(disable!==false){
+                //     $$('#barCodeInput').attr('disabled',1);
+                //     $$('#buttonBarcodeInputEnter').attr('disabled',1);
+                //     return;
+                // }
+                // $$('#barCodeInput').removeAttr('disabled');
+                // $$('#buttonBarcodeInputEnter').removeAttr('disabled');
+            },
+            recTableTDNewQtyOnClick:function(e,contentTableItemName,self){
+//                var td=e.target;
+//                self.showRealQtyDialog(td, contentTableItemName["ProdName"], td.innerText.trim());
+            },
+            setScroll: function(innerElem){
+                var page=$$('#pageContentRecData')[0],
+                        absoluteElementTop = innerElem.getBoundingClientRect().top + page.scrollTop;
+                page.scrollTop= absoluteElementTop - (page.clientHeight / 2);//page.scrollTo(1, absoluteElementTop - (page.clientHeight / 2));-fail in mobileApp
+            }
+        }
+    }
+</script>

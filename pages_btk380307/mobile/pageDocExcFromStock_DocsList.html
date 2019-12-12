@@ -1,6 +1,6 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-    <div class="page page-with-subnavbar" id="pageExcFromStockList">
+    <div class="page page-with-subnavbar" id="pageDocExcFromStockDocsList">
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="left">
@@ -14,14 +14,14 @@
                         <div class="list" style="width:100%">
                             <ul>
                                 <li>
-                                    <a href="#" id="pageExcFromStockList-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageExcFromStockListStockClose">
+                                    <a href="#" id="pageDocExcFromStockDocsList-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageDocExcFromStockDocsListStockClose">
                                         <div class="item-content" style="font-size:16px">
                                             <div class="item-inner">
                                                 <div class="item-title" style="font-weight:bold">по складу</div>
-                                                <div id="pageExcFromStockList-stock-label" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
+                                                <div id="pageDocExcFromStockDocsList-stockLabel" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
                                             </div>
                                         </div>
-                                        <select id="pageExcFromStockList-stock-select">
+                                        <select id="pageDocExcFromStockDocsList-stockSelect">
                                             {{#each listStocks}}
                                             <option value={{StockID}}>{{StockName}}</option>
                                             {{/each}}
@@ -41,9 +41,9 @@
             </div>
             <div class="list media-list" style="margin:0">
                 <ul>
-                    {{#each listExcs}}
+                    {{#each listDocs}}
                     <li>
-                        <a class="item-link item-content" href="/pageExcFromStockProducts/{{ChID}}"
+                        <a class="item-link item-content" href="/pageDocExcFromStockProdsData/{{ChID}}"
                            style="background-color:lightgrey;background-color:{{#if IsStateCreated}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                             <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                                 <div class="item-title-row" style="padding-right:16px">
@@ -71,59 +71,58 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e,page){                                                                      //console.log("app7.data.pageExcFromStockList",app7.data.pageExcFromStockList);
+            pageAfterIn: function(e,page){
                 var self=this;
-                $$('#pageExcFromStockList .ptr-content').on('ptr:refresh',function(e){
+                $$('#pageDocExcFromStockDocsList .ptr-content').on('ptr:refresh',function(e){
                     setTimeout(function(){
-                        self.loadExcFromStockList();
+                        self.loadExcFromStockDocsList();
                         app7.ptr.done(); // or e.detail();
                     },1000);
                 });
-                if(app7.data.pageExcFromStockList){
-                    this.stockIDFilter=app7.data.pageExcFromStockList.stockIDFilter;
-                    this.stockNameFilter=app7.data.pageExcFromStockList.stockNameFilter;
-                    if(this.stockIDFilter!==undefined) $$('#pageExcFromStockList-stock-select').val(this.stockIDFilter);
-                    if(this.stockNameFilter) $$('#pageExcFromStockList-stock').find("#pageExcFromStockList-stock-label").text(this.stockNameFilter);
+                if(app7.data.pageDocExcFromStockDocsList){
+                    this.stockIDFilter=app7.data.pageDocExcFromStockDocsList.stockIDFilter;
+                    this.stockNameFilter=app7.data.pageDocExcFromStockDocsList.stockNameFilter;
+                    if(this.stockIDFilter!==undefined) $$('#pageDocExcFromStockDocsList-stockSelect').val(this.stockIDFilter);
+                    if(this.stockNameFilter) $$('#pageDocExcFromStockDocsList-stock').find("#pageDocExcFromStockDocsList-stockLabel").text(this.stockNameFilter);
                     this.$setState({
-                        listStocks:app7.data.pageExcFromStockList.listStocks,
+                        listStocks:app7.data.pageDocExcFromStockDocsList.listStocks,
                         stockIDFilter:this.stockIDFilter, stockNameFilter:this.stockNameFilter,
-                        listExcs:app7.data.pageExcFromStockList.listExcs
+                        listDocs:app7.data.pageDocExcFromStockDocsList.listDocs
                     });
                     return;
                 }
                 if(this.stockIDFilter===undefined)this.stockIDFilter="";
                 if(this.stockNameFilter===undefined)this.stockNameFilter="";
-                this.loadExcFromStockList();
+                this.loadExcFromStockDocsList();
             }
         },
         methods:{
-            loadExcFromStockList: function(){
-                let cInstance=this,
-                    stockIDFilter=this.stockIDFilter,stockNameFilter=this.stockNameFilter;
+            loadExcFromStockDocsList: function(){
+                var stockIDFilter=this.stockIDFilter, stockNameFilter=this.stockNameFilter, self=this;
                 app7.preloader.show();
-                var conditions={top:app7.data['excFromStockListDocCount']};
-                if(stockIDFilter=='')conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
+                var conditions= {top:app7.data['docExcFromStockDocsListCount']};
+                if(stockIDFilter=='') conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
                 app7.srvRequestJSON({url:'/mobile/excFromStock/getDataForExcList',conditions:conditions,
                         errorDialogMsg:"Не удалось получить с сервера список перемещений товара со склада!"},
                     function(result,error){
                         app7.preloader.hide();
                         if(!result)return;
-                        app7.data.pageExcFromStockList={
+                        app7.data.pageDocExcFromStockDocsList={
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
-                            listExcs:result.listExcsByStockID
-                        };                                                                                  //console.log('pageExcFromStockList.html pageAfterIn app.data.pageExcFromStockList 2=',app.data.pageExcFromStockList);
-                        cInstance.$setState({
+                            listDocs:result.listExcsByStockID
+                        };
+                        self.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
-                            listExcs:result.listExcsByStockID
+                            listDocs:result.listExcsByStockID
                         });
                     })
             },
-            pageExcFromStockListStockClose: function(e){
-                this.stockIDFilter=$$('#pageExcFromStockList-stock-select').val();
-                this.stockNameFilter=$$('#pageExcFromStockList-stock-label').text();
-                app7.data.pageExcFromStockList=null;
+            pageDocExcFromStockDocsListStockClose: function(e){
+                this.stockIDFilter= $$('#pageDocExcFromStockDocsList-stockSelect').val();
+                this.stockNameFilter= $$('#pageDocExcFromStockDocsList-stockLabel').text();
+                app7.data.pageDocExcFromStockDocsList=null;
             }
         }
     }
