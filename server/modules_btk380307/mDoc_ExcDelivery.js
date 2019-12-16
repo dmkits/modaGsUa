@@ -61,7 +61,7 @@ module.exports.init = function(app){
         {data:"StateInfo", name:"Информация статуса", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode not in (50,56,60) Then 'Изменение запрещено' Else 'Изменение разрешено' END" }
     ];
-    app.get("/mobile/excDelivery/getDataForExcList",function(req,res){
+    app.get("/mobile/docExcDelivery/getDataForExcList",function(req,res){
         var conditions={}, top="";
         for(var condItem in req.query){
             if(condItem=="top")top="top "+req.query[condItem];
@@ -107,10 +107,10 @@ module.exports.init = function(app){
         {data:"SumCC_wt", name:"Сумма", width:75, type:"numeric2", dataSource:"t_ExcD"},
         {data:"NewSumCC_wt", name:"Факт. сумма", width:75, type:"numeric2", dataFunction:"NewQty*PriceCC_wt"}
     ];
-    app.get("/mobile/excDelivery/getDataForExcDTable",function(req,res){
+    app.get("/mobile/docExcDelivery/getDataForExcDTable",function(req,res){
         var conditions={};
         for(var condItem in req.query)
-            if(condItem.indexOf("ParentChID")==0) conditions["t_ExcD.ChID="]=req.query[condItem];
+            if(condItem.indexOf("docChID")==0) conditions["t_ExcD.ChID="]=req.query[condItem];
             else conditions["t_ExcD."+condItem]= req.query[condItem];
         t_ExcD.getDataItemsForTable(req.dbUC,{tableColumns:tExcDTableColumns, conditions:conditions, order:"SrcPosID"},
             function(result){ res.send(result); });
@@ -178,7 +178,7 @@ module.exports.init = function(app){
                      });
          });
      };
-     app.post("/mobile/excDelivery/storeProdDataByCRUniInput",function(req,res){
+     app.post("/mobile/docExcDelivery/storeProdDataByCRUniInput",function(req,res){
          var storingData= req.body, value= (storingData)?storingData["value"]:null, docChID= storingData["docChID"];
          r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
              if(resultFindProd.error){
@@ -190,7 +190,7 @@ module.exports.init = function(app){
                  function(result){ res.send(result); })
          });
      });
-     app.post("/mobile/excDelivery/storeNewQtyData",function(req,res){
+     app.post("/mobile/docExcDelivery/storeNewQtyData",function(req,res){
          var storingData= req.body, docChID= storingData["docChID"], excDData={SrcPosID:storingData["SrcPosID"]};
          t_ExcD.storeExcDProdDataWNewQty(req.dbUC,docChID,excDData,storingData["NewQty"],
              function(result){ res.send(result); });

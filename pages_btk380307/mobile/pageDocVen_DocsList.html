@@ -14,8 +14,8 @@
                     <div class="list" style="width:100%">
                         <ul>
                             <li>
-                                <a href="#" id="pageDocVenDocsList-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageDocVenListStockClose">
-                                    <div class="item-content">
+                                <a href="#" id="pageDocVenDocsList-stock" class="item-link smart-select" data-page-back-link-text="" @smartselect:close="pageDocVenDocsListStockListClose">
+                                    <div class="item-content" style="font-size:16px">
                                         <div class="item-inner">
                                             <div class="item-title" style="font-weight:bold">Склад</div>
                                             <div id="pageDocVenDocsList-stockLabel" class="item-after" style="margin-left:0px;max-width:80%;color:#212121"></div>
@@ -44,13 +44,14 @@
                 {{#each listDocs}}
                 <li>
                     <a class="item-link item-content" href="/pageDocVenProdsData/{{ChID}}"
-                            style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
+                       style="background-color:lightgrey;background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateClosed}}lightpink{{/if}}{{#if IsStateClosed}};font-weight:bold{{/if}}">
+                            <!--style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">-->
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
-                            <div class="item-title-row">
+                            <div class="item-title-row" style="padding-right:16px">
                                 <div class="item-title" style="width:100%">
                                     <div class="item-title">
-                                        <div class="item-header" style="display:inline-block;float:left;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{DocID}} от {{SDocDate}}</div>
-                                        <div class="item-header" style="display:inline-block;float:right;{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">{{StateName}}</div>
+                                        <div class="item-header" style="display:inline-block;float:left;max-width:90px;font-weight:inherit">{{DocID}}<br>от {{SDocDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:right;max-width:160px;text-align:right;font-weight:inherit">{{StateName}}</div>
                                     </div>
                                     <div class="item-title docsListStockName" style="font-weight:normal">{{StockName}}</div>
                                 </div>
@@ -70,7 +71,7 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e,page){                                                                      //console.log('pageDocVen_DocsList.html pageAfterIn', app7.data.pageDocVenDocsList);
+            pageAfterIn: function(e,page){
                 var self=this;
                 $$('#pageDocVenDocsList .ptr-content').on('ptr:refresh',function(e){
                     setTimeout(function(){
@@ -110,7 +111,7 @@
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
                             listDocs:result.listVensByStockID
-                        };                                                                                      //console.log('pageDocVen_DocsList.html pageAfterIn app.data.pageDocVenDocsList 2=',app.data.pageDocVenDocsList);
+                        };
                         self.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
@@ -118,7 +119,7 @@
                         });
                     })
             },
-            pageDocVenListStockClose:function(e){
+            pageDocVenDocsListStockListClose:function(e){
                 this.stockIDFilter= $$('#pageDocVenDocsList-stockSelect').val();
                 this.stockNameFilter= $$('#pageDocVenDocsList-stockLabel').text();
                 app7.data.pageDocVenDocsList=null;

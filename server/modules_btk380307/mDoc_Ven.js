@@ -50,13 +50,14 @@ module.exports.init = function(app){
         {data:"TSumCC_wt", name:"Сумма", width:85, type:"numeric2", dataSource:"t_Ven" },
         {data:"TNewSumCC_wt", name:"Сумма", width:85, type:"numeric2", dataSource:"t_Ven" },
         {data:"StateCode", name:"StateCode", width:50, type:"text", readOnly:true, visible:false, dataSource:"t_Ven"},
-        {data:"IsStateWork", name:"В работе", width:50, type:"text", readOnly:true, visible:false,
+        {data:"IsStateCreated", name:"В работе", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Ven.StateCode=0 Then 1 Else 0 END" },
-        {data:"IsStateClosedOrConfirmed", name:"Закрыт/Подтвержден", width:50, type:"text", readOnly:true, visible:false,
-            dataFunction:"CASE When t_Ven.StateCode in (145,51,57,61) Then 1 Else 0 END" },
+        {data:"IsStateClosed", name:"Закрыт", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"CASE When t_Ven.StateCode in (145) Then 1 Else 0 END" },
         {data:"StateName", name:"Статус", width:250, type:"text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Ven.StateCode" },
-        {data:"StateInfo", name:"Информация статуса", width:250, type:"text", dataSource:"r_States", sourceField:"StateInfo" }
+        {data:"StateInfo", name:"Информация статуса", width:50, type:"text", readOnly:true, visible:false,
+            dataFunction:"CASE When t_Ven.StateCode not in (0) Then 'Изменение запрещено' Else 'Изменение разрешено' END" }
     ];
     app.get("/mobile/docVen/getDataForVensList",function(req,res){
         var conditions={}, top="";
@@ -137,21 +138,21 @@ module.exports.init = function(app){
     app.get("/mobile/docVen/getDataForVenATable",function(req,res){
         var conditions={};
         for(var condItem in req.query)
-            if(condItem.indexOf("ParentChID")==0) conditions["t_VenA.ChID="]=req.query[condItem];
+            if(condItem.indexOf("docChID")==0) conditions["t_VenA.ChID="]=req.query[condItem];
             else conditions["t_VenA."+condItem]= req.query[condItem];
         t_VenA.getDataItemsForTable(req.dbUC,{tableColumns:tVenATableColumns, conditions:conditions, order:"TSrcPosID"},
             function(result){ res.send(result); });
     });
     /**
-     * prodData = { ProdID, UM, Barcode, TNewQty }
+     * prodData = { ProdID, UM, Barcode }
      */
-    t_VenA.storeVenAProdData= function(dbUC,parentChID,venAProdData,tNewQty,resultCallback){
+    t_VenA.findAndStoreProdInVenA= function(dbUC,docChID,venAProdData,tNewQty,resultCallback){
         if(!("ProdID" in venAProdData)&&!("TSrcPosID" in venAProdData)){
             resultCallback({error:"Failed find prod in t_VenA!<br> No ProdID or TSrcPosID!",
                 userErrorMsg:"Не удалось найти товар в инвентаризации!<br> В данных нет кода товара или позиции товара!"});
             return;
         }
-        var conditions= {"ChID=":parentChID};
+        var conditions= {"ChID=":docChID};
         if("ProdID" in venAProdData)conditions["ProdID="]= venAProdData["ProdID"];
         if("TSrcPosID" in venAProdData)conditions["TSrcPosID="]= venAProdData["TSrcPosID"];
         t_VenA.getDataItem(dbUC,{fields:["TSrcPosID","Barcode","ProdID","UM","TQty","TNewQty",
@@ -178,11 +179,11 @@ module.exports.init = function(app){
                 }else{//update by TSrcPosID
                     if(tNewQty===undefined) storeData["TNewQty"]++; else storeData["TNewQty"]=tNewQty;
                 }
-                storeData["ChID"]=parentChID;
+                storeData["ChID"]=docChID;
                 t_VenA.storeTableDataItem(dbUC,{tableColumns:tVenATableColumns,idFields:["ChID","TSrcPosID"],storeTableData:storeData,
                         calcNewIDValue:function(params,callback){
                             t_VenA.getDataItem(dbUC,{fields:["maxTSrcPosID"],
-                                    fieldsFunctions:{maxTSrcPosID:{function:"maxPlus1",sourceField:"TSrcPosID"}},conditions:{"ChID=":parentChID}},
+                                    fieldsFunctions:{maxTSrcPosID:{function:"maxPlus1",sourceField:"TSrcPosID"}},conditions:{"ChID=":docChID}},
                                 function(result){
                                     if(result.error){
                                         resultCallback({error:"Failed calc new TSrcPosID by prod in t_VenA!<br>"+result.error,
@@ -205,19 +206,74 @@ module.exports.init = function(app){
         });
     };
     app.post("/mobile/docVen/storeProdDataByCRUniInput",function(req,res){
-        var storingData= req.body, value= (storingData)?storingData["value"]:null, parentChID= storingData["parentChID"];
+        var storingData= req.body, value= (storingData)?storingData["value"]:null, docChID= storingData["docChID"];
         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
             if(resultFindProd.error){
                 res.send({error:{error:resultFindProd.error,userMessage:resultFindProd.errorMessage}});
                 return;
             }
-            t_VenA.storeVenAProdData(req.dbUC,parentChID,resultFindProd.prodData,storingData["TNewQty"],
+            t_VenA.findAndStoreProdInVenA(req.dbUC,docChID,resultFindProd.prodData,storingData["TNewQty"],
                 function(result){ res.send(result); })
         });
     });
     app.post("/mobile/docVen/storeExistsPosProdData",function(req,res){
-        var storingData= req.body, parentChID= storingData["parentChID"],venAData= {TSrcPosID:storingData["TSrcPosID"]};
-        t_VenA.storeVenAProdData(req.dbUC,parentChID,venAData,storingData["TNewQty"],
+        var storingData= req.body, docChID= storingData["docChID"], venAData= {TSrcPosID:storingData["TSrcPosID"]};
+        t_VenA.findAndStoreProdInVenA(req.dbUC,docChID,venAData,storingData["TNewQty"],
             function(result){ res.send(result); });
+    });
+    app.get("/mobile/docVen/findProdDataByBarcode",function(req,res){
+        var barcode= req.query["Barcode~"], docChID= req.query["docChID~"];
+        r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
+            if(!resultFindProd||resultFindProd.error){
+                var sErr="Failed find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Не удалось найти товар по штрихкоду \""+barcode+"\"!";
+                sErr+="\n"+resultFindProd.error; sErrMsg+="\n"+resultFindProd.errorMessage;
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }else if(!resultFindProd.prodData){
+                var sErr="Cannot find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Товар по штрихкоду \""+barcode+"\" не найден!";
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }
+            var prodData= resultFindProd.prodData;
+            t_VenA.getDataItems(req.dbUC,{conditions:{"ChID=":docChID, "Barcode=":barcode},
+                    fields:["TSrcPosID","Barcode","ProdID","UM","TQty","TNewQty"],
+                    order:"TSrcPosID desc" },
+                function(resultFindProdInVenA){
+                    if(resultFindProdInVenA.error){
+                        res.send({error:"Failed find prod in t_ExcD!<br>"+resultFindProdInVenA.error.error,
+                            errorMessage:"Не удалось найти товар в инвентаризации!<br>"+resultFindProdInVenA.error.message});
+                        return;
+                    }
+                    if(resultFindProdInVenA.items&&resultFindProdInVenA.items.length>0){
+                        var findedExcDData= resultFindProdInVenA.items[0];
+                        prodData["TSrcPosID"]= findedExcDData["TSrcPosID"];
+                        prodData["TQty"]= findedExcDData["TQty"]; prodData["TNewQty"]= findedExcDData["TNewQty"];
+                    }
+                    res.send({item:prodData});
+                });
+        });
+    });
+    app.post("/mobile/docVen/storeProdBarcodeWithQty",function(req,res){
+        var storingData= req.body||{}, docChID= storingData["docChID"], barcode= storingData["Barcode"];
+        r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
+            if(!resultFindProd||resultFindProd.error){
+                var sErr="Failed find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Не удалось найти товар по штрихкоду \""+barcode+"\"!";
+                sErr+="\n"+resultFindProd.error; sErrMsg+="\n"+resultFindProd.errorMessage;
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }else if(!resultFindProd.prodData){
+                var sErr="Cannot find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Товар по штрихкоду \""+barcode+"\" не найден!";
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }
+            var prodData= resultFindProd.prodData,
+                prodDataForStoreToVenA= {"ProdID":prodData["ProdID"],"UM":prodData["UM"], "Barcode":barcode, "TQty":0.0};
+            t_VenA.findAndStoreProdInVenA(req.dbUC,docChID,prodDataForStoreToVenA,storingData["TNewQty"],
+                function(result){ res.send(result); });
+        });
     });
 };

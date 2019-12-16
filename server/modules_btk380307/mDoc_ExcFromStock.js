@@ -59,7 +59,7 @@ module.exports.init = function(app){
         {data:"StateInfo", name:"Информация статуса", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Exc.StateCode not in (0,52,60,62) Then 'Изменение запрещено' Else 'Изменение разрешено' END" }
     ];
-    app.get("/mobile/excFromStock/getDataForExcList",function(req,res){
+    app.get("/mobile/docExcFromStock/getDataForExcList",function(req,res){
         var conditions={}, top="";
         for(var condItem in req.query){
             if(condItem=="top")top="top "+req.query[condItem];
@@ -107,10 +107,10 @@ module.exports.init = function(app){
         {data:"TaxSum", name:"НДС", width:75, type:"numeric2", dataSource:"t_ExcD"},
         {data:"SumCC_wt", name:"Сумма", width:75, type:"numeric2", dataSource:"t_ExcD"}
     ];
-    app.get("/mobile/excFromStock/getDataForExcDTable",function(req,res){
+    app.get("/mobile/docExcFromStock/getDataForExcDTable",function(req,res){
         var conditions={};
         for(var condItem in req.query)
-            if(condItem.indexOf("ParentChID")==0) conditions["t_ExcD.ChID="]= req.query[condItem];
+            if(condItem.indexOf("docChID")==0) conditions["t_ExcD.ChID="]= req.query[condItem];
             else conditions["t_ExcD."+condItem]= req.query[condItem];
         t_ExcD.getDataItemsForTable(req.dbUC,{tableColumns:tExcFromStockProductsTableColumns,conditions:conditions,order:"SrcPosID"},
             function(result){ res.send(result); });
@@ -357,7 +357,7 @@ module.exports.init = function(app){
                 });
             });
     };
-    app.post("/mobile/excFromStock/storeProdDataByCRUniInput",function(req,res){
+    app.post("/mobile/docExcFromStock/storeProdDataByCRUniInput",function(req,res){
         var storingData= req.body||{}, docChID= storingData["docChID"], value= storingData["value"];
         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
             if(resultFindProd.error){
@@ -371,12 +371,12 @@ module.exports.init = function(app){
             t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,prodDataForStoreToExcD,storingData["addQty"],function (result){ res.send(result); })
         });
     });
-    app.post("/mobile/excFromStock/storeQtyData",function(req,res){
+    app.post("/mobile/docExcFromStock/storeQtyData",function(req,res){
         var storingData= req.body||{}, docChID= storingData["docChID"],
             excDData= {SrcPosID:storingData["SrcPosID"],"Qty":storingData["Qty"]};
         t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,excDData,0,function(result){ res.send(result); });
     });
-    app.get("/mobile/excFromStock/findProdDataByBarcode",function(req,res){
+    app.get("/mobile/docExcFromStock/findProdDataByBarcode",function(req,res){
         var barcode= req.query["Barcode~"], docChID= req.query["docChID~"];
         r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
             if(!resultFindProd||resultFindProd.error){
@@ -401,7 +401,7 @@ module.exports.init = function(app){
                         res.send({error:"Failed find prod in t_ExcD!<br>"+resultFindProdInExcD.error.error,
                             errorMessage:"Не удалось найти товар в перемещении!<br>"+resultFindProdInExcD.error.message});
                         return;
-                    }                                                                                           console.log("resultFindProd",resultFindProd,resultFindProdInExcD);
+                    }
                     if(resultFindProdInExcD.items&&resultFindProdInExcD.items.length>0){
                         var findedExcDData= resultFindProdInExcD.items[0];
                         prodData["SrcPosID"]= findedExcDData["SrcPosID"];
@@ -411,7 +411,7 @@ module.exports.init = function(app){
                 });
         });
     });
-    app.post("/mobile/excFromStock/storeProdBarcodeWithQty",function(req,res){
+    app.post("/mobile/docExcFromStock/storeProdBarcodeWithQty",function(req,res){
         var storingData= req.body||{}, docChID= storingData["docChID"], barcode= storingData["Barcode"];
         r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
             if(!resultFindProd||resultFindProd.error){

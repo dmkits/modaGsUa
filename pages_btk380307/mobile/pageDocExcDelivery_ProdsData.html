@@ -1,105 +1,105 @@
 <!--suppress ALL, JSAnnotator -->
 <template>
-    <div class="page page-with-subnavbar" id="pageDocExcDeliveryProdsData">
-        <div class="navbar">
-            <div class="navbar-inner">
-                <div class="left">
-                    <a href="#" class="link back">
-                        <i class="icon icon-back"></i><i class="icon icon-back"></i>
-                        <!--<span class="ios-only"></span>-->
-                    </a>
-                </div>
-                <div class="title docHeaderTitle">
-                    <span>Перемещение на доставку<br>{{docData.DocID}} от {{docData.SDocDate}}</span><br>
-                </div>
-                <div class="subnavbar docHeaderTitle" id="pageDocExcDeliveryProdsDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
-                    <div class="subnavbar-inner">
-                        <div class="row" style="padding-left:16px;padding-right:16px;">
-                            <input type="number" class="col" style="height:36px;min-width:200px;" id="pageDocExcDeliveryProdsDataBarCodeInput" placeholder="ШК или код товара">
-                            <button class="col button button-outline button-round" id="pageDocExcDeliveryProdsDataBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>
-                            <div>
-                                <span id="pageDocExcDeliveryProdsDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>
-                                <span id="pageDocExcDeliveryProdsDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
-                            </div>
+<div class="page page-with-subnavbar" id="pageDocExcDeliveryProdsData">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link back">
+                    <i class="icon icon-back"></i><i class="icon icon-back"></i>
+                    <!--<span class="ios-only"></span>-->
+                </a>
+            </div>
+            <div class="title docHeaderTitle">
+                <span>Перемещение на доставку<br>{{docData.DocID}} от {{docData.SDocDate}}</span><br>
+            </div>
+            <div class="subnavbar docHeaderTitle" id="pageDocExcDeliveryProdsDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
+                <div class="subnavbar-inner">
+                    <div class="row" style="padding-left:16px;padding-right:16px;">
+                        <input type="number" class="col" style="height:36px;min-width:200px;" id="pageDocExcDeliveryProdsDataBarCodeInput" placeholder="ШК или код товара">
+                        <button class="col button button-outline button-round" id="pageDocExcDeliveryProdsDataBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>
+                        <div>
+                            <span id="pageDocExcDeliveryProdsDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>
+                            <span id="pageDocExcDeliveryProdsDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="page-content" id="pageContentDocExcDeliveryProdsData" style="padding-left:1px;padding-right:1px;padding-bottom:1px;">
-            <table class="mobile-table-small-size" height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
-                <thead>
-                <tr style="">
-                    <th width="40px"><span class="table-header-small">№<br>п/п</span></th>
-                    <th><span class="table-header-small">Наименование товара<br>Код товара</span></th>
-                    <!--<th width="50px"><span class="table-header-small">Ед.<br>изм.</span></th>-->
-                    <th width="50px"><span class="table-header-small">Уч.<br>кол-во</span></th>
-                    <th width="50px"><span class="table-header-small">Факт.<br>кол-во</span></th>
-                </tr>
-                </thead>
-                <tbody style="display:none">
-                <tr rowSelecting="true">
-                    <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
-                    <td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
-                </tr>
-                <tr rowSelecting="true">
-                    <td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
-                    <!--<td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>-->
-                    <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
-                    <td width="50px" class="tdNewQty" dataItemName="NewQty"
-                        onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
-                </tr>
-                </tbody>
-            </table>
-            <table class="mobile-table-small-size" style="margin-top:33px;margin-bottom:30px;width:100%"></table>
-            <table class="mobile-table-small-size" height="30px" style="position:fixed;left:1px;bottom:0px;width:calc(100% - 2px);z-index:100">
-                <tfoot>
-                <tr>
-                    <td id="totalRows" width="40px"><span class="table-total">0</span></td>
-                    <td><span class="table-total"></span></td>
-                    <td id="totalQty" width="50px"><span class="table-total">0</span></td>
-                    <td id="totalNewQty" width="50px"><span class="table-total">0</span></td>
-                </tr>
-                </tfoot>
-            </table>
-            <table class="mobile-table-large-size" height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
-                <thead>
-                <tr>
-                    <th width="40px"><div class="table-header-large">№<br>п/п</div></th>
-                    <th width="110px"><div class="table-header-large">Штрихкод</div></th>
-                    <th width="50px"><div class="table-header-large">Код товара</div></th>
-                    <th><div class="table-header-large">Наименование товара</div></th>
-                    <th width="50px"><div class="table-header-large">Ед.<br>изм.</div></th>
-                    <th width="50px"><div class="table-header-large">Уч.<br>кол-во</div></th>
-                    <th width="50px"><div class="table-header-large">Факт.<br>кол-во</div></th>
-                </tr>
-                </thead>
-                <tbody style="display:none">
-                <tr rowSelecting="true">
-                    <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
-                    <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"><div class="table-text"></div></td>
-                    <td width="50px" class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
-                    <td class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
-                    <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
-                    <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
-                    <td width="50px" class="tdNewQty" dataItemName="NewQty"
-                        onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
-                </tr>
-                </tbody>
-            </table>
-            <table class="mobile-table-large-size" style="margin-top:33px;margin-bottom:30px;width:100%"></table>
-            <table class="mobile-table-large-size" height="30px" style="position:fixed;left:1px;bottom:0px;width:calc(100% - 2px);z-index:100">
-                <tfoot>
-                <tr>
-                    <td id="totalRows" width="40px"><span class="table-total">0</span></td>
-                    <td><span class="table-total"></span></td>
-                    <td id="totalQty" width="50px"><span class="table-total">0</span></td>
-                    <td id="totalNewQty" width="50px"><span class="table-total">0</span></td>
-                </tr>
-                </tfoot>
-            </table>
-        </div>
     </div>
+    <div class="page-content" id="pageContentDocExcDeliveryProdsData" style="padding-left:1px;padding-right:1px;padding-bottom:1px;">
+        <table class="mobile-table-small-size" height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
+            <thead>
+            <tr style="">
+                <th width="40px"><span class="table-header-small">№<br>п/п</span></th>
+                <th><span class="table-header-small">Наименование товара<br>Код товара</span></th>
+                <!--<th width="50px"><span class="table-header-small">Ед.<br>изм.</span></th>-->
+                <th width="50px"><span class="table-header-small">Уч.<br>кол-во</span></th>
+                <th width="50px"><span class="table-header-small">Факт.<br>кол-во</span></th>
+            </tr>
+            </thead>
+            <tbody style="display:none">
+            <tr rowSelecting="true">
+                <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
+                <td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
+            </tr>
+            <tr rowSelecting="true">
+                <td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
+                <!--<td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>-->
+                <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
+                <td width="50px" class="tdNewQty" dataItemName="NewQty"
+                    onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="mobile-table-small-size" style="margin-top:33px;margin-bottom:30px;width:100%"></table>
+        <table class="mobile-table-small-size" height="30px" style="position:fixed;left:1px;bottom:0px;width:calc(100% - 2px);z-index:100">
+            <tfoot>
+            <tr>
+                <td id="totalRows" width="40px"><span class="table-total">0</span></td>
+                <td><span class="table-total"></span></td>
+                <td id="totalQty" width="50px"><span class="table-total">0</span></td>
+                <td id="totalNewQty" width="50px"><span class="table-total">0</span></td>
+            </tr>
+            </tfoot>
+        </table>
+        <table class="mobile-table-large-size" height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
+            <thead>
+            <tr>
+                <th width="40px"><div class="table-header-large">№<br>п/п</div></th>
+                <th width="110px"><div class="table-header-large">Штрихкод</div></th>
+                <th width="50px"><div class="table-header-large">Код товара</div></th>
+                <th><div class="table-header-large">Наименование товара</div></th>
+                <th width="50px"><div class="table-header-large">Ед.<br>изм.</div></th>
+                <th width="50px"><div class="table-header-large">Уч.<br>кол-во</div></th>
+                <th width="50px"><div class="table-header-large">Факт.<br>кол-во</div></th>
+            </tr>
+            </thead>
+            <tbody style="display:none">
+            <tr rowSelecting="true">
+                <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
+                <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"><div class="table-text"></div></td>
+                <td width="50px" class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
+                <td class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
+                <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
+                <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
+                <td width="50px" class="tdNewQty" dataItemName="NewQty"
+                    onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="mobile-table-large-size" style="margin-top:33px;margin-bottom:30px;width:100%"></table>
+        <table class="mobile-table-large-size" height="30px" style="position:fixed;left:1px;bottom:0px;width:calc(100% - 2px);z-index:100">
+            <tfoot>
+            <tr>
+                <td id="totalRows" width="40px"><span class="table-total">0</span></td>
+                <td><span class="table-total"></span></td>
+                <td id="totalQty" width="50px"><span class="table-total">0</span></td>
+                <td id="totalNewQty" width="50px"><span class="table-total">0</span></td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
 </template>
 <script>
     return {
@@ -159,7 +159,7 @@
                 if(excChID===null||excChID===undefined) return;
                 var self=this;                                                                                  //console.log('pageDocExcDelivery_ProdsData.html loadExcData excChID=',excChID, this);
                 app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/excDelivery/getDataForExcDTable',conditions:{'ParentChID=':excChID},
+                app7.srvRequestJSON({url:'/mobile/docExcDelivery/getDataForExcDTable',conditions:{'docChID=':excChID},
                             errorDialogMsg:"Не удалось получить товары перемещения на доставку с сервера!"},
                         function(result,error){
                             app7.preloader.hide();
@@ -249,7 +249,7 @@
                 }
                 var self=this, docChID= this.docData["ChID"];                                                  //console.log('pageDocExcDelivery_ProdsData.html storeInputValueToExc inputValue=',inputValue, this);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/excDelivery/storeProdDataByCRUniInput',data:{value:inputValue,docChID:docChID},
+                app7.srvPostRequestJSON({url:'/mobile/docExcDelivery/storeProdDataByCRUniInput',data:{value:inputValue,docChID:docChID},
                             userErrorMsg:"Не удалось добавить товар в перемещение!"},
                         function(result,errmsg){
                             app7.preloader.hide();
@@ -323,8 +323,7 @@
             storeNewQtyToExcD: function(srcPosID,prodID,newQty,callback){
                 var cInstance=this, docChID=this.docData["ChID"];                                            //console.log('pageDocExcDelivery_ProdsData.html storeNewQtyToExcD tSrcPosID=',tSrcPosID, tNewQty);
                 app7.preloader.show();
-                app7.srvPostRequestJSON({url:'/mobile/excDelivery/storeNewQtyData',
-                            data:{docChID:docChID,SrcPosID:srcPosID,NewQty:newQty},
+                app7.srvPostRequestJSON({url:'/mobile/docExcDelivery/storeNewQtyData',data:{docChID:docChID,SrcPosID:srcPosID,NewQty:newQty},
                             showRequestErrorDialog:false},
                     function(result,errmsg){
                         app7.preloader.hide();// Hide Preloader

@@ -101,7 +101,7 @@
                 app7.preloader.show();
                 var conditions= {top:app7.data['docRecDocsListCount']};
                 if(stockIDFilter=='') conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
-                app7.srvRequestJSON({url:'/mobile/rec/getDataForRecsList',conditions:conditions,
+                app7.srvRequestJSON({url:'/mobile/docRec/getDataForRecsList',conditions:conditions,
                         errorDialogMsg:"Не удалось получить список приходов товара с сервера!"},
                     function(result,error){
                         app7.preloader.hide();

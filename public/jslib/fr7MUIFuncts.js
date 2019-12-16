@@ -24,14 +24,13 @@ var framework7MUIFunctions= {
         if(params.data)requestData=params.data;
         else if(params.conditions&&typeof(params.conditions)=="string") requestData=params.conditions.replace('=','~');
         else if(params.conditions)
-            for(var cName in params.conditions) requestData[cName.replace('=','~')]=params.conditions[cName];   //console.log('srvRequestJSON app7.request',params.url,'requestData=',requestData);
-        this.request({method:params.method,url:params.url,data:requestData,
-            headers:{ 'x-requested-with': 'application/json; charset=utf-8' },
-            success:function(data){                                                                             //console.log('srvRequestJSON app7.request',params.url,'success data=',data);
+            for(var cName in params.conditions) requestData[cName.replace('=','~')]=params.conditions[cName];
+        this.request({method:params.method,url:params.url,data:requestData,headers:{'x-requested-with':'application/json; charset=utf-8'},
+            success:function(data){
                 var errMsg;
-                if(!params.errorDialogMsg)params.errorDialogMsg='Не удалось получить данные с сервера!';
-                if(data==undefined||data==null) {
-                    if(params.showRequestErrorDialog==false){ callback(null, null);return; }
+                if(!params.errorDialogMsg) params.errorDialogMsg='Не удалось получить данные с сервера!';
+                if(data==undefined||data==null){
+                    if(params.showRequestErrorDialog==false){ callback(null,null); return; }
                     errMsg=params.errorDialogMsg;
                 }
                 var jsonData;
@@ -41,36 +40,30 @@ var framework7MUIFunctions= {
                     errMsg=params.errorDialogMsg+'<br>Данные некорректные!';
                 }
                 if(jsonData&&jsonData.error){
-                    if(typeof(jsonData.error)=="string")errMsg= jsonData.errorMessage||jsonData.error;
+                    if(typeof(jsonData.error)=="string") errMsg= jsonData.errorMessage||jsonData.error;
                     else errMsg= (jsonData.error.userMessage||jsonData.error.message||jsonData.error.error);
-                    errMsg=params.errorDialogMsg+"<br>"+errMsg;
+                    errMsg= params.errorDialogMsg+"<br>"+errMsg;
                 }
-                if(errMsg&&params.showRequestErrorDialog==false){ callback(null, errMsg);return; }
+                if(errMsg&&params.showRequestErrorDialog==false){ callback(null,errMsg); return; }
                 if(errMsg&&app7.srvRequestJSONDialogErr){ app7.srvRequestJSONDialogErr.open(); return; }
                 else if(errMsg){
-                    app7.srvRequestJSONDialogErr = app7.dialog.alert(errMsg,"Внимание",function(){
-                        app7.srvRequestJSONDialogErr = null;
-                        callback(null, errMsg);
+                    app7.srvRequestJSONDialogErr= app7.dialog.alert(errMsg,"Внимание",function(){
+                        app7.srvRequestJSONDialogErr=null;
+                        callback(null,errMsg);
                     });
                     return;
-                }                                                                                           //console.log('srvRequestJSON app7.request',params.url,'success jsonData=',jsonData);
+                }
                 callback(jsonData);
             },
-            error:function(xhr, status){                                                                    //console.log('srvRequestJSON app7.request',params.url,'error err=',xhr);
-                var state=status,
-                    msg=(!params.errorDialogMsg)?'Не удалось получить данные с сервера!':params.errorDialogMsg;
-                if(params.showRequestErrorDialog==false){
-                    callback(undefined,msg+"<br>Статус="+state);return;
-                }
+            error:function(xhr,status){
+                var state=status, msg= (!params.errorDialogMsg)?'Не удалось получить данные с сервера!':params.errorDialogMsg;
+                if(params.showRequestErrorDialog==false){ callback(undefined,msg+"<br>Статус="+state); return; }
                 if(state===0){
-                    msg+="<br>Неправильный или недействительный адрес сервера"+
-                        "<br>или доступ по указанному адресу сервера запрещен.";
-                } else
+                    msg+="<br>Неправильный или недействительный адрес сервера<br>или доступ по указанному адресу сервера запрещен.";
+                }else
                     msg+="<br>Не удалось установить связь с сервером по указанному адресу.";
-                if(app7.srvRequestJSONDialogErr){
-                    app7.srvRequestJSONDialogErr.open(); return;
-                }
-                app7.srvRequestJSONDialogErr=app7.dialog.alert(msg,"Внимание",function(){
+                if(app7.srvRequestJSONDialogErr){ app7.srvRequestJSONDialogErr.open(); return; }
+                app7.srvRequestJSONDialogErr= app7.dialog.alert(msg,"Внимание",function(){
                     app7.srvRequestJSONDialogErr=null;
                     callback(undefined,msg);
                 });
@@ -154,11 +147,14 @@ var framework7MUIFunctions= {
             newTRs.push(newTR=dthTR.cloneNode(true)); contentTableDataDomEl.appendChild(newTR);
             var rowSelecting= newTR.getAttribute("rowSelecting"),
                 selectOnClickFunction=function(e){
-                    $$(contentTableDataDomEl).children('.mobile-table-selectedRow').removeClass('mobile-table-selectedRow');
-                    for(var selTR of newTRs) selTR.classList.add('mobile-table-selectedRow');
+                    if(contentTableDataDomEl.contentTableDataDomSelectedTRs)
+                        for(var trDomEl of contentTableDataDomEl.contentTableDataDomSelectedTRs)
+                            trDomEl.classList.remove('mobile-table-selectedRow')
+                    contentTableDataDomEl.contentTableDataDomSelectedTRs= [].concat(newTRs);
+                    for(var trDomEl of contentTableDataDomEl.contentTableDataDomSelectedTRs)
+                        trDomEl.classList.add('mobile-table-selectedRow')
                 };
-            var trOnCreatedMethodName= newTR.getAttribute("onCreated"),
-                trOnClickMethodName= newTR.getAttribute("onClick");
+            var trOnCreatedMethodName= newTR.getAttribute("onCreated"), trOnClickMethodName= newTR.getAttribute("onClick");
             if(trOnCreatedMethodName){
                 var methods={};
                 if(rowSelecting) methods["rowSelectingMethod"]= selectOnClickFunction;

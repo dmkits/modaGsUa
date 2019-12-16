@@ -65,7 +65,7 @@ module.exports.init = function(app){
         {data:"StateName", name:"Статус", width:250, type:"text",
             dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" }
     ];
-    app.get("/mobile/rec/getDataForRecsList",function(req,res){
+    app.get("/mobile/docRec/getDataForRecsList",function(req,res){
         var conditions={}, top="";
         for(var condItem in req.query){
             var condVal=req.query[condItem];
@@ -137,10 +137,10 @@ module.exports.init = function(app){
         {data:"PriceCC", name:"Цена продажи", width:65, type:"numeric2", dataSource:"t_RecD"}
         //{data:"PRICELIST_PRICE", name:"Цена по прайс-листу", width:75, type:"numeric2"},
     ];
-    app.get("/mobile/rec/getDataForRecDTable",function(req,res){
+    app.get("/mobile/docRec/getDataForRecDTable",function(req,res){
         var conditions={};
         for(var condItem in req.query)
-            if(condItem.indexOf("ParentChID")==0) conditions["t_RecD.ChID="]= req.query[condItem];
+            if(condItem.indexOf("docChID")==0) conditions["t_RecD.ChID="]= req.query[condItem];
             else conditions["t_RecD."+condItem]= req.query[condItem];
         t_RecD.getDataItemsForTable(req.dbUC,{tableColumns:tRecDTableColumns,conditions:conditions,order:"SrcPosID"},
             function(result){ res.send(result); });

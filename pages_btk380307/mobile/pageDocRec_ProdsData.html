@@ -154,7 +154,7 @@
                 var self=this;
                 self.disableActionButtons();
                 app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/rec/getDataForRecDTable',conditions:{'ParentChID=':recChID},
+                app7.srvRequestJSON({url:'/mobile/docRec/getDataForRecDTable',conditions:{'docChID=':recChID},
                             errorDialogMsg:"Не удалось получить список товаров прихода товара с сервера!"},
                         function(result,error){
                             app7.preloader.hide();
