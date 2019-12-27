@@ -62,7 +62,7 @@ try{
 }catch(e){                                                                                          log.warn('Failed create XLSX_temp directory! Reason:',e);
     tempExcelRepDir=null;
 }
-module.exports.tempExcelRepDir= tempExcelRepDir;
+module.exports.getTempExcelRepDir= function(){ return tempExcelRepDir };
 
 var appServerComponentsVersion= (sysConfig.appServerComponentsVersion)?"_"+sysConfig.appServerComponentsVersion:"";
 global.appModulesPath= path.join(__dirname,'/modules'+appServerComponentsVersion+'/','');

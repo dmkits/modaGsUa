@@ -48,12 +48,13 @@ module.exports.getJSONWithoutComments= function(text){
     return text;
 };
 
-module.exports.getUIDNumber= function(){
+var getUIDNumber= function(){
     var str= uid.time(), len= str.length, num= BigNumber(0);
     for(var i=(len-1); i>=0; i--)
         num.plus(BigNumber(256).pow(i).mult(str.charCodeAt(i)));
     return num.toString();
 };
+module.exports.getUIDNumber= getUIDNumber;
 
 var getControlBarcodeFigure= function(valueForBarcode){
     var barcodeStr=valueForBarcode.toString();
@@ -80,3 +81,93 @@ module.exports.sortArray= function(arr){
     arr.sort(compareBychangeDatetime);
     return arr;
 };
+
+var server= require('./server'), log= server.log;
+var XLSX= require('xlsx');
+/**
+ * sExcelData = { columns, rows }
+ * callback= function(status, filename, unlinkAction)
+ *      unlinkAction = function()
+ * if error return callback(<status>)
+ * else return callback(0,<filename>,unlinkAction)
+ */
+module.exports.getExcelFile= function(sExcelData,callback){
+    try {
+        var body= JSON.parse(sExcelData), columns= body.columns, rows= body.rows;
+    }catch(e){                                                                                                  log.error("Impossible to parse data! Reason:",e);
+        callback(500); return;
+    }
+    if(!columns){                                                                                               log.error("Error: No columns data to create excel file.");
+        callback(500); return;
+    }
+    if(!rows){                                                                                                  log.error("Error: No table data to create excel file.");
+        callback(500); return;
+    }
+    var uniqueFileName= getUIDNumber(), fname= path.join(server.getTempExcelRepDir(),uniqueFileName+'.xlsx');
+    try{
+        fs.writeFileSync(fname);
+    }catch(e){                                                                                                  log.error("Impossible to write file! Reason:",e);
+        callback(500); return;
+    }
+    try{
+        var wb= XLSX.readFileSync(fname);
+    }catch(e){                                                                                                  log.error("Impossible to create workbook! Reason:",e);
+        callback(500); return;
+    }
+    wb.SheetNames= []; wb.SheetNames.push('Sheet1');
+    fillTable(wb,columns,rows);
+    XLSX.writeFileAsync(fname, wb, {bookType:"xlsx", /*cellStyles:true,*/ cellDates:true}, function(err){
+        if(err){                                                                                                log.error("send xls file err=",err);
+            callback(500); return;
+        }
+        callback(0,fname, function(err){
+            fs.unlink(fname,function(errUnlink){
+                if(errUnlink){                                                                                  log.error("unlink xls file err=",err);
+                }
+            });
+        })
+    });
+};
+function fillTable(wb,columns,rows){
+    fillHeaders(wb,columns);
+    var lineNum=1;
+    for(var i in rows){
+        fillRowData(wb,rows[i],columns,lineNum);
+        lineNum++;
+    }
+}
+function fillHeaders(wb,columns){
+    var worksheetColumns= [];
+    wb.Sheets['Sheet1']= { '!cols': worksheetColumns };
+    for (var j=0; j<columns.length; j++) {
+        worksheetColumns.push({wpx: columns[j].width});
+        var currentHeader= XLSX.utils.encode_cell({c:j,r:0});
+        wb.Sheets['Sheet1'][currentHeader] = {t:"s", v:columns[j].name, s:{font:{bold:true}}};
+    }
+}
+function fillRowData(wb,rowData,columns, lineNum){
+    var lastCellInRaw;
+    for(var i=0; i<columns.length; i++){
+        var column= columns[i], columnDataID= column.data, cellType= getCellType(column),
+            displayValue= rowData[columnDataID];
+        displayValue= (displayValue===undefined||displayValue===null)?"":displayValue;
+        var currentCell= XLSX.utils.encode_cell({c:i,r:lineNum});
+        lastCellInRaw= currentCell;
+        wb.Sheets['Sheet1'][currentCell]={};
+        var wbCell= wb.Sheets['Sheet1'][currentCell];
+        wbCell.t= cellType; wbCell.v= displayValue;
+        if(wbCell.t=="d"){
+            wbCell.z= column.datetimeFormat || "DD.MM.YYYY";
+        }else if(wbCell.t=="n"){
+            if(column.format.indexOf("0.00")>0 ) wbCell.z= '#,###,##0.00';
+            if(column.format.indexOf("0.[")>0 ) wbCell.z= '#,###,##0';
+        }
+        wb.Sheets['Sheet1']['!ref']= 'A1:'+lastCellInRaw;
+    }
+}
+function getCellType(columnData){
+    if(!columnData.type) return's';
+    if(columnData.type=="numeric") return'n';
+    if(columnData.type=="text" && columnData.datetimeFormat) return'd';
+    else return's';
+}
