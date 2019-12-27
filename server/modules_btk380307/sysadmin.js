@@ -31,8 +31,8 @@ module.exports.init = function(app){
             {fields:["dbUserName","GMS_DBVersion","OT_DBiID",
                 "t_OurID","t_OneOur","OT_MainOurID","z_CurrMC","z_CurrCC","t_StockID","t_OneStock","it_MainStockID","t_SecID","DefaultUM",
                 "EmpID","EmpName","EmpRole"], withoutConditions:true},
-            function(result){ callback(result.error,result.item);
-            });
+            function(result){ callback(result.error,result.item);}
+        );
     };
     app.get("/sysadmin/sysState",function(req,res){
         var revalidateModules= false;
