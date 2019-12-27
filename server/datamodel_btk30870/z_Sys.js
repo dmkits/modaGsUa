@@ -1,0 +1,19 @@
+module.exports.id=module.id;
+module.exports.modelData = { tableName:"z_Sys",idField:"SysID",
+    fields:["SysID","SrvPack","DBType","DBInfo",
+        "RoundNum","RoundTax","RoundTaxSum","RoundPriceIn","TaxPercent",
+        "CurrCC","CurrMC","BDate","EDate",
+        "PayMonMode","MinExtraPrc","MaxExtraPrc","ExtraMode","RoundMonPL","SLoyalID","BarQtyCount","BarDecCount","ConfirmPost",
+        "s_PP","s_PPQC","s_RZ","s_DZ","s_ZR","s_RR","s_SPCfg","s_TaxFromPrice","s_PPAutoCrComp","s_PPAutoCreate",
+        "s_CCPF","s_EPCfg","s_EppPCfg","s_ExtLog","s_ShowNoRemMes","s_RemExtra","s_MoreInDocs",
+        "b_PP","b_PPQC","b_RZ","b_DZ","b_ZR","b_GLInTID","b_GRPTID","b_MoreInDocs","b_MoreInReps","b_TaxFromPrice",
+        "b_CCPF","b_ExtLog","b_PPAutoCrComp","b_PPAutoCreate","b_ShowNoRemMes","b_UseFirstEvent","b_EPCfg","b_RemExtra",
+        "t_PP","t_PPQC","t_RZ","t_DZ","t_ZR","t_PPAutoCrComp","t_PPAutoCreate","t_AutoCreateRem","t_KeepZeroPP",
+        "t_MoveToBarCode","t_ShowOneProdCode","t_ChangeSalePrice","t_RetailTrade","t_UseBarCodePL",
+        "t_SPP","t_ValidExp","t_ChequeCompID","t_CCPF","t_EPCfg","t_EppPCfg","t_ExtLog","t_ShowNoRemMes",
+        "t_UseNotBarCodePL","t_NotBarCodePLList","t_NotUseBarPL","t_NoPPTarce","t_RemExtra","t_MoreInDocs",
+        "e_DZ","e_RZ","e_ExtLog",
+        "c_ExtLog",
+        "p_ExtLog","p_SickNoValidPays","p_LeavNoValidPays","p_DisNoValidPays","p_IndexPayTypeID","p_ThirteenPay",
+        "n_ExtLog"]
+};
