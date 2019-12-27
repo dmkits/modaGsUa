@@ -16,6 +16,7 @@ module.exports.resetValidatedDataModels= function(){ validatedDataModels={}; };
  *          tableName/viewName, idField="<idFieldName>", fields=["<fieldName>, ..." ];
  *          queryName, idField="<idFieldName>", fields=["<fieldName>, ..."], queryParameters=["@<parameterName>", ... ];
  *          functionName, functionParameters=["@<parameterName>", ... ]
+ *      errs = [ <datamodel name>+"_initError":<error message>, ... ]
  * created data model functions
  */
 function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataModelCallback){                  log.info('InitValidateDataModel: dataModel:'+dataModelName+"...");//test
@@ -159,7 +160,10 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     };
     dataModel.doValidate(errs, nextValidateDataModelCallback);
 }
-
+/**
+ * resultCallback= function(errs)
+ *      errs = [ <datamodel name>+"_initError":<error message>, ... ]
+ */
 module.exports.initValidateDataModels= function(dataModelsList, errs, resultCallback){
     var validateDataModelCallback = function(dataModelsList, index, errs){
         var dataModelInstance= dataModelsList[index];
@@ -319,7 +323,7 @@ function _getSelectItems(connection, params,resultCallback){                    
         selectQuery+= " group by "+queryGroupedFields;
     }
     if(hConditionQuery) selectQuery+= " having "+hConditionQuery;
-    if(params.order) selectQuery+= " order by "+params.order;                                                    //log.debug('_getSelectItems selectQuery:',selectQuery);//test
+    if(params.order) selectQuery+= " order by "+params.order;                                                   //log.debug('_getSelectItems selectQuery:',selectQuery);//test
     if(queryValues.length==0)
         database.selectQuery(connection, selectQuery, function(err,recordset,count,fields){
             if(err){                                                                                            log.error("FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
@@ -353,7 +357,7 @@ function _getDataItems(connection, params, resultCallback){                     
     if(!params.sourceParamsNames) params.sourceParamsNames= this.sourceParamsNames;
     if(!params.sourceParams) params.sourceParams= this.sourceParams;
     if(!params.fields) params.fields=this.fields;
-    if(!params.withoutConditions&&!params.conditions){                                                                                     log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!");//test
+    if(!params.withoutConditions&&!params.conditions){                                                          log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!");//test
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!"});
         return;
     }
@@ -365,7 +369,7 @@ function _getDataItems(connection, params, resultCallback){                     
             hasCondition= true;
         }
     }
-    if(!params.withoutConditions&&!hasCondition){                                                                                          log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!");//test
+    if(!params.withoutConditions&&!hasCondition){                                                               log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!");//test
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!"});
         return;
     }
@@ -395,7 +399,11 @@ function _getDataItems(connection, params, resultCallback){                     
 function _getDataItem(connection, params, resultCallback){
     if(!params) params={};
     if(!params.source) params.source= this.source;
-    if(!params.fields) params.fields= this.fields;
+    if(!params.sourceName) params.sourceName= this.sourceName;
+    if(!params.sourceType) params.sourceType= this.sourceType;
+    if(!params.sourceParamsNames) params.sourceParamsNames= this.sourceParamsNames;
+    if(!params.sourceParams) params.sourceParams= this.sourceParams;
+    if(!params.fields) params.fields=this.fields;
     _getDataItems(connection, params, function(result){                                                         log.debug('_getDataItem: _getDataItems: result:',result,{});//test
         var getDataItemResult={};
         if(result.error) getDataItemResult.error= result.error;

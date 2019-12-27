@@ -1,10 +1,9 @@
-var path=require('path'), fs=require('fs');
-var server=require("./server"), log= server.log,
+var path= require('path'), fs= require('fs');
+var server= require("./server"), log= server.log,
     appStartupParams= server.getAppStartupParams(), getSysConfig= server.getSysConfig,
     getAppConfigName= server.getAppConfigName, getAppConfig= server.getAppConfig,
-    database=require("./databaseMSSQL"),
-    appModules=require(appModulesPath),
-    common=require("./common");
+    database= require("./databaseMSSQL"), common= require("./common"),
+    appModules= require(appModulesPath), sysadmin= require(appModulesPath+"sysadmin");
 
 var sysadminsList={};
 
@@ -107,28 +106,7 @@ module.exports= function(app){
         for(var saUUID in sysadminsList)
             if(saUUID==uuid) return sysadminsList[saUUID];
     };
-    /**
-     * callback = function(<error message>,{<database user parameters>})
-     */
-    var getDBUserData= function(connection,callback){
-        database.selectQuery(connection,
-            "select SUSER_NAME() as dbUserName,"+
-            "GMS_DBVersion=dbo.zf_Var('GMS_DBVersion'),OT_DBiID=dbo.zf_Var('OT_DBiID'),"+
-            "t_OurID=dbo.zf_Var('t_OurID'),t_OneOur=dbo.zf_Var('t_OneOur'),OT_MainOurID=dbo.zf_Var('OT_MainOurID'),"+
-            "z_CurrMC=dbo.zf_Var('z_CurrMC'),z_CurrCC=dbo.zf_Var('z_CurrCC'),"+
-            "t_StockID=dbo.zf_Var('t_StockID'),t_OneStock=dbo.zf_Var('t_OneStock'),it_MainStockID=dbo.zf_Var('it_MainStockID'),"+
-            "t_SecID=dbo.zf_Var('t_SecID'),DefaultUM=dbo.zf_Var('DefaultUM'), "+
-            "EmpID=(select EmpID from r_Users where UserName=SUSER_NAME()), "+
-            "EmpName=(select EmpName from r_Users u, r_Emps e where e.EmpID=u.EmpID and u.UserName=SUSER_NAME()),"+
-            "EmpRole=(select un.Notes from r_Users u, r_Emps e,r_Uni un where e.EmpID=u.EmpID and u.UserName=SUSER_NAME() and un.RefTypeID=10606 and un.RefID=e.ShiftPostID)",
-            function(err,recordset){
-                if(err||(recordset&&recordset.length==0)){
-                    callback("Не удалось получить данные пользователя из базы даных! Обратитесь к системному администратору.");
-                    return;
-                }
-                callback(null,recordset[0]);
-            });
-    };
+
     app.use(function(req,res,next){                                                                             log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
         var isMobileApp= getIsMobileApp(req);
         if(isMobileApp) res.header("Access-Control-Allow-Headers","origin, Content-Type,Content-Length, Accept, X-Requested-With, uuid,aidcn");
@@ -167,7 +145,7 @@ module.exports= function(app){
         if(sysadminName) req.dbSysadminName= sysadminName;
         if(sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
             req.dbUC= (userConnectionData)?userConnectionData.connection:null;
-            getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
+            sysadmin.getDBUserData(req.dbUC, function(errMsg,dbUserParameters){
                 req.dbUserParams=dbUserParameters;
                 if(errMsg){
                     req.dbUserName=sysadminName;req.dbEmpRole="sysadmin";req.dbUserError=errMsg;
@@ -207,7 +185,7 @@ module.exports= function(app){
             return;
         }
         req.dbUC = userConnectionData.connection;
-        getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
+        sysadmin.getDBUserData(userConnectionData.connection, function(errMsg,dbUserParameters){
             if(errMsg){
                 accessFail(req,res,next,{
                     error: "ailed to get data! Reason: failed to get login user data from database!",
@@ -298,7 +276,7 @@ module.exports= function(app){
                 var aidcn= getAIDCN();
                 if(aidcn) res.cookie("aidcn",aidcn);
             }
-            getDBUserData(result.dbUC, function(errMsg,dbUserParameters){
+            sysadmin.getDBUserData(result.dbUC, function(errMsg,dbUserParameters){
                 if(errMsg) outData.dbUserError= errMsg;
                 if(dbUserParameters){
                     outData.dbUserName= dbUserParameters["dbUserName"];

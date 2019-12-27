@@ -24,7 +24,7 @@ function createNewUserDBConnection(userData, callback){
         callback({error:"Failed create new user database connection! Reason:No UUID."});
         return;
     }
-    var dbConfig=server.getSysConfig();
+    var dbConfig= server.getSysConfig();
     if(!dbConfig){
         callback({error:"Failed create database system connection! Reason: no server configuration!",
             errorMessage:"Не удалось подключиться к базе данных!<br> Нет параметров подключения к базе данных!<br> Обратитесь к системному администратору."});
@@ -59,7 +59,7 @@ function createNewUserDBConnection(userData, callback){
         callback(null,{dbUC:dbUserConnection});
     });
 }
-module.exports.createNewUserDBConnection=createNewUserDBConnection;
+module.exports.createNewUserDBConnection= createNewUserDBConnection;
 
 var systemConnectionErr=null;
 module.exports.getDBSystemConnection=function(){

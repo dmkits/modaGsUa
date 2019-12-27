@@ -6,14 +6,14 @@ var server=require('../server'), getLoadInitModulesError=server.getLoadInitModul
     getAppConfig=server.getAppConfig;
 var common=require('../common'), database=require('../databaseMSSQL');
 var appModules=require(appModulesPath), getDBValidateError=appModules.getValidateError,
-    dataModel=require(appDataModelPath),
+    dataModel=require(appDataModelPath), querySysDBUserInfo= require(appDataModelPath+"querySysDBUserInfo"),
     changeLog= require(appDataModelPath+"change_log"),
     r_Users= require(appDataModelPath+"r_Users"),ir_UserData= require(appDataModelPath+"ir_UserData"),
     r_Emps= require(appDataModelPath+"r_Emps"),r_Uni= require(appDataModelPath+"r_Uni"),
     sysusers=require(appDataModelPath+"sysusers"), sys_server_principals=require(appDataModelPath+"sys_server_principals");
 
 module.exports.validateModule = function(errs,nextValidateModuleCallback){
-    dataModel.initValidateDataModels([changeLog,r_Users,ir_UserData,r_Emps,r_Uni,sysusers,sys_server_principals], errs,
+    dataModel.initValidateDataModels([querySysDBUserInfo, changeLog,r_Users,ir_UserData,r_Emps,r_Uni,sysusers,sys_server_principals], errs,
         function(){
             nextValidateModuleCallback();
         });
@@ -22,6 +22,18 @@ module.exports.validateModule = function(errs,nextValidateModuleCallback){
 module.exports.modulePageURL = "/sysadmin";
 module.exports.modulePagePath = "sysadmin.html";
 module.exports.init = function(app){
+    /**
+     * call in access module
+     * callback = function(<error message>,{<database user parameters>})
+     */
+    module.exports.getDBUserData= function(dbUC,callback){
+        querySysDBUserInfo.getDataItem(dbUC,
+            {fields:["dbUserName","GMS_DBVersion","OT_DBiID",
+                "t_OurID","t_OneOur","OT_MainOurID","z_CurrMC","z_CurrCC","t_StockID","t_OneStock","it_MainStockID","t_SecID","DefaultUM",
+                "EmpID","EmpName","EmpRole"], withoutConditions:true},
+            function(result){ callback(result.error,result.item);
+            });
+    };
     app.get("/sysadmin/sysState",function(req,res){
         var revalidateModules= false;
         if(req.query&&req.query["revalidate"]) revalidateModules= true;

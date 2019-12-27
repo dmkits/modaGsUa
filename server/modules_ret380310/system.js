@@ -1,11 +1,10 @@
 var dataModel= require(appDataModelPath), server= require('../server'), log= server.log, common= require('../common');
-// var database = require('../databaseMSSQL');
 
-module.exports.validateModule= function(errs, nextValidateModuleCallback){
+module.exports.validateModule = function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([], errs, function(){ nextValidateModuleCallback(); });
 };
 
-module.exports.init= function(app) {
+module.exports.init= function(app){
     app.post("/sys/getExcelFile",function(req,res){
         common.getExcelFile(req.body,function(status, filename, unlinkAction){
             if(status){ res.sendStatus(status); return; }
