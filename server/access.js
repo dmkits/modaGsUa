@@ -245,15 +245,15 @@ module.exports= function(app){
         }
         var uuid = common.getUIDNumber();
         database.createNewUserDBConnection({uuid:uuid,login:userName,password:userPswrd}, function(err,result){
-            var isSysadmin=false, sysConfig=getSysConfig(),
-                appMode=(appStartupParams)?appStartupParams.mode:null,
-                appModeIsDebug=!appMode
+            var isSysadmin=false, sysConfig= getSysConfig(),
+                appMode= (appStartupParams)?appStartupParams.mode:null,
+                appModeIsDebug= !appMode
                     ||(appMode.toLocaleLowerCase().indexOf("debug")>=0)
                     ||(appMode.toLocaleLowerCase().indexOf("test")>=0),
                 appConfig= (getAppConfig)?getAppConfig():null,
                 appName= (appConfig)?(appConfig.title||appConfig.appID):"UNKNOWN",
                 appVer= (appConfig)?appConfig.appVer:null, appCVer= (appConfig)?appConfig.appCVer:null;
-            var outData={"uuid":uuid,
+            var outData= {"uuid":uuid,
                 appName:appName, appVerSrv:appVer, appCVer:appCVer,
                 mode:appMode, modeIsDebug:appModeIsDebug, dbName:sysConfig.dbName
             };
@@ -261,7 +261,11 @@ module.exports= function(app){
             if(err){
                 if(isSysadmin){
                     storeSysadminUUID({uuid:uuid,userName:userName},function(){
-                        res.cookie("uuid", uuid);
+                        if(!getIsMobileApp(req)){
+                            res.cookie("uuid",uuid);
+                            var aidcn= getAIDCN();
+                            if(aidcn) res.cookie("aidcn",aidcn);
+                        }
                         res.send(outData);
                     });
                     return;

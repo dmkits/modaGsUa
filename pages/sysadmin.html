@@ -41,7 +41,7 @@
 </page>
 </body>
 <script type="text/javascript"> //$app.dev(true);
-    $app.startup("#sysadmin_page",function(){                                                               log("START SYSADMIN PAGE...",this,$$);//!!!IT'S FOR TESTING!!!
+    $app.startup("#sysadmin_page",function(){                                                                   log("START SYSADMIN PAGE...",this,$$);//!!!IT'S FOR TESTING!!!
         $$.sysadmin_btnLogout.onClick=function(){
             $$.request.postJSONData({url:"/exit",consoleLog:true},function(result){
                 if(result&&result.actionResult=="successful"){
