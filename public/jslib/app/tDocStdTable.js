@@ -637,8 +637,8 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
              * params = { title, detailTableAction }
              * params.detailTableAction = function(params)
              * params.detailTableAction calls on this.detailHTable select row, or updated table content
-             *  detailTableAction.params = { thisToolPane, detailTable:<this.DetailTable>, instance:<this>,
-             *      detailTableSelectedRow:<this.detailHTable.getSelectedRow()> }
+             *  detailTableAction.params = { toolPaneContent,toolPaneContentDom, detailHeader, detailHTable, doc }
+             *      detailHTable selected row:<detailHTable.getSelectedRow()>
              */
             addToolPane: function(params){
                 if(!this.rightContainer){ console.log("WARNING! Failed addToolPane! Reason: no rightContainer!"); return this; }
@@ -652,21 +652,36 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 $TDF.addTableTo(actionsTitlePane.containerNode);
                 return this;
             },
+            /**
+             * contentAction = function(params),
+             *      params= { toolPaneContent,toolPaneContentDom, detailHeader, detailHTable, doc }
+             */
             addToolXPane: function(title,contentAction){
                 if(!this.toolPanes) this.toolPanes= [];
                 var actionsTitlePane= $TDF.addChildTitlePaneTo(this.rightContainer,{title:title});
                 if(contentAction) actionsTitlePane.contentAction= contentAction;
                 this.toolPanes.push(actionsTitlePane);
-                actionsTitlePane.xContentPane= new XContentPane({style:"margin:0;padding:0;"});
-                actionsTitlePane.addChild(actionsTitlePane.xContentPane);
+                actionsTitlePane.toolPaneContentWidget= new XContentPane({style:"margin:0;padding:0;"});
+                actionsTitlePane.addChild(actionsTitlePane.toolPaneContentWidget);
+                return this;
+            },
+            addToolInnerPage: function(title,contentAction){
+                if(!this.toolPanes) this.toolPanes= [];
+                var actionsTitlePane= $TDF.addChildTitlePaneTo(this.rightContainer,{title:title});
+                if(contentAction) actionsTitlePane.contentAction= contentAction;
+                this.toolPanes.push(actionsTitlePane);
+                actionsTitlePane.toolPaneContentWidget= new window.InnerPage({style:"margin:0;padding:0;"});
+                actionsTitlePane.addChild(actionsTitlePane.toolPaneContentWidget);
                 return this;
             },
             setToolPanesContent: function(){
                 if(!this.toolPanes) return;
                 for(var tpInd=0;tpInd<this.toolPanes.length;tpInd++){
-                    var toolPane= this.toolPanes[tpInd], tpContentAction=toolPane.contentAction,
-                        tpInstance= (toolPane.xContentPane)?toolPane.xContentPane:toolPane;
-                    if(tpContentAction) tpContentAction(tpInstance,this.detailHeader,this.detailHTable,this);
+                    var toolPane= this.toolPanes[tpInd], tpContentAction= toolPane.contentAction;
+                    if(!tpContentAction) continue;
+                    var toolPaneContent= toolPane.toolPaneContentWidget||toolPane;
+                    tpContentAction({toolPaneContent:toolPaneContent,toolPaneContentDom:toolPaneContent.domNode,
+                        detailHeader:this.detailHeader,detailHTable:this.detailHTable,doc:this});
                 }
             },
             addToolPaneBR: function(){

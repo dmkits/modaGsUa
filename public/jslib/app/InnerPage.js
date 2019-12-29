@@ -17,6 +17,7 @@ define(["dojo/_base/declare","dijit/layout/ContentPane","app/tagParser","app/scr
                     this.startup();
                     this._layout();
                     scriptsParser.parseScripts(this.containerNode);
+                    if(this.onLoadCallback) this.onLoadCallback(this);
                 }
             });
         });

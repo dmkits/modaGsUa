@@ -58,8 +58,9 @@ define(["dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dojox/l
                 o.addChild(child);
                 return child;
             };
-            this.addInnerPage=function(params,callback){
+            this.addInnerPage=function(params,callback,onLoadCallback){
                 var innerPage=this.addChildTo($c, window.InnerPage,params);
+                innerPage.onLoadCallback= onLoadCallback;
                 if(callback)callback(innerPage);
                 return $c;
             };
