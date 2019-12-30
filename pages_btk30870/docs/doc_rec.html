@@ -25,15 +25,15 @@
                 numberDataItemName:"DocID", dateDataItemName:"DocDate", titleDatePrefix:"от"},25)
             .addDetailHeaderRow(25,true)
             .addDetailHeaderSelect("OurName","Фирма", 330,
-                {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirOursForSelect", labelDataItem:"OurName"})
+                {selectStyle:"width:250px", loadDropDownURL:"/dirsDocs/getDirOursForSelect", labelDataItem:"OurName"})
             .addDetailHeaderTextBox("DocID", "Номер", 120, {inputStyle:"width:50px"})
             .addDetailHeaderTextBox("IntDocID", "Вн. номер", 120, {inputStyle:"width:50px"})
             .addDetailHeaderDateTextBox("DocDate", "Дата", 150, "width:80px")
             .addDetailHeaderRow(25,true)
-            .addDetailHeaderSelect("StockName","Склад", 250,
-                {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"StockName"})
+            .addDetailHeaderSelect("StockName","Склад", 330,
+                {selectStyle:"width:250px", loadDropDownURL:"/dirsDocs/getDirStocksForSelect", labelDataItem:"StockName"})
             .addDetailHeaderSelect("CompName","Предприятие", 280,
-                {inputStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCompsForSelect", labelDataItem:"CompName"})
+                {selectStyle:"width:200px", loadDropDownURL:"/dirsDocs/getDirCompsForSelect", labelDataItem:"CompName"})
             .addDetailHeaderNumberTextBox("KursMC", "Курс валюты", 200, {inputStyle:"width:40px", pattern:"########0.00"})
             .setDetailTableParameters({conditionIDName:"ParentChID",
                 getDataUrl:"/docs/rec/getDataForRecDTable",
@@ -372,8 +372,9 @@
             .addToolPaneActionButton("Печать ценников", {btnStyle:"width:200px;",detailTableActionName:"printProdTags",
                 actionFunction: function(actionFunctionParams){
                     var printWindow= window.open("/print/printProductsTags");//, "", "location=1,status=1,scrollbars=1,width=650,height=600"
-                    printWindow["pageProdTagType"]= "productTag40x25";
-                        printWindow["prodTagsContentData"]= actionFunctionParams.detailHTable.getContent();
+//                    printWindow["pageProdTagType"]= "productTag40x25";
+                    printWindow["pageProdTagType"]= "productTag58x60";
+                    printWindow["prodTagsContentData"]= actionFunctionParams.detailHTable.getContent();
                 }
             })
 //            .addToolPaneActionButton("Печать цен", {btnStyle:"width:200px;",detailTableActionName:"printProdPricesTags",
@@ -407,7 +408,9 @@
                     var prodTagContentData = {};
                     for(var rowItemName in detailTableSelectedRow) prodTagContentData[rowItemName]= detailTableSelectedRow[rowItemName];
                     params.toolPaneContent.set("prodTagContentData", prodTagContentData);
-                    params.toolPaneContent.set("href","/print/productTag40x25");
+//                    params.toolPaneContent.set("href","/print/productTag40x25");
+//                    params.toolPaneContent.set("href","/print/productTag58x30");
+                    params.toolPaneContent.set("href","/print/productTag58x60");
                 }
             })
             .startupDoc();

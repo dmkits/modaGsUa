@@ -1,0 +1,46 @@
+<div id="prodTagContent" style="width:5.4cm;height:2.6cm;position:relative" >
+    <div id="stockName" style="position:absolute;left:0cm;top:0cm;right:0cm;height:0.4cm; font-size:12px;text-align:center;overflow:hidden;text-overflow:ellipsis;"></div>
+    <div id="pGrName3" style="position:absolute;left:0cm;top:0.75cm;right:0cm;height:0.35cm; font-size:11px;text-align:center;overflow:hidden;text-overflow:ellipsis;"></div>
+    <div id="pCatName" style="position:absolute;left:0cm;top:1.1cm;right:0cm;height:0.35cm; font-size:11px;text-align:center;overflow:hidden;text-overflow:ellipsis;"></div>
+    <div id="prodCountry" style="position:absolute;left:0cm;top:1.45cm;right:0cm;height:0.35cm; font-size:11px;text-align:center;overflow:hidden;text-overflow:ellipsis;"></div>
+    <div id="prodSizeName" style="position:absolute;left:0cm;top:1.7cm;right:0cm;height:0.35cm; font-size:11px;text-align:center;overflow:hidden;text-overflow:ellipsis;"></div>
+    <div id="prodPrice" style="position:absolute;left:0cm;top:1.4cm;right:0cm;height:0.4cm; font-size:11px;text-align:center;overflow:hidden"></div>
+    <svg id="prodBarcode" style="position:absolute;left:0.2cm;top:1.75cm; border:none;padding:0;"></svg>
+    <div id="pageNum" class="pageNum" style="display:none; position:absolute;left:4.95cm;top:2.3cm;right:0cm;bottom:0cm;padding-right:2px; background-color:lightgrey;font-size:9px;text-align:right; overflow:hidden"></div>
+</div>
+<!--<script type="text/javascript" src="/jslib/jsBarcode/JsBarcode.ean-upc.min.js"></script>-->
+<script type="text/javascript">
+    var printBarcode = function(barcodeElementID, barcodeValue){
+        if(!barcodeValue) return;
+        JsBarcode("#"+barcodeElementID, barcodeValue,{format:"EAN13", width:1, height:16, valueIsValid:true, margin:0,
+            valid:function(valid){
+                if(!valid) this.valueIsValid = false;
+                if(!this.valueIsValid){
+                    //this.background= "#ccffff";
+                    this.lineColor= "#990000"
+                }
+            }
+        });
+    };
+    (function(prodTagContentPageNum,prodTagContentData){
+        if(!prodTagContentData) return;
+        $$.prodTagContent.style["max-width"]= $$.prodTagContent.style["width"];
+        $$.prodTagContent.style["max-height"]= $$.prodTagContent.style["height"];
+        $$.stockName.innerHTML= "МАГАЗИН";
+        $$.pGrName3.innerHTML= prodTagContentData["PGrName3"];
+        $$.pCatName.innerHTML= prodTagContentData["PCatName"];
+        $$.prodCountry.innerHTML= prodTagContentData["Country"];
+        $$.prodSizeName.innerHTML= prodTagContentData["SizeName"];
+        $$.prodPrice.innerHTML= "<b>ціна: "+prodTagContentData["PriceCC"]+" грн./"+prodTagContentData["UM"]+"</b>";
+        var parentDom= $$.prodTagContent.parentNode,
+                barcodeHTML= $$.prodBarcode, barcodeID= parentDom.id+"_prodbarcode";
+        barcodeHTML.id= barcodeID;
+        var barcode= prodTagContentData["Barcode"];
+        if(barcode==null || barcode.toString().trim().length==0) barcode='0000000000000';
+        if(prodTagContentData) printBarcode(barcodeID, barcode);
+        if(prodTagContentPageNum==null) return;
+        $$.pageNum.innerHTML = prodTagContentPageNum;
+        $$.pageNum.style.display= "block";
+    })($$.$parent.prodTagContentPageNum,$$.$parent.prodTagContentData);
+</script>
+</html>

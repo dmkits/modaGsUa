@@ -1,12 +1,12 @@
 var server= require("../server"), appConfig= server.getAppConfig();
 
-module.exports.validateModule = function(errs,nextValidateModuleCallback){
+module.exports.validateModule= function(errs,nextValidateModuleCallback){
     nextValidateModuleCallback();
 };
 
-module.exports.init = function(app){
+module.exports.init= function(app){
     app.get("/print/printDocSimpleTable",function(req,res){
-        var icon32x32= (appConfig['icon32x32']||"/icons/modaua32x32.ico"),
+        var icon32x32= (appConfig['icon32x32']||"/icons/pdm_favicon.ico"),
             title= ((appConfig.title)?appConfig.title:"")+" Print table document";
         res.render(appViewsPath+"print/printDocSimpleTable.ejs",{icon:icon32x32, title:title});
     });
@@ -28,10 +28,10 @@ module.exports.init = function(app){
     app.get("/print/productTag58x30",function(req,res){
         res.sendFile(appViewsPath+"print/productTag58x30.html");
     });
-    //app.get("/print/productTag58x40", function (req, res) {
+    //app.get("/print/productTag58x40",function(req,res) {
     //    res.sendFile(appViewsPath+"print/productTag58x40.html");
     //});
-    app.get("/print/tag40x25price",function(req,res){
-        res.sendFile(appViewsPath+"print/tag40x25price.html");
+    app.get("/print/productTag58x60",function(req,res) {
+        res.sendFile(appViewsPath+"print/productTag58x60.html");
     });
 };
