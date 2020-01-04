@@ -11,17 +11,29 @@
             .addToolPane({title:"log info",
                 contentTableAction:function(params){
                     var info="";
-                    if(params.contentTableSelectedRow){
-//                        info+="<b>changeID</b>: "+params.contentTableSelectedRow["changeID"];
-//                        info+="<br><b>changeDatetime</b>: "+params.contentTableSelectedRow["changeDatetime"];
-//                        info+="<br><b>changeObj</b>: "+params.contentTableSelectedRow["changeObj"];
-//                        info+="<br><b>changeVal</b>: "+params.contentTableSelectedRow["changeVal"];
-//                        info+="<br><b>type</b>: "+params.contentTableSelectedRow["type"];
-//                        info+="<br><b>message</b>: "+params.contentTableSelectedRow["message"];
+                    if(params.contentHTable.getSelectedRow()){
+                        info= params.contentHTable.getSelectedRow()["message"];
+                        params.thisToolPane.domNode.style["white-space"]="normal";
                     }
                     params.thisToolPane.set("content",info);
                 }
-            });
+            })
+            .addToolPane({title:"log metadata",
+                contentTableAction:function(params){
+                    var info=null;
+                    if(params.contentHTable.getSelectedRow()){
+                        var metadata= params.contentHTable.getSelectedRow()["metadata"];
+                        for(var i=0;i<metadata.length;i++){
+                            var metadataItem= metadata[i];
+                            if(!metadataItem) continue;
+                            info= ((info!=null)?info+"<br>":"")+((typeof(metadataItem)!="object")?metadataItem.toString():JSON.stringify(metadataItem,null,"    "));
+                        }
+                    }
+                    if(!info) return;
+                    params.thisToolPane.set("content",info);
+                }
+            })
+    ;
     $$.sa_logs_TDocDBLogs.onShow= function(){
         if(!$$.sa_logs_TDocDBLogs.startedUp)$$.sa_logs_TDocDBLogs.startupDoc();
     };

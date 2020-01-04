@@ -5,32 +5,51 @@ try{
     var logDebug= (ENV=='development' || (appStartupParams && appStartupParams.logDebug));          if(logDebug) console.log("DEBUG LOG ON");
     module.exports.logDebug = logDebug;
     var path= require('path'), fs= require('fs'), dateformat= require('dateformat'),
-        log= require('winston');                                                                    console.log('Modules path, fs, dateformat, winston loaded');//test
+        winston= require('winston'), DailyRotateFile= require('winston-daily-rotate-file');         console.log('Modules path, fs, dateformat, winston loaded');//test
 } catch(e){                                                                                         console.log("FAILED START! Reason:",e.message);
     return;
 }
 module.exports.getAppStartupParams = function(){ return appStartupParams; };                        console.log('Started with startup params:',appStartupParams);//test
 
-var logDir= path.join(__dirname, '/../logs/');
+const logDir= path.join(__dirname, '/../logs/');
 try {
     if(!fs.existsSync(logDir)){ fs.mkdirSync(logDir); }
 }catch(e){                                                                                          console.log("FAILED START! Reason: Failed create log directory! Reason:",e.message);
     return;
 }
-var transports= [], logConsole= log.transports.Console;
-transports.push(new (require('winston-daily-rotate-file'))({
-    name:'file', datePattern:'.yyyy-MM-dd', filename:path.join(logDir, "log_file.log")
+var transports= [], logConsole= winston.transports.Console;
+transports.push(new DailyRotateFile({
+    filename:path.join(logDir,"syslog-%DATE%.log"), datePattern:'YYYY-MM-DD',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.printf(function(log){
+            var splat= log[Symbol.for('splat')], s="";
+            for(var k in splat){
+                var val= splat[k];
+                s+= " "+((typeof(val)!="object")?val.toString():JSON.stringify(val));
+            }
+            return JSON.stringify({timestamp:dateformat(Date.now(),"yyyy-mm-dd HH:MM:ss.l"),level:log.level,message:log.message+s,metadata:splat});
+        })
+    )
 }));
 if(appStartupParams.logToConsole){
     transports.push(
-        new (logConsole)({ colorize: true,level:(logDebug)?'silly':'info', timestamp:function(){
-            return dateformat(Date.now(),"yyyy-mm-dd HH:MM:ss.l");
-        }})
+        new winston.transports.Console({ level:(logDebug)?'silly':'info',
+            format: winston.format.combine(
+                winston.format.colorize(),
+                winston.format.printf(function(log){
+                    var splat= log[Symbol.for('splat')], s="";
+                    for(var k in splat){
+                        var val= splat[k];
+                        s+= " "+((typeof(val)!="object")?val.toString():JSON.stringify(val));
+                    }
+                    return dateformat(Date.now(),"yyyy-mm-dd HH:MM:ss.l")+" | "+log.level+": "+log.message+s;
+                })
+            )
+        })
     );
 }
-log= new log.Logger({transports:transports,level:(logDebug)?'silly':'info', timestamp:function(){
-    return dateformat(Date.now(),"yyyy-mm-dd HH:MM:ss.l");
-}});
+var log= winston.createLogger({transports:transports, level:(logDebug)?'silly':'info'});
 module.exports.log= log;                                                                            log.info('Module log inited on',new Date().getTime()-startTime);
 
 global.sysConfigPath= path.join(__dirname,'/../','');

@@ -78,7 +78,7 @@ module.exports= function(app){
      * failResult = { error, userErrorMsg, pageMsg}
      */
     var accessFail= function(req,res,next,failResult){
-        if(!failResult)failResult={error:"Access FAIL!",userErrorMsg:"Доступ не удался!",pageMsg:"Доступ не удался!"};
+        if(!failResult) failResult={error:"Access FAIL!",userErrorMsg:"Доступ не удался!",pageMsg:"Доступ не удался!"};
         if(isReqJSON(req.method,req.headers)){
             res.send({error:{error:failResult.error,userMessage:failResult.userErrorMsg}}); return;
         }
@@ -107,14 +107,14 @@ module.exports= function(app){
             if(saUUID==uuid) return sysadminsList[saUUID];
     };
 
-    app.use(function(req,res,next){                                                                             log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
+    app.use(function(req,res,next){                                                                             //log.info("ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
         var isMobileApp= getIsMobileApp(req);
         if(isMobileApp) res.header("Access-Control-Allow-Headers","origin, Content-Type,Content-Length, Accept, X-Requested-With, uuid,aidcn");
         setAccessControlAllowOriginForMapp(req,res);
         if(req.originalUrl.indexOf("/login")==0){ next(); return; }                                             //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
         var reqAIDCN= (isMobileApp)?req.headers['aidcn']:req.cookies['aidcn'], aidcn= getAIDCN(),
-            uuid=(isMobileApp)?req.headers['uuid']:req.cookies['uuid'],
-            sysadminName= getSysadminNameByUUID(uuid);
+            uuid= (isMobileApp)?req.headers['uuid']:req.cookies['uuid'],
+            sysadminName= getSysadminNameByUUID(uuid);                                                          log.info(uuid,"ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
         if(reqAIDCN===undefined||reqAIDCN===null){
             accessFail(req,res,next,{
                 error: "Failed to get data! Reason: no application config identifier!",
@@ -196,7 +196,7 @@ module.exports= function(app){
                 return;
             }
             req.dbUserParams= dbUserParameters;
-            req.dbUserName= dbUserParameters["dbUserName"]; req.dbEmpName= dbUserParameters["EmpName"];         log.info('ACCESS CONTROLLER: dbUserName=',req.dbUserName,'dbUserParams=',req.dbUserParams);
+            req.dbUserName= dbUserParameters["dbUserName"]; req.dbEmpName= dbUserParameters["EmpName"];         log.info(uuid,req.dbUserName,'ACCESS CONTROLLER: dbUserParams=',req.dbUserParams);
             req.dbEmpRole=(dbUserParameters)?dbUserParameters["EmpRole"]:null;
             var validateError=appModules.getValidateError();
             if(validateError){
@@ -223,21 +223,21 @@ module.exports= function(app){
         });
     });
 
-    app.get("/login", function (req, res) {                                                                     log.info("ACCESS CONTROLLER: get /login");
+    app.get("/login",function(req,res){                                                                         log.info("LOGIN","UNKNOWN","ACCESS CONTROLLER: get /login");
         renderToLogin(res,"");
     });
     /**
      * sysadminData = { uuid, userName }
      */
     var storeSysadminUUID= function(sysadminData, callback){
-        sysadminsList[sysadminData.uuid]=sysadminData.userName;
+        sysadminsList[sysadminData.uuid]= sysadminData.userName;
         fs.writeFile(path.join(__dirname,"../sysadmins.json"), JSON.stringify(sysadminsList),{flag:"w"}, function(err){
             if(err){                                                                                            log.error("storeSysadminUUID: Failed store sysadmins data! Reason:",err);
             }
             if(callback)callback();
         });
     };
-    app.post("/login", function (req, res) {                                                                    log.info("ACCESS CONTROLLER: post /login user=",req.body.user,'pswrd=',req.body.pswrd);
+    app.post("/login",function(req,res){                                                                        log.info("LOGIN PROCESS",req.body.user,"ACCESS CONTROLLER: post /login user=",req.body.user,'pswrd=',req.body.pswrd);
         var userName=req.body.user, userPswrd=req.body.pswrd;
         if(!userName ||!userPswrd){
             res.send({ error:{error:"Authorisation failed! No login or password!",userMessage:"Пожалуйста введите имя и пароль."} });

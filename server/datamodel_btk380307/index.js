@@ -180,6 +180,8 @@ module.exports.initValidateDataModels= function(dataModelsList, errs, resultCall
     validateDataModelCallback(dataModelsList, 0, errs);
 };
 
+var getConUUID= database.getConUUID, getConU= database.getConU;
+
 /**
  * params = { source, sourceType= table/view/query/function, sourceName, sourceParamsNames = [<param1Name>,...], sourceParams={<param1Name>:<value>,...},
  *      fields = [ <fieldName> or <functionFieldName>, ... ],
@@ -404,13 +406,13 @@ function _getDataItem(connection, params, resultCallback){
     if(!params.sourceParamsNames) params.sourceParamsNames= this.sourceParamsNames;
     if(!params.sourceParams) params.sourceParams= this.sourceParams;
     if(!params.fields) params.fields=this.fields;
-    _getDataItems(connection, params, function(result){                                                         log.debug('_getDataItem: _getDataItems: result:',result,{});//test
+    _getDataItems(connection, params, function(result){                                                         log.debug(getConUUID(connection),getConU(connection),'_getDataItem: _getDataItems: result:',JSON.stringify(result));//test
         var getDataItemResult={};
         if(result.error) getDataItemResult.error= result.error;
         if(result.errorCode!==undefined) getDataItemResult.errorCode= result.errorCode;
         if(result.items){
             if(result.items.length>1)
-                result.error= "Failed get data item! Reason: result contains more that one items!";
+                getDataItemResult.error= "Failed get data item! Reason: result contains more that one items!";
             else
                 getDataItemResult.item= result.items[0];
         }
@@ -940,7 +942,7 @@ function _insDataItem(connection, params, resultCallback){
     var insQuery="insert into "+params.tableName+"("+queryFields+") values("+queryFieldsValues+")";
     database.executeParamsQuery(connection, insQuery,queryInputParams,function(err,updateCount){
         if(err){
-            resultCallback({error:err.message,errorMessage:"Failed insert data item! Reason:"+err.message});
+            resultCallback({error:"Failed insert data item! Reason:"+(err.message||"UNKNOWN")});
             return;
         }
         var insResult= {updateCount:updateCount};

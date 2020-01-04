@@ -600,8 +600,7 @@ module.exports.init = function(app){
         var fileDate = req.query.DATE, outData = {};
         outData.columns = sysLogsTableColumns;
         if(!fileDate){ res.send(outData); return; }
-        outData.items = [];
-        var logFile = path.join(__dirname + "/../../logs/log_file.log." + fileDate);
+        var logFile = path.join(__dirname + "/../../logs/syslog-"+fileDate+".log");
         try {
             fs.existsSync(logFile);
             var fileDataStr = fs.readFileSync(logFile, "utf8");
@@ -612,22 +611,28 @@ module.exports.init = function(app){
                 res.send(outData);
                 return;
             }
-            log.error("Impossible to read logs! Reason:", e);
-            outData.error = "Impossible to read logs! Reason:" + e;
+            log.error("Impossible to read logs! Reason:",e);
+            outData.error = "Impossible to read logs! Reason:"+e.message;
             res.send(outData);
             return;
         }
-        var target = '{"level"';
-        var pos = 0, strObj, jsonObj;
+        var sPos=0, strObj, jsonObj, items=[];
         while(true){
-            var foundPos = fileDataStr.indexOf(target, pos);
-            if(foundPos < 0)break;
-            strObj = fileDataStr.substring(foundPos, fileDataStr.indexOf('"}', foundPos) + 2);
-            pos = foundPos + 1;
-            jsonObj = JSON.parse(strObj);
-            if(jsonObj.timestamp) jsonObj.timestamp = moment(new Date(jsonObj.timestamp));
-            outData.items.push(jsonObj);
+            var ePos= fileDataStr.indexOf("\n",sPos);
+            if(ePos<0) break;
+            strObj = fileDataStr.substring(sPos,ePos);
+            try {
+                jsonObj= JSON.parse(strObj);
+            }catch(e){
+                var sErr= "Failed JSON.parse log data item! Reason:";
+                log.error(sErr,e);
+                res.send({error:sErr+e.message});
+                return;
+            }
+            items.push(jsonObj);
+            sPos=ePos+1;
         }
+        outData.items = items;
         res.send(outData);
     });
 };
