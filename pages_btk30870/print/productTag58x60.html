@@ -29,15 +29,16 @@
         $$.prodTagContent.style["max-width"]= $$.prodTagContent.style["width"];
         $$.prodTagContent.style["max-height"]= $$.prodTagContent.style["height"];
 //        $$.stockName.innerHTML= "МАГАЗИН";
-        $$.pGrName2.innerHTML= prodTagContentData["PGrName2"];
-        $$.pGrName.innerHTML= prodTagContentData["PGrName"];
+        $$.pGrName2.innerHTML= (prodTagContentData["PGrName2"]||"");
+        $$.pGrName.innerHTML= (prodTagContentData["PGrName"]||"");
         var pArticle1= prodTagContentData["Article1"];
-        $$.pArticle1.innerHTML= "Артикул: "+((pArticle1!=null&&pArticle1.trim()!="")?pArticle1:prodTagContentData["ProdID"]);
-        $$.pSizeName.innerHTML= "Размер: "+prodTagContentData["SizeName"];
-        $$.pCountry.innerHTML= "Производство: "+prodTagContentData["Country"];
-        $$.pGrName3.innerHTML= "Состав: "+prodTagContentData["PGrName3"];
+        $$.pArticle1.innerHTML= "Артикул: "+((pArticle1!=null&&pArticle1.trim()!="")?pArticle1:(prodTagContentData["ProdID"]||""));
+        $$.pSizeName.innerHTML= "Размер: "+(prodTagContentData["SizeName"]||"");
+        $$.pCountry.innerHTML= "Производство: "+(prodTagContentData["Country"]||"");
+        $$.pGrName3.innerHTML= "Состав: "+(prodTagContentData["PGrName3"]||"");
 //        $$.prodPrice.innerHTML= "<b>ціна: "+prodTagContentData["PriceCC"]+" грн./"+prodTagContentData["UM"]+"</b>";
-        $$.prodPrice.innerHTML= "<b>"+prodTagContentData["PriceCC"]+" -экв.</b>";
+        var prodPrice= prodTagContentData["PriceCC"];
+        $$.prodPrice.innerHTML= (prodPrice)?"<b>"+prodPrice+" -экв.</b>":"";
         var parentDom= $$.prodTagContent.parentNode,
                 barcodeHTML= $$.prodBarcode, barcodeID= parentDom.id+"_prodbarcode";
         barcodeHTML.id= barcodeID;

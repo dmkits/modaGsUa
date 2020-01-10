@@ -57,6 +57,8 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
             var changeLogItem=dataModel.changeLog[i];
             if(changeLogItem.tableName&&!tableName&&!viewName) tableName= changeLogItem.tableName;
             if(changeLogItem.viewName&&!viewName&&!tableName) viewName= changeLogItem.viewName;
+            if(changeLogItem.functionName) functionName= changeLogItem.functionName;
+            functionParameters= changeLogItem.functionParameters;
             if(changeLogItem.idField&&!idFieldName) idFieldName= changeLogItem.idField;
             if(changeLogItem.fields){
                 for(var fieldIndex in changeLogItem.fields){
@@ -139,7 +141,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     var sourceParams={};
     if(dataModel.source&&dataModel.sourceParamsNames){
         for(var i=0;i<dataModel.sourceParamsNames.length;i++){
-            var sourceParamName= (dataModel.sourceParamsNames)?dataModel.sourceParamsNames[i]:null;
+            var sourceParamName= dataModel.sourceParamsNames[i];
             if(sourceParamName) sourceParams[sourceParamName]=null;
         }
     }

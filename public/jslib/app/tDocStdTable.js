@@ -413,14 +413,17 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 var thisInstance= this;
                 this.detailHTable.onUpdateContent= function(params){                                             console.log("TDocStdTable.detailHTable.onUpdateContent ",params);
                     if(params&&(params.updatedRows||params.deletedRows)){
-                        var reloadData=false;
+                        var reloadData=false, storedRows=[];
                         if(params.deletedRows) reloadData=true;
                         if(!reloadData&&params.updatedRows)
-                            for(var r in params.updatedRows)
-                                if(!this.isRowEditable(params.updatedRows[r])){ reloadData=true; break; }
+                            for(var r in params.updatedRows){
+                                var rowData= params.updatedRows[r];
+                                if(!this.isRowEditable(rowData)){ reloadData=true; storedRows.push(rowData); }
+                            }
                         if(reloadData){
                             thisInstance.loadListTableContentFromServer({callUpdateContent:false});
                             thisInstance.setDetailHeaderContentByListSelectedRow(thisInstance.detailHeader.lastContentData, {reloadData:reloadData});
+                            thisInstance.detailHTable.updContentAutocompleteColumnsValues(storedRows);
                         }
                     }
                     if(!this.getSelectedRow() && this.getContent().length>0){

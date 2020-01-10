@@ -16,3 +16,11 @@ module.exports.modelData = { tableName:"r_Prods",idField:"ProdID",
         "RecMinPriceCC","RecMaxPriceCC","RecStdPriceCC","RecRemQty",
         "InStopList"]
 };
+module.exports.changeLog = [
+    { changeID:"r_Prods__1", changeDatetime:"2020-01-08 16:01:00", changeObj:"r_Prods",
+        changeVal:"ALTER TABLE r_Prods ADD ColorID smallint NOT NULL DEFAULT 0",
+        field:"ColorID"},
+    { changeID:"r_Prods__2", changeDatetime:"2020-01-08 16:02:00", changeObj:"r_Prods",
+        changeVal:"ALTER TABLE r_Prods ADD SizeName varchar(250) NOT NULL DEFAULT ''",
+        field:"SizeName"}
+];

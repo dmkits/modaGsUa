@@ -48,6 +48,25 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         }
                     })
             },
+            updAutocompleteColumnValues: function(colData,rowsData){
+                if(!colData||colData.type!=="autocomplete")return;
+                colData.sourceValues= colData.sourceValues||{}; colData.source= colData.source||[];
+                for(var r=0;r<rowsData.length;r++){
+                    var value=rowsData[r][colData.data];
+                    if(!colData.sourceValues[value]){
+                        colData.sourceValues[value]=true;
+                        colData.source.push(value);
+                    }
+                }
+            },
+            updContentAutocompleteColumnsValues: function(rowsData){
+                if(!this.htColumns||this.htColumns.length==0||!rowsData||rowsData.length==0)return;            //console.log("HTableEditable updAutocompleteColumnsValues",rowsData);
+                var htContentCols= this.handsonTable.getSettings()["columns"];
+                for(var c=0;c<htContentCols.length;c++){
+                    var htContentColData= htContentCols[c];
+                    this.updAutocompleteColumnValues(htContentColData,rowsData);
+                }
+            },
             getAutocompleteColumnValueForItem: function(colItemName, itemValue, valueItemName){
                 for(var c=0;c<this.htVisibleColumns.length;c++){
                     var visColData=this.htVisibleColumns[c];
@@ -60,10 +79,9 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
             },
             setChangeSettings: function(){
-                var parent= this;
-                var parentCellValueRenderer=this.handsonTable.getSettings().cellValueRenderer;
+                var parent= this, parentCellValueRenderer= this.handsonTable.getSettings().cellValueRenderer;
                 this.handsonTable.updateSettings({
-                    cellValueRenderer:function (instance, td, row, col, prop, value, cellProperties) {
+                    cellValueRenderer: function (instance, td, row, col, prop, value, cellProperties){
                         parentCellValueRenderer(instance, td, row, col, prop, value, cellProperties);
                         var rowSourceData= instance.getContentRow(row);
                         if(rowSourceData){

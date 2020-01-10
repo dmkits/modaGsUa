@@ -6,6 +6,8 @@
   "modules":[
     "sysadmin",
     "main",
+    "sysCommon",
+    "dirsForDocs",
     "dirsForProds",
     "doc_rec",
     "print"

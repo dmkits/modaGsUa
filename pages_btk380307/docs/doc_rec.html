@@ -123,7 +123,7 @@
                     condition["PGrName3"]=crd.item("PGrName3").getValue();
                     condition["ColorName"]=crd.item("ColorName").getValue();
                     condition["SizeName"]=crd.item("SizeName").getValue();
-                    Request.getJSONData({url:"/dirsProds/getProdProdAttrsAndNameByArticle1", condition:condition},
+                    Request.getJSONData({url:"/dirsProds/getProdAttrsAndNameByProdData", condition:condition},
                             function(result){
                                 if (result.item) thisInstance.setDetailTableProdArticle1Attrs(crd,result.item);
                                 else if(result.error) thisInstance.setDetailTableProdArticle1Attrs(crd);

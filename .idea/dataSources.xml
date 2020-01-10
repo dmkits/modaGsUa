@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="3397718293">
+  <component name="DataSourceManagerImpl" format="xml" hash="689645485">
     <data-source source="LOCAL" name="SQL Server - GMSDev38Btk380307GS@192.168.56.12" uuid="2ea65b6b-a474-474c-a755-7dc773aab887">
       <driver-ref>sqlserver.ms</driver-ref>
       <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
@@ -14,6 +14,12 @@
       <libraries />
     </data-source>
     <data-source source="LOCAL" name="SQL Server - GMSDev35_Btk30870_Pdm@192.168.56.12" uuid="ea0870b2-af36-41cc-a85b-4fb7a1dfa314">
+      <driver-ref>sqlserver.ms</driver-ref>
+      <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
+      <jdbc-url>jdbc:sqlserver://192.168.56.12:1433;databaseName=GMSDev35_Btk30870_Pdm</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="SQL Server - GMSDev35_Btk30870_Pdm@192.168.56.12 [2]" uuid="bbfa946d-6e5e-49d1-91ff-d14244e06f5b">
       <driver-ref>sqlserver.ms</driver-ref>
       <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
       <jdbc-url>jdbc:sqlserver://192.168.56.12:1433;databaseName=GMSDev35_Btk30870_Pdm</jdbc-url>
