@@ -561,7 +561,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 }
                 var thisContentHTable= this.contentHTable,
                     menuItemParams={contentHTable:thisContentHTable,toolPanes:this.toolPanes,thisDoc:this};
-                thisContentHTable.setMenuItem(itemName, menuItemParams,
+                thisContentHTable.addMenuItem(itemName, menuItemParams,
                     /*menuItemAction*/function(contentHTableSelectedRowsData, menuItemParams){
                         var contentHTableRowsDataForAction=[];
                         for(var selInd in contentHTableSelectedRowsData) contentHTableRowsDataForAction.push(contentHTableSelectedRowsData[selInd]);

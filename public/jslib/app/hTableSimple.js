@@ -62,15 +62,16 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 var visibleColumns = [], vc=0;
                 for(var c=0;c<dataColumns.length;c++){
                     var colItem=dataColumns[c];
-                    if(colItem["visible"]!==false){
-                        var newColData = {};
-                        visibleColumns[vc++]= newColData;
-                        for(var item in colItem){
-                            newColData[item]=colItem[item];
-                            if(item==="type"&&colItem.type==="autocomplete"&&colItem.source===undefined){
-                                newColData.source=[]; //newColData.source.push("");
-                            }
+                    colItem.visibleColumnIndex=-1;
+                    if(colItem.visible===false)continue;
+                    colItem.visibleColumnIndex=vc++;
+                    var newColData = {};
+                    visibleColumns[colItem.visibleColumnIndex]= newColData;
+                    for(var item in colItem){
+                        if(item==="type"&&colItem.type==="autocomplete"&&colItem.source===undefined){
+                            colItem.source=[]; //colItem.source.push("");
                         }
+                        newColData[item]=colItem[item];
                     }
                 }
                 return visibleColumns;
@@ -195,6 +196,8 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 this.loadingGif = new Standby({"target":parent.domNode});
                 this.loadingGif.startup();
                 document.body.appendChild(this.loadingGif.domNode);
+                this.popupMenuItems.push({ name:"Колонки таблицы", key:"hTableColumns"/*index=0*/});
+                this.handsonTable.updateSettings({ contextMenu:{items:this.popupMenuItems} });
             },
             getHandsonTable: function(){ return this.handsonTable; },
             resizeAll: function(changeSize,resultSize){
@@ -259,15 +262,17 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
              */
             updateContent: function(newdata,params){                                                        log("HTableSimple updateContent newdata=",newdata," params=", params);
                 if(newdata!==undefined) this.setData(newdata);
-                if(this.htData!==null) {//loadTableContent
-                    this.handsonTable.updateSettings(
-                        {columns:this.htVisibleColumns, data:this.getData(), readOnly:this.readOnly!==false, comments:this.enableComments}
-                    );
-                    if(params&&params.resetSelection!==false) this.resetSelection();
-                }else{//clearTableDataContent
+                if(this.htData===null){//clearTableDataContent
                     this.clearContent(params);
+                    this.setMenuItemHTableColumns();
                     return;
                 }
+                //loadTableContent
+                this.handsonTable.updateSettings(
+                    {columns:this.htVisibleColumns, data:this.getData(), readOnly:this.readOnly!==false, comments:this.enableComments}
+                );
+                if(params&&params.resetSelection!==false) this.resetSelection();
+                this.setMenuItemHTableColumns();
                 if(params&&params.callUpdateContent===false) return;
                 this.onUpdateContent((params&&params.error)?{error:params.error}:{});
             },
@@ -402,10 +407,39 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 //TODO actions on/after update table content (after set/reset/reload/clear table content data)
                 //TODO actions and after call updateRowData({rowData,newRowData})
             },
+            setMenuItemHTableColumns: function(refreshDataAction){
+                var popupMenuHTableColumns= this.popupMenuItems[0], thisHTable=this;
+                if(!popupMenuHTableColumns)return;
+                var popupMenuHTableColumnsItems=null;
+                if(this.htColumns){
+                    popupMenuHTableColumnsItems=[];
+                    for(var c=0;c<this.htColumns.length;c++){
+                        var hTableColumnData= this.htColumns[c];
+                        if(!hTableColumnData) continue;
+                        (function(){
+                            var popupMenuItemHTableColumnData=hTableColumnData;
+                            popupMenuHTableColumnsItems.push({ key:"hTableColumns:"+hTableColumnData.data,
+                                name:function(){
+                                    return ((popupMenuItemHTableColumnData.visible!==false)?"<b>":"")+popupMenuItemHTableColumnData.name+((popupMenuItemHTableColumnData.visible!==false)?"</b>":"");
+                                },
+                                callback:function(key,selection,clickEvent){
+                                    if(!popupMenuItemHTableColumnData)return;
+                                    popupMenuItemHTableColumnData.visible= !(popupMenuItemHTableColumnData.visible!==false);
+                                    thisHTable.setDataColumns(thisHTable.htColumns);
+                                    if(refreshDataAction) refreshDataAction();
+                                    else thisHTable.handsonTable.updateSettings({columns:thisHTable.htVisibleColumns});
+                                }
+                            });
+                        })();
+                    }
+                }
+                popupMenuHTableColumns.submenu= {items:popupMenuHTableColumnsItems};
+                this.handsonTable.updateSettings({ contextMenu:{items:this.popupMenuItems} });
+            },
             /**
              * menuAction= function(selRowsData, actionParams, thisInstance)
              */
-            setMenuItem: function(itemName, actionParams, menuAction){                                       //log("HTableSimple setMenuItem",itemID,this.popupMenuItems,this);
+            addMenuItem: function(itemName, actionParams, menuAction){                                       //log("HTableSimple addMenuItem",itemID,this.popupMenuItems,this);
                 var thisInstance= this;
                 this.popupMenuItems.push({
                     name:itemName,
@@ -419,7 +453,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                         menuAction(selRowsData, actionParams, thisInstance);
                     }
                 });
-                this.handsonTable.updateSettings({ contextMenu: { items: this.popupMenuItems } });
+                this.handsonTable.updateSettings({ contextMenu:{items:this.popupMenuItems} });
             },
             /**
              * params: { method=get/post , url, conditions:string or object, data,

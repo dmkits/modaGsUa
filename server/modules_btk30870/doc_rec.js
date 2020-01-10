@@ -18,7 +18,7 @@ module.exports.moduleViewURL = "/docs/rec";
 module.exports.moduleViewPath = "docs/doc_rec.html";
 module.exports.init = function(app){
     var tRecsListTableColumns=[
-        {data: "ChID", name:"ChID", width:85, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "ChID", name:"Код рег.", width:85, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
         {data: "DocID", name:"Номер", width:85, type:"text", align:"right", dataSource:"t_Rec"},
         {data: "IntDocID", name:"Вн. номер", width:85, type:"text", align:"right", dataSource:"t_Rec"},
         {data: "DocDate", name:"Дата", width:60, type:"dateAsText",align:"center", dataSource:"t_Rec"},
@@ -38,11 +38,11 @@ module.exports.init = function(app){
         //{data: "StateCode", name:"StateCode", width:50, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
         //{data: "StateName", name:"Статус", width:250, type:"text",
         //    dataSource:"r_States", sourceField:"StateName", linkCondition:"r_States.StateCode=t_Rec.StateCode" },
-        {data: "CodeID1", name:"Признак 1", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "CodeID2", name:"Признак 2", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "CodeID3", name:"Признак 3", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "CodeID4", name:"Признак 4", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
-        {data: "CodeID5", name:"Признак 5", width:60, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"}
+        {data: "CodeID1", name:"Признак 1", width:80, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "CodeID2", name:"Признак 2", width:80, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "CodeID3", name:"Признак 3", width:80, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "CodeID4", name:"Признак 4", width:80, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
+        {data: "CodeID5", name:"Признак 5", width:80, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"}
     ];
     app.get("/docs/rec/getDataForRecsListTable", function(req,res){
         var conditions={};
@@ -126,7 +126,7 @@ module.exports.init = function(app){
     });
 
     var tRecDTableColumns=[
-        {data:"ChID", name:"ChID", width:85, type:"text", dataSource:"t_RecD", identifier:true, readOnly:true, visible:false},
+        {data:"ChID", name:"Код рег.", width:85, type:"text", dataSource:"t_RecD", identifier:true, readOnly:true, visible:false},
         {data:"SrcPosID", name:"№ п/п", width:45, type:"numeric", dataSource:"t_RecD", identifier:true },
         {data:"Country", name:"Страна товара", width:80,
             //type:"comboboxWN", sourceURL:"/dirsProds/getDataForArticle1Combobox",
@@ -159,9 +159,9 @@ module.exports.init = function(app){
         {data:"Article1", name:"Артикул1 товара", width:90, align:"center",
             type:"comboboxWN", sourceURL:"/dirsProds/getDataForArticle1Combobox",
             dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID"},
-        {data:"ProdID", name:"Код товара", width:50, type:"text",align:"center", dataSource:"t_RecD", visible:true},
+        {data:"ProdID", name:"Код товара", width:50, type:"text",align:"center", dataSource:"t_RecD", visible:false},
         {data:"Barcode", name:"Штрихкод", width:75, type:"text", dataSource:"t_RecD", visible:false},
-        {data:"ProdName", name:"Наименование товара", width:350, type:"text",
+        {data:"ProdName", name:"Наименование товара", width:350, type:"text", visible:false,
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
         {data:"UM", name:"Ед. изм.", width:45, type:"text", align:"center", dataSource:"t_RecD", sourceField:"UM"},
         {data:"Qty", name:"Кол-во", width:50, type:"numeric", dataSource:"t_RecD"},

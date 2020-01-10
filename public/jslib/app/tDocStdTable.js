@@ -916,7 +916,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 }else if(actionParams.action==="storeDetailTableSelectedRows"){
                     menuItemCallback= function(selRowsData){ thisInstance.storeDetailTableRowsDataToServer(selRowsData); }
                 }
-                if(menuItemCallback) this.detailHTable.setMenuItem(itemName, null, menuItemCallback);
+                if(menuItemCallback) this.detailHTable.addMenuItem(itemName, null, menuItemCallback);
                 return this;
             },
             /**
@@ -999,7 +999,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     }
                 }
                 if(!menuItemActionFunction) return this;
-                thisDetailTable.setMenuItem(itemName, actionParams,
+                thisDetailTable.addMenuItem(itemName, actionParams,
                     /*menuItemAction*/function(selRowsData, actionParams){
                         var rowsDataForAction=[];
                         for(var selInd in selRowsData) rowsDataForAction.push(selRowsData[selInd]);

@@ -127,7 +127,7 @@ define(["dojo/_base/declare", "app/tDocsFunctions", "app/base", "app/tDocSimpleT
                         thisInstance.contentHTable.storeRowsDataByURL({url:thisInstance.dataStoreURL, rowsData:selRowsData, condition:null});
                     }
                 }
-                if(menuItemCallback) this.contentHTable.setMenuItem(itemName, {}, menuItemCallback);
+                if(menuItemCallback) this.contentHTable.addMenuItem(itemName, {}, menuItemCallback);
                 return this;
             }
         });

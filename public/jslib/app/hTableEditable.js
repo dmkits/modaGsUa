@@ -11,12 +11,14 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
             setData: function(data){
                 this.inherited(arguments,[data]);
                 var tableData=this.htData;
-                for(var c=0;c<this.htVisibleColumns.length;c++){
-                    var visColData=this.htVisibleColumns[c];
-                    if(visColData.type==="autocomplete") this.loadAutocompleteColumnValues(visColData, tableData);
-                }                                                                                       //console.log("HTableEditable setData htVisibleColumns",this.htVisibleColumns);
+                for(var c=0;c<this.htColumns.length;c++){
+                    var colData=this.htColumns[c];
+                    if(colData.type!=="autocomplete")continue;
+                    this.loadAutocompleteColumnValues(colData, tableData);
+                    if(colData.visibleColumnIndex>=0) this.htVisibleColumns[colData.visibleColumnIndex].source= colData.source;
+                }
             },
-            setAutocompleteColumnValues: function(colData,tableData){                                    //console.log("HTableEditable setAutocompleteColumnValues",colData.data);
+            setAutocompleteColumnValues: function(colData,tableData){
                 colData.sourceValues={}; colData.source=[];
                 for(var r=0;r<tableData.length;r++){
                     var value=tableData[r][colData.data];
