@@ -5,13 +5,13 @@
         <div id="docs_rec_ProductsTable" style="width:100%;height:100%; margin:0;padding:0;"></div>
         <div id="docs_rec_DetailTotal" style="width:100%;height:auto;; margin:0;padding:0;"></div>
     </div>
-    <div id="docs_rec_RightContainer" style="width:250px;height:100%; margin:0;padding:0;"></div>
+    <div id="docs_rec_DetailPanesContainer" style="width:250px;height:100%; margin:0;padding:0;"></div>
 </TDocStdTable>
 <script type="text/javascript">
     $$.docs_rec_PageContainer
             .init({idListContainer:"docs_rec_ListContainer",idDetailContainer:"docs_rec_DetailContainer",
                 idDetailHeader:"docs_rec_DetailHeader",idDetailTable:"docs_rec_ProductsTable",idDetailTotal:"docs_rec_DetailTotal",
-                idRightContainer:"docs_rec_RightContainer" })
+                idDetailPanesContainer:"docs_rec_DetailPanesContainer" })
             .addListTable({getDataUrl:"/docs/rec/getDataForRecsListTable",
                 header:"Список накладных", bdatelabelText:"c",bdateCondition:"DOCDATE>=", edatelabelText:"по",edateCondition:"DOCDATE<="
             })
@@ -117,7 +117,7 @@
                             function(result){
                                 if(result.item) doc.setDetailTableProdArticle1Attrs(crd,result.item,(result.itemProdName)?result.itemProdName["ProdName"]:null);
                                 else if(result.error) doc.setDetailTableProdArticle1Attrs(crd);
-//                                if(result.itemProdName) doc.setDetailTableProdData(crd,result.itemProdName);
+                                if(!result.item&&result.itemProdName) doc.setDetailTableProdData(crd,result.itemProdName);
 //                                else doc.setDetailTableProdData(crd);
                                 nextCallback(true);
                             });

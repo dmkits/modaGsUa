@@ -22,13 +22,13 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 this.idDetailHeader=null;
                 this.idDetailTable=null;
                 this.idDetailTotal=null;
-                this.idDetailPanesContainer=null;
+                this.idRightContainer=null;
                 declare.safeMixin(this, args);
                 this.listTable = null;
                 this.listBDate = null;
                 this.listEDate = null;
                 this.detailContainer= null;
-                this.detailPanesContainer= null;
+                this.rightContainer= null;
             },
             /**
              * params: { titleText, dataURL, dataURLCondition={...},
@@ -60,9 +60,9 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(this.idDetailContainer&&this.idDetailTotal){
                     this.detailTotal= $TDF.setContentPane({region:'bottom'}, this.idDetailTotal);
                 }
-                if(this.idDetailPanesContainer){
-                    this.detailPanesContainer= $TDF.setContentPane({region:'left',splitter:true}, this.idDetailPanesContainer);
-                    this.addChild(this.detailPanesContainer);
+                if(this.idRightContainer){
+                    this.rightContainer= $TDF.setContentPane({region:'right'}, this.idRightContainer);
+                    this.addChild(this.rightContainer);
                 }
             },
             init: function(params){
@@ -294,7 +294,6 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(!detailHeaderTitleParams.titleDatePrefix) detailHeaderTitleParams.titleDatePrefix=" ";
                 this.detailHeaderTable= $TDF.addTableTo(this.detailHeader.containerNode, "padding:0;margin:0px;");
                 $TDF.addRowToTable(this.detailHeaderTable, height);
-                this.addDetailHeaderPanesBtns();
                 this.detailHeader.titleCell= $TDF.addHeaderCellToTableRow(this.detailHeaderTable.lastChild);
                 this.addDetailHeaderElement(true,this.detailHeader.titleCell);
                 this.detailHeader.setTitleContent= function(){
@@ -323,26 +322,6 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 this.addDetailHeaderBtnUpdate();
                 if(this.buttonPrint!=false&&!this.btnPrint) this.addDetailHeaderBtnPrint();
                 //if(this.buttonExportToExcel!=false&&!this.btnExportToExcel) this.addBtnExportToExcel();
-                return this;
-            },
-            addDetailHeaderPanesBtns: function(width,labelBtnListText,labelBtnPanesText){
-                if(width===undefined) width=1;
-                if(!labelBtnListText) labelBtnListText="Список";
-                this.detailHeader.btnPaneList=
-                    $TDF.addTableHeaderButtonTo(this.detailHeaderTable.lastChild,{labelText:labelBtnListText,cellWidth:width,cellStyle:"text-align:right;",btnChecked:true});
-                var thisDoc= this;
-                this.detailHeader.btnPaneList.onClick= function(){
-                    thisDoc.detailHeader.btnPaneDocPanes.set("checked",false); thisDoc.detailHeader.btnPaneList.set("checked",true);
-                    thisDoc.removeChild(thisDoc.detailPanesContainer); thisDoc.addChild(thisDoc.listContainer);
-                };
-                if(!labelBtnPanesText) labelBtnPanesText="Документ";
-                this.detailHeader.btnPaneDocPanes=
-                    $TDF.addTableHeaderButtonTo(this.detailHeaderTable.lastChild,{labelText:labelBtnPanesText,cellWidth:width,cellStyle:"text-align:right;",btnChecked:false});
-                this.detailHeader.btnPaneDocPanes.onClick= function(){
-                    thisDoc.detailHeader.btnPaneList.set("checked",false); thisDoc.detailHeader.btnPaneDocPanes.set("checked",true);
-                    thisDoc.removeChild(thisDoc.listContainer); thisDoc.addChild(thisDoc.detailPanesContainer);
-                };
-                this.detailHeader.btnPaneList.onClick();
                 return this;
             },
             addDetailHeaderBtnUpdate: function(width,labelText){
@@ -551,7 +530,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(obj) this.detailTotalElements[this.detailTotalElements.length-1].push(obj);
             },
             addDetailTotalRow: function(createNewTable){
-                if(!this.detailTotalTable || createNewTable) this.detailTotalTable=$TDF.addTableTo(this.detailTotal.domNode);
+               if (!this.detailTotalTable || createNewTable) this.detailTotalTable=$TDF.addTableTo(this.detailTotal.domNode);
                 $TDF.addRowToTable(this.detailTotalTable);
                 this.addDetailTotalElement(true);
                 return this;
@@ -572,7 +551,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 var textBox= $TDF.addTableCellTextBoxTo(this.detailTotalTable.lastChild,
                     {cellWidth:cellWidth, cellStyle:"text-align:right;", labelText:label, labelStyle:style, inputStyle:style+inputStyle,
                         inputParams:{readOnly:true,
-                            /*it's for print*/cellWidth:cellWidth, labelText:label, printStyle:params.style, inputStyle:params.inputStyle, print:params.print} });
+                        /*it's for print*/cellWidth:cellWidth, labelText:label, printStyle:params.style, inputStyle:params.inputStyle, print:params.print} });
                 this.detailHeader.addControlElementObject(textBox, itemName);
                 this.addDetailTotalElement(false,textBox);
                 return this;
@@ -665,11 +644,11 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
              *      detailHTable selected row:<detailHTable.getSelectedRow()>
              */
             addToolPane: function(params){
-                if(!this.detailPanesContainer){ console.log("WARNING! Failed addToolPane! Reason: no detailPanesContainer!"); return this; }
+                if(!this.rightContainer){ console.log("WARNING! Failed addToolPane! Reason: no rightContainer!"); return this; }
                 if(!params) params={};
                 if(params.title===undefined) params.title="";
                 if(params.width===undefined) params.width=100;
-                var actionsTitlePane= $TDF.addChildTitlePaneTo(this.detailPanesContainer,{title:params.title});
+                var actionsTitlePane= $TDF.addChildTitlePaneTo(this.rightContainer,{title:params.title});
                 if(params.detailTableAction) actionsTitlePane.contentAction = params.detailTableAction;
                 if(!this.toolPanes) this.toolPanes= [];
                 this.toolPanes.push(actionsTitlePane);
@@ -682,7 +661,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
              */
             addToolXPane: function(title,contentAction){
                 if(!this.toolPanes) this.toolPanes= [];
-                var actionsTitlePane= $TDF.addChildTitlePaneTo(this.detailPanesContainer,{title:title});
+                var actionsTitlePane= $TDF.addChildTitlePaneTo(this.rightContainer,{title:title});
                 if(contentAction) actionsTitlePane.contentAction= contentAction;
                 this.toolPanes.push(actionsTitlePane);
                 actionsTitlePane.toolPaneContentWidget= new XContentPane({style:"margin:0;padding:0;"});
@@ -691,7 +670,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
             },
             addToolInnerPage: function(title,contentAction){
                 if(!this.toolPanes) this.toolPanes= [];
-                var actionsTitlePane= $TDF.addChildTitlePaneTo(this.detailPanesContainer,{title:title});
+                var actionsTitlePane= $TDF.addChildTitlePaneTo(this.rightContainer,{title:title});
                 if(contentAction) actionsTitlePane.contentAction= contentAction;
                 this.toolPanes.push(actionsTitlePane);
                 actionsTitlePane.toolPaneContentWidget= new window.InnerPage({style:"margin:0;padding:0;"});
@@ -951,7 +930,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 };
                 return this;
             },
-
+            
             /**
              * actionParams = { btnStyle, btnParams, actionFunction, detailTableActionName, beforeDetailTableRowsAction }
              *      actionFunction = function(selectedTableContent, actionParams)
@@ -1027,13 +1006,13 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                                 else if(detHElem.textDirNode) value= detHElem.textDirNode.textContent;//if element Select
                                 var printParams= detHElem.printParams;
                                 if(value==""){
-                                    if(printParams.inputStyle){
-                                        var oldStyleStr =printParams.inputStyle,
-                                            newStyleStr= (oldStyleStr.trim().charAt(oldStyleStr.length-1)!=";")?";":"";
-                                        newStyleStr+="height:14px;";
-                                        printParams.inputStyle = oldStyleStr+newStyleStr;
-                                    }else
-                                        printParams.inputStyle= " height:14px;";
+                                  if(printParams.inputStyle){
+                                      var oldStyleStr =printParams.inputStyle,
+                                          newStyleStr= (oldStyleStr.trim().charAt(oldStyleStr.length-1)!=";")?";":"";
+                                      newStyleStr+="height:14px;";
+                                      printParams.inputStyle = oldStyleStr+newStyleStr;
+                                  }else
+                                      printParams.inputStyle= " height:14px;";
                                 }
                                 $TDF.addPrintDataSubItemTo(printData,"header",{width:printParams.cellWidth+5,
                                     style:printParams.printStyle, align:"left", contentStyle:"margin-bottom:3px;",
