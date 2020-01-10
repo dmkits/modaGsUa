@@ -394,12 +394,15 @@ module.exports.init= function(app){
         if(!prodMQData) prodMQData={};
         var qty= prodMQData["Qty"];
         if(qty===undefined) qty=1;
-        var insProdMQData={"ProdID":prodMQData["ProdID"], "Barcode":prodMQData["Barcode"], "UM":prodMQData["UM"],"Qty":qty,
+        var insProdMQData={"ProdID":prodMQData["ProdID"],"UM":prodMQData["UM"], "Barcode":prodMQData["Barcode"], "Qty":qty,
             "Weight":0.000,"Notes":null,"ProdBarcode":null,"PLID":0};
         for(var fieldName in insProdMQData)
             if(prodMQData[fieldName]!==undefined) insProdMQData[fieldName]=prodMQData[fieldName];
         r_ProdMQ.insDataItem(dbUC,{insData:insProdMQData}, function(resultInsProdMQ){
-            if(resultInsProdMQ.error||resultInsProdMQ.updateCount!=1){ callback({error:"Failed create prodMQ!"}); return; }
+            if(resultInsProdMQ.error||resultInsProdMQ.updateCount!=1){
+                callback({error:"Failed create prodMQ! Reason:"+(resultInsProdMQ.error||"UNKNOWN!")});
+                return;
+            }
             callback({resultItem:insProdMQData});
         });
     };
