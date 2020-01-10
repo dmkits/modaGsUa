@@ -97,7 +97,7 @@ module.exports.init = function(app){
     app.post("/docs/excCashier/updExcDataState",function(req,res){
         var storeData=req.body, chID=storeData["ChID"];
         if(!chID){
-            res.send({error:"Non correct ChID!",userErrorMsg:"Не корректные данные сохраняемого документа (код регистрации)!"});
+            res.send({error:"Non correct ChID!",errorMessage:"Не корректные данные сохраняемого документа (код регистрации)!"});
             return;
         }
         t_Exc.updTableDataItem(req.dbUC,{tableColumns:tExcsListTableColumns, idFieldName:"ChID",
@@ -146,7 +146,7 @@ module.exports.init = function(app){
     app.post("/docs/excCashier/storeExcDTableData", function(req,res){
         var storeData=req.body, chID=storeData["ChID"], srcPosID=storeData["SrcPosID"];
         if(!chID||!srcPosID){
-            res.send({error:"Non correct ChID/SrcPosID!",userErrorMsg:"Не корректные данные по сохраняемой позиции в документе (код регистрации/позиция)!"});
+            res.send({error:"Non correct ChID/SrcPosID!",errorMessage:"Не корректные данные по сохраняемой позиции в документе (код регистрации/позиция)!"});
             return;
         }
         t_ExcD.updTableDataItem(req.dbUC,{tableColumns:tExcDTableColumns, idFields:["ChID","SrcPosID"],

@@ -158,7 +158,7 @@ module.exports.init = function(app){
     app.post("/docs/rec/updRecDataState",function(req,res){
         var storeData=req.body, chID=storeData["ChID"];
         if(!chID){
-            res.send({error:"Non correct ChID!",userErrorMsg:"Не корректные данные сохраняемого документа (код регистрации)!"});
+            res.send({error:"Non correct ChID!",errorMessage:"Не корректные данные сохраняемого документа (код регистрации)!"});
             return;
         }
         t_Rec.updTableDataItem(req.dbUC,{tableColumns:tRecsListTableColumns, idFieldName:"ChID",

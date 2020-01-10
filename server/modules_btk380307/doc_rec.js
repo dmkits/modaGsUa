@@ -216,7 +216,7 @@ module.exports.init = function(app){
             });
     };
     /**
-     * callback = function(result), result= { resultItem, error, userErrorMsg }
+     * callback = function(result), result= { resultItem, error, errorMessage }
      */
     t_RecD.storeNewProdPP=function(connection,prodID,recChID,recDData,callback){
         t_Rec.getDataItem(connection,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
@@ -236,7 +236,7 @@ module.exports.init = function(app){
             });
     };
     /**
-     * callback = function(result), result = { resultItem, error, userErrorMsg }
+     * callback = function(result), result = { resultItem, error, errorMessage }
      */
     t_RecD.storeRecD=function(connection,prodID,storeData,dbUserParams,callback){
         var parentChID=storeData["ParentChID"]||storeData["ChID"];
@@ -259,7 +259,7 @@ module.exports.init = function(app){
                         if(result.error) {
                             r_Prods.delete(connection,prodID);
                             if(result.error.indexOf("Violation of PRIMARY KEY constraint '_pk_t_RecD'"))
-                            result.userErrorMsg="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером."
+                            result.errorMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером."
                         }
                         callback(result);
                     });
@@ -277,7 +277,7 @@ module.exports.init = function(app){
                 "InRems":1};
             r_Prods.storeNewProdWithProdMQandProdPP0(req.dbUC,prodData,req.dbUserParams,function(result){
                 if(!result.resultItem||result.error){
-                    res.send({error:"Failed crate new product! Reason:"+result.error,userErrorMsg:result.errorMessage||result.error});
+                    res.send({error:"Failed create new product! Reason:"+result.error,errorMessage:result.errorMessage||result.error});
                     return;
                 }
                 prodID=result.resultItem["ProdID"];
@@ -290,7 +290,7 @@ module.exports.init = function(app){
         }
         var iProdID=parseInt(prodID);
         if(isNaN(iProdID)){
-            res.send({error:"Non correct ProdID!",userErrorMsg:"Не корректный код товара!"});
+            res.send({error:"Non correct ProdID!",errorMessage:"Не корректный код товара!"});
             return;
         }
         t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){

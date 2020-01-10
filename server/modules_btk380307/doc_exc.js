@@ -203,7 +203,7 @@ module.exports.init = function(app){
             });
     };
     /**
-     * callback = function(result), result= { resultItem, error, userErrorMsg }
+     * callback = function(result), result= { resultItem, error, errorMessage }
      */
     t_ExcD.storeNewProdPP=function(connection,prodID,recChID,recDData,callback){
         t_Exc.getDataItem(connection,{fields:["DocDate","CurrID","CompID"],conditions:{"ChID=":recChID}},
@@ -223,7 +223,7 @@ module.exports.init = function(app){
             });
     };
     /**
-     * callback = function(result), result = { resultItem, error, userErrorMsg }
+     * callback = function(result), result = { resultItem, error, errorMessage }
      */
     t_ExcD.storeExcD=function(connection,prodID,storeData,dbUserParams,callback){
         var parentChID=storeData["ParentChID"]||storeData["ChID"];
@@ -246,7 +246,7 @@ module.exports.init = function(app){
                         if(result.error) {
                             r_Prods.delete(connection,prodID);
                             if(result.error.indexOf("Violation of PRIMARY KEY constraint '_pk_t_ExcD'"))
-                            result.userErrorMsg="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером."
+                            result.errorMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером."
                         }
                         callback(result);
                     });
@@ -257,7 +257,7 @@ module.exports.init = function(app){
         var storeData=req.body, prodID=storeData["ProdID"];
         var iProdID=parseInt(prodID);
         if(prodID===undefined||prodID===null||isNaN(iProdID)){
-            res.send({error:"Non correct ProdID!",userErrorMsg:"Не корректный код товара!"});
+            res.send({error:"Non correct ProdID!",errorMessage:"Не корректный код товара!"});
             return;
         }
         t_ExcD.storeExcD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){

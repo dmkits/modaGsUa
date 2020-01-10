@@ -149,7 +149,7 @@ module.exports.init = function(app){
     t_VenA.findAndStoreProdInVenA= function(dbUC,docChID,venAProdData,tNewQty,resultCallback){
         if(!("ProdID" in venAProdData)&&!("TSrcPosID" in venAProdData)){
             resultCallback({error:"Failed find prod in t_VenA!<br> No ProdID or TSrcPosID!",
-                userErrorMsg:"Не удалось найти товар в инвентаризации!<br> В данных нет кода товара или позиции товара!"});
+                errorMessage:"Не удалось найти товар в инвентаризации!<br> В данных нет кода товара или позиции товара!"});
             return;
         }
         var conditions= {"ChID=":docChID};
@@ -161,7 +161,7 @@ module.exports.init = function(app){
             function(result){
                 if(result.error){
                     resultCallback({error:"Failed find prod in t_VenA!<br>"+result.error,
-                        userErrorMsg:"Не удалось найти товар в инвентаризации!<br>"+result.error});
+                        errorMessage:"Не удалось найти товар в инвентаризации!<br>"+result.error});
                     return;
                 }
                 var storeData=result.item;
@@ -169,7 +169,7 @@ module.exports.init = function(app){
                     storeData=venAProdData;
                     if(!("ProdID" in storeData)){
                         resultCallback({error:"Failed get prod data for insert into t_VenA!",
-                            userErrorMsg:"Не удалось получить данные товара для добавления в инвентаризацию!"});
+                            errorMessage:"Не удалось получить данные товара для добавления в инвентаризацию!"});
                         return;
                     }
                     storeData["TQty"]=0; storeData["TNewQty"]=1;
@@ -187,7 +187,7 @@ module.exports.init = function(app){
                                 function(result){
                                     if(result.error){
                                         resultCallback({error:"Failed calc new TSrcPosID by prod in t_VenA!<br>"+result.error,
-                                            userErrorMsg:"Не удалось вычислить новый номер позиции для товара в инвентаризации!<br>"+result.error});
+                                            errorMessage:"Не удалось вычислить новый номер позиции для товара в инвентаризации!<br>"+result.error});
                                         return;
                                     }
                                     if(!result.item) params.storeTableData["TSrcPosID"]=1;else params.storeTableData["TSrcPosID"]= result.item["maxTSrcPosID"];
@@ -197,9 +197,9 @@ module.exports.init = function(app){
                     function(result){
                         if(result.error){
                             if(result.error.indexOf("Cannot insert duplicate key row in object 'dbo.t_VenA' with unique index 'NoDuplicate'")>=0)
-                                result.userErrorMsg="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером.";
+                                result.errorMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером.";
                             else
-                                result.userErrorMsg="Ну удалось сохранить товар в инвентаризацию!<br>"+result.error;
+                                result.errorMessage="Ну удалось сохранить товар в инвентаризацию!<br>"+result.error;
                         }
                         resultCallback(result);
                     });
