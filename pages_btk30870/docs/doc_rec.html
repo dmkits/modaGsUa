@@ -225,13 +225,17 @@
             })
             .addToolInnerPage("Ценник товара", function(params){
                 var detailTableSelectedRow= params.detailHTable.getSelectedRow();
-                if(detailTableSelectedRow) {
+                if(detailTableSelectedRow){
                     var prodTagContentData = {};
                     for(var rowItemName in detailTableSelectedRow) prodTagContentData[rowItemName]= detailTableSelectedRow[rowItemName];
                     params.toolPaneContent.set("prodTagContentData", prodTagContentData);
-//                    params.toolPaneContent.set("href","/print/productTag40x25");
-//                    params.toolPaneContent.set("href","/print/productTag58x30");
-                    params.toolPaneContent.set("href","/print/productTag58x60");
+                    if(!params.toolPaneContent.get("href")&&!params.toolPaneContent.get("content")){
+//                        params.toolPaneContent.set("href","/print/productTag40x25");
+//                        params.toolPaneContent.set("href","/print/productTag58x30");
+                        params.toolPaneContent.set("href","/print/productTag58x60");
+                    }else{
+                        params.toolPaneContent.set("content",params.toolPaneContent.get("content"));
+                    }
                 }
             })
             .startupDoc();

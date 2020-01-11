@@ -17,14 +17,12 @@
         JsBarcode("#"+barcodeElementID, barcodeValue,{format:"EAN13", width:1, height:16, valueIsValid:true, margin:0,
             valid:function(valid){
                 if(!valid) this.valueIsValid = false;
-                if(!this.valueIsValid){
-                    //this.background= "#ccffff";
-                    this.lineColor= "#990000"
-                }
+                if(this.valueIsValid) return;
+                this.lineColor= "#990000"; //this.background= "#ccffff"; //IF barcode not valid
             }
         });
     };
-    (function(prodTagContentPageNum,prodTagContentData){                                            console.log("prodTagContentData",prodTagContentData);
+    (function(prodTagContentPageNum,prodTagContentData){                                                        log("productTag58x60 prodTagContentData",prodTagContentData);
         if(!prodTagContentData) return;
         $$.prodTagContent.style["max-width"]= $$.prodTagContent.style["width"];
         $$.prodTagContent.style["max-height"]= $$.prodTagContent.style["height"];
