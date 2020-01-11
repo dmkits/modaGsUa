@@ -58,48 +58,53 @@ module.exports.init= function(app){
     //dirProductsTableColumns=
     //    dir_products_bata.addProductAttrsColumnsTo(dirProductsTableColumns,8);
 
-    app.get("/dirsProds/getDataForArticle1Combobox", function(req, res){
+    app.get("/dirsProds/getDataForCountryCombobox", function(req,res){
+        r_Prods.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"Country":"Country"}, order:"Country"},
+            function(result){ res.send(result); }
+        );
+    });
+    app.get("/dirsProds/getDataForArticle1Combobox", function(req,res){
         r_Prods.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"Article1":"Article1"}, order:"Article1"},
             function(result){ res.send(result); }
         );
     });
-    app.get("/dirsProds/getDataForPCatNameCombobox", function(req, res){
+    app.get("/dirsProds/getDataForPCatNameCombobox", function(req,res){
         r_ProdC.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PCatName":"PCatName","PCatID":"PCatID"},
-                conditions:{"PCatID>0":null}, order:"PCatName"},
+                conditions:{"PCatID>0":null}, order:"PCatName desc"},
             function(result){ res.send(result); }
         );
     });
-    app.get("/dirsProds/getDataForPGrNameCombobox", function(req, res){
+    app.get("/dirsProds/getDataForPGrNameCombobox", function(req,res){
         r_ProdG.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName":"PGrName","PGrID":"PGrID"},
                 conditions:{"PGrID>0":null}, order:"PGrName"},
             function(result){ res.send(result); }
         );
     });
-    app.get("/dirsProds/getDataForPGrName1Combobox", function(req, res){
+    app.get("/dirsProds/getDataForPGrName1Combobox", function(req,res){
         r_ProdG1.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName1":"PGrName1","PGrID1":"PGrID1"},
                 conditions:{"PGrID1>0":null}, order:"PGrName1"},
             function(result){ res.send(result); }
         );
     });
-    app.get("/dirsProds/getDataForPGrName2Combobox", function(req, res){
+    app.get("/dirsProds/getDataForPGrName2Combobox", function(req,res){
         r_ProdG2.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName2":"PGrName2","PGrID2":"PGrID2"},
                 conditions:{"PGrID2>0":null}, order:"PGrName2"},
             function(result){ res.send(result); }
         );
     });
-    app.get("/dirsProds/getDataForPGrName3Combobox", function(req, res){
+    app.get("/dirsProds/getDataForPGrName3Combobox", function(req,res){
         r_ProdG3.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName3":"PGrName3","PGrID3":"PGrID3"},
                 conditions:{"PGrID3>0":null}, order:"PGrName3"},
             function(result){ res.send(result); }
         );
     });
-    app.get("/dirsProds/getDataForColorNameCombobox", function(req, res){
+    app.get("/dirsProds/getDataForColorNameCombobox", function(req,res){
         ir_ProdColors.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"ColorName":"ColorName"},
                 conditions:{"ChID>0":null}, order:"ColorName"},
             function(result){ res.send(result); }
         );
     });
-    app.get("/dirsProds/getDataForSizeNameCombobox", function(req, res){
+    app.get("/dirsProds/getDataForSizeNameCombobox", function(req,res){
         ir_ProdSizes.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"SizeName":"SizeName"},
                 conditions:{"ChID>0":null}, order:"SizeName"},
             function(result){ res.send(result); }
