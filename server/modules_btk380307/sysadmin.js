@@ -169,12 +169,12 @@ module.exports.init = function(app){
         });
     };
     var changesTableColumns=[
-        {data: "changeID", name: "changeID", width: 150, type: "text"},
-        {data: "changeDatetime", name: "changeDatetime", width: 120, type:"text", datetimeFormat:"YYYY-MM-DD HH:mm:ss"},
-        {data: "changeObj", name: "changeObj", width: 150, type: "text"},
-        {data: "changeVal", name: "changeVal", width: 600, type: "text"},
-        {data: "type", name: "type", width: 100, type: "text"},
-        {data: "message", name: "message", width: 200, type: "text"}
+        {data:"changeID", name:"changeID", width:150, type:"text"},
+        {data:"changeDatetime", name:"changeDatetime", width:120, type:"text", datetimeFormat:"YYYY-MM-DD HH:mm:ss"},
+        {data:"changeObj", name:"changeObj", width:150, type:"text"},
+        {data:"changeVal", name:"changeVal", width:600, type:"text"},
+        {data:"type", name:"type", width:100, type:"text"},
+        {data:"message", name:"message", width:200, type:"text"}
     ];
     app.get("/sysadmin/database/getCurrentChanges",function(req,res){
         var outData = { columns:changesTableColumns, identifier:changesTableColumns[0].data, items:[] };
@@ -209,11 +209,11 @@ module.exports.init = function(app){
         changeLog.getDataItems(database.getDBSystemConnection(),{conditions:{"ID IS NULL":null}}, resultCallback);
     };
     var changeLogTableColumns=[
-        {data: "ID", name: "changeID", width: 150, type: "text"},
-        {data: "CHANGE_DATETIME", name: "changeDatetime", width: 120, type: "text", datetimeFormat:"YYYY-MM-DD HH:mm:ss", align:"center"},
-        {data: "CHANGE_OBJ", name: "changeObj", width: 150, type: "text"},
-        {data: "CHANGE_VAL", name: "changeVal", width: 600, type: "text"},
-        {data: "APPLIED_DATETIME", name: "appliedDatetime", width: 120, type: "text", datetimeFormat:"YYYY-MM-DD HH:mm:ss", align:"center"}
+        {data:"ID", name:"changeID", width:150, type:"text"},
+        {data:"CHANGE_DATETIME", name:"changeDatetime", width:120, type:"text", datetimeFormat:"YYYY-MM-DD HH:mm:ss", align:"center"},
+        {data:"CHANGE_OBJ", name:"changeObj", width:150, type:"text"},
+        {data:"CHANGE_VAL", name:"changeVal", width:600, type:"text"},
+        {data:"APPLIED_DATETIME", name:"appliedDatetime", width:120, type:"text", datetimeFormat:"YYYY-MM-DD HH:mm:ss", align:"center"}
     ];
     /**
      * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
@@ -312,27 +312,27 @@ module.exports.init = function(app){
     });
     var userVisiblePass="****************",
         loginsTableColumns=[
-            {data: "UserID", name: "UserID", width: 65, type: "numeric",align:"center", readOnly:true, visible:false},
-            {data: "UserName", name: "User name", width: 250, type: "text", readOnly:true},
-            {data: "EmpID", name: "EmpID", width: 65, type:"numeric",align:"center", dataSource:"r_Users", readOnly:true, visible:false},
-            {data: "EmpName", name: "Employee name", width: 300, type: "text", readOnly:true,
+            {data:"UserID", name:"UserID", width:65, type:"numeric",align:"center", readOnly:true, visible:false},
+            {data:"UserName", name:"User name", width:220, type:"text", readOnly:true},
+            {data:"EmpID", name:"EmpID", width:65, type:"numeric",align:"center", dataSource:"r_Users", readOnly:true, visible:false},
+            {data:"EmpName", name:"Employee name", width:300, type:"text", readOnly:true,
                 dataSource:"r_Emps",linkCondition:"r_Emps.EmpID=r_Users.EmpID"},
-            {data: "ShiftPostID", name: "User role", width: 120, dataSource:"r_Emps", visible:false},
-            {data: "ShiftPostName", name: "User role", width: 120,
+            {data:"ShiftPostID", name:"User role ID", width:60, align:"center", dataSource:"r_Emps", visible:false},
+            {data:"ShiftPostName", name:"User role", width:280,
                 dataSource:"r_Uni", sourceField:"RefName", linkCondition:"r_Uni.RefTypeID=10606 and r_Uni.RefID=r_Emps.ShiftPostID",
-                type: "combobox", sourceURL:"/sysadmin/logins/getDataForUserRoleCombobox"},
-            {data: "suname", name: "DB User Name", width: 250, type: "text", readOnly:true, visible:false,
+                type:"combobox", sourceURL:"/sysadmin/logins/getDataForUserRoleCombobox"},
+            {data:"suname", name:"DB User Name", width:220, type:"text", readOnly:true, visible:false,
                 childDataSource:"sysusers", sourceField:"name",
                 childLinkCondition:"sysusers.islogin=1 and (sysusers.name=r_Users.UserName or (sysusers.Name='dbo' and r_Users.UserName='sa'))"},
-            {data: "login", name: "login", width: 150, type: "text", readOnly:true,
+            {data:"login", name:"login", width:150, type:"text", readOnly:true,
                 childDataSource:"sys.server_principals", sourceField:"name",
                 childLinkCondition:"sys.server_principals.type in ('S','U') and sys.server_principals.sid=sysusers.sid"},
-            {data: "lPass", name: "Password", width: 150, type: "text",
+            {data:"lPass", name:"Password", width:100, type:"text",
                 dataSource:"sys.server_principals", dataFunction:"CASE When sys.server_principals.sid is Null Then '' else '"+userVisiblePass+"' END"},
-            {data: "PswrdNote", name: "Password note", width: 150, type: "text", readOnly:true, visible:true,
+            {data:"PswrdNote", name:"Password note", width:100, type:"text", readOnly:true, visible:true,
                 childDataSource:"ir_UserData", sourceField:"pswrdNote",
                 childLinkCondition:"ir_UserData.UserID=r_Users.UserID"},
-            {data: "is_disabled", name: "Disabled", width: 75, type: "checkboxMSSQL",
+            {data:"is_disabled", name:"Disabled", width:75, type:"checkboxMSSQL",
                 dataSource:"sys.server_principals", sourceField:"is_disabled"}
     ];
     app.get('/sysadmin/logins/getLoginsDataForTable',function(req,res){
@@ -582,9 +582,9 @@ module.exports.init = function(app){
         res.sendFile(appPagesPath+'sysadmin/logs.html');
     });
     var sysLogsTableColumns=[
-        {data: "level", name: "Level", width:80, align:"center", type: "text"},
-        {data: "message", name: "Message", width:700, type: "text"},
-        {data: "timestamp", name: "Timestamp", width:120, align:"center", type: "text", datetimeFormat:"DD.MM.YY HH:mm:ss"}
+        {data:"level", name:"Level", width:80, align:"center", type:"text"},
+        {data:"message", name:"Message", width:700, type:"text"},
+        {data:"timestamp", name:"Timestamp", width:120, align:"center", type:"text", datetimeFormat:"DD.MM.YY HH:mm:ss"}
     ];
     app.get('/sysadmin/logs/getDataForTable',function(req,res){
         var fileDate = req.query.DATE, outData = {};
