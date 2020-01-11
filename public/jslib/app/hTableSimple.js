@@ -114,7 +114,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 var content = document.createElement('div');content.style="width:100%;height:100%;margin0;padding:0;";
                 this.domNode.appendChild(content); this.domNode.style.overflow="hidden";
                 var parent=this;
-                this.handsonTable = new Handsontable(content, {
+                this.handsonTable= new Handsontable(content,{
                     columns: parent.htVisibleColumns,
                     getColumnHeader: function(colIndex){
                         if(!parent.htVisibleColumns||!parent.htVisibleColumns[colIndex])return colIndex;
@@ -222,13 +222,14 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
             setHTParams: function(params){
                 this.handsonTable.updateSettings(params);
             },
-            setAddingHeaderRow: function(addingHeaderElements){
+            setAddingHeaderRow: function(refreshDataAction,addingHeaderElements){
                 if(addingHeaderElements) this.tableHeaderAddedElements=addingHeaderElements;
-                var hInstance= this.getHandsonTable();
+                var hInstance= this.getHandsonTable(), thisHTable=this;
                 hInstance.updateSettings({
                     afterRender: function(){
                         var theads=hInstance.rootElement.getElementsByTagName('thead'),                     //log("HTableSimple afterRender theads=",theads);
-                            div= document.createElement("div");
+                            divBtnColumns= document.createElement("div"),
+                            divAddingElems= document.createElement("div");
                         for(var theadInd=0;theadInd<theads.length;theadInd++){
                             var thead= theads[theadInd],
                                 newTR = document.createElement("tr"),
@@ -238,13 +239,59 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                             if(theadInd<=1){
                                 thead.insertBefore(newTR, tr);
                                 newTH.setAttribute("colspan", tr.childNodes.length.toString());
-                                if(theadInd==1)newTH.appendChild(div);
+                                if(theadInd==1){ newTH.appendChild(divBtnColumns); newTH.appendChild(divAddingElems); }
                                 if(tr.firstChild) tr.firstChild.removeAttribute("colspan");
                             }
                         }
-                        for(var eName in addingHeaderElements) div.appendChild(addingHeaderElements[eName]);
+                        var btnHTableColumns= document.createElement('BUTTON');
+                        btnHTableColumns.id="btnHTableColumns"; btnHTableColumns.innerHTML="Колонки таблицы";
+                        btnHTableColumns.className="addedHeaderDef";
+                        btnHTableColumns.style["margin-left"]="10px"; btnHTableColumns.style["margin-right"]="20px";
+                        btnHTableColumns.onclick= function(){
+                            thisHTable.createPopupMenuHTableColumns(btnHTableColumns,refreshDataAction);
+                        };
+                        divBtnColumns.appendChild(btnHTableColumns);
+                        for(var eName in addingHeaderElements) divAddingElems.appendChild(addingHeaderElements[eName]);
                     }
                 });
+            },
+            createPopupMenuHTableColumns: function(btnHTableColumns,refreshDataAction){
+                var popupMenu= this.popupMenu;
+                if(!this.htColumns){ if(popupMenu) this.closePopupMenuHTableColumns(); return; }
+                if(!popupMenu){
+                    document.body.appendChild(this.popupMenu = popupMenu= document.createElement('UL'));
+                    popupMenu.className= "hTablePopupMenu";
+                }
+                var position= btnHTableColumns.getBoundingClientRect();
+                popupMenu.style.top= (position.top + (window.scrollY || window.pageYOffset)) + 2 + 'px';
+                popupMenu.style.left= (position.left) + 'px';
+                while(popupMenu.firstChild) popupMenu.removeChild(popupMenu.firstChild);
+                var thisHTable=this;
+                for(var c=0;c<this.htColumns.length;c++){
+                    var hTableColumnData= this.htColumns[c];
+                    if(!hTableColumnData) continue;
+                    var popupMenuItem = document.createElement("LI"), popupMenuItemDiv;
+                    popupMenu.appendChild(popupMenuItem);
+                    popupMenuItem.appendChild(popupMenuItemDiv=document.createElement("div"));
+                    popupMenuItemDiv.innerHTML=
+                        ((hTableColumnData.visible!==false)?"<b>":"")+hTableColumnData.name+((hTableColumnData.visible!==false)?"</b>":"");
+                    (function(){
+                        var popupMenuItemHTableColumnData=hTableColumnData;
+                        popupMenuItem.onclick= function(){
+                            if(!popupMenuItemHTableColumnData)return;
+                            popupMenuItemHTableColumnData.visible= !(popupMenuItemHTableColumnData.visible!==false);
+                            thisHTable.setDataColumns(thisHTable.htColumns);
+                            if(refreshDataAction) refreshDataAction();
+                            else thisHTable.handsonTable.updateSettings({columns:thisHTable.htVisibleColumns});
+                            popupMenu.isOpen= false; popupMenu.style.display='none';
+                        };
+                    })();
+                }
+                popupMenu.style.display='block'; popupMenu.isOpen=true;
+            },
+            closePopupMenuHTableColumns: function(){
+                if(!this.popupMenu)return;
+                this.popupMenu.isOpen= false; this.popupMenu.style.display='none';
             },
             //setDisabled: function(disabled){
             //    this.set("disabled",disabled);
