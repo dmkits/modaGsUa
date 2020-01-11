@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/debugBtk.cfg" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/debugBtkDev.cfg" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/debugBtkDev2-localhost.cfg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/debugBtk380307.cfg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/debugBtk380307dev.cfg" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/debugBtk380307dev2-localhost.cfg" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/package.json" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/scripts/SQLQuery_if_GetProdNameByMaskValues.sql" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/server/common.js" charset="UTF-8" />
@@ -20,10 +20,10 @@
     <file url="file://$PROJECT_DIR$/server/modules_btk380307/index.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/modules_btk380307/main.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/modules_btk380307/mainPage.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/start_8080-btk.cmd" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/start_8080-btk.sh" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/start_8181-debugBtk.cmd" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/start_8181-debugBtk.sh" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/start-btk380307-8080.cmd" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/start-btk380307-8080.sh" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/start-btk380307-8181-debug.cmd" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/start-btk380307-8181-debug.sh" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/sysadmins.json" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>

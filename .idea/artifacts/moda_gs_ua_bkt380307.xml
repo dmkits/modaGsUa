@@ -27,22 +27,22 @@
       <element id="directory" name="scripts">
         <element id="dir-copy" path="$PROJECT_DIR$/scripts" />
       </element>
-      <element id="file-copy" path="$PROJECT_DIR$/configBtk.json" />
-      <element id="file-copy" path="$PROJECT_DIR$/debugBtk.cfg" />
+      <element id="file-copy" path="$PROJECT_DIR$/configBtk380307.json" />
+      <element id="file-copy" path="$PROJECT_DIR$/debugBtk380307.cfg" />
       <element id="file-copy" path="$PROJECT_DIR$/package.json" />
-      <element id="file-copy" path="$PROJECT_DIR$/start_8080-btk.cmd" />
-      <element id="file-copy" path="$PROJECT_DIR$/start_8181-debugBtk.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/start-btk380307-8080.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/start-btk380307-8181-debug.cmd" />
       <element id="directory" name="installNode">
         <element id="dir-copy" path="$PROJECT_DIR$/installNode" />
       </element>
       <element id="directory" name="logs" />
-      <element id="file-copy" path="$PROJECT_DIR$/debugBtkDev2-localhost.cfg" />
-      <element id="file-copy" path="$PROJECT_DIR$/start_8081-productionTBtk.cmd" />
-      <element id="file-copy" path="$PROJECT_DIR$/start_8082-productionTBtk.cmd" />
-      <element id="file-copy" path="$PROJECT_DIR$/start_8181-debugBtk-NoCL.cmd" />
-      <element id="file-copy" path="$PROJECT_DIR$/start_58080-btk.cmd" />
-      <element id="file-copy" path="$PROJECT_DIR$/productionBtk.cfg" />
-      <element id="file-copy" path="$PROJECT_DIR$/productionTBtk.cfg" />
+      <element id="file-copy" path="$PROJECT_DIR$/debugBtk380307dev2-localhost.cfg" />
+      <element id="file-copy" path="$PROJECT_DIR$/start-btk380307-8081-productionT.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/start-btk380307-8082-productionT.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/start-btk380307-8181-debug-NoCL.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/start-btk380307-58080.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/productionBtk380307.cfg" />
+      <element id="file-copy" path="$PROJECT_DIR$/productionTBtk380307.cfg" />
     </root>
   </artifact>
 </component>
