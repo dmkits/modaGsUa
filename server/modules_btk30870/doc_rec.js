@@ -158,7 +158,7 @@ module.exports.init = function(app){
             type:"comboboxWN", sourceURL:"/dirsProds/getDataForArticle1Combobox",
             dataSource:"r_Prods", sourceField:"Article1", linkCondition:"r_Prods.ProdID=t_RecD.ProdID"},
         {data:"ProdID", name:"Код товара", width:50, type:"text",align:"center", dataSource:"t_RecD", visible:false},
-        {data:"Barcode", name:"Штрихкод", width:75, type:"text", dataSource:"t_RecD", visible:false},
+        {data:"Barcode", name:"Штрихкод товара", width:80, type:"text", dataSource:"t_RecD", visible:false},
         {data:"ProdName", name:"Наименование товара", width:350, type:"text", visible:false,
             dataSource:"r_Prods", sourceField:"ProdName", linkCondition:"r_Prods.ProdID=t_RecD.ProdID" },
         {data:"UM", name:"Ед. изм.", width:45, type:"text", align:"center", dataSource:"t_RecD", sourceField:"UM"},
