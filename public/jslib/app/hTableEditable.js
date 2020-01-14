@@ -14,7 +14,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 for(var c=0;c<this.htColumns.length;c++){
                     var colData=this.htColumns[c];
                     if(colData.type!=="autocomplete")continue;
-                    this.loadAutocompleteColumnValues(colData, tableData);
+                    this.loadAutocompleteColumnValues(colData,tableData);
                     if(colData.visibleColumnIndex>=0) this.htVisibleColumns[colData.visibleColumnIndex].source= colData.source;
                 }
             },
@@ -22,25 +22,16 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 colData.sourceValues={}; colData.source=[];
                 for(var r=0;r<tableData.length;r++){
                     var value=tableData[r][colData.data];
-                    if(!colData.sourceValues[value]){
-                        colData.sourceValues[value]=true;
-                        colData.source.push(value);
-                    }
+                    if(!colData.sourceValues[value]){ colData.sourceValues[value]=true; colData.source.push(value); }
                 }
             },
-            loadAutocompleteColumnValues: function(colData, tableData){
+            loadAutocompleteColumnValues: function(colData,tableData){
                 var thisInstance=this;
-                if(!colData.sourceURL){
-                    thisInstance.setAutocompleteColumnValues(colData,tableData);
-                    return;
-                }
+                if(!colData.sourceURL){ thisInstance.setAutocompleteColumnValues(colData,tableData); return; }
                 colData.sourceValues={};colData.source=[];
                 Request.getJSONData({url:colData.sourceURL, resultItemName:"items"}
                     ,function(resultItems){
-                        if(!resultItems){
-                            thisInstance.setAutocompleteColumnValues(colData,tableData);
-                            return;
-                        }
+                        if(!resultItems){ thisInstance.setAutocompleteColumnValues(colData,tableData); return; }
                         for(var r=0;r<resultItems.length;r++){
                             var resultItemsData=resultItems[r], value=resultItemsData[colData.data];
                             if(colData.sourceValues[value]===undefined){
@@ -62,14 +53,14 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
             },
             updContentAutocompleteColumnsValues: function(rowsData){
-                if(!this.htColumns||this.htColumns.length==0||!rowsData||rowsData.length==0)return;            //console.log("HTableEditable updAutocompleteColumnsValues",rowsData);
+                if(!this.htColumns||this.htColumns.length==0||!rowsData||rowsData.length==0)return;
                 var htContentCols= this.handsonTable.getSettings()["columns"];
                 for(var c=0;c<htContentCols.length;c++){
                     var htContentColData= htContentCols[c];
                     this.updAutocompleteColumnValues(htContentColData,rowsData);
                 }
             },
-            getAutocompleteColumnValueForItem: function(colItemName, itemValue, valueItemName){
+            getAutocompleteColumnValueForItem: function(colItemName,itemValue,valueItemName){
                 for(var c=0;c<this.htVisibleColumns.length;c++){
                     var visColData=this.htVisibleColumns[c];
                     if(visColData.data===colItemName&&visColData.type==="autocomplete"){
@@ -87,10 +78,10 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         parentCellValueRenderer(instance, td, row, col, prop, value, cellProperties);
                         var rowSourceData= instance.getContentRow(row);
                         if(rowSourceData){
-                            var colType=parent.htVisibleColumns[col].type;
-                            if(colType === "autocomplete"
+                            var colData= (parent.htVisibleColumns)?parent.htVisibleColumns[col]:null;
+                            if(colData&&colData.type==="autocomplete"
                                 &&td.lastChild&&td.lastChild.tagName==="DIV"
-                                &&td.lastChild.className&&td.lastChild.className.indexOf("htAutocompleteArrow")>=0){    //console.log("HTableEditable cellValueRenderer autocomplete",td,td.className);
+                                &&td.lastChild.className&&td.lastChild.className.indexOf("htAutocompleteArrow")>=0){
                                 if(rowSourceData[parent.allowEditRowProp] != true) td.lastChild.setAttribute("style","display:none");
                                 else td.lastChild.removeAttribute("style");
                             }
@@ -117,8 +108,8 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     }
                 });
                 this.handsonTable.updateSettings({
-                    cells: function (row/*index in data*/, col, prop) {                                 //console.log("HTableEditable cells row=",row, parent.readOnly);
-                        var cellProps={readOnly:true, renderer:this.cellValueRenderer};
+                    cells: function(row/*index in data*/,col,prop){
+                        var cellProps= {readOnly:true, renderer:this.cellValueRenderer};
                         if(parent.readOnly==true) return cellProps;
                         var colData;
                         if(this.columns&&(colData=this.columns[col])&&colData.readOnly==true) return cellProps;
@@ -132,7 +123,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 if(this.allowFillHandle===true)
                     this.handsonTable.updateSettings({ fillHandle:{autoInsertRow:false, direction:'vertical'} });
                 this.handsonTable.updateSettings({
-                    beforeChange: function(change,source){                                              //console.log("HTableEditable beforeChange source=", source, " change=", change, change[0][3]);
+                    beforeChange: function(change,source){
                         if(source==='loadData') return;
                         if(change.length==1){//changed 1 cell
                             var newValue= change[0][3];
@@ -144,14 +135,14 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                             if(newValue && (typeof newValue==='string' || newValue instanceof String)) change[i][3]=newValue.trim();
                         }
                     },
-                    afterChange: function(change,source){                                               //console.log("HTableEditable afterChange source=",source," change=",change);
+                    afterChange: function(change,source){
                         if(source==='loadData' || !parent.onChangeRowsData) return;
                         if(change.length==1){//changed 1 cell
-                            var rowInd=change[0][0],prop= change[0][1], oldVal= change[0][2];           //console.log("HTableEditable afterChange changed 1 cell row=",rowInd," cell=",prop," oldVal=",oldVal);
+                            var rowInd=change[0][0],prop= change[0][1], oldVal= change[0][2];
                             var rowData=this.getContentRow(rowInd), oldRowData= {}, changedRowsItems={};
                             for(var itemName in rowData) oldRowData[itemName]=rowData[itemName];
                             changedRowsItems[prop]=true; oldRowData[prop]=oldVal;
-                            var changedRowData= parent.getChangedRowsData(rowData,oldRowData,changedRowsItems); //console.log("HTableEditable afterChange changed 1 cell",rowData,oldRowData);
+                            var changedRowData= parent.getChangedRowsData(rowData,oldRowData,changedRowsItems);
                             parent.onChangeRowsData(changedRowData);
                             return;
                         }
@@ -160,10 +151,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         for(var i=0; i<change.length; i++){
                             var rowInd=change[i][0], prop= change[i][1], oldVal= change[i][2];
                             var changedRowItems= changedRowsItems[rowInd];
-                            if(!changedRowItems){
-                                changedRowItems={};
-                                changedRowsItems[rowInd]=changedRowItems;
-                            }
+                            if(!changedRowItems){ changedRowItems={}; changedRowsItems[rowInd]=changedRowItems; }
                             changedRowItems[prop]=true;
                             var changedRowData= changedRowsData[rowInd], oldRowData= changedRowsOldData[rowInd];
                             if(!changedRowData){
@@ -174,9 +162,9 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                                 changedRowsOldData[rowInd]=oldRowData;
                             }
                             oldRowData[prop]=oldVal;
-                        }                                                                               //console.log("HTableEditable afterChange changed many cell",changedRowsData,changedRowsOldData,changedRowsItems);
+                        }
                         var changedRows= parent.getChangedRowsData();
-                        for(var rowInd in changedRowsData){                                             //console.log("HTableEditable afterChange changed many cell",changedRowsData[rowInd],changedRowsOldData[rowInd]);
+                        for(var rowInd in changedRowsData){
                             changedRows.addRowData(changedRowsData[rowInd],changedRowsOldData[rowInd],changedRowsItems[rowInd]);
                         }
                         parent.onChangeRowsData(changedRows);
@@ -276,11 +264,8 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
                 var selectedRowData= this.getSelectionLastRow(), selectRowIndex= -1;
                 var data=this.getData(), dataLength=data.length;
-                for(var rowInd=0; rowInd<dataLength; rowInd++){
-                    if(data[rowInd]===selectedRowData){
-                        selectRowIndex=rowInd; break;
-                    }
-                }                                                                                       //console.log("HTableEditable insertRowsAfterSelected",selectedRowData,dataValuesForNewRows);
+                for(var rowInd=0; rowInd<dataLength; rowInd++)
+                    if(data[rowInd]===selectedRowData){ selectRowIndex=rowInd; break; }
                 var valuesForNewRows;
                 if(dataValuesForNewRows){
                     valuesForNewRows={};
@@ -307,8 +292,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                             for(var rowItem in valuesForNewRows) insertingRowData[rowItem] = valuesForNewRows[rowItem];
                         newChangedRowsData.insertRowData(insertingRowData, newRowData);
                     }
-                }                                                                                       //console.log("HTableEditable insertRowsAfterSelected valuesForNewRows=",valuesForNewRows);
-                this.filterContentData();
+                }
                 var thisInstance=this;
                 //setTimeout(function(){
                 thisInstance.onChangeRowsData(newChangedRowsData, {inserted:true});
@@ -340,18 +324,14 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         }
                         deleteRowIndex=rowInd; break;
                     }
-                }                                                                                       //console.log("HTableEditable deleteRow",deleteRowData,deleteRowIndex,newSelectedRow,newSelection);
-                if(deleteRowIndex<0){
-                    this.setSelection(null,null);
-                    return;
                 }
+                if(deleteRowIndex<0){ this.setSelection(null,null); return; }
                 for(var rowInd=deleteRowIndex; rowInd<dataLength-1; rowInd++) data[rowInd]=data[rowInd+1];
                 data.length=dataLength-1;
-                this.setSelection(newSelectedRow,newSelection);                                         //console.log("HTableEditable deleteRow params=",params,deleteRowData,newSelectedRow,newSelection);
+                this.setSelection(newSelectedRow,newSelection);
                 if(params&&params.callUpdateContent===false) return;
                 var rowsData=[]; rowsData[0]=deleteRowData;
-                var filtered= this.filterContentData();
-                this.onUpdateContent({filtered:filtered, deletedRows:rowsData});
+                this.updateContent({deletedRows:rowsData});
             },
             /**
              * params: { filtered, updatedRows, insertedRows, deletedRows }
@@ -373,7 +353,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         if(value===undefined&&oldValue!==undefined) return oldValue;
                         return value;
                     };
-                    this.setValue= function(newValue){                                                      //console.log("ChangedData setValue ",this.itemName,newValue);
+                    this.setValue= function(newValue){
                         if(newValue===undefined) newValue=null;
                         if(typeof(newValue)=="number"&&isNaN(newValue+0)) this.values[this.itemName]=""; else this.values[this.itemName] = newValue;
                         return this;
@@ -415,9 +395,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
                 function newChangedRowData(newRowData,oldRowData,changedRowItems){
                     var newInstance= { values:newRowData, oldValues:oldRowData };
-                    newInstance.data= function(){
-                        return this.values;
-                    };
+                    newInstance.data= function(){ return this.values; };
                     newInstance.item= function(itemName){
                         var item=this[itemName];
                         if(!item){
@@ -440,12 +418,8 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
                 function newChangedRowsData(){
                     var newInstance= [];
-                    newInstance.insertRowData= function(newRowData,oldRowData){
-                        this.unshift(newChangedRowData(newRowData,oldRowData));
-                    };
-                    newInstance.addRowData= function(newRowData,oldRowData,changedRowItems){
-                        this.push(newChangedRowData(newRowData,oldRowData,changedRowItems));
-                    };
+                    newInstance.insertRowData= function(newRowData,oldRowData){ this.unshift(newChangedRowData(newRowData,oldRowData)); };
+                    newInstance.addRowData= function(newRowData,oldRowData,changedRowItems){ this.push(newChangedRowData(newRowData,oldRowData,changedRowItems)); };
                     return newInstance;
                 }
 
@@ -456,7 +430,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
             /**
              * params = { inserted:true/false }
              */
-            onChangeRowsData: function(changedRowsData,onChangeRowsDataParams){                             //console.log("HTableEditable.onChangeRowsData changedRowsData=",changedRowsData,onChangeRowsDataParams);
+            onChangeRowsData: function(changedRowsData,onChangeRowsDataParams){
                 var thisInstance=this;
                 /* rowsCallback.params = { table:<this instance>, <other added in onChangeRowData params> } */
                 var changeRowsDataProcess= function(i,changedRowsData,params,callUpdateContent){
@@ -468,9 +442,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         return;
                     }
                     setTimeout(function(){
-                        thisInstance.onChangeRowData(changedRowData,params,function(){
-                            changeRowsDataProcess(i+1,changedRowsData,params,callUpdateContent);            //console.log("HTableEditable.onChangeRowsData rowsCallback for change=",i+1);
-                        });
+                        thisInstance.onChangeRowData(changedRowData,params,function(){ changeRowsDataProcess(i+1,changedRowsData,params,callUpdateContent); });
                     },1);
                 };
                 changeRowsDataProcess(0,changedRowsData,{table:thisInstance},false);
@@ -480,7 +452,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
              * changedRowData, params = { table:<this instance>, <other added in onChangeRowData params> }, nextChangedRowAction
              * without fail call nextCallback on the over onChangeRowData!
              */
-            onChangeRowData: function(changedRowData,onChangeRowDataParams,nextChangedRowAction){           //console.log("HTableEditable.onChangeRowData changedRowData=",changedRowData);
+            onChangeRowData: function(changedRowData,onChangeRowDataParams,nextChangedRowAction){
                 //TODO actions after user change (or paste) content table row cell data
                 nextChangedRowAction();//without fail call this!
             },
@@ -516,13 +488,12 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
              */
             getRowDataFromURL: function(params,postCallback){
                 if(!this.getRowIDName()) return;
-                var rowData=params.rowData, newData = {};
-                var thisInstance = this;                                                                //console.log("HTableEditable storeRowDataByURL storingData=",storingData,params.callUpdateContent);
+                var rowData=params.rowData, newData={}, thisInstance=this;
                 Request.getJSONData({url:params.url,condition:params.condition, consoleLog:true, showErrorDialog:params.showErrorDialog}
                     ,function(result,error){
                         if(!result){
                             rowData["<!$error$!>"]= "Не удалось получить результат операции с сервера!";
-//                        instance.setErrorsCommentsForRow(storeRow,resultItem);
+//                              instance.setErrorsCommentsForRow(storeRow,resultItem);
                             if(postCallback) postCallback(result,error,rowData);
                             return;
                         }
@@ -537,7 +508,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                         if(error) errors["<!$error$!>"] = error;
                         if(!resultItem)resultItem=newData;
                         thisInstance.updateRowAllDataItems(rowData,resultItem,
-                            {editPropValue:true, addData:errors, callUpdateContent:params.callUpdateContent} );//console.log("HTableEditable.storeRowDataByURL resultItem=",resultItem);
+                            {editPropValue:true, addData:errors, callUpdateContent:params.callUpdateContent} );
                         //instance.setErrorsCommentsForRow(storeRow,storeRowData);
                         if(postCallback) postCallback(result,error,rowData);
                     })
@@ -579,7 +550,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                                 errorMsg+=errors['<!$error_updateCount$!>'];
                             }
                             thisInstance.updateRowAllDataItems(rowData, resultItem||storingData,
-                                {editPropValue:true, addData:errors, callUpdateContent:false});             //console.log("HTableEditable.storeRowDataByURL resultItem=",resultItem);
+                                {editPropValue:true, addData:errors, callUpdateContent:false});
                             //instance.setErrorsCommentsForRow(storeRow,storeRowData);
                             if(postCallback) postCallback(result,error,rowData,errorMsg);
                             return;
@@ -598,9 +569,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 if(!this.isRowEditable(params.rowData)) return;
                 var thisInstance=this;
                 thisInstance.loadingGif.show();
-                this.storeRowDataByURL(params,/*postCallback*/function(){
-                    thisInstance.loadingGif.hide();
-                });
+                this.storeRowDataByURL(params,/*postCallback*/function(){ thisInstance.loadingGif.hide(); });
             },
             /**
              * storeParams: {url, condition, rowsData, callUpdateContent,
@@ -608,7 +577,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
              *      progressDialogStoreRowMessage, progressDialogStoreRowMessageSuccess, progressDialogStoreRowMessageFail
              * }
              */
-            storeRowsDataByURL: function(storeParams){                                                       //console.log("HTableEditable storeRowsDataByURL rowsData=",params.rowsData);
+            storeRowsDataByURL: function(storeParams){
                 if(!storeParams||!storeParams.rowsData){
                     console.error("HTableEditable.storeRowsDataByURL FAILED! NO DATA FOR STORE!");
                     return;
@@ -677,9 +646,9 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                     console.error("HTableEditable.deleteRowDataByURL ERROR! NO ROW ID VALUES!");
                     return;
                 }
-                var thisInstance = this;                                                                    //console.log("HTableEditable deleteRowDataByURL deletingData",deletingData);
+                var thisInstance = this;
                 Request.postJSONData({url:params.url,condition:params.condition,data:deletingData},
-                    function(result,error){                                                                 //console.log("HTableEditable deleteRowDataByURL result",result);
+                    function(result,error){
                         var errors={};
                         if(error) errors["<!$error$!>"] = error;
                         if(!result){
@@ -725,7 +694,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
                 if(!params || !this.getRowIDName() || !this.getSelectedRow()) return;
                 params.rowData= this.getSelectedRow();
-                var rowData=params.rowData, rowIDNames=this.getRowIDNames();                            //console.log("HTableEditable.deleteSelectedRowDataByURL params=",params,"rowIDNames",rowIDNames);
+                var rowData=params.rowData, rowIDNames=this.getRowIDNames();
                 for(var rowIDNameItem in rowIDNames){
                     var rowIDValueItem=rowData[rowIDNameItem];
                     if(rowIDValueItem===null||rowIDValueItem===undefined){
@@ -736,9 +705,7 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 params.callUpdateContent= true;
                 var thisInstance=this;
                 thisInstance.loadingGif.show();
-                this.deleteRowDataByURL(params,/*postCallback*/function(){
-                    thisInstance.loadingGif.hide();
-                });//this call onUpdateContent
+                this.deleteRowDataByURL(params,/*postCallback*/function(){ thisInstance.loadingGif.hide(); });//this call onUpdateContent
             }
         });
 });
