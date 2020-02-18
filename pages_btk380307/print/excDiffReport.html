@@ -1,20 +1,63 @@
-<h1>excDiffReport</h1>
-<div style="width:100%;text-align:center">АКТ</div>
-<table width="100%">
+<h2 style="text-align:center">АКТ РАСХОЖДЕНИЙ ПЕРЕМЕЩЕНИЯ ТОВАРОВ</h2>
+<table width="100%" style="border: none">
     <tr>
-        <td>Номер</td>
-        <td>Дата</td>
+        <td style="height:0.5cm;border:none;border-bottom:solid 1px;text-align:left;vertical-align:bottom"><span class="tableHText">Номер перемещения:</span><span class="tableHText" style="font-weight:bold" dataItemName="headerValue.DocID"></span></td>
+        <td style="height:0.5cm;width:0.5cm;border:none"></td>
+        <td style="height:0.5cm;border:none;border-bottom:solid 1px;text-align:left;vertical-align:bottom"><span class="tableHText">Дата:</span><span class="tableHText" style="font-weight:bold" dataItemName="headerValue.DocDate"></span></td>
     </tr>
 </table>
-<table width="100%" style="border: solid 1px">
+<table width="100%" style="border: none">
     <tr>
-        <th>№ п/п</th>
-        <th>Товар</th>
-        <th>Кол-во</th>
+        <td style="height:0.6cm;border:none;border-bottom:solid 1px;text-align:left;vertical-align:bottom"><span class="tableHText">Фирма:</span><span class="tableHText" style="font-weight:bold" dataItemName="headerValue.OurName"></span></td>
+        <td style="height:0.6cm;width:0.5cm;border:none"></td>
+        <td style="height:0.6cm;border:none;border-bottom:solid 1px;text-align:left;vertical-align:bottom"><span class="tableHText">Склад:</span><span class="tableHText" style="font-weight:bold" dataItemName="headerValue.StockName"></span></td>
     </tr>
-    <tr>
-        <td>1</td>
-        <td>ТОВАР 1</td>
-        <td>123</td>
+</table>
+<table width="100%" style="margin-top:0.4cm;border:solid 1px">
+    <tr style="height:0.5cm">
+        <th rowspan="2" style="width:1cm">№<br>п/п</th>
+        <th rowspan="2"  style="width:1.5cm">Код товара</th>
+        <th rowspan="2"> Наименование товара</th>
+        <th rowspan="2"  style="width:1cm">Ед. изм.</th>
+        <th rowspan="2" style="width:1.5cm">Цена</th>
+        <th colspan="2" style="width:1.5cm">Передано</th>
+        <th colspan="2" style="width:1.5cm">Принято</th>
+    </tr>
+    <tr style="height:0.5cm">
+        <th style="width:1.0cm">Кол-во</th>
+        <th style="width:2.0cm">Сумма</th>
+        <th style="width:1.0cm">Кол-во</th>
+        <th style="width:2.0cm">Сумма</th>
+    </tr>
+    <tr dataRowItemName="tableData">
+        <td style="text-align:right"><div class="tableText" dataRowContextItemName="SrcPosID"></div></td>
+        <td style="text-align:center"><div class="tableText" dataRowContextItemName="ProdID"></div></td>
+        <td><div class="tableText" dataRowContextItemName="ProdName"></div></td>
+        <td style="text-align:center"><div class="tableText" dataRowContextItemName="UM"></div></td>
+        <td style="text-align:center"><div class="tableText" dataRowContextItemName="PriceCC"></div></td>
+        <td style="text-align:center"><div class="tableText" dataRowContextItemName="Qty"></div></td>
+        <td style="text-align:center"><div class="tableText" dataRowContextItemName="SumCC"></div></td>
+        <td style="text-align:center"><div class="tableText" dataRowContextItemName="NewQty"></div></td>
+        <td style="text-align:center"><div class="tableText" dataRowContextItemName="NewSumCC"></div></td>
+    </tr>
+</table>
+<table width="100%" style="border: none">
+    <tr style="font-weight:bold">
+        <td style="height:0.6cm;border:none;text-align:right"><div class="tableHText">ИТОГО количество:</div></td>
+        <td style="height:0.6cm;width:3.0cm;border-top:none;text-align:center"><div class="tableHText" style="" dataItemName="headerData.TQty"></div></td>
+        <td style="height:0.6cm;width:3.0cm;border-top:none;text-align:center"><div class="tableHText" style="" dataItemName="headerData.TNewQty"></div></td>
+    </tr>
+    <tr style="font-weight:bold">
+        <td style="height:0.6cm;border:none;text-align:right"><div class="tableHText">ИТОГО сумма:</div></td>
+        <td style="height:0.6cm;width:3.0cm;border-top:none;text-align:center"><div class="tableHText" style="" dataItemName="headerData.TSumCC"></div></td>
+        <td style="height:0.6cm;width:3.0cm;border-top:none;text-align:center"><div class="tableHText" style="" dataItemName="headerData.TNewSumCC"></div></td>
+    </tr>
+    <tr style="font-weight:bold">
+        <td colspan="2" style="height:0.6cm;border:none;text-align:right"><div class="tableHText">Отклонение по количеству:</div></td>
+        <td style="height:0.6cm;width:3.0cm;border-top:none;text-align:center"><div class="tableHText" style="" dataItemName="headerData.TDiffQty"></div></td>
+    </tr>
+    <tr style="font-weight:bold">
+        <td colspan="2" style="height:0.6cm;border:none;text-align:right"><div class="tableHText">Отклонение по сумме:</div></td>
+        <td style="height:0.6cm;width:3.0cm;border-top:none;text-align:center"><div class="tableHText" style="" dataItemName="headerData.TDiffSumCC"></div></td>
     </tr>
 </table>

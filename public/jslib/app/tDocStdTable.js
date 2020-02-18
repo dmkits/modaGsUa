@@ -274,10 +274,14 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 if(!this.detailHeader.postForDeleteDataUrl) return;
                 this.detailHeader.deleteDataByUrl({url:this.detailHeader.postForDeleteDataUrl, onlyIDValue:true});
             },
-            addDetailHeaderElement: function(newRow,obj){
+            addDetailHeaderElement: function(newRow,obj,itemName){
                 if(!this.detailHeaderElements) this.detailHeaderElements=[];
+                if(!this.detailHeaderElItems) this.detailHeaderElItems={};
                 if(this.detailHeaderElements.length==0||newRow) this.detailHeaderElements.push([]);
-                if(obj) this.detailHeaderElements[this.detailHeaderElements.length-1].push(obj);
+                if(!obj) return;
+                this.detailHeaderElements[this.detailHeaderElements.length-1].push(obj);
+                if(itemName) this.detailHeaderElItems[itemName]=obj;
+
             },
             addDetailHeaderRow: function(height,createNewTable){
                 if(!height) height=25;
@@ -296,7 +300,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 $TDF.addRowToTable(this.detailHeaderTable, height);
                 this.addDetailHeaderPanesBtns();
                 this.detailHeader.titleCell= $TDF.addHeaderCellToTableRow(this.detailHeaderTable.lastChild);
-                this.addDetailHeaderElement(true,this.detailHeader.titleCell);
+                this.addDetailHeaderElement(true,this.detailHeader.titleCell,"#title");
                 this.detailHeader.setTitleContent= function(){
                     if(!this.titleCell) return;
                     if(this.getContentData()===undefined){
@@ -374,7 +378,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 var textBox= $TDF.addTableCellTextBoxTo(this.detailHeaderTable.lastChild,
                     {cellWidth:cellWidth, labelText:label, labelStyle:params.style, inputStyle:params.style+params.inputStyle});
                 this.detailHeader.addControlElementObject(textBox, itemName);
-                this.addDetailHeaderElement(false,textBox);
+                this.addDetailHeaderElement(false,textBox,itemName);
                 return this;
             },
             /**
@@ -389,7 +393,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     {cellWidth:cellWidth, labelText:label, labelStyle:params.style, inputStyle:params.style+params.inputStyle,
                         noPrevNextButtons:params.noPrevNextButtons});
                 this.detailHeader.addControlElementObject(dateBox, itemName);
-                this.addDetailHeaderElement(false,dateBox);
+                this.addDetailHeaderElement(false,dateBox,itemName);
                 return this;
             },
             /**
@@ -404,7 +408,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     { labelText:label, labelStyle:params.style, inputStyle:params.style+"text-align:right;"+params.inputStyle, cellWidth:cellWidth,
                         inputParams:{constraints:{pattern:params.pattern}} });
                 this.detailHeader.addControlElementObject(numberTextBox, itemName);
-                this.addDetailHeaderElement(false,numberTextBox);
+                this.addDetailHeaderElement(false,numberTextBox,itemName);
                 return this;
             },
             /**
@@ -419,7 +423,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     { labelText:label, labelStyle:params.style, selectStyle:params.style+"text-align:right;"+params.selectStyle, cellWidth:cellWidth,
                         selectParams:{labelDataItem:params.labelDataItem,loadDropDownURL:params.loadDropDownURL} });
                 this.detailHeader.addControlElementObject(select, itemName);
-                this.addDetailHeaderElement(false,select);
+                this.addDetailHeaderElement(false,select,itemName);
                 return this;
             },
             /**
@@ -545,10 +549,13 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
             //    return this;
             //},
 
-            addDetailTotalElement: function(newRow,obj){
+            addDetailTotalElement: function(newRow,obj,itemName){
+                if(!this.detailTotalElItems) this.detailTotalElItems={};
                 if(!this.detailTotalElements) this.detailTotalElements=[];
                 if(this.detailTotalElements.length==0||newRow) this.detailTotalElements.push([]);
-                if(obj) this.detailTotalElements[this.detailTotalElements.length-1].push(obj);
+                if(!obj) return;
+                this.detailTotalElements[this.detailTotalElements.length-1].push(obj);
+                if(itemName) this.detailTotalElItems[itemName]=obj;
             },
             addDetailTotalRow: function(createNewTable){
                 if(!this.detailTotalTable || createNewTable) this.detailTotalTable=$TDF.addTableTo(this.detailTotal.domNode);
@@ -574,7 +581,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                         inputParams:{readOnly:true,
                             /*it's for print*/cellWidth:cellWidth, labelText:label, printStyle:params.style, inputStyle:params.inputStyle, print:params.print} });
                 this.detailHeader.addControlElementObject(textBox, itemName);
-                this.addDetailTotalElement(false,textBox);
+                this.addDetailTotalElement(false,textBox,itemName);
                 return this;
             },
             /**
@@ -594,7 +601,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                             /*it's for print*/cellWidth:cellWidth, printLabel:printLabel, printStyle:params.style, inputStyle:"text-align:right;"+params.inputStyle,
                                 print:params.print} });
                 this.detailHeader.addControlElementObject(numberTextBox, itemName);
-                this.addDetailTotalElement(false,numberTextBox);
+                this.addDetailTotalElement(false,numberTextBox,itemName);
                 return this;
             },
             /**
@@ -1078,6 +1085,34 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 var printWindow= window.open("/print/printDocSimpleTable");                                     //console.log("doPrint printWindow printData=",printData);
                 printWindow["printDocSimpleTableData"]= printData;
             },
+
+            _getElemValue: function(elem){
+                var value=null;
+                if(elem.textbox) value= elem.textbox.value;
+                else if(elem.textDirNode) value= elem.textDirNode.textContent;//if element Select
+                else if(elem.innerText) value= elem.innerText;
+                return value;
+            },
+            /**
+             * return  printData= { headerData, headerValue, tableColumns, tableData, totalValue }
+             */
+            getDataForPrint: function(){
+                var printData= { headerData:this.detailHeader.getContentData() };
+                if(this.detailHeaderElItems){
+                    var headerValue={}; printData.headerValue=headerValue;
+                    for(var hItemName in this.detailHeaderElItems)
+                        headerValue[hItemName]= this._getElemValue(this.detailHeaderElItems[hItemName]);
+                }
+                printData.tableColumns = this.detailHTable.getColumns();
+                printData.tableData = this.detailHTable.getData();
+                if(this.detailTotalElItems){
+                    var totalValue={}; printData.totalValue=totalValue;
+                    for(var tItemName in this.detailTotalElItems)
+                        totalValue[tItemName]= this._getElemValue(this.detailTotalElItems[tItemName]);
+                }
+                return printData;
+            },
+
             exportTableContentToExcel: function(){
                 this.requestForExcelFile({tableData:this.detailHTable.getContent(), visibleColumns:this.detailHTable.getVisibleColumns()});
             },

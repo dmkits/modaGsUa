@@ -10,7 +10,6 @@
     <script src="/jslib/moment/moment.js"></script>
     <script src="/jslib/numeral/numeral.js"></script>
     <script src="/jslib/numeral/languages/ru-UA.js"></script>
-    <script src="/jslib/app/printTable.js"></script>
     <title><%-title%></title>
     <style>
         html, body {
@@ -30,8 +29,16 @@
             border: solid 1px black;
         }
         th, tr, td {
+            font-size: 12px;
+            padding: 0;
+        }
+        span, .tableText {
             padding: 2px 5px 2px 5px;
             font-size: 12px;
+        }
+        .tableHText {
+            padding: 2px 5px 2px 5px;
+            font-size: 14px;
         }
         .topContent {
             margin: 0.5cm 1cm 0;
@@ -46,21 +53,9 @@
             html, body {
                 color: black;
             }
-            /*table {*/
-                /*margin:0;*/
-            /*}*/
             thead {
                 display: table-header-group;
             }
-            /*.topContent {*/
-                /*margin: 0;*/
-            /*}*/
-            /*.detailContent {*/
-                /*margin: 0;*/
-            /*}*/
-            /*.bottomContent {*/
-                /*margin: 0;*/
-            /*}*/
         }
     </style>
 </head>
@@ -68,25 +63,94 @@
 <page id="printDocFT" style="position:absolute;left:0;top:0;right:0;bottom:0;margin:0;padding:0">
     <InnerPage id="printDocFT_PrintContent" region="left"></InnerPage>
 </page>
-<!--<InnerPage id="printDocFT" style="position:absolute;left:0;top:0;right:auto;bottom:0;margin:0;padding:0">-->
-
-</InnerPage>
 </body>
 <script type="text/javascript"> $app.dev(true);
     $app.startup("#printDocFT",function(){                                                              log("START PRINT DOC FROM TEMPLATE PAGE...",$$,this);//!!!IT'S FOR TESTING!!!
         var docTemplateName = window["docTemplateName"],docContentData = window["docContentData"];      log("PRINT DOC FROM TEMPLATE PAGE docTemplateName=",docTemplateName,"docContentData=",docContentData);//!!!IT'S FOR TESTING!!!
         if(!docTemplateName||!docContentData) return;
-        var tableWidth = calcTableWidth(docContentData);                                                console.log("tableWidth",tableWidth);
+        var calcTableWidth= function(tableColumns){
+            var col_width, table_width= 0;
+            if(!tableColumns) return 0;
+            for(var col = 0; col < tableColumns.length; col++){
+                var tableColumnData= tableColumns[col];
+                col_width= (tableColumnData.width != undefined)?tableColumnData.width:80;
+                table_width+= col_width;
+            }
+            return table_width;
+        };
+        var tableWidth = calcTableWidth(docContentData.tableColumns);
         $$.printDocFT_PrintContent.domNode.style.width=tableWidth+"px";
-        //$$.printDocFT.domNode.style.width=tableWidth+"px";
+        $$.printDocFT_PrintContent.onLoadCallback= function(){
+            var fillDomElByAttr= function(docContentData,domEl,fillParams){
+                if(!domEl||!docContentData) return;
+                var attrDataItemName= (domEl.getAttribute)?domEl.getAttribute("dataItemName"):null;
+                attrDataItemName= (attrDataItemName)?attrDataItemName.trim():attrDataItemName;
+                if(attrDataItemName&&attrDataItemName!=""){
+                    var dataItemName= attrDataItemName.substr(0,attrDataItemName.indexOf(".")),
+                        dataItemValueName= attrDataItemName.replace(dataItemName+".",""), val=null;
+                    if(dataItemName&&dataItemValueName){
+                        var item= docContentData[dataItemName];
+                        if(item) val= item[dataItemValueName];
+                    }
+                    if(val!=null) domEl.innerText= val;
+                }
+                var attrDataRowContextItemName= (domEl.getAttribute)?domEl.getAttribute("dataRowContextItemName"):null;
+                attrDataRowContextItemName= (attrDataRowContextItemName)?attrDataRowContextItemName.trim():attrDataRowContextItemName;
+                if(attrDataRowContextItemName&&attrDataRowContextItemName!=""&&fillParams.rowItemData)
+                    domEl.innerText= fillParams.rowItemData[attrDataRowContextItemName];
+            };
+            var createRows= function(rowsParams,domEl,childEl,docContentData){
+                var hasRowItemData= false;
+                for(var rowItemParams of rowsParams){
+                    rowItemParams.rowIndex= (rowItemParams.rowIndex==null)?0:rowItemParams.rowIndex+1;
+                    var rowItemData= rowItemParams.rowsData[rowItemParams.rowIndex];
+                    if(!rowItemData) continue;
+                    hasRowItemData= true;
+                    var rowChildEl= rowItemParams.node.cloneNode(true);
+                    domEl.insertBefore(rowChildEl,childEl);
+                    var fillParams={ rowItemData:rowItemData };
+                    fillDomElByAttr(docContentData,rowChildEl,fillParams);
+                    if(rowChildEl&&rowChildEl.childNodes&&rowChildEl.childNodes.length>0) parseDomChilds(docContentData,rowChildEl,0,fillParams);
+                }
+                if(!hasRowItemData) return;
+                createRows(rowsParams,domEl,childEl,docContentData);
+            };
+            var parseDomChilds= function(docContentData,domEl,index, parseParams){
+                if(!domEl||!domEl.childNodes) return;
+                var childEl= domEl.childNodes[index];
+                if(!childEl){
+                    if(parseParams&&parseParams.rowsParams) createRows(parseParams.rowsParams,domEl,childEl,docContentData);
+                    return;
+                }
+                if(childEl.nodeType!=1){ parseDomChilds(docContentData,domEl,++index, parseParams); return; }
+                var attrDataRowItemName= (childEl.getAttribute)?childEl.getAttribute("dataRowItemName"):null;
+                attrDataRowItemName= (attrDataRowItemName)?attrDataRowItemName.trim():attrDataRowItemName;
+                if(attrDataRowItemName&&attrDataRowItemName!=""){
+                    var rowsData= docContentData[attrDataRowItemName], rowsParams= (parseParams)?parseParams.rowsParams:null;
+                    if(rowsData&&rowsData.length>0){
+                        rowsParams= rowsParams||[];
+                        var rowItemParams={};
+                        rowsParams.push(rowItemParams);
+                        rowItemParams.node= childEl.cloneNode(true); rowItemParams.rowsData= rowsData;
+                    }
+                    domEl.removeChild(childEl);
+                    if(rowsParams){
+                        parseParams= parseParams||{};
+                        parseParams.rowsParams= rowsParams;
+                    }
+                    parseDomChilds(docContentData,domEl,index, parseParams);
+                    return;
+                }else if(parseParams&&parseParams.rowsParams)
+                    createRows(parseParams.rowsParams,domEl,childEl,docContentData)
+                var fillParams={};
+                if(parseParams&&parseParams.rowItemData) fillParams.rowItemData= parseParams.rowItemData;
+                fillDomElByAttr(docContentData,childEl,fillParams);
+                if(childEl&&childEl.childNodes&&childEl.childNodes.length>0) parseDomChilds(docContentData,childEl,0,fillParams);
+                parseDomChilds(docContentData,domEl,++index, parseParams);
+            };
+            parseDomChilds(docContentData,this.containerNode,0)
+        };
         $$.printDocFT_PrintContent.set("href","/print/getPrintDocTemplate?docTemplateName="+docTemplateName);
-
-//        $$.$parent.domNode.style.width=tableWidth+"px";
-//        $$.$parent.set("href","/print/getPrintDocTemplate?docTemplateName="+docTemplateName);
-
-//        if(printData.header) $$.print_PrintContent.domNode.appendChild(createDescriptiveTable(printData.header, table_width));
-//        if(printData.columns) $$.print_PrintContent.domNode.appendChild(createPrintDetailTable(printData.columns,printData.data, table_width));
-//        if(printData.total) $$.print_PrintContent.domNode.appendChild(createDescriptiveTable(printData.total, table_width));
     });
 </script>
 </html>
