@@ -12,7 +12,7 @@
             .init({idListContainer:"docs_excCashier_ListContainer",idDetailContainer:"docs_excCashier_DetailContainer",
                 idDetailHeader:"docs_excCashier_DetailHeader",idDetailTable:"docs_excCashier_ProductsTable",idDetailTotal:"docs_excCashier_DetailTotal",
                 idDetailPanesContainer:"docs_excCashier_DetailPanesContainer",
-                buttonPrint:true, buttonExportToExcel:false})
+                buttonPrint:{printParams:{minTableWidth:1100}}, buttonExportToExcel:false})
             .addListTable({getDataUrl:"/docs/excCashier/getDataForExcsListTable",
                 header:"Список накладных", bdatelabelText:"c",bdateCondition:"DOCDATE>=", edatelabelText:"по",edateCondition:"DOCDATE<="
             })
@@ -43,6 +43,7 @@
             .addDetailSubtotalNumberTextBox("ИТОГО КОЛ-ВО:", 230,"Qty",{pattern:"###,###,##0.#########",inputStyle:"width:50px;"})
             .addDetailSubtotalNumberTextBox("ИТОГО ФАКТ. КОЛ-ВО:", 240,"NewQty",{pattern:"###,###,##0.#########",inputStyle:"width:50px;"})
             .addDetailSubtotalNumberTextBox("ИТОГО СУММА:", 220,"SumCC",{pattern:"###,###,##0.00#######",inputStyle:"width:80px;"})
+            .addDetailSubtotalNumberTextBox("ИТОГО ФАКТ. СУММА:", 250,"NewSumCC",{pattern:"###,###,##0.00#######",inputStyle:"width:80px;"})
             .addDetailTotalRow(true)
             .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ КОЛ-ВО:", 372,"TQty",
                 {pattern:"###,###,##0.#########", style:"font-weight:bold;",inputStyle:"width:50px;", printLabel:"ИТОГО КОЛИЧЕСТВО:"})
@@ -50,8 +51,14 @@
                 {pattern:"###,###,##0.#########", style:"font-weight:bold;",inputStyle:"width:50px;", printLabel:"ИТОГО ФАКТ. КОЛИЧЕСТВО:"})
             .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ СУММА:", 220,"TSumCC",
                 {pattern:"###,###,##0.00#######", style:"font-weight:bold;",inputStyle:"width:80px;", printLabel:"ИТОГО СУММА:"})
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ ФАКТ. СУММА:", 250,"TNewSumCC",
+                {pattern:"###,###,##0.00#######", style:"font-weight:bold;",inputStyle:"width:80px;", printLabel:"ИТОГО ФАКТ. СУММА:"})
             .addDetailTotalRow(true)
             .addDetailTotalTextBox("Статус:", 260,"StateName",{style:"font-weight:bold;",inputStyle:"width:200px"})
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ ОТКЛОНЕНИЕ ПО КОЛ-ВУ:", 352,"TDiffQty",
+                {pattern:"###,###,##0.#########", style:"font-weight:bold;",inputStyle:"width:50px;", printLabel:"ИТОГО ОТКЛОНЕНИЕ ПО КОЛ-ВУ:"})
+            .addDetailTotalNumberTextBox("В ДОКУМЕНТЕ ОТКЛОНЕНИЕ ПО СУММЕ:", 471,"TDiffSumCC",
+                {pattern:"###,###,##0.00#######", style:"font-weight:bold;",inputStyle:"width:80px;", printLabel:"ИТОГО ОТКЛОНЕНИЕ ПО СУММЕ:"})
             .addToolPane({title:"Действия"})
             .addToolPaneActionButton("Изменить строку", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableSelectedRow"})
             .addToolPaneActionButton("Изменить все строки", {btnStyle:"width:200px;", actionButtonName:"allowEditDetailTableAllVisibleRows"})

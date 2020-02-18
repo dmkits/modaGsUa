@@ -12,14 +12,15 @@
  */
 
 var calcTableWidth = function(printSectionData){
-    var col_width, table_width= 0, tableColumns= printSectionData.columns;
+    var colWidth, tableWidth= 0, tableColumns= printSectionData.columns;
     if(!tableColumns) return 0;
     for(var col = 0; col < tableColumns.length; col++){
         var tableColumnData= tableColumns[col];
-        col_width= (tableColumnData.width != undefined)?tableColumnData.width:80;
-        table_width+= col_width;
-    }
-    return table_width;
+        colWidth= (tableColumnData.width != undefined)?tableColumnData.width:80;
+        tableWidth+= colWidth;
+    }                                            console.log("tableWidth",tableWidth,printSectionData);
+    if(!printSectionData||!printSectionData.printParams||printSectionData.printParams.minTableWidth==null) return tableWidth;
+    return (printSectionData.printParams.minTableWidth<tableWidth)?tableWidth:printSectionData.printParams.minTableWidth;
 };
 /*
  * tableColumns: [

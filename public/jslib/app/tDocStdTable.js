@@ -325,7 +325,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                             +" "+moment(this.getContentDataItem(detailHeaderTitleParams.dateDataItemName)).format("DD.MM.YYYY");
                 };
                 this.addDetailHeaderBtnUpdate();
-                if(this.buttonPrint!=false&&!this.btnPrint) this.addDetailHeaderBtnPrint();
+                if(this.buttonPrint!=false&&!this.detailHeader.btnPrint) this.addDetailHeaderBtnPrint(this.buttonPrint);
                 //if(this.buttonExportToExcel!=false&&!this.btnExportToExcel) this.addBtnExportToExcel();
                 return this;
             },
@@ -359,13 +359,19 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 };
                 return this;
             },
-            addDetailHeaderBtnPrint: function(width,labelText,printFormats){
-                if(width===undefined) width=100;
-                if(!this.detailHeader.btnUpdate) this.addBtnUpdate(width);
-                if(!labelText) labelText="Печатать";
-                this.detailHeader.btnPrint= $TDF.addTableHeaderButtonTo(this.detailHeaderTable.lastChild, {labelText:labelText, cellWidth:1, cellStyle:"text-align:right;"});
-                var instance= this;
-                this.detailHeader.btnPrint.onClick= function(){ instance.doPrint(); };
+            /**
+             *
+             * params = { width, labelText, printParams, printFormats }
+             *      printParams = { minTableWidth }
+             */
+            addDetailHeaderBtnPrint: function(params){
+                params= params||{};
+                if(params.width===undefined) params.width=1;
+                if(!params.labelText) params.labelText="Печатать";
+                this.detailHeader.btnPrint= $TDF.addTableHeaderButtonTo(this.detailHeaderTable.lastChild,
+                    {labelText:params.labelText, cellWidth:params.width, cellStyle:"text-align:right;"});
+                var instance= this, printParams=params.printParams;
+                this.detailHeader.btnPrint.onClick= function(){ instance.doPrint(printParams); };
                 return this;
             },
             /**
@@ -1014,9 +1020,13 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     });
                 return this;
             },
-
-            doPrint: function(){                                                                                //console.log("TDocStdTable.doPrint ",this);
+            /**
+             *
+             * printParams = { minTableWidth }
+             */
+            doPrint: function(printParams){                                                                     //console.log("TDocStdTable.doPrint ",this);
                 var printData= {}, headerTextStyle= "font-size:14px;";
+                printData.printParams= printParams;
                 if(this.detailHeaderElements){
                     for(var ri=0;ri<this.detailHeaderElements.length;ri++){
                         var detHRow=this.detailHeaderElements[ri];
@@ -1032,20 +1042,20 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                                 value=null;
                                 if(detHElem.textbox) value= detHElem.textbox.value;
                                 else if(detHElem.textDirNode) value= detHElem.textDirNode.textContent;//if element Select
-                                var printParams= detHElem.printParams;
+                                var hElemPrintParams= detHElem.printParams;
                                 if(value==""){
-                                    if(printParams.inputStyle){
-                                        var oldStyleStr =printParams.inputStyle,
+                                    if(hElemPrintParams.inputStyle){
+                                        var oldStyleStr =hElemPrintParams.inputStyle,
                                             newStyleStr= (oldStyleStr.trim().charAt(oldStyleStr.length-1)!=";")?";":"";
                                         newStyleStr+="height:14px;";
-                                        printParams.inputStyle = oldStyleStr+newStyleStr;
+                                        hElemPrintParams.inputStyle = oldStyleStr+newStyleStr;
                                     }else
-                                        printParams.inputStyle= " height:14px;";
+                                        hElemPrintParams.inputStyle= " height:14px;";
                                 }
-                                $TDF.addPrintDataSubItemTo(printData,"header",{width:printParams.cellWidth+5,
-                                    style:printParams.printStyle, align:"left", contentStyle:"margin-bottom:3px;",
-                                    label:printParams.labelText,
-                                    value:value, type:"text", valueStyle:printParams.inputStyle});
+                                $TDF.addPrintDataSubItemTo(printData,"header",{width:hElemPrintParams.cellWidth+5,
+                                    style:hElemPrintParams.printStyle, align:"left", contentStyle:"margin-bottom:3px;",
+                                    label:hElemPrintParams.labelText,
+                                    value:value, type:"text", valueStyle:hElemPrintParams.inputStyle});
                             }
                         }
                         $TDF.addPrintDataSubItemTo(printData,"header");

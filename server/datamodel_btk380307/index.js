@@ -193,6 +193,7 @@ var getConUUID= database.getConUUID, getConU= database.getConU;
  *              "<function>" OR
  *              { function:<function>, source:<functionSource>, sourceField:<functionSourceField>, fields:[ <functionBodySourceFieldName> ] },
  *      ... },
+ *      fieldsResultFunctions = { <fieldName>:"<function>" },
  *      joinedSources = { <sourceName>:<linkConditions> = <linkConditions> or { <linkCondition>:null or <linkCondition>:<value>, ... } },
  *      leftJoinedSources = { <sourceName>:<linkConditions> = <linkConditions> or { <linkCondition>:null or <linkCondition>:<value>, ... } },
  *      groupedFields = [ <fieldName>, ... ],
@@ -216,10 +217,11 @@ function _getSelectItems(connection, params,resultCallback){                    
         resultCallback("FAILED _getSelectItems from source:"+params.source+"! Reason: no source fields!");
         return;
     }
-    var queryFields="";
+    var queryFields="", queryResultFields="";
     for(var fieldNameIndex in params.fields){
         if(queryFields!="") queryFields+= ",";
         var fieldName=params.fields[fieldNameIndex], fieldFunction=null;
+        queryResultFields+= ((queryResultFields)?",":"")+fieldName;
         if(params.fieldsSources&&params.fieldsSources[fieldName]){
             fieldName= params.fieldsSources[fieldName]+" as "+fieldName;
         }else if(params.fieldsFunctions&&params.fieldsFunctions[fieldName]){
@@ -327,6 +329,11 @@ function _getSelectItems(connection, params,resultCallback){                    
         selectQuery+= " group by "+queryGroupedFields;
     }
     if(hConditionQuery) selectQuery+= " having "+hConditionQuery;
+    if(params.fieldsResultFunctions){
+        for(var fieldResultName in params.fieldsResultFunctions)
+            queryResultFields+= ", "+ params.fieldsResultFunctions[fieldResultName]+" as "+fieldResultName;
+        selectQuery="select "+queryResultFields+" from ("+selectQuery+") mres";
+    }
     if(params.order) selectQuery+= " order by "+params.order;                                                   //log.debug('_getSelectItems selectQuery:',selectQuery);//test
     if(queryValues.length==0)
         database.selectQuery(connection, selectQuery, function(err,recordset,count,fields){
@@ -348,6 +355,12 @@ module.exports.getSelectItems= _getSelectItems;
 /**
  * params = { source, sourceType, sourceName, sourceParamsNames, sourceParams,
  *      fields = [<tableFieldName>,<tableFieldName>,<tableFieldName>,...],
+ *      fieldsFunctions = {
+ *          <fieldName>:
+ *              "<function>" OR
+ *              { function:<function>, source:<functionSource>, sourceField:<functionSourceField>, fields:[ <functionBodySourceFieldName> ] },
+ *      ... },
+ *      fieldsResultFunctions = { <fieldName>:"<function>" },
  *      conditions={ <condition>:<conditionValue>, ... } or withoutConditions=true/false,
  *      order = "<orderFieldsList>"
  * }
@@ -395,6 +408,7 @@ function _getDataItems(connection, params, resultCallback){                     
  *              "<function>" OR
  *              { function:<function>, source:<functionSource>, sourceField:<functionSourceField>, fields:[ <functionBodySourceFieldName> ] },
  *      ... },
+ *      fieldsResultFunctions = { <fieldName>:"<function>" },
  *      conditions={ <condition>:<conditionValue>, ... },
  * }
  *      <function>: "maxPlus1"
@@ -578,11 +592,12 @@ function _getDSAlias(sDataSource){
  *      tableColumns = [
  *          {data:<dataFieldName>, name:<tableColumnHeader>, width:<tableColumnWidth>, type:<dataType>, readOnly:true/false, visible:true/false,
  *              sourceField:<sourceFieldName>,
- *              dataFunction:<sql function or sql expression>
- *             OR dataSource:<sourceName>, sourceField:<sourceFieldName>
- *             OR dataSource:<sourceName>, sourceField:<sourceFieldName>, linkCondition:<dataSource join link condition>
- *             OR childDataSource:<childSourceName>, sourceField:<child dataSource field name>, childLinkCondition:<child dataSource join link condition>
- *             OR childDataSource:<childSourceName>, sourceField:<child dataSource field name>, childLinkField:<childSourceLinkFieldName>, parentDataSource, parentLinkField:<parentSourceLinkFieldName> },
+ *                  OR dataSource:<sourceName>, sourceField:<sourceFieldName>
+ *                  OR dataSource:<sourceName>, sourceField:<sourceFieldName>, linkCondition:<dataSource join link condition>
+ *                  OR childDataSource:<childSourceName>, sourceField:<child dataSource field name>, childLinkCondition:<child dataSource join link condition>
+ *                  OR childDataSource:<childSourceName>, sourceField:<child dataSource field name>, childLinkField:<childSourceLinkFieldName>, parentDataSource, parentLinkField:<parentSourceLinkFieldName> },
+ *                  OR dataFunction:<sql function or sql expression>
+ *                  OR dataResultFunction:<result sql function or sql expression>
  *          ...
  *      ],
  *      conditions={ <condition>:<conditionValue>, ... },
@@ -626,7 +641,7 @@ function _getDataItemsForTable(connection, params, resultCallback){
             hasAFunctions=true;
         if(hasSources&&hasAFunctions) break;
     }
-    var fieldsList=[], fieldsSources={}, fieldsFunctions, groupedFieldsList=[], addJoinedSources;
+    var fieldsList=[], fieldsSources={}, fieldsFunctions, groupedFieldsList=[], addJoinedSources, fieldsResultFunctions;
     for(var i in params.tableColumns){
         var tableColumnData= params.tableColumns[i], fieldName= tableColumnData.data;
         if(this.fieldsMetadata&&this.fieldsMetadata[fieldName]&&!tableColumnData.dataFunction){
@@ -656,6 +671,9 @@ function _getDataItemsForTable(connection, params, resultCallback){
                 groupedFieldsList.push(fieldName);
             if(!fieldsFunctions) fieldsFunctions={};
             fieldsFunctions[fieldName]= tableColumnData.dataFunction;
+        }else if(tableColumnData.dataResultFunction){
+            if(!fieldsResultFunctions) fieldsResultFunctions={};
+            fieldsResultFunctions[fieldName]= tableColumnData.dataResultFunction;
         }else if(!this.fieldsMetadata){
             if(tableColumnData.name) fieldsList.push(fieldName);
             if(tableColumnData.name&&hasAFunctions)groupedFieldsList.push(fieldName);
@@ -691,7 +709,7 @@ function _getDataItemsForTable(connection, params, resultCallback){
         if(!params.joinedSources) params.joinedSources={};
         for(var sourceName in addJoinedSources) params.joinedSources[sourceName]= addJoinedSources[sourceName];
     }
-    params.fieldsFunctions=fieldsFunctions;
+    params.fieldsFunctions=fieldsFunctions; params.fieldsResultFunctions=fieldsResultFunctions;
     if(groupedFieldsList.length>0) params.groupedFields= groupedFieldsList;
     _getSelectItems(connection, params, function(err,recordset){
         if(err) tableData.error= "Failed get data for table! Reason:"+err.message;
@@ -796,8 +814,9 @@ function _getTableColumnsDataForHTable(tableColumns){
  *      tableColumns = [
  *          {data:<sourceFieldName>, name:<tableColumnHeader>, width:<tableColumnWidth>, type:<dataType>, readOnly:true/false, visible:true/false,
  *                dataSource:<sourceName>, sourceField:<sourceFieldName>,
- *              dataFunction:<sql function or sql expression>
- *                },
+ *                  OR dataFunction:<sql function or sql expression>
+ *                  OR dataResultFunction:<result sql function or sql expression>
+ *           },
  *          ...
  *      ],
  *      identifier= <sourceIDFieldName>,
