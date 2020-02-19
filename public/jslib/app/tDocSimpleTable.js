@@ -486,6 +486,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 var actionButton= $TDF.addTableCellButtonTo(actionsTableRow, {labelText:label, cellWidth:0,
                     btnStyle:toolPaneBtnActionParams.btnStyle, btnParameters:toolPaneBtnActionParams.btnParams});
                 if(!this.toolPanesActionButtons) this.toolPanesActionButtons={};
+                var self=this;
                 if(toolPaneBtnActionParams.actionFunction){
                     actionButton.onClick=function(){
                         var contentHTableSelRowData=self.getSelectedRow(),contentHTableRowsData=self.getHTableContent(),
@@ -495,7 +496,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     return this;
                 }
                 var contentHTableRowsActionFunction= this.getContentTableActionByName(toolPaneBtnActionParams.contentTableActionName),
-                        self=this, toolPaneBtnActionFunction;
+                    toolPaneBtnActionFunction;
                 if(toolPaneBtnActionParams.beforeContentTableAction){
                     toolPaneBtnActionFunction= function(contentHTableSelRowData,contentHTableRowsData, actionParams){
                         actionParams.progressDialog=actionParams.contentHTable.updateRowsActionDialog(actionParams,contentHTableRowsData.length);
