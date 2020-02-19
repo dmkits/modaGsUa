@@ -226,8 +226,10 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                     if(this.setTitleContent) this.setTitleContent();
                     if(idIsChanged&&(!params||(params.onlyValues!==true&&!params.error))) this.lastContentData=contentData;
                     if(idIsChanged){
-                        if(!contentData||contentData.length==0) self.detailHTable.clearContent();
-                        else self.loadDetailTableContentDataFromServer();
+                        if(!contentData||contentData.length==0){
+                            if(!self.detailHTable.getColumns()) self.loadDetailTableContentDataFromServer();//load only table columns
+                            else self.detailHTable.clearContent();
+                        }else self.loadDetailTableContentDataFromServer();
                     }else{
                         var detailSubtotalContent=!contentData||contentData.length==0;
                         self.setDetailSubtotalContent({disabled:detailSubtotalContent, clearValue:detailSubtotalContent});
@@ -518,7 +520,7 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 //this.setDetailSubtotalContent({clearValue:true});//clearing before setDetailSubtotalContent on this.detailHTable.onUpdateContent
                 var conditions= this.detailHTable.getDataURLCondition, conditionIDValue= this.detailHeader.getContentDataIDValue();
                 if(!conditions) conditions= {};
-                if(conditionIDValue!==null&&conditionIDValue!==undefined&&this.detailHTable.conditionIDName)
+                if(conditionIDValue!=null&&this.detailHTable.conditionIDName)
                     conditions[(this.detailHTable.conditionIDName+"=").replace("=","~")]=conditionIDValue;
                 this.detailHTable.setContentFromUrl({url:this.detailHTable.getDataUrl, conditions:conditions});
             },

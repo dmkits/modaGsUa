@@ -27,17 +27,17 @@ Handsontable.cellTypes['text'].editor.prototype.getValue = function(){
 define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby", "app/request", "app/dialogs"],
     function(declare, ContentPane, Standby, Request, Dialogs){
         return declare("HTableSimple", [ContentPane],{
-            handsonTable: null,
-            htColumns: [], htData: [],
+            handsonTable:null,
+            htColumns:null, htData:null,
             htSelection:null,
             //showIdentifiers:false,
-            readOnly: true,
-            wordWrap: false,
-            persistentState: false,
-            popupMenuItems: {},
-            tableHeaderAddedElements: undefined,
+            readOnly:true,
+            wordWrap:false,
+            persistentState:false,
+            popupMenuItems:{},
+            tableHeaderAddedElements:undefined,
             constructor: function(args){
-                this.htColumns= [];/*[ { data:<data prop>, name, readOnly, type, width}, ...]*/
+                this.htColumns= null;/*[ { data:<data prop>, name, readOnly, type, width}, ...]*/
                 this.htData= []; /*[ {prop:value,...}, ...]*/
                 //this.showIdentifiers=false;
                 this.readOnly= true;//HTableSimple,hTableSimpleFiltered only read only. see cells function.
