@@ -368,11 +368,40 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 params= params||{};
                 if(params.width===undefined) params.width=1;
                 if(!params.labelText) params.labelText="Печатать";
-                this.detailHeader.btnPrint= $TDF.addTableHeaderButtonTo(this.detailHeaderTable.lastChild,
-                    {labelText:params.labelText, cellWidth:params.width, cellStyle:"text-align:right;"});
                 var instance= this, printParams=params.printParams;
+                var printItems= [{name:"Документ",onClick:function(menuItemData){ instance.doPrint(printParams); }}];
+                this.detailHeader.btnPrint= $TDF.addTableHeaderButtonTo(this.detailHeaderTable.lastChild,
+                    {labelText:params.labelText, cellWidth:params.width, cellStyle:"text-align:right;", items:printItems});
+                this.detailHeader.btnPrint.printItems=printItems;
                 this.detailHeader.btnPrint.onClick= function(){ instance.doPrint(printParams); };
                 return this;
+            },
+            /**
+             * newPrintMenuItem = { name, onClick }
+             * onClick= function(menuItemData,actionParams), actionParams= { detailHeader, detailHTable, toolPanes, thisDoc }
+             */
+            addDetailHeaderBtnPrintItem: function(newPrintMenuItem){
+                if(!newPrintMenuItem||!this.detailHeader.btnPrint||!this.detailHeader.btnPrint.printItems)return this;
+                newPrintMenuItem.actionParams= newPrintMenuItem.actionParams||{};
+                newPrintMenuItem.actionParams.detailHeader= this.detailHeader;
+                newPrintMenuItem.actionParams.detailHTable= this.detailHTable;
+                newPrintMenuItem.actionParams.toolPanes= this.toolPanes;
+                newPrintMenuItem.actionParams.thisDoc= this;
+                this.detailHeader.btnPrint.printItems.push(newPrintMenuItem);
+                this.detailHeader.btnPrint.addMenuItem(newPrintMenuItem);
+                return this;
+            },
+            /**
+             * params = { name:"<DetailHeaderBtnPrint dropDown menu item name>"}
+             */
+            runDetailHeaderBtnPrintItemAction: function(params){
+                if(!params||!params.name||!this.detailHeader.btnPrint||!this.detailHeader.btnPrint.printItems)return this;
+                var actionParams={ detailHeader:this.detailHeader, detailHTable:this.detailHTable, toolPanes:this.toolPanes, thisDoc:this };
+                for(var printMenuItem of this.detailHeader.btnPrint.printItems){
+                    if(typeof(printMenuItem)!="object")continue;
+                    if(printMenuItem.name!=params.name||!printMenuItem.onClick)continue;
+                    printMenuItem.onClick(printMenuItem.name,actionParams);
+                }
             },
             /**
              * params={ style, inputStyle }

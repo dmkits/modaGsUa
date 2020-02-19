@@ -97,7 +97,7 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
             /**
              * params= {btnParameters, labelText, btnStyle, btnChecked, items=['<itemValue>']}
              * if params.btnChecked = true/false, added ToggleButton
-             * if params.items = [<>,...], added ComboButton
+             * if params.items = [<>,...], added ComboButton, params.items = ["<menuItemName>",...] or [{name,onClick},...]
              * else added Button
              */
             addButtonTo: function(parentNode, params){
@@ -113,17 +113,16 @@ define(["dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dijit/Title
                     button=new ToggleButton(btnParameters);
                 }else if(params.items!==undefined&&params.items.length>0){
                     button=new ComboButton(btnParameters);
-                    var menu = new Menu({style:"display:none;"});
-                    for(var i in params.items){
-                        var item=params.items[i],
-                            menuItem = new MenuItem({label: item,
-                                onClick: function(){                                                        console.log(item," clicked!");
-                                }
-                            });
-                        menu.addChild(menuItem);
-                    }
-                    menu.startup();
-                    button.set("dropDown", menu);
+                    button.dropDownMenu= new Menu({style:"display:none;"});
+                    button.addMenuItem= function(menuItemData){
+                        var menuItem = new MenuItem({label: (typeof(menuItemData)=="object")?menuItemData.name:menuItemData, checked:i==0 });
+                        if(typeof(menuItemData)!="object"||!menuItemData.onClick)return;
+                        menuItem.onClick= function(){ menuItemData.onClick(menuItemData,menuItemData.actionParams); };
+                        button.dropDownMenu.addChild(menuItem);
+                    };
+                    for(var i in params.items) button.addMenuItem(params.items[i]);
+                    button.dropDownMenu.startup();
+                    button.set("dropDown", button.dropDownMenu);
                 }else button = new Button(btnParameters);
                 var btnStyle="";
                 if (params.btnStyle) btnStyle=params.btnStyle;

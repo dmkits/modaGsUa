@@ -161,10 +161,13 @@
                 }
             })
             .addToolPane({title:"Печать"})
+            .addDetailHeaderBtnPrintItem({name:"Акт расхождений",onClick:function(menuItemData,ap){
+                var printWindow= window.open("/print/printDocFromTemplate");
+                printWindow["docTemplateName"]= "excDiffReport"; printWindow["docContentData"]= ap.thisDoc.getDataForPrint();
+            }})
             .addToolPaneActionButton("Печать Акта расхождений", {btnStyle: "width:200px;",
                 actionFunction: function(ap){
-                    var printWindow= window.open("/print/printDocFromTemplate");
-                    printWindow["docTemplateName"]= "excDiffReport"; printWindow["docContentData"]= ap.thisDoc.getDataForPrint();
+                    ap.thisDoc.runDetailHeaderBtnPrintItemAction({name:"Акт расхождений"});
                 }
             })
             .addToolPane({title:"Информация о товаре",
