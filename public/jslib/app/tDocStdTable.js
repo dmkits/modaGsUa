@@ -87,40 +87,40 @@ define(["dojo/_base/declare", "dijit/layout/BorderContainer", "app/tDocsFunction
                 $TDF.setBorderedStyleFor(this.listTable.domNode);
                 this.listTable.getDataUrl= (params)?params.getDataUrl:null; this.listTable.getDataUrlCondition= (params)?params.getDataUrlCondition:null;
                 this.listContainer.addChild(this.listTable);
-                var thisInstance= this;
-                this.listTable.onUpdateContent= function(){                                                     console.log("TDocStdTable.listTable.onUpdateContent ",this.getSelectedRow()," rowDataIDForSelect",this.rowDataIDForSelect);
+                var thisDoc= this;
+                this.listTable.onUpdateContent= function(){                                                     console.log("TDocStdTable.listTable.onUpdateContent",this.getSelectedRow(),"rowDataIDForSelect",this.rowDataIDForSelect);
                     if(this.rowDataIDForSelect!==undefined){
-                        this.setSelectionByItemValue(this.getRowIDName(), this.rowDataIDForSelect);
+                        this.setSelectionByItemValue(this.getRowIDName(),this.rowDataIDForSelect);
                         return;
                     }
                     var selectedRowData= this.getSelectedRow();
                     if(!selectedRowData && this.getContent().length>0){ this.setSelectedRowByIndex(0); return; }
-                    thisInstance.setDetailHeaderContentByListSelectedRow(selectedRowData);
+                    thisDoc.setDetailHeaderContentByListSelectedRow(selectedRowData);
                 };
-                this.listTable.onSelect= function(firstSelectedRowData,selection){                              console.log("TDocStdTable.listTable.onSelect ",firstSelectedRowData);
-                    if( (thisInstance.detailHeader&&thisInstance.detailHeader.isContentChanged())
-                            || (thisInstance.detailHTable&&thisInstance.detailHTable.isExistsEditableRows()) ){
-                        var listTableSelRowDataID= firstSelectedRowData[thisInstance.detailHeader.dataIDName];
-                        if(listTableSelRowDataID===thisInstance.detailHeader.getContentDataIDValue()) return;
-                        Dialogs.showSimple({title:"Действия с изменениями в документе",
-                                content:"<b>Вы пытаетесь перейти в другой документ не сохранив изменения<br> в текущем документе.<br></b>"
-                                    +"<br>Нажмите <b>Вернуться</b>, чтобы вернуться в текущий документ<br> и продолжить работу с ним, <br>"
-                                    +"<br>или нажмите <b>Не сохранять</b> чтобы не сохранять изменения<br>"
-                                    +" в текущем документе и перейти к выбранному в списке документу.",
-                                btnOkLabel:"Вернуться", btnCancelLabel:"Не сохранять"
-                            },function(dlgWin){
-                                dlgWin.hide();
-                            },function(dlgWin){
-                                dlgWin.hide();
-                                thisInstance.listTable.setSelection(firstSelectedRowData, selection);
-                                thisInstance.setDetailHeaderContentByListSelectedRow(firstSelectedRowData);
-                            }
-                        );
+                this.listTable.onSelect= function(firstSelectedRowData,selection){                              console.log("TDocStdTable.listTable.onSelect",firstSelectedRowData);
+                    var listTableSelRowDataID=
+                            (firstSelectedRowData&&thisDoc.detailHeader)?firstSelectedRowData[thisDoc.detailHeader.dataIDName]:undefined;
+                    if(!thisDoc.detailHeader||(!thisDoc.detailHeader.isContentChanged()&&!thisDoc.detailHTable.isExistsEditableRows())){
+                        this.setSelection(firstSelectedRowData, selection);
+                        this.rowDataIDForSelect= listTableSelRowDataID;
+                        thisDoc.setDetailHeaderContentByListSelectedRow(firstSelectedRowData);
                         return;
                     }
-                    this.setSelection(firstSelectedRowData, selection);
-                    this.rowDataIDForSelect= listTableSelRowDataID;
-                    thisInstance.setDetailHeaderContentByListSelectedRow(firstSelectedRowData);
+                    if(listTableSelRowDataID===thisDoc.detailHeader.getContentDataIDValue()) return;
+                    Dialogs.showSimple({title:"Действия с изменениями в документе",
+                            content:"<b>Вы пытаетесь перейти в другой документ не сохранив изменения<br> в текущем документе.<br></b>"
+                                +"<br>Нажмите <b>Вернуться</b>, чтобы вернуться в текущий документ<br> и продолжить работу с ним, <br>"
+                                +"<br>или нажмите <b>Не сохранять</b> чтобы не сохранять изменения<br>"
+                                +" в текущем документе и перейти к выбранному в списке документу.",
+                            btnOkLabel:"Вернуться", btnCancelLabel:"Не сохранять"
+                        },function(dlgWin){
+                            dlgWin.hide();
+                        },function(dlgWin){
+                            dlgWin.hide();
+                            thisDoc.listTable.setSelection(firstSelectedRowData, selection);
+                            thisDoc.setDetailHeaderContentByListSelectedRow(firstSelectedRowData);
+                        }
+                    );
                 };
                 this.setListDatesContent(params);
                 return this;

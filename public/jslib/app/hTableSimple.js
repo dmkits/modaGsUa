@@ -424,13 +424,10 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
             },
             setSelectionByItemValue: function(itemName,value){
                 var oldSelectedRow=this.getSelectedRow(), instance=this;
-                this.getContent().some(function(item,rowIndex){
-                    if(item[itemName]==value){
-                        instance.htSelection= []; instance.htSelection[rowIndex]=item;
-                    }
-                });
+                instance.htSelection=[];
+                this.getContent().some(function(item,rowIndex){ if(item[itemName]==value) instance.htSelection[rowIndex]=item; });
                 var newSelectedRow=this.getSelectedRow();
-                this.handsonTable.getSettings().setDataSelectedProp(newSelectedRow, oldSelectedRow);
+                this.handsonTable.getSettings().setDataSelectedProp(newSelectedRow,oldSelectedRow);
                 this.handsonTable.render();
             },
             setSelectedRowByIndex: function(rowIndex){ this.handsonTable.selectCell(rowIndex,0,rowIndex,0); },
@@ -446,7 +443,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 for(var selItemIndex in this.htSelection) return parseInt(selItemIndex);
             },
             getSelectedRow: function(){
-                if(!this.htSelection) return null;
+                if(!this.htSelection||!this.htSelection.length) return null;
                 for(var selItemIndex in this.htSelection) return this.htSelection[selItemIndex];
             },
             getSelectionLastRow: function(){
