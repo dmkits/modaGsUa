@@ -31,7 +31,7 @@
             <thead>
             <tr>
                 <th rowSpan="2" width="40px"><span class="table-header-small">№<br>п/п</span></th>
-                <th colSpan="4"><span class="table-header-small">Наименование товара</span></th>
+                <th colSpan="3"><span class="table-header-small">Наименование товара</span></th>
             </tr>
             <tr>
                 <th><span class="table-header-small">Код товара</span></th>
@@ -43,7 +43,7 @@
             <tbody style="display:none">
             <tr rowSelecting="true" onCreated="contentTableTROnCreated">
                 <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
-                <td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
+                <td colSpan="3" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
             </tr>
             <tr rowSelecting="true" onCreated="contentTableTROnCreated">
                 <td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
@@ -174,10 +174,7 @@
                         if(self.dialogEditQty&&self.dialogEditQty.opened)return;//if show dialog edit qty
                         if(self.barcodeScannerWithEditQtyProcess)return;
                         if(barcode) barcode= barcode.replace("\n","");
-                        if(!self.barcodeScannerWithEditQtyStart){
-                            self.barcodeInputEnter(barcode);
-                            return;
-                        }
+                        if(!self.barcodeScannerWithEditQtyStart){ self.barcodeInputEnter(barcode); return; }
                         self.setInputProdBarcodeByState({disable:true});
                         self.barcodeScannerWithEditQtyStart= false;
                         self.barcodeScannerWithEditQtyProcess= true;
@@ -201,10 +198,10 @@
                             if(qty==null) qty=0;
                             self.showDialogEditQty({"ProdName":prodData["ProdName"],"Qty":qty},
                                     /*okAction*/function(inputValQty,actionSuccess,actionError){
-                                        self.storeBarcodeWithQtyToExc(prodData["Barcode"],inputValQty,function(excProdData,errMsg){
+                                        self.storeBarcodeWithQtyToExc(prodData["Barcode"],inputValQty,function(storeExcDResultItem,errMsg){
                                             if(errMsg){ actionError(errMsg); return; }
                                             actionSuccess();
-                                            if(excProdData) self.updContentTableData(excProdData);
+                                            if(storeExcDResultItem) self.updContentTableData(storeExcDResultItem);
                                         });
                                     },/*closedAction*/function(){
                                         self.barcodeScannerWithEditQtyProcess= false;
@@ -259,13 +256,13 @@
                                     },{});
                             if(!resultItems){ self.setInputProdBarcodeByState(); return; }
                             var params={ contentTableHeaderDomEl:self.contentTableHeaderDomEl, contentTableDataDomEl:self.contentTableDataDomEl,
-                                contentTable2HeaderDomEl:self.contentTableLHeaderDomEl, contentTable2DataDomEl:self.contentTableLDataDomEl,
-                                contentTableDataIDName:"SrcPosID",
-                                progressAction:function(tableData, ind,tableDataItem){
-                                    if(!tableDataItem){ self.setTotalInfo(0); return; }
-                                    self.setTotalInfo(tableDataItem["Qty"],ind+1);
-                                }
-                            };
+                                    contentTable2HeaderDomEl:self.contentTableLHeaderDomEl, contentTable2DataDomEl:self.contentTableLDataDomEl,
+                                    contentTableDataIDName:"SrcPosID",
+                                    progressAction:function(tableData, ind,tableDataItem){
+                                        if(!tableDataItem){ self.setTotalInfo(0); return; }
+                                        self.setTotalInfo(tableDataItem["Qty"],ind+1);
+                                    }
+                                };
                             app7.innerPageFillTableData(self,resultItems,params,function(contentTableData,contentTableDataDomTRs){
                                 self.contentTableDataDomTRs= contentTableDataDomTRs;
                                 self.setInputProdBarcodeByState({focus:false,enable:true});
@@ -286,7 +283,7 @@
              * opts = { enable, disable, focus, val }
              */
             setInputProdBarcodeByState: function(opts){
-                var barcodeInput= $$("#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBarCodeInput"),
+                var barcodeInput= this.pageDocExcFromStockProdsDataBarCodeInput,
                         btnBarcodeInputEnter= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBtnBarcodeInputEnter'),
                         stateInfo= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataStateInfo'),
                         stateName= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataStateName');
@@ -314,17 +311,15 @@
                     barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }
             },
-            barcodeInputEnter: function(scanBarcode,qty){
-                if(qty==null) qty=1;
+            barcodeInputEnter: function(scanBarcode){
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
-                var self=this;
-                this.storeInputValueToExc(scanBarcode || $$("#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBarCodeInput").val(),qty,
-                        function(excProdData){
-                            app7.preloader.hide();
-                            if(excProdData) self.updContentTableData(excProdData);
-                            self.setInputProdBarcodeByState({enable:true,focus:false/*(!scanBarcode)*/,val:""});
-                        });
+                var qty=1, self=this;
+                this.storeInputValueToExc(scanBarcode||this.pageDocExcFromStockProdsDataBarCodeInput.val(),qty,function(excProdData){
+                    app7.preloader.hide();
+                    if(excProdData) self.updContentTableData(excProdData);
+                    self.setInputProdBarcodeByState({enable:true,focus:false/*(!scanBarcode)*/,val:""});
+                });
             },
             /**
              * callback = function(excProdData)
@@ -353,7 +348,7 @@
             },
             updContentTableData: function(prodData){
                 if(!prodData) prodData={};
-                var srcPosID= prodData["SrcPosID"], ctTRs= this.contentTableDataDomTRs[srcPosID], ctDataItem= this.contentTableDataItems[srcPosID];
+                var srcPosID= prodData["SrcPosID"], qty= prodData["Qty"], ctTRs= this.contentTableDataDomTRs[srcPosID];
                 if(!ctTRs){//not exists - add new
                     ctTRs= app7.innerPageCreateTableRow(this.contentTableHeaderDomEl,this.contentTableDataDomEl,prodData,this);
                     if(this.contentTableLHeaderDomEl&&this.contentTableLDataDomEl)
@@ -366,8 +361,9 @@
                     this.contentTableDataBarcodes[prodData["Barcode"]]=
                             {"Barcode":prodData["Barcode"],"ProdID":prodData["ProdID"],"ProdName":prodData["ProdName"],"UM":prodData["UM"]};
                     this.setTotalInfo(prodData["Qty"]);
+                    return;
                 }else{//exists - update exists
-                    var oldQty= ctDataItem["Qty"], qty= prodData["Qty"];
+                    var ctDataItem= this.contentTableDataItems[srcPosID], oldQty= ctDataItem["Qty"];
                     ctDataItem["Qty"]= qty;
                     this.setTotalInfo(qty-oldQty);
                 }
@@ -378,12 +374,12 @@
                     this.setScroll(ctTR);
                 }
             },
-            contentTableTDQtyOnClick: function(e,ownerTD,contentTableDataItem,self){
+            contentTableTDQtyOnClick: function(e,ownerTD,contentTableDataItem){
                 if(this.isDocReadOnly())return;
                 var tdQty=e.target, self=this;
                 this.showDialogEditQty(contentTableDataItem,/*ok/Enter*/function(inputValQty,actionSuccess,actionError){
                     self.storeQtyToExcD(contentTableDataItem["SrcPosID"],contentTableDataItem["ProdID"],inputValQty,
-                            function(storeResult,errMsg){
+                            function(storeExcDResultItem,errMsg){
                                 if(errMsg){ if(actionError) actionError(errMsg); return; }
                                 var srcPosID= contentTableDataItem["SrcPosID"], ctTRs= self.contentTableDataDomTRs[srcPosID];
                                 for(var ctTR of ctTRs) $$(ctTR).find("td[dataItemName=Qty] div").text(inputValQty);
@@ -440,18 +436,27 @@
                             { text:"ОТМЕНА",close:true,keyCodes:[27] } ]
                     }).open();
             },
+            /**
+             * callback = function(storeExcDResultItem,errMsg)
+             * if no result or no result.resultItem call callback(null,"<error message>")
+             * if has result and result.resultItem call callback(storeExcDResultItem=result.resultItem)
+             */
             storeQtyToExcD: function(srcPosID,prodID,qty,callback){
                 var docChID= this.docData["ChID"];
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/docExcFromStock/storeQtyData',data:{docChID:docChID,SrcPosID:srcPosID,Qty:qty},
                             showRequestErrorDialog:false},
                     function(result,errmsg){
-                        app7.preloader.hide();// Hide Preloader
+                        app7.preloader.hide();//Hide Preloader
                         if(!result||!result.resultItem){ callback(null,(errmsg||"Не удалось сохранить данные на сервере!")); return; }
-                        var excDData= result.resultItem;
-                        callback(excDData);
+                        callback(result.resultItem);
                     })
             },
+            /**
+             * callback = function(prodData)
+             * if no result or no result.item call callback(null)
+             * if has result and result.item call callback(prodData=result.itItem)
+             */
             findProdByBarcode: function(barcode,docChID,callback){
                 if(!barcode||barcode.toString().trim()=='')return;
                 app7.preloader.show();
@@ -460,12 +465,13 @@
                         function(result,errmsg){
                             app7.preloader.hide();
                             if(!result||!result.item){ callback(null); return; }
-                            var prodData=result.item;
-                            callback(prodData);
+                            callback(result.item);
                         });
             },
             /**
-             * callback = function(excProdData)
+             * callback = function(storeExcDResultItem,errMsg)
+             * if no result or no result.resultItem call callback(null,"<error message>")
+             * if has result and result.resultItem call callback(storeExcDResultItem=result.resultItem)
              */
             storeBarcodeWithQtyToExc: function(barcode,qty,callback){
                 if(!barcode||barcode.toString().trim()==''){
@@ -488,8 +494,7 @@
                                 callback(null,"Не удалось добавить товар по штрихкоду в перемещение!"+((errmsg)?"<br>"+errmsg:""));
                                 return;
                             }
-                            var excProdData=result.resultItem;
-                            callback(excProdData);
+                            callback(result.resultItem);
                         });
             },
             setScroll: function(innerElem){
