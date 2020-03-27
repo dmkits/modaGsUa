@@ -114,7 +114,7 @@ module.exports= function(app){
         if(req.originalUrl.indexOf("/login")==0){ next(); return; }                                             //log.info("ACCESS CONTROLLER: req.headers=",req.headers," req.cookies=",req.cookies,{});
         var reqAIDCN= (isMobileApp)?req.headers['aidcn']:req.cookies['aidcn'], aidcn= getAIDCN(),
             uuid= (isMobileApp)?req.headers['uuid']:req.cookies['uuid'],
-            sysadminName= getSysadminNameByUUID(uuid);                                                          log.info(uuid,"ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,{});//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
+            sysadminName= getSysadminNameByUUID(uuid);                                                          log.info(uuid,"ACCESS CONTROLLER:",req.method,req.path,"params=",req.query,"data=",req.body);//log.info("ACCESS CONTROLLER: req.headers=",req.headers,"req.cookies=",req.cookies,{});
         if(reqAIDCN===undefined||reqAIDCN===null){
             accessFail(req,res,next,{
                 error: "Failed to get data! Reason: no application config identifier!",
