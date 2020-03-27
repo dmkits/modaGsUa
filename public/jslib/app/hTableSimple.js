@@ -56,24 +56,6 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 this.setConentStyle();
                 this.createHandsonTable();
             },
-            getVisibleColumnsFrom: function(dataColumns){
-                var visibleColumns = [], vc=0;
-                for(var c=0;c<dataColumns.length;c++){
-                    var colItem=dataColumns[c];
-                    colItem.visibleColumnIndex=-1;
-                    if(colItem.visible===false)continue;
-                    colItem.visibleColumnIndex=vc++;
-                    var newColData = {};
-                    visibleColumns[colItem.visibleColumnIndex]= newColData;
-                    for(var item in colItem){
-                        if(item==="type"&&colItem.type==="autocomplete"&&colItem.source===undefined){
-                            colItem.source=[]; //colItem.source.push("");
-                        }
-                        newColData[item]=colItem[item];
-                    }
-                }
-                return visibleColumns;
-            },
             setDataColumns: function(newDataColumns){
                 if(!newDataColumns||newDataColumns.length==0){ this.htColumns=[]; return; }
                 var colWidths= [];
@@ -287,7 +269,7 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 while(popupMenu.firstChild) popupMenu.removeChild(popupMenu.firstChild);
                 var thisHTable=this;
                 for(var c=0;c<this.htColumns.length;c++){
-                    var hTableColumnData= this.htColumns[c];                                            console.log("hTableColumnData",hTableColumnData);
+                    var hTableColumnData= this.htColumns[c];
                     if(!hTableColumnData||!hTableColumnData.defWidth>0||!hTableColumnData.width>0) continue;
                     var popupMenuItem = document.createElement("LI"), popupMenuItemDiv;
                     popupMenu.appendChild(popupMenuItem);

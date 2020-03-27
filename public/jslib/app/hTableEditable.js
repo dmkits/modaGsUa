@@ -61,8 +61,8 @@ define(["dojo/_base/declare", "app/hTableSimpleFiltered", "dijit/ProgressBar","d
                 }
             },
             getAutocompleteColumnValueForItem: function(colItemName,itemValue,valueItemName){
-                for(var c=0;c<this.htVisibleColumns.length;c++){
-                    var visColData=this.htVisibleColumns[c];
+                for(var c=0;c<this.htColumns.length;c++){
+                    var visColData=this.htColumns[c];
                     if(visColData.data===colItemName&&visColData.type==="autocomplete"){
                         if(!visColData.sourceValues) return undefined;
                         var sourceValuesItemData= visColData.sourceValues[itemValue];
