@@ -29,25 +29,28 @@
     <div class="page-content" id="pageContentDocExcDeliveryProdsData" style="padding-left:1px;padding-right:1px;padding-bottom:1px;">
         <table class="mobile-table-small-size" height="30px" style="position:fixed;left:1px;top:88px;width:calc(100% - 2px);z-index:100;">
             <thead>
-            <tr style="">
-                <th width="40px"><span class="table-header-small">№<br>п/п</span></th>
-                <th><span class="table-header-small">Наименование товара<br>Код товара</span></th>
+            <tr>
+                <th rowSpan="2" width="40px"><span class="table-header-small">№<br>п/п</span></th>
+                <th colSpan="4"><span class="table-header-small">Наименование товара</span></th>
+            <tr>
+                <th><span class="table-header-small">Код тов.</span></th>
                 <!--<th width="50px"><span class="table-header-small">Ед.<br>изм.</span></th>-->
-                <th width="50px"><span class="table-header-small">Уч.<br>кол-во</span></th>
-                <th width="50px"><span class="table-header-small">Факт.<br>кол-во</span></th>
+                <th width="140px"><span class="table-header-small">Статус товара</span></th>
+                <th width="55px"><span class="table-header-small">Уч. кол.</span></th>
+                <th width="55px"><span class="table-header-small">Фкт. кол.</span></th>
             </tr>
             </thead>
             <tbody style="display:none">
-            <tr rowSelecting="true">
+            <tr rowSelecting="true" onCreated="contentTableTROnCreated">
                 <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
                 <td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
             </tr>
-            <tr rowSelecting="true">
+            <tr rowSelecting="true" onCreated="contentTableTROnCreated">
                 <td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
                 <!--<td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>-->
-                <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
-                <td width="50px" class="tdNewQty" dataItemName="NewQty"
-                    onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
+                <td width="140px" class="text-centered" dataItemName="NewSecName"><div class="table-text"></div></td>
+                <td width="55px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
+                <td width="55px" class="tdNewQty" dataItemName="NewQty" onClick="contentTableTDQtyOnClick"><div class="table-text"></div></td>
             </tr>
             </tbody>
         </table>
@@ -57,8 +60,8 @@
             <tr>
                 <td id="totalRows" width="40px"><span class="table-total">0</span></td>
                 <td><span class="table-total"></span></td>
-                <td id="totalQty" width="50px"><span class="table-total">0</span></td>
-                <td id="totalNewQty" width="50px"><span class="table-total">0</span></td>
+                <td id="totalQty" width="55px"><span class="table-total">0</span></td>
+                <td id="totalNewQty" width="55px"><span class="table-total">0</span></td>
             </tr>
             </tfoot>
         </table>
@@ -72,18 +75,19 @@
                 <th width="50px"><div class="table-header-large">Ед.<br>изм.</div></th>
                 <th width="50px"><div class="table-header-large">Уч.<br>кол-во</div></th>
                 <th width="50px"><div class="table-header-large">Факт.<br>кол-во</div></th>
+                <th width="150px"><div class="table-header-large">Статус товара</div></th>
             </tr>
             </thead>
             <tbody style="display:none">
-            <tr rowSelecting="true">
+            <tr rowSelecting="true" onCreated="contentTableTROnCreated">
                 <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
                 <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"><div class="table-text"></div></td>
                 <td width="50px" class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
                 <td class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
                 <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
                 <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
-                <td width="50px" class="tdNewQty" dataItemName="NewQty"
-                    onCreated="excDataTableTDNewQtyOnCreated" onClick="excDTableTDNewQtyOnClick"><div class="table-text"></div></td>
+                <td width="50px" class="tdNewQty" dataItemName="NewQty" onClick="contentTableTDQtyOnClick"><div class="table-text"></div></td>
+                <td width="150px" class="text-centered" dataItemName="NewSecName"><div class="table-text"></div></td>
             </tr>
             </tbody>
         </table>
@@ -105,7 +109,7 @@
     return {
         on: {
             pageInit: function(e,page){
-                this.pageContentDocExcDeliveryProdsData= $$(this.el).children("#pageContentDocExcDeliveryProdsData");    //console.log("this.pageContentDocExcDeliveryProdsData",this.pageContentDocExcDeliveryProdsData);
+                this.pageContentDocExcDeliveryProdsData= $$(this.el).children("#pageContentDocExcDeliveryProdsData");
                 if(!this.pageContentDocExcDeliveryProdsData){ this.setInputProdBarcodeByState(); return; };
                 var contentTables= this.pageContentDocExcDeliveryProdsData.children("table");
                 if(contentTables&&contentTables[0]) this.contentTableHeaderDomEl= contentTables[0];
@@ -114,30 +118,103 @@
                 if(contentTables&&contentTables[3]) this.contentTableLHeaderDomEl= contentTables[3];
                 if(contentTables&&contentTables[4]) this.contentTableLDataDomEl= contentTables[4];
                 if(contentTables&&contentTables[5]) this.contentTableLFootDomEl= contentTables[5];
-                if(!this.docData||(this.docData&&!this.docData["IsStateOnConfirmation"])){ this.loadExcData(); return; }
+                if(this.isDocReadOnly()){ this.loadExcProdsData(); return; }
                 var self=this;
-                $$('#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataBtnBarcodeInputEnter').
-                        on('click',function(){ self.barcodeInputEnter(); });
-                $$('#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataBarCodeInput').on('keypress',function(e){
+                $$('#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataBtnBarcodeInputEnter')
+                        .on('click',function(){ self.barcodeInputEnter(); });
+                this.pageDocExcDeliveryProdsDataBarCodeInput= $$('#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataBarCodeInput');
+                this.pageDocExcDeliveryProdsDataBarCodeInput.on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter') self.barcodeInputEnter();
+                    e.stopPropagation();
                 });
-//                app7.data.pageExcD_bccallback= function(){
-//                    var pageDom=$$('.view-main #pageDocExcDeliveryProdsData');                                    //console.log("pageExcD_bccallback",pageDom.length==0,!pageDom[0],pageDom[0].innerHTML.length==0);
-//                    if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0)return;                 console.log("pageExcD_bccallback DO SCAN!!!");
-//                }
-//                setTimeout(function(){
-//                    if(app7.data.pageExcD_bccallback)app7.data.pageExcD_bccallback();
-//                },0)
-
-//                if(deviceBarcodeScannerReaderAction){
-//                    deviceBarcodeScannerReaderAction= function(barcode){
-//                        var pageDom=$$('.view-main #pageDocExcDeliveryProdsData');
-//                        if(pageDom.length==0||!pageDom[0]||pageDom[0].innerHTML.length==0) return;              //alert("pageDocExcDeliveryProdsData scan:"+barcode);
-//                        if(barcode) barcode= barcode.replace("\n","");
-//                        self.barcodeInputEnter(barcode);
-//                    }
-//                }
-                this.loadExcData();
+                this.loadExcProdsData();
+            },
+            pageAfterIn: function(e,page){
+                var self=this, thisEl=this.el;
+                this.keypressBuffer="";
+                document.onkeypress= function(e){
+                    if(thisEl!=mainView.router.currentPageEl)return;
+                    if(self.isDocReadOnly())return;
+                    if(app7.srvRequestJSONDialogErr)return;//if error dialog show and don't close
+                    if(self.dialogEditNewQty&&self.dialogEditNewQty.opened)return;//if show dialog edit qty
+                    if(!e||e.key==null)return;
+                    if(e.key=="Enter"){
+                        self.barcodeInputEnter(self.keypressBuffer);
+                        self.keypressBuffer="";
+                    }else {
+                        if(e.key.length==1) self.keypressBuffer+=e.key;
+                        self.pageDocExcDeliveryProdsDataBarCodeInput.val(self.keypressBuffer);
+                    }
+                }
+                document.onkeydown= function(e){
+                    if(thisEl!=mainView.router.currentPageEl)return;
+                    if(self.isDocReadOnly())return;
+                    if(self.dialogEditNewQty&&self.dialogEditNewQty.opened)return;//if show dialog edit qty
+                    if(!e||e.key==null)return;
+                    if(e.key=="Escape"){
+                        self.keypressBuffer="";
+                        self.pageDocExcDeliveryProdsDataBarCodeInput.val(self.keypressBuffer);
+                    }else if(document.device&&document.device.barcodeScannerReaderAction&&e.keyCode==0&&!document.device.barcodeScannerStart){
+                        self.barcodeScannerWithEditQtyStart= true;
+                        document.device.barcodeScannerRequestScan();
+                        document.device.barcodeScannerStart= true;
+                    }
+                }
+                document.onkeyup= function(e){
+                    if(thisEl!=mainView.router.currentPageEl)return;
+                    if(self.isDocReadOnly())return;
+                    if(self.dialogEditNewQty&&self.dialogEditNewQty.opened)return;//if show dialog edit qty
+                    if(!e||e.key==null)return;
+                    if(e.key=="Escape"){
+                        self.keypressBuffer="";
+                        self.pageDocExcDeliveryProdsDataBarCodeInput.val(self.keypressBuffer);
+                    }else if(document.device&&document.device.barcodeScannerStart)
+                        document.device.barcodeScannerStart= false;
+                }
+                if(document.device&&document.device.barcodeScannerReaderAction){
+                    document.device.barcodeScannerReaderAction= function(barcode){
+                        if(thisEl!=mainView.router.currentPageEl)return;
+                        if(self.isDocReadOnly())return;
+                        if(app7.srvRequestJSONDialogErr)return;//if error dialog show and don't close
+                        if(self.dialogEditNewQty&&self.dialogEditNewQty.opened)return;//if show dialog edit qty
+                        if(self.barcodeScannerWithEditQtyProcess)return;
+                        if(barcode) barcode= barcode.replace("\n","");
+                        if(!self.barcodeScannerWithEditQtyStart){ self.barcodeInputEnter(barcode); return; }
+                        self.setInputProdBarcodeByState({disable:true});
+                        self.barcodeScannerWithEditQtyStart= false;
+                        self.barcodeScannerWithEditQtyProcess= true;
+                        var docData=self.docData, docChID= (docData)?docData["ChID"]:null;
+                        self.findProdByBarcode(barcode,docChID,function(prodData){
+                            if(!prodData){
+                                self.barcodeScannerWithEditQtyProcess= false;
+                                self.setInputProdBarcodeByState({enable:true,focus:false,val:""});
+                                return;
+                            }
+                            var srcPosID= prodData["SrcPosID"];
+                            if(srcPosID!=null){
+                                var ctTRs= self.contentTableDataDomTRs[srcPosID];
+                                for(var ctTR of ctTRs){
+                                    if(ctTR.doSelect) ctTR.doSelect();
+                                    if(ctTR.clientHeight==0||ctTR.clientWidth==0) continue;
+                                    self.setScroll(ctTR);
+                                }
+                            }
+                            var newQty= prodData["NewQty"];
+                            if(newQty==null) newQty=0;
+                            self.showDialogEditQty({"ProdName":prodData["ProdName"],"NewQty":newQty},
+                                    /*okAction*/function(inputValNewQty,actionSuccess,actionError){
+                                        self.storeBarcodeWithNewQtyToExc(prodData["Barcode"],inputValNewQty,function(storeExcDResultItem,errMsg){
+                                            if(errMsg){ actionError(errMsg); return; }
+                                            actionSuccess();
+                                            if(storeExcDResultItem) self.updContentTableData(storeExcDResultItem);
+                                        });
+                                    },/*closedAction*/function(){
+                                        self.barcodeScannerWithEditQtyProcess= false;
+                                        self.setInputProdBarcodeByState({enable:true,focus:false,val:""});
+                                    });
+                        });
+                    }
+                }
             },
             pageAfterOut: function(e,page){
                 if(this.progressBarEl) this.$app.progressbar.hide(this.progressBarEl);
@@ -153,50 +230,68 @@
             return {docData:excData};
         },
         methods: {
-            loadExcData: function(){                                                                            //console.log('pageDocExcDelivery_ProdsData.html loadExcData excData=',this.docData);
-                this.setInputProdBarcodeByState({focus:true,enable:false});
-                var excData=this.docData, excChID=excData["ChID"];
-                if(excChID===null||excChID===undefined) return;
-                var self=this;                                                                                  //console.log('pageDocExcDelivery_ProdsData.html loadExcData excChID=',excChID, this);
+            isDocReadOnly: function(){
+                return !this.docData||!this.docData["IsStateOnConfirmation"];
+            },
+            loadExcProdsData: function(){
+                this.contentTableDataDomTRs={}; this.contentTableDataItems={}; this.contentTableDataBarcodes={};
+                this.contentTableTotalData={};
+                this.setInputProdBarcodeByState({focus:false,enable:false});
+                var docData=this.docData, docChID= docData["ChID"];
+                if(docChID===null||docChID===undefined)return;
+                var self=this;
                 app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/docExcDelivery/getDataForExcDTable',conditions:{'docChID=':excChID},
-                            errorDialogMsg:"Не удалось получить товары перемещения на доставку с сервера!"},
+                app7.srvRequestJSON({url:'/mobile/docExcDelivery/getDataForExcDTable',conditions:{'docChID=':docChID},
+                            errorDialogMsg:"Не удалось получить с сервера товары перемещения на доставку!"},
                         function(result,error){
                             app7.preloader.hide();
-                            var resultItems=(result)?result.items:null;
-                            self.items=resultItems;
+                            var resultItems= (result)?result.items:null;
+                            self.contentTableData= resultItems; app7.data.pageDocExcFromStockProdsData= {contentTableData:resultItems};
+                            self.contentTableDataItems=
+                                    (!resultItems)?{}:resultItems.reduce(function(result,arrItem,index,array){
+                                        result[arrItem["SrcPosID"]]= arrItem; return result;
+                                    },{});
+                            self.contentTableDataBarcodes=
+                                    (!resultItems)?{}:resultItems.reduce(function(result,arrItem,index,array){
+                                        result[arrItem["Barcode"]]=
+                                                {"Barcode":arrItem["Barcode"],"ProdID":arrItem["ProdID"],"ProdName":arrItem["ProdName"],"UM":arrItem["UM"]};
+                                        return result;
+                                    },{});
                             if(!resultItems){ self.setInputProdBarcodeByState(); return; }
-                            app7.data.pageDocExcDeliveryProdsData= {docDataItems:resultItems};                  //console.log('pageDocExcDelivery_ProdsData.html loadExcData resultItems=',resultItems);
-                            var params={ contentTableHeaderDomEl:self.contentTableHeaderDomEl,contentTableDataDomEl:self.contentTableDataDomEl,
-                                contentTable2HeaderDomEl:self.contentTableLHeaderDomEl,contentTable2DataDomEl:self.contentTableLDataDomEl,
-                                progressAction:function(tableData, ind,tableDataItem){
-                                    if(!tableDataItem){ self.setTotalInfo(0,0); return; }
-                                    self.setTotalInfo(tableDataItem["Qty"],tableDataItem["NewQty"],ind+1);
-                                }
-                            };
-                            app7.innerPageFillTableData(self, resultItems, params, function(tableData){
-                                self.setInputProdBarcodeByState({focus:true,enable:true});
+                            var params={ contentTableHeaderDomEl:self.contentTableHeaderDomEl, contentTableDataDomEl:self.contentTableDataDomEl,
+                                    contentTable2HeaderDomEl:self.contentTableLHeaderDomEl, contentTable2DataDomEl:self.contentTableLDataDomEl,
+                                    contentTableDataIDName:"SrcPosID",
+                                    progressAction:function(tableData, ind,tableDataItem){
+                                        if(!tableDataItem){ self.setTotalInfo(0,0); return; }
+                                        self.setTotalInfo(tableDataItem["Qty"],tableDataItem["NewQty"],ind+1);
+                                    }
+                                };
+                            app7.innerPageFillTableData(self,resultItems,params,function(contentTableData,contentTableDataDomTRs){
+                                self.contentTableDataDomTRs= contentTableDataDomTRs;
+                                self.setInputProdBarcodeByState({focus:false,enable:true});
                             });
                         })
             },
             setTotalInfo: function(qty,newQty,tLoadedRows){
-                var tRows=(this.items)?this.items.length.toString():0;
-                if(tLoadedRows!==undefined) tRows=tLoadedRows.toString()+"/<br>"+tRows;
-                var contentTableFootDomElTR= $$(this.contentTableFootDomEl).find("tr"),
-                        totalQty= parseFloat(contentTableFootDomElTR.find("td#totalQty").text())+qty,
-                        totalNewQty= parseFloat(contentTableFootDomElTR.find("td#totalNewQty").text())+newQty;
+                var sTotalRows= (this.contentTableData)?this.contentTableData.length.toString():0;
+                if(tLoadedRows!==undefined) sTotalRows= tLoadedRows.toString()+"/<br>"+sTotalRows;
+                this.contentTableTotalData["totalQty"]= this.contentTableTotalData["totalQty"]||0; this.contentTableTotalData["totalQty"]+= qty;
+                this.contentTableTotalData["totalNewQty"]= this.contentTableTotalData["totalNewQty"]||0; this.contentTableTotalData["totalNewQty"]+= newQty;
                 app7.innerPageUpdateTotalTable([this.contentTableFootDomEl,this.contentTableLFootDomEl],
-                        {totalRows:tRows,totalQty:totalQty,totalNewQty:totalNewQty})
+                        {totalRows:sTotalRows,totalQty:this.contentTableTotalData["totalQty"],totalNewQty:this.contentTableTotalData["totalNewQty"]});
+            },
+            contentTableTROnCreated: function(tr,tableDataItem,newTRs,methods){
+                tr.doSelect= methods["rowSelectingMethod"];
             },
             /**
              * opts = { enable, disable, focus, val }
              */
             setInputProdBarcodeByState: function(opts){
-                var barcodeInput= $$("#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataBarCodeInput"),
+                var barcodeInput= this.pageDocExcDeliveryProdsDataBarCodeInput,
                         btnBarcodeInputEnter= $$('#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataBtnBarcodeInputEnter'),
                         stateInfo= $$('#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataStateInfo'),
                         stateName= $$('#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataStateName');
-                if(!this.docData||(this.docData&&!this.docData["IsStateOnConfirmation"])||!this.items){
+                if(this.isDocReadOnly()||!this.contentTableData||!this.contentTableData.length){
                     barcodeInput.attr('disabled',1); btnBarcodeInputEnter.attr('disabled',1);
                     barcodeInput.hide(); btnBarcodeInputEnter.hide();
                     stateInfo.show(); stateInfo.text(this.docData["StateInfo"]);
@@ -206,7 +301,7 @@
                 if(!opts)return;
                 barcodeInput.show(); btnBarcodeInputEnter.show();
                 stateInfo.hide(); stateName.hide();
-                if(opts.val!==undefined) barcodeInput.val(opts.val);
+                if(opts.val!==undefined){ barcodeInput.val(opts.val); this.keypressBuffer= opts.val; }
                 if(opts.enable==true||opts.disable==false){
                     barcodeInput.removeAttr('disabled'); btnBarcodeInputEnter.removeAttr('disabled');
                     if(opts.focus==true) barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
@@ -217,20 +312,14 @@
                     barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }
             },
-
-            excDataTableTDNewQtyOnCreated: function(td,tableDataItem,newTRs,methods){                           //console.log("excDataTableTDNewQtyOnCreated",tableDataItem,td);
-                td.id="id_"+tableDataItem["ChID"].toString()+'_'+tableDataItem["SrcPosID"].toString();
-                td.doSelect= methods["rowSelectingMethod"];
-                tableDataItem.tableTDNewQty= td;                                                                //console.log("excDataTableTDNewQtyOnCreated SrcPosID",td.SrcPosID);
-            },
             barcodeInputEnter: function(scanBarcode){
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
                 var self=this;
-                this.storeInputValueToExc(scanBarcode || $$("#pageDocExcDeliveryProdsDataToolbar #pageDocExcDeliveryProdsDataBarCodeInput").val(),function(excProdData){
+                this.storeInputValueToExc(scanBarcode||this.pageDocExcDeliveryProdsDataBarCodeInput.val(),function(excProdData){
                     app7.preloader.hide();
-                    if(excProdData)self.addProdToTable(excProdData);
-                    self.setInputProdBarcodeByState({enable:true,focus:(!scanBarcode),val:""});
+                    if(excProdData) self.updContentTableData(excProdData);
+                    self.setInputProdBarcodeByState({enable:true,focus:false/*(!scanBarcode)*/,val:""});
                 });
             },
             /**
@@ -247,7 +336,7 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
-                var self=this, docChID= this.docData["ChID"];                                                  //console.log('pageDocExcDelivery_ProdsData.html storeInputValueToExc inputValue=',inputValue, this);
+                var self=this, docChID= this.docData["ChID"];
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/docExcDelivery/storeProdDataByCRUniInput',data:{value:inputValue,docChID:docChID},
                             userErrorMsg:"Не удалось добавить товар в перемещение!"},
@@ -258,81 +347,154 @@
                             callback(excProdData);
                         })
             },
-            addProdToTable: function(prodData){
-                if(!prodData) prodData={Qty:0,NewQty:0};
-                var existsTDNewQty= $$(this.contentTableDataDomEl).children("tr").children("#id_"+prodData["ChID"]+"_"+prodData["SrcPosID"])[0];
-                if(existsTDNewQty){                                                                             //console.log("addProdToTable existsTDNewQty",existsTDNewQty.dataTableRowData);
-                    var oldNewQty= parseFloat(existsTDNewQty.dataTableRowData["NewQty"]), newQty= prodData["NewQty"],
-                        oldQty= parseFloat(existsTDNewQty.dataTableRowData["Qty"]), qty= prodData["Qty"];
-                    existsTDNewQty.innerText=newQty; existsTDNewQty.Qty=qty;
-                    existsTDNewQty.dataTableRowData["NewQty"]=newQty;
-                    existsTDNewQty.doSelect();
-                    this.setScroll(existsTDNewQty);
+            updContentTableData: function(prodData){
+                if(!prodData) prodData={};
+                var srcPosID= prodData["SrcPosID"], qty= prodData["Qty"], newQty= prodData["NewQty"], ctTRs= this.contentTableDataDomTRs[srcPosID];
+                if(!ctTRs){//not exists - add new
+                    ctTRs= app7.innerPageCreateTableRow(this.contentTableHeaderDomEl,this.contentTableDataDomEl,prodData,this);
+                    if(this.contentTableLHeaderDomEl&&this.contentTableLDataDomEl)
+                        ctTRs= ctTRs.concat(app7.innerPageCreateTableRow(this.contentTableLHeaderDomEl,this.contentTableLDataDomEl,prodData,this));
+                    this.contentTableDataDomTRs[srcPosID]= ctTRs;
+                    if(!this.contentTableData) this.contentTableData=[];
+                    this.contentTableData.push(prodData);
+                    if(!this.contentTableDataItems) this.contentTableDataItems={};
+                    this.contentTableDataItems[srcPosID]= prodData;
+                    this.contentTableDataBarcodes[prodData["Barcode"]]=
+                            {"Barcode":prodData["Barcode"],"ProdID":prodData["ProdID"],"ProdName":prodData["ProdName"],"UM":prodData["UM"]};
+                    this.setTotalInfo(prodData["Qty"],prodData["NewQty"]);
+                }else{//exists - update exists
+                    var ctDataItem= this.contentTableDataItems[srcPosID], oldQty= ctDataItem["Qty"], oldNewQty= ctDataItem["NewQty"];
+                    ctDataItem["Qty"]= qty; ctDataItem["NewQty"]= newQty;
                     this.setTotalInfo(qty-oldQty,newQty-oldNewQty);
-                    return;
                 }
-                app7.innerPageCreateTableRow(this.contentTableHeaderDomEl,this.contentTableDataDomEl, prodData, this);
-                prodData.tableTDNewQty.doSelect();
-                this.setTotalInfo(prodData["Qty"],prodData["NewQty"]);
-                this.setScroll(prodData.tableTDNewQty);
+                for(var ctTR of ctTRs){
+                    $$(ctTR).find("td[dataItemName=Qty] div").text(qty); $$(ctTR).find("td[dataItemName=NewQty] div").text(newQty);
+                    if(ctTR.doSelect) ctTR.doSelect();
+                    if(ctTR.clientHeight==0||ctTR.clientWidth==0) continue;
+                    this.setScroll(ctTR);
+                }
             },
-
-            excDTableTDNewQtyOnClick: function(e,tdNewQty,contentTableDataItem,self){
-                if(self.docData&&!self.docData["IsStateOnConfirmation"])return;
-                self.showDialogExcDEditNewQty(tdNewQty,contentTableDataItem);
+            contentTableTDQtyOnClick: function(e,ownerTD,contentTableDataItem){
+                if(this.isDocReadOnly())return;
+                var tdQty=e.target, self=this;
+                this.showDialogEditQty(contentTableDataItem,/*ok/Enter*/function(inputValNewQty,actionSuccess,actionError){
+                    self.storeNewQtyToExcD(contentTableDataItem["SrcPosID"],contentTableDataItem["ProdID"],inputValNewQty,
+                            function(storeExcDResultItem,errMsg){
+                                if(errMsg){ if(actionError) actionError(errMsg); return; }
+                                var srcPosID= contentTableDataItem["SrcPosID"], ctTRs= self.contentTableDataDomTRs[srcPosID];
+                                for(var ctTR of ctTRs) $$(ctTR).find("td[dataItemName=NewQty] div").text(inputValNewQty);
+                                var oldNewQty= contentTableDataItem["NewQty"];
+                                contentTableDataItem["NewQty"]= inputValNewQty;
+                                self.setTotalInfo(0,inputValNewQty-oldNewQty);
+                                if(actionSuccess) actionSuccess();
+                            })
+                });
             },
-            showDialogExcDEditNewQty: function(tdNewQty,tableDataItem){
-                var self=this;
-                this.dialogEditNewQty= app7.dialog.create({ title:"Фактическое количество", destroyOnClose:true, text:tableDataItem.ProdName,
-                        content:'<span id="dialogExcDEditNewQtyErrMsg" style="color:red;font-weight:bold;font-size:14px;line-height:1;"></span>'+
+            /**
+             * params = { ProdName, NewQty }
+             * okAction = function(inputValNewQty,actionSuccess,actionError)
+             *      actionSuccess = function(), actionError = function(errMsg)
+             * closedAction = function(dialog)
+             * actionSuccess - close dialog
+             * actionError - don't close dialog, show error message in dialog and focus to input
+             */
+            showDialogEditQty: function(params,okAction,closedAction){
+                var self=this, oldNewQty= params["NewQty"];
+                this.dialogEditNewQty= app7.dialog.create({ title:"Фактическое количество", destroyOnClose:true, text:params["ProdName"],
+                    content:'<span id="dialogExcDEditNewQtyErrMsg" style="color:red;font-weight:bold;font-size:14px;line-height:1;"></span>'+
                             '<br><input id="inputExcDNewQty" type="number" style="text-align:center;border:solid 1px grey;padding:5px"></<input>',
-                        on:{
-                            open:function(){
-                                $$("#dialogExcDEditNewQtyErrMsg").html("");
-                                $$("#inputExcDNewQty").val(tableDataItem.NewQty).focus(); document.getElementById("inputExcDNewQty").select();
-                                document.getElementById("inputExcDNewQty").onkeydown=function(e){
-                                    if(e.key=="Escape"||e.code=="Escape"||e.keyCode==27) self.dialogEditNewQty.close();
-                                    else if(e.key=="Enter"||e.code=="Enter"||e.keyCode==13) self.dialogEditNewQty.params.buttons[0].onClick();
-                                };
-                            },
+                    on:{
+                        open:function(){
+                            $$("#dialogExcDEditNewQtyErrMsg").html("");
+                            $$("#inputExcDNewQty").val(oldNewQty).focus(); document.getElementById("inputExcDNewQty").select();
+                            document.getElementById("inputExcDNewQty").onkeypress= function(e){ e.stopPropagation(); };
+                            document.getElementById("inputExcDNewQty").onkeydown=function(e){
+                                if(e.key=="Escape"||e.code=="Escape"||e.keyCode==27) self.dialogEditNewQty.close();
+                                else if(e.key=="Enter"||e.code=="Enter"||e.keyCode==13) self.dialogEditNewQty.params.buttons[0].onClick();
+                            };
                         },
-                        buttons:[
-                            { text:"ВВОД",close:false,keyCodes:[13],onClick:function(){
-                                var val= parseFloat($$("#inputExcDNewQty").val());
-                                if(isNaN(val)){
-                                    $$("#dialogExcDEditNewQtyErrMsg").html("Неверное значение количества!");
-                                    $$("#inputExcDNewQty").focus(); document.getElementById("inputExcDNewQty").select();
-                                    return;
-                                }
-                                self.storeNewQtyToExcD(tableDataItem.SrcPosID,tableDataItem.ProdID,val,
-                                    function(storeResult,errMsg){
-                                        if(errMsg){
-                                            $$("#dialogExcDEditNewQtyErrMsg").html(errMsg);
-                                            $$("#inputExcDNewQty").focus(); document.getElementById("inputExcDNewQty").select();
-                                            return;
-                                        }
-                                        var oldNewQty= tableDataItem["NewQty"];
-                                        tableDataItem["NewQty"]=val; tdNewQty.innerText=val.toString();
-                                        self.setTotalInfo(0,val-parseFloat(oldNewQty));
-                                        self.dialogEditNewQty.close();
-                                    })
-                            } },
-                            { text:"ОТМЕНА",close:true,keyCodes:[27] } ]
-                    }).open().on("closed",function(){ self.setInputProdBarcodeByState({focus:true}); });
+                        closed:function(){
+                            if(closedAction) closedAction(self.dialogEditNewQty);
+                            self.setInputProdBarcodeByState({focus:false});
+                        }
+                    },
+                    buttons:[
+                        { text:"ВВОД",close:false,keyCodes:[13],onClick:function(){
+                            var inputValNewQty= parseFloat($$("#inputExcDNewQty").val());
+                            if(isNaN(inputValNewQty)||(inputValNewQty-0)<0){
+                                $$("#dialogExcDEditNewQtyErrMsg").html("Неверное значение количества!");
+                                $$("#inputExcDNewQty").focus(); document.getElementById("inputExcDNewQty").select();
+                                return;
+                            }
+                            if(!okAction) { self.showDialogEditQty.close(); return; }
+                            okAction(inputValNewQty,/*success*/function(){ self.dialogEditNewQty.close(); },/*error*/function(errMsg){
+                                $$("#dialogExcDEditNewQtyErrMsg").html(errMsg);
+                                $$("#inputExcDNewQty").focus(); document.getElementById("inputExcDNewQty").select();
+                            });
+                        } },
+                        { text:"ОТМЕНА",close:true,keyCodes:[27] } ]
+                }).open();
             },
+            /**
+             * callback = function(storeExcDResultItem,errMsg)
+             * if no result or no result.resultItem call callback(null,"<error message>")
+             * if has result and result.resultItem call callback(storeExcDResultItem=result.resultItem)
+             */
             storeNewQtyToExcD: function(srcPosID,prodID,newQty,callback){
-                var cInstance=this, docChID=this.docData["ChID"];                                            //console.log('pageDocExcDelivery_ProdsData.html storeNewQtyToExcD tSrcPosID=',tSrcPosID, tNewQty);
+                var docChID= this.docData["ChID"];
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/docExcDelivery/storeNewQtyData',data:{docChID:docChID,SrcPosID:srcPosID,NewQty:newQty},
                             showRequestErrorDialog:false},
-                    function(result,errmsg){
-                        app7.preloader.hide();// Hide Preloader
-                        if(!result||!result.resultItem){
-                            callback(null,(errmsg||"Не удалось сохранить данные на сервере!")); return;
-                        }
-                        var excDData=result.resultItem;
-                        callback(excDData);
-                    })
+                        function(result,errmsg){
+                            app7.preloader.hide();//Hide Preloader
+                            if(!result||!result.resultItem){ callback(null,(errmsg||"Не удалось сохранить данные на сервере!")); return; }
+                            callback(result.resultItem);
+                        })
+            },
+            /**
+             * callback = function(prodData)
+             * if no result or no result.item call callback(null)
+             * if has result and result.item call callback(prodData=result.itItem)
+             */
+            findProdByBarcode: function(barcode,docChID,callback){
+                if(!barcode||barcode.toString().trim()=='')return;
+                app7.preloader.show();
+                app7.srvRequestJSON({url:'/mobile/docExcDelivery/findProdDataByBarcode',conditions:{"docChID=":docChID,"Barcode=":barcode},
+                            userErrorMsg:"Не удалось найти товар по штрихкоду!"},
+                        function(result,errmsg){
+                            app7.preloader.hide();
+                            if(!result||!result.item){ callback(null); return; }
+                            callback(result.item);
+                        });
+            },
+            /**
+             * callback = function(storeExcDResultItem,errMsg)
+             * if no result or no result.resultItem call callback(null,"<error message>")
+             * if has result and result.resultItem call callback(storeExcDResultItem=result.resultItem)
+             */
+            storeBarcodeWithNewQtyToExc: function(barcode,newQty,callback){
+                if(!barcode||barcode.toString().trim()==''){
+                    var self=this;
+                    if(!this.dialogAlertNoBarcode)
+                        this.dialogAlertNoBarcode=
+                                app7.dialog.alert("Не удалось считать штрихкод или код товара!","Внимание",
+                                        function(){ self.dialogAlertNoBarcode=null; callback(null); });
+                    else
+                        this.dialogAlertNoBarcode.open();
+                    return;
+                }
+                var docChID= (this.docData)?this.docData["ChID"]:null;
+                app7.preloader.show();
+                app7.srvPostRequestJSON({url:'/mobile/docExcDelivery/storeProdBarcodeWithNewQty',data:{docChID:docChID,Barcode:barcode,NewQty:newQty},
+                            showRequestErrorDialog:false },
+                        function(result,errmsg){
+                            app7.preloader.hide();
+                            if(!result||!result.resultItem){
+                                callback(null,"Не удалось добавить товар по штрихкоду в перемещение!"+((errmsg)?"<br>"+errmsg:""));
+                                return;
+                            }
+                            callback(result.resultItem);
+                        });
             },
             setScroll: function(innerElem){
                 var page=this.pageContentDocExcDeliveryProdsData[0],

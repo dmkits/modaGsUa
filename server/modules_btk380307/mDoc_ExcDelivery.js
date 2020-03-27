@@ -98,6 +98,8 @@ module.exports.init = function(app){
         {data:"PPID", name:"Кол-во", width:50, type:"numeric", dataSource:"t_ExcD"},
         {data:"SecID", name:"Кол-во", width:50, type:"numeric", dataSource:"t_ExcD"},
         {data:"NewSecID", name:"Кол-во", width:50, type:"numeric", dataSource:"t_ExcD"},
+        {data:"NewSecName", name:"Статус товара", width:80, type:"text", readOnly:true, visible:false,
+            dataSource:"r_Secs", sourceField:"SecName", linkCondition:"r_Secs.SecID=t_ExcD.NewSecID" },
         {data:"NewQty", name:"Нов кол-во", width:50, type:"numeric", dataSource:"t_ExcD"},
         {data:"PriceCC_nt", name:"Цена без НДС", width:65, type:"numeric2", dataSource:"t_ExcD"},
         {data:"Tax", name:"НДС Цены", width:65, type:"numeric2", dataSource:"t_ExcD"},
@@ -115,84 +117,144 @@ module.exports.init = function(app){
         t_ExcD.getDataItemsForTable(req.dbUC,{tableColumns:tExcDTableColumns, conditions:conditions, order:"SrcPosID"},
             function(result){ res.send(result); });
     });
-     /**
-      * prodData = { ProdID, UM, Barcode, TNewQty }
-      */
-     t_ExcD.storeExcDProdDataWNewQty= function(dbUC,docChID,excDProdData,newQty,resultCallback){
-         if(!("ProdID" in excDProdData)&&!("SrcPosID" in excDProdData)){
-             resultCallback({error:"Failed find prod in t_ExcD!<br> No ProdID or SrcPosID!",
-                 errorMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
-             return;
-         }
-         var conditions= {"ChID=":docChID};
-         if("ProdID" in excDProdData) conditions["ProdID="]= excDProdData["ProdID"];
-         if("SrcPosID" in excDProdData) conditions["SrcPosID="]= excDProdData["SrcPosID"];
-         t_ExcD.getDataItem(dbUC,{conditions:conditions,
-                 fields:["SrcPosID","Barcode","ProdID","UM","Qty","PPID","SecID","NewSecID","NewQty",
-                     "PriceCC_nt","Tax","PriceCC_wt","SumCC_nt","TaxSum","SumCC_wt"]},
-             function(result){
-                 if(result.error){
-                     resultCallback({error:"Failed find prod in t_ExcD!<br>"+result.error,
-                         errorMessage:"Не удалось найти товар в перемещении!<br>"+result.error});
-                     return;
-                 }
-                 var storeData=result.item;
-                 if(!storeData){//insert
-                     storeData=excDProdData;
-                     if(!("ProdID" in storeData)){
-                         resultCallback({error:"Failed get prod data for insert into t_ExcD!",
-                             errorMessage:"Не удалось получить данные товара для добавления в перемещение!"});
-                         return;
-                     }
-                     storeData["Barcode"]= excDProdData["Barcode"];
-                     storeData["SecID"]= excDProdData["SecID"]; storeData["NewSecID"]= excDProdData["NewSecID"];
-                     storeData["Qty"]=0; storeData["NewQty"]=1; storeData["PPID"]=0;
-                     storeData["PriceCC_nt"]=0; storeData["Tax"]=0; storeData["PriceCC_wt"]=0;
-                     storeData["SumCC_nt"]=0; storeData["TaxSum"]=0; storeData["SumCC_wt"]=0;
-                 }else{//update by TSrcPosID
-                     if(newQty===undefined) storeData["NewQty"]++; else storeData["NewQty"]=newQty;
-                 }
-                 storeData["ChID"]=docChID;
-                 t_ExcD.storeTableDataItem(dbUC,{tableColumns:tExcDTableColumns, idFields:["ChID","SrcPosID"],storeTableData:storeData,
-                         calcNewIDValue: function(params, callback){
-                             t_ExcD.getDataItem(dbUC,{fields:["maxSrcPosID"],
-                                     fieldsFunctions:{maxSrcPosID:{function:"maxPlus1",sourceField:"SrcPosID"}},conditions:{"ChID=":docChID}},
-                                 function(result){
-                                     if(result.error){
-                                         resultCallback({error:"Failed calc new SrcPosID by prod in t_ExcD!<br>"+result.error,
-                                             errorMessage:"Не удалось вычислить новый номер позиции для товара в перемещении!<br>"+result.error});
-                                         return;
-                                     }
-                                     if(!result.item)params.storeTableData["SrcPosID"]=1;else params.storeTableData["SrcPosID"]= result.item["maxSrcPosID"];
-                                     callback(params);
-                                 });
-                         }},
-                     function(result){
-                         if(result.error){
-                             if(result.error.indexOf("Cannot insert duplicate key row in object 'dbo.t_ExcD' with unique index 'NoDuplicate'")>=0)
-                                 result.errorMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером.";
-                             else
-                                 result.errorMessage="Не удалось сохранить товар в перемещение!<br>"+result.error;
-                         }
-                         resultCallback(result);
-                     });
-         });
-     };
-     app.post("/mobile/docExcDelivery/storeProdDataByCRUniInput",function(req,res){
-         var storingData= req.body, value= (storingData)?storingData["value"]:null, docChID= storingData["docChID"];
-         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
-             if(resultFindProd.error){
-                 res.send({error:{error:resultFindProd.error,userMessage:resultFindProd.errorMessage}});
-                 return;
-             }
-             resultFindProd.prodData["SecID"]= req.dbUserParams["t_SecID"]; resultFindProd.prodData["NewSecID"]= req.dbUserParams["t_SecID"];
-             t_ExcD.storeExcDProdDataWNewQty(req.dbUC,docChID,resultFindProd.prodData,storingData["NewQty"],
-                 function(result){ res.send(result); })
-         });
-     });
-     app.post("/mobile/docExcDelivery/storeNewQtyData",function(req,res){
-         var storingData= req.body, docChID= storingData["docChID"], excDData={SrcPosID:storingData["SrcPosID"]};
-         t_ExcD.storeExcDProdDataWNewQty(req.dbUC,docChID,excDData,storingData["NewQty"],
-             function(result){ res.send(result); });
-     });
+    /**
+     * excDProdData = { ProdID, UM, Barcode, NewQty }
+     * if no excDProdData.NewQty - inserting NewQty=1, or updating NewQty=NewQty+1
+     */
+    t_ExcD.findAndStoreProdWNewQtyInExcD= function(dbUC,docChID,excDProdData,resultCallback){
+        if(!("ProdID" in excDProdData)&&!("SrcPosID" in excDProdData)){
+            resultCallback({error:"Failed find prod in t_ExcD!<br> No ProdID or SrcPosID!",
+                errorMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
+            return;
+        }
+        var conditions= {"ChID=":docChID};
+        if("ProdID" in excDProdData) conditions["ProdID="]= excDProdData["ProdID"];
+        if("SrcPosID" in excDProdData) conditions["SrcPosID="]= excDProdData["SrcPosID"];
+        t_ExcD.getDataItem(dbUC,{conditions:conditions,
+                fields:["SrcPosID","Barcode","ProdID","UM","Qty","PPID","SecID","NewSecID","NewQty",
+                    "PriceCC_nt","Tax","PriceCC_wt","SumCC_nt","TaxSum","SumCC_wt"]},
+            function(result){
+                if(result.error){
+                    resultCallback({error:"Failed find prod in t_ExcD!<br>"+result.error,
+                        errorMessage:"Не удалось найти товар в перемещении!<br>"+result.error});
+                    return;
+                }
+                var storeData=result.item, prodNewQty=excDProdData["NewQty"];
+                if(!storeData){//insert
+                    storeData=excDProdData;
+                    if(!("ProdID" in storeData)){
+                        resultCallback({error:"Failed get prod data for insert into t_ExcD!",
+                            errorMessage:"Не удалось получить данные товара для добавления в перемещение!"});
+                        return;
+                    }
+                    storeData["Barcode"]= excDProdData["Barcode"];
+                    storeData["SecID"]= excDProdData["SecID"]; storeData["NewSecID"]= excDProdData["NewSecID"];
+                    storeData["Qty"]=0; storeData["NewQty"]=(prodNewQty!=null)?prodNewQty:1; storeData["PPID"]=0;
+                    storeData["PriceCC_nt"]=0; storeData["Tax"]=0; storeData["PriceCC_wt"]=0;
+                    storeData["SumCC_nt"]=0; storeData["TaxSum"]=0; storeData["SumCC_wt"]=0;
+                }else{//update by SrcPosID
+                    if(prodNewQty!=null) storeData["NewQty"]=prodNewQty; else storeData["NewQty"]++;
+                }
+                storeData["ChID"]=docChID;
+                t_ExcD.storeTableDataItem(dbUC,{tableColumns:tExcDTableColumns, idFields:["ChID","SrcPosID"],storeTableData:storeData,
+                        calcNewIDValue: function(params, callback){
+                            t_ExcD.getDataItem(dbUC,{fields:["maxSrcPosID"],
+                                    fieldsFunctions:{maxSrcPosID:{function:"maxPlus1",sourceField:"SrcPosID"}},conditions:{"ChID=":docChID}},
+                                function(result){
+                                    if(result.error){
+                                        resultCallback({error:"Failed calc new SrcPosID by prod in t_ExcD!<br>"+result.error,
+                                            errorMessage:"Не удалось вычислить новый номер позиции для товара в перемещении!<br>"+result.error});
+                                        return;
+                                    }
+                                    if(!result.item)params.storeTableData["SrcPosID"]=1;else params.storeTableData["SrcPosID"]= result.item["maxSrcPosID"];
+                                    callback(params);
+                                });
+                        }},
+                    function(result){
+                        if(result.error){
+                            if(result.error.indexOf("Cannot insert duplicate key row in object 'dbo.t_ExcD' with unique index 'NoDuplicate'")>=0)
+                                result.errorMessage="Некорректный номер позиции!<br> В документе уже есть позиция с таким номером.";
+                            else
+                                result.errorMessage="Не удалось сохранить товар в перемещение!<br>"+result.error;
+                        }
+                        resultCallback(result);
+                    });
+            });
+    };
+    app.post("/mobile/docExcDelivery/storeProdDataByCRUniInput",function(req,res){
+        var storingData= req.body, value= (storingData)?storingData["value"]:null, docChID= storingData["docChID"];
+        r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
+            if(resultFindProd.error){
+                res.send({error:{error:resultFindProd.error,userMessage:resultFindProd.errorMessage}});
+                return;
+            }
+            var prodDataForStoreToExcD= {"ProdID":resultFindProd.prodData["ProdID"],"UM":resultFindProd.prodData["UM"],
+                "Barcode":resultFindProd.prodData["Barcode"],
+                "SecID":req.dbUserParams["t_SecID"],"NewSecID":req.dbUserParams["t_SecID"]
+            };
+            t_ExcD.findAndStoreProdWNewQtyInExcD(req.dbUC,docChID,prodDataForStoreToExcD,function(result){ res.send(result); })
+        });
+    });
+    app.post("/mobile/docExcDelivery/storeNewQtyData",function(req,res){
+        var storingData= req.body, docChID= storingData["docChID"],
+            prodDataForStoreToExcD={SrcPosID:storingData["SrcPosID"],"NewQty":storingData["NewQty"]};
+        t_ExcD.findAndStoreProdWNewQtyInExcD(req.dbUC,docChID,prodDataForStoreToExcD,function(result){ res.send(result); });
+    });
+    app.get("/mobile/docExcDelivery/findProdDataByBarcode",function(req,res){
+        var barcode= req.query["Barcode~"], docChID= req.query["docChID~"];
+        r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
+            if(!resultFindProd||resultFindProd.error){
+                var sErr="Failed find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Не удалось найти товар по штрихкоду \""+barcode+"\"!";
+                sErr+="\n"+resultFindProd.error; sErrMsg+="\n"+resultFindProd.errorMessage;
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }else if(!resultFindProd.prodData){
+                var sErr="Cannot find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Товар по штрихкоду \""+barcode+"\" не найден!";
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }
+            var prodData= resultFindProd.prodData;
+            t_ExcD.getDataItems(req.dbUC,{conditions:{"ChID=":docChID, "Barcode=":barcode},
+                    fields:["SrcPosID","Barcode","ProdID","UM","Qty","PPID","SecID","NewSecID","NewQty",
+                        "PriceCC_nt","Tax","PriceCC_wt","SumCC_nt","TaxSum","SumCC_wt"],
+                    order:"SrcPosID desc" },
+                function(resultFindProdInExcD){
+                    if(resultFindProdInExcD.error){
+                        res.send({error:"Failed find prod in t_ExcD!<br>"+resultFindProdInExcD.error.error,
+                            errorMessage:"Не удалось найти товар в перемещении!<br>"+resultFindProdInExcD.error.message});
+                        return;
+                    }
+                    if(resultFindProdInExcD.items&&resultFindProdInExcD.items.length>0){
+                        var findedExcDData= resultFindProdInExcD.items[0];
+                        prodData["SrcPosID"]= findedExcDData["SrcPosID"];
+                        prodData["Qty"]= findedExcDData["Qty"]; prodData["NewQty"]= findedExcDData["NewQty"];
+                    }
+                    res.send({item:prodData});
+                });
+        });
+    });
+    app.post("/mobile/docExcDelivery/storeProdBarcodeWithNewQty",function(req,res){
+        var storingData= req.body||{}, docChID= storingData["docChID"], barcode= storingData["Barcode"];
+        r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
+            if(!resultFindProd||resultFindProd.error){
+                var sErr="Failed find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Не удалось найти товар по штрихкоду \""+barcode+"\"!";
+                sErr+="\n"+resultFindProd.error; sErrMsg+="\n"+resultFindProd.errorMessage;
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }else if(!resultFindProd.prodData){
+                var sErr="Cannot find r_Prods prod data by Barcode=\""+barcode+"\"!",
+                    sErrMsg="Товар по штрихкоду \""+barcode+"\" не найден!";
+                res.send({error:sErr,errorMessage:sErrMsg});
+                return;
+            }
+            var prodData= resultFindProd.prodData,
+                prodDataForStoreToExcD= {"ProdID":prodData["ProdID"],"UM":prodData["UM"], "Barcode":barcode,
+                    "NewQty":storingData["NewQty"], "SecID":req.dbUserParams["t_SecID"],"NewSecID":req.dbUserParams["t_SecID"]
+                };
+            t_ExcD.findAndStoreProdWNewQtyInExcD(req.dbUC,docChID,prodDataForStoreToExcD,function(result){ res.send(result); })
+        });
+    });
 };
