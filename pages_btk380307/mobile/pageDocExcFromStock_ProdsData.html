@@ -113,15 +113,15 @@
                 if(contentTables&&contentTables[3]) this.contentTableLHeaderDomEl= contentTables[3];
                 if(contentTables&&contentTables[4]) this.contentTableLDataDomEl= contentTables[4];
                 if(contentTables&&contentTables[5]) this.contentTableLFootDomEl= contentTables[5];
+                this.pageDocExcFromStockProdsDataBarCodeInput= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBarCodeInput');
                 if(this.isDocReadOnly()){ this.loadExcProdsData(); return; }
                 var self=this;
-                $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBtnBarcodeInputEnter')
-                        .on('click',function(){ self.barcodeInputEnter(); });
-                this.pageDocExcFromStockProdsDataBarCodeInput= $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBarCodeInput');
                 this.pageDocExcFromStockProdsDataBarCodeInput.on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter') self.barcodeInputEnter();
                     e.stopPropagation();
                 });
+                $$('#pageDocExcFromStockProdsDataToolbar #pageDocExcFromStockProdsDataBtnBarcodeInputEnter')
+                        .on('click',function(){ self.barcodeInputEnter(); });
                 this.loadExcProdsData();
             },
             pageAfterIn: function(e,page){
@@ -314,8 +314,8 @@
             barcodeInputEnter: function(scanBarcode){
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
-                var qty=1, self=this;
-                this.storeInputValueToExc(scanBarcode||this.pageDocExcFromStockProdsDataBarCodeInput.val(),qty,function(excProdData){
+                var self=this;
+                this.storeProdInputValueToExc(scanBarcode||this.pageDocExcFromStockProdsDataBarCodeInput.val(),function(excProdData){
                     app7.preloader.hide();
                     if(excProdData) self.updContentTableData(excProdData);
                     self.setInputProdBarcodeByState({enable:true,focus:false/*(!scanBarcode)*/,val:""});
@@ -324,7 +324,7 @@
             /**
              * callback = function(excProdData)
              */
-            storeInputValueToExc: function(inputValue,qty,callback){
+            storeProdInputValueToExc: function(inputValue,callback){
                 if(!inputValue||inputValue.toString().trim()==''){
                     var self=this;
                     if(!this.dialogAlertNoBarcode)
@@ -338,8 +338,7 @@
                 var docChID= this.docData["ChID"];
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/docExcFromStock/storeProdDataByCRUniInput',
-                            data:{docChID:docChID,value:inputValue,addQty:qty},
-                            userErrorMsg:"Не удалось добавить товар в перемещение!"},
+                            data:{docChID:docChID,value:inputValue}, userErrorMsg:"Не удалось добавить товар в перемещение!"},
                         function(result,errmsg){
                             app7.preloader.hide();
                             if(!result||!result.resultItem){ callback(null); return; }
@@ -361,7 +360,6 @@
                     this.contentTableDataBarcodes[prodData["Barcode"]]=
                             {"Barcode":prodData["Barcode"],"ProdID":prodData["ProdID"],"ProdName":prodData["ProdName"],"UM":prodData["UM"]};
                     this.setTotalInfo(prodData["Qty"]);
-                    return;
                 }else{//exists - update exists
                     var ctDataItem= this.contentTableDataItems[srcPosID], oldQty= ctDataItem["Qty"];
                     ctDataItem["Qty"]= qty;

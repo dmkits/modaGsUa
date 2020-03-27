@@ -288,9 +288,10 @@ module.exports.init = function(app){
         });
     };
     /**
-      * excDProdData = { Barcode, ProdID, UM, Qty }
-      */
-    t_ExcD.findAndStoreProdInExcD= function(dbUC,docChID,prodDataForStore,addQty,resultCallback){
+     * excDProdData = { Barcode, ProdID, UM, Qty }
+     * if no excDProdData.Qty - inserting Qty=1, or updating Qty=Qty+1
+     */
+    t_ExcD.findAndStoreProdWQtyInExcD= function(dbUC,docChID,prodDataForStore,resultCallback){
         if(!("Barcode" in prodDataForStore)&&!("SrcPosID" in prodDataForStore)){
             resultCallback({error:"Failed find prod in t_ExcD!<br> No ProdID or SrcPosID!",
                 errorMessage:"Не удалось найти товар в перемещении!<br> В данных нет кода товара или позиции товара!"});
@@ -327,9 +328,7 @@ module.exports.init = function(app){
                                 errorMessage:"Не удалось получить данные товара для добавления в перемещение!"});
                             return;
                         }
-                        if(prodDataQty==null) prodDataQty=0;
-                        if(addQty) prodDataQty+= parseFloat(addQty);
-                        storeData["Qty"]=prodDataQty; storeData["NewQty"]=0; storeData["PPID"]=0;
+                        storeData["Qty"]= (prodDataQty!=null)?prodDataQty:1; storeData["NewQty"]=0; storeData["PPID"]=0;
                         storeData["PriceCC_nt"]=0; storeData["Tax"]=0; storeData["PriceCC_wt"]=0;
                         storeData["SumCC_nt"]=0; storeData["TaxSum"]=0; storeData["SumCC_wt"]=0;
                         var getProdRemPPDataParams= { "DocCode":11021,
@@ -349,8 +348,7 @@ module.exports.init = function(app){
                         return;
                     }
                     //update exists position Qty by SrcPosID
-                    if(prodDataQty!=null) storeData["Qty"]=prodDataQty;
-                    if(addQty) storeData["Qty"]+= parseFloat(addQty);
+                    if(prodDataQty!=null) storeData["Qty"]=prodDataQty; else storeData["Qty"]++;
                     t_ExcD.storeExcDProdData(dbUC,docChID,storeData, storeExcDProdDataParams, function(resultStoreExcDProdData){
                         resultCallback(resultStoreExcDProdData);
                     });
@@ -368,13 +366,13 @@ module.exports.init = function(app){
                 "Barcode":resultFindProd.prodData["Barcode"],
                 "SecID":req.dbUserParams["t_SecID"],"NewSecID":req.dbUserParams["t_SecID"]
             };
-            t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,prodDataForStoreToExcD,storingData["addQty"],function (result){ res.send(result); })
+            t_ExcD.findAndStoreProdWQtyInExcD(req.dbUC,docChID,prodDataForStoreToExcD,function (result){ res.send(result); })
         });
     });
     app.post("/mobile/docExcFromStock/storeQtyData",function(req,res){
         var storingData= req.body||{}, docChID= storingData["docChID"],
-            excDData= {SrcPosID:storingData["SrcPosID"],"Qty":storingData["Qty"]};
-        t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,excDData,0,function(result){ res.send(result); });
+            prodDataForStoreToExcD= {SrcPosID:storingData["SrcPosID"],"Qty":storingData["Qty"]};
+        t_ExcD.findAndStoreProdWQtyInExcD(req.dbUC,docChID,prodDataForStoreToExcD,function(result){ res.send(result); });
     });
     app.get("/mobile/docExcFromStock/findProdDataByBarcode",function(req,res){
         var barcode= req.query["Barcode~"], docChID= req.query["docChID~"];
@@ -430,7 +428,7 @@ module.exports.init = function(app){
                 prodDataForStoreToExcD= {"ProdID":prodData["ProdID"],"UM":prodData["UM"], "Barcode":barcode,
                 "Qty":storingData["Qty"], "SecID":req.dbUserParams["t_SecID"],"NewSecID":req.dbUserParams["t_SecID"]
             };
-            t_ExcD.findAndStoreProdInExcD(req.dbUC,docChID,prodDataForStoreToExcD,0,function(result){ res.send(result); })
+            t_ExcD.findAndStoreProdWQtyInExcD(req.dbUC,docChID,prodDataForStoreToExcD,function(result){ res.send(result); })
         });
     });
 };
