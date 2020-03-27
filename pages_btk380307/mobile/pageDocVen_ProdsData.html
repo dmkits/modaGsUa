@@ -13,14 +13,14 @@
                 <span>Инвентаризация {{docData.DocID}} от {{docData.SDocDate}}</span><br>
                 <span style="font-size:14px;font-weight:normal">{{docData.StockName}}</span>
             </div>
-            <div class="subnavbar docHeaderTitle" id="pageDocVenProdsData-Toolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
+            <div class="subnavbar docHeaderTitle" id="pageDocVenProdsDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
                 <div class="subnavbar-inner">
                     <div class="row" style="padding-left:16px;padding-right:16px;">
-                        <input type="number" class="col" style="height:36px;min-width:200px;" id="pageDocVenProdsData-BarCodeInput" placeholder="ШК или код товара">
-                        <button class="col button button-outline button-round" id="pageDocVenProdsData-BtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>
+                        <input type="number" class="col" style="height:36px;min-width:200px;" id="pageDocVenProdsDataBarCodeInput" placeholder="ШК или код товара">
+                        <button class="col button button-outline button-round" id="pageDocVenProdsDataBtnBarcodeInputEnter" style="width:80px;margin-top:3px">ВВОД</button>
                         <div>
-                            <span id="pageDocVenProdsData-StateInfo" style="color:black;font-weight:bold;display:none"></span><br>
-                            <span id="pageDocVenProdsData-StateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
+                            <span id="pageDocVenProdsDataStateInfo" style="color:black;font-weight:bold;display:none"></span><br>
+                            <span id="pageDocVenProdsDataStateName" style="color:black;font-weight:bold;font-size:12px;display:none"></span>
                         </div>
                     </div>
                 </div>
@@ -39,7 +39,7 @@
             </tr>
             </thead>
             <tbody style="display:none">
-            <tr rowSelecting="true">
+            <tr rowSelecting="true" onCreated="contentTableTROnCreated">
                 <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="TSrcPosID"><div class="table-text"></div></td>
                 <td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
             </tr>
@@ -47,7 +47,7 @@
                 <td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
                 <!--<td width="50px" class="text-centered" dataItemName="UM"></td>-->
                 <td width="50px" class="tdQty" dataItemName="TQty"><div class="table-text"></div></td>
-                <td width="50px" class="tdNewQty" dataItemName="TNewQty" onClick="venDataTableTDNewQtyOnClick"><div class="table-text"></div></td>
+                <td width="50px" class="tdNewQty" dataItemName="TNewQty" onClick="contentTableTDNewQtyOnClick"><div class="table-text"></div></td>
             </tr>
             </tbody>
         </table>
@@ -82,7 +82,7 @@
                 <td class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
                 <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
                 <td width="50px" class="tdQty" dataItemName="TQty"><div class="table-text"></div></td>
-                <td width="50px" class="tdNewQty" dataItemName="TNewQty" onClick="venDataTableTDNewQtyOnClick"><div class="table-text"></div></td>
+                <td width="50px" class="tdNewQty" dataItemName="TNewQty" onClick="contentTableTDNewQtyOnClick"><div class="table-text"></div></td>
             </tr>
             </tbody>
         </table>
@@ -113,17 +113,17 @@
                 if(contentTables&&contentTables[3]) this.contentTableLHeaderDomEl= contentTables[3];
                 if(contentTables&&contentTables[4]) this.contentTableLDataDomEl= contentTables[4];
                 if(contentTables&&contentTables[5]) this.contentTableLFootDomEl= contentTables[5];
+                this.pageDocVenProdsDataBarCodeInput= $$('#pageDocVenProdsDataToolbar #pageDocVenProdsDataBarCodeInput');
+                this.pageDocVenProdsDataBtnBarcodeInputEnter= $$('#pageDocVenProdsDataToolbar #pageDocVenProdsDataBtnBarcodeInputEnter');
+                this.pageDocVenProdsDataStateInfo= $$('#pageDocVenProdsDataToolbar #pageDocVenProdsDataStateInfo');
+                this.pageDocVenProdsDataStateName= $$('#pageDocVenProdsDataToolbar #pageDocVenProdsDataStateName');
                 if(this.isDocReadOnly()){ this.loadVenProdsData(); return; }
                 var self=this;
-                this.pageDocVenProdsDataBarCodeInput= $$('#pageDocVenProdsData-Toolbar #pageDocVenProdsData-BarCodeInput');
                 this.pageDocVenProdsDataBarCodeInput.on('keypress',function(e){
                     if(e.keyCode==13||e.key=='Enter')self.barcodeInputEnter();
                     e.stopPropagation();
                 });
-                this.pageDocVenProdsDataBtnBarcodeInputEnter= $$('#pageDocVenProdsData-Toolbar #pageDocVenProdsData-BtnBarcodeInputEnter');
                 this.pageDocVenProdsDataBtnBarcodeInputEnter.on('click',function(){ self.barcodeInputEnter(); });
-                this.pageDocVenProdsDataStateInfo= $$('#pageDocVenProdsData-Toolbar #pageDocVenProdsData-StateInfo');
-                this.pageDocVenProdsDataStateName= $$('#pageDocVenProdsData-Toolbar #pageDocVenProdsData-StateName');
                 this.loadVenProdsData();
             },
             pageAfterIn: function(e,page){
@@ -176,10 +176,7 @@
                         if(self.dialogEditQty&&self.dialogEditQty.opened)return;//if show dialog edit qty
                         if(self.barcodeScannerWithEditQtyProcess)return;
                         if(barcode) barcode= barcode.replace("\n","");
-                        if(!self.barcodeScannerWithEditQtyStart){
-                            self.barcodeInputEnter(barcode);
-                            return;
-                        }
+                        if(!self.barcodeScannerWithEditQtyStart){ self.barcodeInputEnter(barcode); return; }
                         self.setInputProdBarcodeByState({disable:true});
                         self.barcodeScannerWithEditQtyStart= false;
                         self.barcodeScannerWithEditQtyProcess= true;
@@ -291,34 +288,34 @@
              * opts = { enable, disable, focus, val }
              */
             setInputProdBarcodeByState: function(opts){
+                var barcodeInput= this.pageDocVenProdsDataBarCodeInput, btnBarcodeInputEnter= this.pageDocVenProdsDataBtnBarcodeInputEnter,
+                        stateInfo= this.pageDocVenProdsDataStateInfo, stateName= this.pageDocVenProdsDataStateName;
                 if(this.isDocReadOnly()){
-                    this.pageDocVenProdsDataBarCodeInput.attr('disabled',1); this.pageDocVenProdsDataBtnBarcodeInputEnter.attr('disabled',1);
-                    this.pageDocVenProdsDataBarCodeInput.hide(); this.pageDocVenProdsDataBtnBarcodeInputEnter.hide();
-                    this.pageDocVenProdsDataStateInfo.show(); this.pageDocVenProdsDataStateInfo.text(this.docData["StateInfo"]);
-                    this.pageDocVenProdsDataStateName.show(); this.pageDocVenProdsDataStateName.text(this.docData["StateName"]);
-                    return;
+                    barcodeInput.attr('disabled',1); btnBarcodeInputEnter.attr('disabled',1);
+                    barcodeInput.hide(); btnBarcodeInputEnter.hide();
+                    stateInfo.show(); stateInfo.text(this.docData["StateInfo"]);
+                    stateName.show(); stateName.text("("+this.docData["StateName"]+")");
+                    return
                 }
                 if(!opts)return;
-                this.pageDocVenProdsDataBarCodeInput.show(); this.pageDocVenProdsDataBtnBarcodeInputEnter.show();
-                this.pageDocVenProdsDataStateInfo.hide(); this.pageDocVenProdsDataStateName.hide();
-                if(opts.val!==undefined) this.pageDocVenProdsDataBarCodeInput.val(opts.val);
+                barcodeInput.show(); btnBarcodeInputEnter.show();
+                stateInfo.hide(); stateName.hide();
+                if(opts.val!==undefined){ barcodeInput.val(opts.val); this.keypressBuffer= opts.val; }
                 if(opts.enable==true||opts.disable==false){
-                    this.pageDocVenProdsDataBarCodeInput.removeAttr('disabled'); this.pageDocVenProdsDataBtnBarcodeInputEnter.removeAttr('disabled');
-                    this.pageDocVenProdsDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
-                    if(opts.focus!=true) this.pageDocVenProdsDataBtnBarcodeInputEnter.focus();
+                    barcodeInput.removeAttr('disabled'); btnBarcodeInputEnter.removeAttr('disabled');
+                    if(opts.focus==true) barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }else if(opts.disable==true||opts.enable==false){
-                    this.pageDocVenProdsDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
-                    if(opts.focus!==true) this.pageDocVenProdsDataBtnBarcodeInputEnter.focus();
-                    this.pageDocVenProdsDataBarCodeInput.attr('disabled',1); this.pageDocVenProdsDataBtnBarcodeInputEnter.attr('disabled',1);
+                    if(opts.focus==true) barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
+                    barcodeInput.attr('disabled',1); btnBarcodeInputEnter.attr('disabled',1);
                 }else if(opts.focus==true){
-                    this.pageDocVenProdsDataBarCodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
+                    barcodeInput.focus();//!IT'S NECESSARILY CALL FOR LARGE DATATABLEBODY DID'NT SLOW DOWN!
                 }
             },
             barcodeInputEnter: function(scanBarcode){
                 this.setInputProdBarcodeByState({disable:true});
                 app7.preloader.show();
                 var self=this;
-                this.storeInputValueToVenProds(scanBarcode || this.pageDocVenProdsDataBarCodeInput.val(),function(venProdData){
+                this.storeProdInputValueToVen(scanBarcode || this.pageDocVenProdsDataBarCodeInput.val(),function(venProdData){
 //                    if(venProdData) self.updContentTableData(venProdData);
 //                    app7.preloader.hide();
 //                    self.setInputProdBarcodeByState({enable:true,focus:false/*(!scanBarcode)*/,val:""});
@@ -332,7 +329,7 @@
             /**
              * callback = function(prodData,err)
              */
-            storeInputValueToVenProds: function(inputValue,callback){
+            storeProdInputValueToVen: function(inputValue,callback){
                 if(!inputValue||inputValue.toString().trim()==''){
                     var self=this;
                     if(!this.dialogAlertNoBarcode)
@@ -343,9 +340,11 @@
                         this.dialogAlertNoBarcode.open();
                     return;
                 }
+                app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/docVen/storeProdDataByCRUniInput',data:{value:inputValue,docChID:this.docData["ChID"]},
                             userErrorMsg:"Не удалось добавить товар в инвентаризацию!"},
                         function(result,errmsg){
+                            app7.preloader.hide();
                             if(!result||!result.resultItem){ callback(null); return; }
                             callback(result.resultItem);
                         })
@@ -377,7 +376,7 @@
                     this.setScroll(ctTR);
                 }
             },
-            venDataTableTDNewQtyOnClick: function(e,ownerTD,contentTableDataItem,self){
+            contentTableTDNewQtyOnClick: function(e,ownerTD,contentTableDataItem,self){
                 if(this.isDocReadOnly())return;
                 var td=e.target;
                 this.showDialogEditQty(contentTableDataItem,/*ok/Enter*/function(inputValQty,actionSuccess,actionError){
@@ -439,20 +438,27 @@
                         { text:"ОТМЕНА",close:true,keyCodes:[27] } ]
                     }).open();
             },
+            /**
+             * callback = function(storeExcDResultItem,errMsg)
+             * if no result or no result.resultItem call callback(null,"<error message>")
+             * if has result and result.resultItem call callback(storeExcDResultItem=result.resultItem)
+             */
             storeNewQtyToVenProdData: function(tSrcPosID,prodID,tNewQty,callback){
-                var cInstance=this, docChID=this.docData["ChID"];
+                var docChID=this.docData["ChID"];
                 app7.preloader.show();
                 app7.srvPostRequestJSON({url:'/mobile/docVen/storeExistsPosProdData',data:{docChID:docChID,TSrcPosID:tSrcPosID,TNewQty:tNewQty},
                         userErrorMsg:"Не удалось сохранить данные на сервере!",showRequestErrorDialog:false},
                     function(result,errmsg){
                         app7.preloader.hide();// Hide Preloader
-                        if(!result||!result.resultItem){
-                            callback(null,(errmsg||"Не удалось сохранить данные на сервере!")); return;
-                        }
-                        var inventProdData=result.resultItem;
-                        callback(inventProdData);
+                        if(!result||!result.resultItem){ callback(null,(errmsg||"Не удалось сохранить данные на сервере!")); return; }
+                        callback(result.resultItem);
                     })
             },
+            /**
+             * callback = function(prodData)
+             * if no result or no result.item call callback(null)
+             * if has result and result.item call callback(prodData=result.itItem)
+             */
             findProdByBarcode: function(barcode,docChID,callback){
                 if(!barcode||barcode.toString().trim()=='')return;
                 app7.preloader.show();
@@ -461,12 +467,13 @@
                         function(result,errmsg){
                             app7.preloader.hide();
                             if(!result||!result.item){ callback(null); return; }
-                            var prodData=result.item;
-                            callback(prodData);
+                            callback(result.item);
                         });
             },
             /**
-             * callback = function(excProdData)
+             * callback = function(storeExcDResultItem,errMsg)
+             * if no result or no result.resultItem call callback(null,"<error message>")
+             * if has result and result.resultItem call callback(storeExcDResultItem=result.resultItem)
              */
             storeBarcodeWithQtyToVen: function(barcode,qty,callback){
                 if(!barcode||barcode.toString().trim()==''){
@@ -486,7 +493,7 @@
                         function(result,errmsg){
                             app7.preloader.hide();
                             if(!result||!result.resultItem){
-                                callback(null,"Не удалось добавить товар по штрихкоду в перемещение!"+((errmsg)?"<br>"+errmsg:""));
+                                callback(null,"Не удалось добавить товар по штрихкоду в инвентаризацию!"+((errmsg)?"<br>"+errmsg:""));
                                 return;
                             }
                             var excProdData=result.resultItem;
