@@ -263,7 +263,7 @@ function _getSelectItems(connection, params,resultCallback){                    
         }
     }
     if(!params.sourceName) params.sourceName="m";
-    if(params.sourceType=="query") querySource= "(\n"+querySource+"\n) "+params.sourceName;
+    if(params.sourceType=="query") querySource= "(   "+querySource+"   ) "+params.sourceName;
     if(!params.top) params.top=""; else params.top+=" ";
     var selectQuery=(params.sourceType=="function")
         ?"select dbo."+querySource+" "+params.sourceName
