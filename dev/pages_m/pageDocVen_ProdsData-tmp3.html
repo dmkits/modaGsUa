@@ -1,0 +1,149 @@
+<template>
+    <div class="page">
+        <div class="navbar">
+            <div class="navbar-inner sliding">
+                <div class="left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-back"></i>
+                        <span class="ios-only">Back</span>
+                    </a>
+                </div>
+                <div class="title">Virtual List without UL/LI</div>
+                <!--<div class="subnavbar">-->
+                    <!--<form data-search-container=".virtual-list" data-search-item="li" data-search-in=".item-title" class="searchbar searchbar-init">-->
+                        <!--<div class="searchbar-inner">-->
+                            <!--<div class="searchbar-input-wrap">-->
+                                <!--<input type="search" placeholder="Search"/>-->
+                                <!--<i class="searchbar-icon"></i>-->
+                                <!--<span class="input-clear-button"></span>-->
+                            <!--</div>-->
+                            <!--<span class="searchbar-disable-button">Cancel</span>-->
+                        <!--</div>-->
+                    <!--</form>-->
+                <!--</div>-->
+            </div>
+        </div>
+        <!--<div class="searchbar-backdrop"></div>-->
+        <div class="page-content">
+            <!--<div class="list simple-list searchbar-not-found">-->
+                <!--<ul>-->
+                    <!--<li>Nothing found</li>-->
+                <!--</ul>-->
+            <!--</div>-->
+            <!--<div class="list virtual-list" style="width:100%">-->
+                <!--&lt;!&ndash;<table width="100%" class="virtual-list-ul1">&ndash;&gt;-->
+                <!--&lt;!&ndash;</table>&ndash;&gt;-->
+                    <!--<table class="virtual-list-ul1" style="width:100%">-->
+                        <!--<tbody class="virtual-list-ul"></tbody>-->
+                    <!--</table>-->
+            <!--</div>-->
+
+            <!--<div class="list1 virtual-list1 media-list1" style="margin-top:78px;;width:100%">-->
+                <!--<ul width="100%" class="virtual-list-ul" style="display1:table-row-group">-->
+                <!--</ul>-->
+            <!--</div>-->
+            <table class="mobile-table-small-size" width="100%" style="position:fixed;left:0px;top:88px;z-index:100">
+                <thead>
+                <tr>
+                    <th width="40px">№<br>п/п</th>
+                    <th>Наименование товара<br>Код товара</th>
+                    <!--<th width="50px">Ед.<br>изм.</th>-->
+                    <th width="50px">Уч.<br>кол-во</th>
+                    <th width="50px">Факт.<br>кол-во</th>
+                </tr>
+                </thead>
+                <tbody class="list virtual-list media-list" style="display: block">
+                <tr>
+                    <td>
+
+                    </td>
+                </tr>
+                <!--<tr rowSelecting="true" onCreated="contentTableTROnCreated">-->
+                    <!--<td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="TSrcPosID"><div class="table-text"></div></td>-->
+                    <!--<td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>-->
+                <!--</tr>-->
+                <!--<tr rowSelecting="true" onCreated="contentTableTROnCreated">-->
+                    <!--<td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>-->
+                    <!--&lt;!&ndash;<td width="50px" class="text-centered" dataItemName="UM"></td>&ndash;&gt;-->
+                    <!--<td width="50px" class="tdQty" dataItemName="TQty"><div class="table-text"></div></td>-->
+                    <!--<td width="50px" class="tdNewQty" dataItemName="TNewQty" onClick="contentTableTDNewQtyOnClick"><div class="table-text"></div></td>-->
+                <!--</tr>-->
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</template>
+<script>
+    return {
+        data: function() {
+            return { items: null, hotels: null };
+        },
+        on: {
+            pageBeforeIn: function(e, page) {                                                               console.log('pageBeforeIn', page);
+            },
+            pageAfterIn: function(e, page) {
+                return;
+                var self = this;
+                var items = [];
+                for (var i = 1; i <= 10000; i++){ items.push({ title: 'Item '+i, subtitle: 'Subtitle '+i }); }
+                self.virtualList = app7.virtualList.create({
+                    // List Element
+                    el: self.$el.find('.virtual-list'),
+                    createUl: true,
+                    ul: self.$el.find('.virtual-list-ul'),
+                    cache: true,
+                    // Pass array with items
+                    items: items,//items: app.data.items,
+                    // Custom search function for searchbar
+                    searchAll: function (query, items) {
+                        var found = [];
+//                        for (var i = 0; i < items.length; i++) {
+//                            if (items[i].name.toLowerCase().indexOf(query.toLowerCase()) >= 0 || query.trim() === '') found.push(i);
+//                        }
+                        return found; //return array with mathced indexes
+                    },
+                    // List item Template7 template
+                    itemTemplate:
+                    '<li style="width:100%;height:24px">'+
+//                    '<div>'+
+//                    '<div ref-hotel="{{../id}}" class="hotel-card lazy demo-lazy three-images" data-background="{{image}}" style="background:#000;background-size: cover; height: 240px;margin-left:5px;margin-right:5px;margin-top:8px;margin-bottom:8px;border-radius: 5px;">{{name}} / {{star}}</div>'+
+                    '<tr>'+
+                    '<td style="display:inline-block;width:150px;border:solid 1px;border-top:none">{{title}}</td>'+
+//                    '<div style="display:inline-block;width:80px;border:solid 1px;border-left:none;border-top:none">{{subtitle}}</div>'+
+                    '</tr>'+
+//                    '</div>'+
+                    '</li>',
+//                    '<li>'+
+//                    '<div ref-hotel="{{../id}}" class="hotel-card lazy demo-lazy three-images" data-background="{{image}}" style="background:#000;background-size: cover; height: 240px;margin-left:5px;margin-right:5px;margin-top:8px;margin-bottom:8px;border-radius: 5px;">{{name}} / {{star}}</div>'+
+//                    '<div style="height: 24px;">{{title}} {{subtitle}}</div>'+
+//                    '<tr>'+
+//                    '<td>'+
+//                    '<div style="height: 24px;">{{title}} {{subtitle}}</div>'+
+//                    '</td>'+
+//                    '</tr>'+
+//                    '</li>',
+                    // Item height
+                    height: 25
+                });
+            },
+
+            pageBeforeRemove: function() {
+                var self = this;
+                self.virtualList.destroy();
+            },
+            pageInit: function() {
+                var self = this;
+//                $(document).on("click", ".hotel-card", function(e) {
+//                    var _ref_hotel = $(this).attr('ref-hotel');
+//                    app.views.main.router.navigate("/hotel-details/" + _ref_hotel + "/", {
+//                        reloadCurrent: false,
+//                        pushState: false,
+//                        context: {}
+//                    });
+//                });
+
+            }
+        }
+    }
+</script>

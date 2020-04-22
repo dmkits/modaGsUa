@@ -172,13 +172,12 @@ module.exports.init = function(app){
                             errorMessage:"Не удалось получить данные товара для добавления в инвентаризацию!"});
                         return;
                     }
-                    storeData["TQty"]=0; storeData["TNewQty"]=1;
+                    storeData["TQty"]=0; storeData["TNewQty"]=0;
                     storeData["TSumCC_nt"]=0; storeData["TTaxSum"]=0; storeData["TSumCC_wt"]=0;
                     storeData["TNewSumCC_nt"]=0; storeData["TNewTaxSum"]=0; storeData["TNewSumCC_wt"]=0;
                     storeData["Norma1"]=0; storeData["HandCorrected"]=0;
-                }else{//update by TSrcPosID
-                    if(tNewQty===undefined) storeData["TNewQty"]++; else storeData["TNewQty"]=tNewQty;
                 }
+                if(tNewQty==null) storeData["TNewQty"]++; else storeData["TNewQty"]=tNewQty;
                 storeData["ChID"]=docChID;
                 t_VenA.storeTableDataItem(dbUC,{tableColumns:tVenATableColumns,idFields:["ChID","TSrcPosID"],storeTableData:storeData,
                         calcNewIDValue:function(params,callback){
@@ -255,7 +254,7 @@ module.exports.init = function(app){
                 });
         });
     });
-    app.post("/mobile/docVen/storeProdBarcodeWithQty",function(req,res){
+    app.post("/mobile/docVen/storeProdBarcodeWithNewQty",function(req,res){
         var storingData= req.body||{}, docChID= storingData["docChID"], barcode= storingData["Barcode"];
         r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
             if(!resultFindProd||resultFindProd.error){

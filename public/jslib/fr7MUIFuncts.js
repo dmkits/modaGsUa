@@ -6,6 +6,8 @@ var framework7MUIFunctions= {
         app7.innerPageUpdateTotalTable= this.innerPageUpdateTotalTable;
         app7.innerPageFillTableData= this.innerPageFillTableData;
         app7.innerPageFillTableDataProgress= this.innerPageFillTableDataProgress;
+        app7.setDocumentKeyActions= this.setDocumentKeyActions;
+        app7.getVListTemplate= this.getVListTemplate;
     },
     /**
      * params = { method, url, data/conditions, showRequestErrorDialog, errorDialogMsg }
@@ -288,5 +290,88 @@ var framework7MUIFunctions= {
         setTimeout(function(){
             app7.innerPageFillTableDataProgress(self, i,contentTableData, params, finishedCallback)
         },timeout)
+    },
+    /**
+     * p = params = { thisEl, isNoAction, dialog, inputEl, keyInputEl, keyEnterAction, barcodeScannerAction }
+     *      p.isNoAction = function(), return true/false
+     *      p.keyEnterAction = function(inputValue)
+     *      p.barcodeScannerAction= function(barcode,EndAction), EndAction= function()
+     */
+    setDocumentKeyActions: function(app7,p){
+        if(!p)return;
+        document.onkeypress= function(e){
+            if(p.thisEl!=mainView.router.currentPageEl)return;
+            if(p.isNoAction())return;
+            if(app7.srvRequestJSONDialogErr)return;//if error dialog show and don't close
+            if(p.dialog&&p.dialog.opened)return;//if show dialog
+            if(!e||e.key==null)return;
+            if(e.key=="Enter"){
+                p.keyEnterAction(p.inputEl.val());
+                p.inputEl.val("");
+            }else if(e.key.length==1){
+                p.inputEl.val(p.inputEl.val()+e.key);
+            }
+        };
+        document.onkeydown= function(e){
+            if(p.thisEl!=mainView.router.currentPageEl)return;
+            if(p.isNoAction())return;
+            if(p.dialog&&p.dialog.opened)return;//if show dialog
+            if(!e||e.key==null)return;
+            if(e.key=="Escape"){
+                p.inputEl.val("");
+            }else if(document.device&&document.device.barcodeScannerReaderAction&&e.keyCode==0&&!document.device.barcodeScannerStart){
+                p.barcodeScannerWithEditQtyStart= true;
+                document.device.barcodeScannerRequestScan();
+                document.device.barcodeScannerStart= true;
+            }
+        };
+        document.onkeyup= function(e){
+            if(p.thisEl!=mainView.router.currentPageEl)return;
+            if(p.isNoAction())return;
+            if(p.dialog&&p.dialog.opened)return;//if show dialog
+            if(!e||e.key==null)return;
+            if(e.key=="Escape"){
+                p.inputEl.val("");
+            }else if(document.device&&document.device.barcodeScannerStart)
+                document.device.barcodeScannerStart= false;
+        };
+        if(document.device&&document.device.barcodeScannerReaderAction){
+            document.device.barcodeScannerReaderAction= function(barcode){
+                if(p.thisEl!=mainView.router.currentPageEl)return;
+                if(p.isNoAction())return;
+                if(app7.srvRequestJSONDialogErr)return;//if error dialog show and don't close
+                if(p.dialog&&p.dialog.opened)return;//if show dialog
+                if(p.barcodeScannerWithEditQtyProcess)return;
+                if(barcode) barcode= barcode.replace("\n","");
+                if(!p.barcodeScannerWithEditQtyStart){ p.keyEnterAction(barcode); return; }
+                if(!p.barcodeScannerAction)return;
+                p.barcodeScannerWithEditQtyStart= false;
+                p.barcodeScannerWithEditQtyProcess= true;
+                p.barcodeScannerAction(barcode,/*END action*/function(){ p.barcodeScannerWithEditQtyProcess= false; });
+            }
+        }
+    },
+    getVListTemplate: function(vListTemplateElNode){
+        var vListTemplateEl= vListTemplateElNode.cloneNode(true);
+        vListTemplateEl.style["display"]= "block";
+        var fillElTText= function(el){
+            if(!el) return;
+            var dataItemName= el.getAttribute("dataItemName"), dataItemIDName= el.getAttribute("dataItemIDName");
+            if(dataItemName!=null) el.innerText= "{{"+dataItemName+"}}";
+            if(dataItemIDName!=null) el.setAttribute("dataItemIDVal", "{{"+dataItemIDName+"}}");
+        };
+        var fillElsTTextProcess= function(el){
+            if(!el)return;
+            fillElTText(el);
+            for(cel of el.childNodes){
+                if(!cel||cel.nodeType==3/*text*/)continue;
+                if(cel.tagName=="TD"&&(cel.width||cel.style.width)){
+                    cel.style["max-width"]=cel.width; cel.style["min-width"]=cel.width;
+                }
+                fillElsTTextProcess(cel);
+            }
+        };
+        fillElsTTextProcess(vListTemplateEl);
+        return vListTemplateEl.outerHTML;
     }
 };
