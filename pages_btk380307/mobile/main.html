@@ -20,20 +20,17 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <link rel="shortcut icon" href="/img/logoGS-red-min-app.png">
-    <script src="/jslib/framework7/js/framework7.min.js"></script>
+    <title>GABIS Mobile</title>
     <link rel="stylesheet" href="/jslib/framework7/css/framework7.min.css">
     <link rel="stylesheet" type="text/css" href="/cssm/mobileIndex.css">
     <link rel="stylesheet" type="text/css" href="/cssm/mobileIcons.css">
     <link rel="stylesheet" type="text/css" href="/cssm/mobileApp.css">
-    <script src="/jslib/fr7MUIFuncts.js"></script>
-    <script src="/jslib/moment/moment.js"></script>
-    <title>GABIS Mobile</title>
 </head>
 <body>
 <div id="app">
     <div class="appbar">
         <div class="appbar-inner">
-            <div style="display:table;width:100%;min-height:25px;text-align:center">
+            <div style="display:table;width:100%;min-height:26px;text-align:center">
                 <span id="appbar-user" style="display:table-cell;font-size:18px;font-weight:bold;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
                 <span id="appbar-modeMsg" style="display:table-cell;color:red;font-size:18px;font-weight:bold;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
             </div>
@@ -43,6 +40,9 @@
         <div class="page" data-name="home"></div>
     </div>
 </div>
+<script src="/jslib/framework7/js/framework7.min.js"></script>
+<script src="/jslib/fr7MUIFuncts.js"></script>
+<script src="/jslib/moment/moment.js"></script>
 <script>
     var $$=Dom7,
             baseRoutes= [//-- App routes --
@@ -51,7 +51,7 @@
                 { path:'(.*)', url:'/mobile/actionError' }// Default route (404 page). MUST BE THE LAST
             ],
             app7= new Framework7({// Framework7 App main instance
-                id:'io.framework7.mobile.gabis', version:"3.3.0",
+                id:'io.framework7.mobile.gabis', version:"3.3.1",
                 root: '#app', // app7 root element
                 theme: 'ios', // 'auto' - Automatic theme detection, Can be md, ios or aurora
                 routes: baseRoutes,
