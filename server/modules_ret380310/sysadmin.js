@@ -191,15 +191,9 @@ module.exports.init = function(app){
                 res.send(outData);
                 return;
             }
-            if(tableData.error){
-                outData.error = tableData.error;
-                res.send(outData);
-                return;
-            }
+            if(tableData.error){ outData.error= tableData.error; res.send(outData); return; }
             var arr=dataModel.getModelChanges(), logsData= common.sortArray(arr);
-            matchLogData(logsData, outData, 0, function(outData){
-                res.send(outData);
-            });
+            matchLogData(logsData, outData, 0, function(outData){ res.send(outData); });
         });
     });
     /**
@@ -237,20 +231,12 @@ module.exports.init = function(app){
            // if (result.error && (result.errorCode == "ER_NO_SUCH_TABLE")) {
             if (result.error&&  result.error.indexOf("Invalid object name")>=0) {  log.info("checkIfChangeLogExists  tableData.error:",result.error);
                 database.executeQuery(database.getDBSystemConnection(),CHANGE_VAL,function (err){
-                    if(err){
-                        outData.error = err.message;
-                        res.send(outData);
-                        return;
-                    }
+                    if(err){ outData.error= err.message; res.send(outData); return; }
                     insertToChangeLog({"ID":modelChange.changeID,
                             "CHANGE_DATETIME":modelChange.changeDatetime, "CHANGE_OBJ":modelChange.changeObj,
                             "CHANGE_VAL":modelChange.changeVal, "APPLIED_DATETIME":appliedDatetime},
                         function(result){
-                            if(result.error){
-                                outData.error = result.error;
-                                res.send(outData);
-                                return;
-                            }
+                            if(result.error){ outData.error= result.error; res.send(outData); return; }
                             outData.resultItem = result.resultItem;
                             outData.updateCount = result.updateCount;
                             outData.resultItem.CHANGE_MSG='applied';
@@ -259,28 +245,16 @@ module.exports.init = function(app){
                 });
                 return;
             }
-            if(result.error){
-                outData.error = result.error;
-                res.send(outData);
-                return;
-            }
+            if(result.error){ outData.error= result.error; res.send(outData); return; }
             getChangeLogItemByID(ID, function(result){
-                if(result.error){
-                    outData.error = result.error;
-                    res.send(outData);
-                    return;
-                }
+                if(result.error){ outData.error= result.error; res.send(outData); return; }
                 if(result.item){
                     outData.error = "Change log with ID is already exists";
                     res.send(outData);
                     return;
                 }
                 database.executeQuery(database.getDBSystemConnection(),CHANGE_VAL, function(err){
-                    if(err){
-                        outData.error = err.message;
-                        res.send(outData);
-                        return;
-                    }
+                    if(err){ outData.error= err.message; res.send(outData); return; }
                     insertToChangeLog({"ID":modelChange.changeID,
                             "CHANGE_DATETIME":modelChange.changeDatetime, "CHANGE_OBJ":modelChange.changeObj,
                             "CHANGE_VAL":modelChange.changeVal, "APPLIED_DATETIME":appliedDatetime},
@@ -321,6 +295,7 @@ module.exports.init = function(app){
             {data: "ShiftPostName", name: "User role", width: 120,
                 dataSource:"r_Uni", sourceField:"RefName", linkCondition:"r_Uni.RefTypeID=10606 and r_Uni.RefID=r_Emps.ShiftPostID",
                 type: "combobox", sourceURL:"/sysadmin/logins/getDataForUserRoleCombobox"},
+            {data:"ShiftPostNotes", name:"User role alias", width:100, dataSource:"r_Uni", sourceField:"Notes", type:"text", readOnly:true, visible:false },
             {data: "suname", name: "DB User Name", width: 250, type: "text", readOnly:true, visible:false,
                 childDataSource:"sysusers", sourceField:"name",
                 childLinkCondition:"sysusers.islogin=1 and (sysusers.name=r_Users.UserName or (sysusers.Name='dbo' and r_Users.UserName='sa'))"},
@@ -338,18 +313,14 @@ module.exports.init = function(app){
     app.get('/sysadmin/logins/getLoginsDataForTable',function(req,res){
         r_Users.getDataForTable(req.dbUC,{tableColumns:loginsTableColumns, identifier:loginsTableColumns[0].data,
                 conditions:{"1=1":null}, order:"UserID"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get('/sysadmin/logins/getDataForUserRoleCombobox', function(req,res){  //ShiftPostID
         r_Uni.getDataItemsForTableCombobox(req.dbUC,{ comboboxFields:{"ShiftPostName":"RefName","ShiftPostID":"RefID" },
                 source:"r_Uni",fields:["RefID","RefName"],
                 order:"RefName",
                 conditions:{"RefTypeID=":10606}},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     /**
      * callback = function(result,login,lpass,suname)
@@ -537,40 +508,21 @@ module.exports.init = function(app){
     app.post("/sysadmin/logins/storeLoginsTableData",function(req,res){
         var tLoginData=req.body;
         r_Users.checkLoginPassDBUser(req.dbUC,tLoginData,function(result,login,lpass,suname){
-            if(result.error){
-                res.send(result);
-                return;
-            }
+            if(result.error){ res.send(result); return; }
             var storeLoginResult={};
             r_Users.createLoginIfNotExists(req.dbUC,tLoginData,login,lpass,suname,storeLoginResult,function(result){
-                if(result.error){
-                    res.send(result);
-                    return;
-                }
+                if(result.error){ res.send(result); return; }
                 r_Users.createDBUserIfNotExists(req.dbUC,tLoginData,login,lpass,suname,result,function(result){
-                    if(result.error){
-                        res.send(result);
-                        return;
-                    }
+                    if(result.error){ res.send(result); return; }
                     r_Users.updateLoginDBUser(req.dbUC,tLoginData,login,lpass,suname,result,function(result){
-                        if(result.error){
-                            res.send(result);
-                            return;
-                        }
+                        if(result.error){ res.send(result); return; }
                         r_Users.updateEmpData(req.dbUC,tLoginData,login,lpass,suname,result,function(result){
-                            if(result.error){
-                                res.send(result);
-                                return;
-                            }
+                            if(result.error){ res.send(result); return; }
                             if(lpass==userVisiblePass){
-                                r_Users.getLoginData(req.dbUC,tLoginData,result,function(result){
-                                    res.send(result);
-                                });
+                                r_Users.getLoginData(req.dbUC,tLoginData,result,function(result){ res.send(result); });
                                 return;
                             }
-                            ir_UserData.updateUserData(req.dbUC,tLoginData,login,lpass,suname,result,function(result){
-                                res.send(result);
-                            });
+                            ir_UserData.updateUserData(req.dbUC,tLoginData,login,lpass,suname,result,function(result){ res.send(result); });
                         });
                     });
                 });

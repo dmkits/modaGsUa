@@ -765,6 +765,7 @@ function _getTableColumnsDataForHTable(tableColumns){
         if(tableColData.useFilter!==undefined) thTableColumnsItem.useFilter=tableColData.useFilter;
         if(tableColData.readOnly!==undefined) thTableColumnsItem.readOnly=tableColData.readOnly;
         if(tableColData.visible!==undefined) thTableColumnsItem.visible=tableColData.visible;
+        if(tableColData.doVisible!==undefined) thTableColumnsItem.doVisible=tableColData.doVisible;
         if(tableColData.format!==undefined) thTableColumnsItem.format=tableColData.format;
         //if(tableColData.trimWhitespace!==undefined) thTableColumnsItem.trimWhitespace=tableColData.trimWhitespace;
         //else thTableColumnsItem.trimWhitespace=false;

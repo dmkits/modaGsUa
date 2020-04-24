@@ -57,21 +57,31 @@ define(["dojo/_base/declare", "dijit/layout/ContentPane","dojox/widget/Standby",
                 this.createHandsonTable();
             },
             setDataColumns: function(newDataColumns){
-                if(!newDataColumns||newDataColumns.length==0){ this.htColumns=[]; return; }
+                if(!newDataColumns||newDataColumns.length==0){ this.htColumns=[]; this.colWidths=[]; return; }
                 var colWidths= [];
                 for(var c=0;c<newDataColumns.length;c++){
                     var colData= newDataColumns[c], colRealWidth= this.handsonTable.getColWidth(c);
                     if(!colData)continue;
-                    if(colData.defWidth===undefined)colData.defWidth= colData.width;
+                    if(colData.defWidth==null)colData.defWidth= colData.width;
+                    if(newDataColumns!=this.htColumns&&this.htColumns&&this.htColumns.length>0){
+                        var equalColData= this.htColumns.find(function(elem,ind,arr){ return elem&&(elem.data+elem.name)==(colData.data+colData.name); });
+                        if(equalColData){
+                            colData.visible= equalColData.visible;
+                            colData.width= equalColData.width; colData.vwidth= equalColData.vwidth;
+                        }
+                    }
+                    if(newDataColumns!=this.htColumns&&this.htColumns&&colData.doVisible!=null) colData.visible= colData.doVisible;
                     if(colData.visible===false){
-                        if(colRealWidth>0.1) colData.vwidth= colRealWidth; else if(colData.width>0.1) colData.vwidth= colData.width;
+                        if(!this.colWidths&&colData.width>0.1) colData.vwidth= colData.width;
+                        else if(!this.colWidths&&colData.defWidth) colData.vwidth= colData.defWidth;
+                        else if(colData.vwidth==null) colData.vwidth= colRealWidth;
                         colData.width=0.1;
                     }else if(colData.visible!==false&&colData.width==0.1){
                         if(colData.vwidth!==undefined) colData.width= colData.vwidth; else colData.width= colRealWidth;
-                        colData.vwidth= undefined;
+                        colData.vwidth= null;
                     }else if(colData.visible!==false&&this.colWidths){
                         colData.width= colRealWidth;
-                        colData.vwidth= undefined;
+                        colData.vwidth= null;
                     }
                     colWidths[c]= colData.width;
                 }

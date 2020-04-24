@@ -83,7 +83,7 @@ module.exports.init = function(app){
         }
         for(var i=0; i<tProdsSalesTableColumns.length; i++){
             var tColData=tProdsSalesTableColumns[i];
-            if(tColData.data=="CRName"){ tColData.visible=allItems; break; }
+            if(tColData.data=="CRName"){ tColData.doVisible=allItems; break; }
         }
         t_SaleD.getDataForTable(req.dbUC,{tableColumns:tProdsSalesTableColumns, identifier:tProdsSalesTableColumns[0].data,
                 conditions:conditions, order:"OurID, StockID, SrcPosID"},
@@ -139,7 +139,7 @@ module.exports.init = function(app){
         for(var i=0; i<tProdsSalesCRRetsTableColumns.length; i++){
             var tColData=tProdsSalesCRRetsTableColumns[i];
             if(tColData.data=="CRName"){
-                tColData.visible=allItems; break;
+                tColData.doVisible=allItems; break;
             }
         }
         querySalesCRRets.getDataForTable(req.dbUC,

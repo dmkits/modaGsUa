@@ -90,7 +90,7 @@ module.exports.init = function(app){
         }
         for(var i=0; i<prodsWAllBarcodesTableColumns.length; i++){
             var tColData=prodsWAllBarcodesTableColumns[i];
-            if(tColData.data=="PCatName"){ tColData.visible=allItems; break; }
+            if(tColData.data=="PCatName"){ tColData.doVisible=allItems; break; }
         }
         r_Prods.getDataForTable(req.dbUC,{tableColumns:prodsWAllBarcodesTableColumns, identifier:prodsWAllBarcodesTableColumns[0].data,
                 conditions:conditions, order:"r_Prods.ProdID,r_ProdMQ.UM,r_ProdMQ.Barcode"},
