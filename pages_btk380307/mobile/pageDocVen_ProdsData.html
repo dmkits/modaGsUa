@@ -167,7 +167,7 @@
                                         return;
                                     }
                                     var srcPosID= prodData["TSrcPosID"];
-                                    if(srcPosID!=null) self.findAndSelContentVTableDataRow(srcPosID);
+                                    if(srcPosID!=null) self.selContentVTableDataRow(srcPosID,{setScroll:true});
                                     var qty= prodData["TQty"], newQty= prodData["TNewQty"];
                                     if(qty==null) qty=0; if(newQty==null) newQty=0;
                                     self.showDialogEditQty({"ProdName":prodData["ProdName"],"TQty":qty,"TNewQty":newQty},
@@ -328,30 +328,27 @@
                     this.setTotalInfo(qty-oldQty,newQty-oldNewQty);
                 }
                 if(cvtIndex==null)return;
-                this.contentTableVirtList.scrollToItem(cvtIndex);
-                this.selContentVTableDataRow(srcPosID,{setScroll:true});
+                this.selContentVTableDataRow(srcPosID,{cvtIndex:cvtIndex,setScroll:true});
             },
             /**
-             * params = { setScroll:true/false }
+             * params = { cvtIndex, setScroll:true/false }
              */
             selContentVTableDataRow: function(srcPosID,params){
+                if(params&&params.setScroll){
+                    var cvtIndex= (params&&params.cvtIndex!=null)?params.cvtIndex:this.contentTableDataIndexByTSrcPosID[srcPosID];
+                    if(cvtIndex!=null) this.contentTableVirtList.scrollToItem(cvtIndex);                                            console.log("cvtIndex",cvtIndex);
+                }
                 var cvtIndexELdom= this.contentTableVirtList.$el.find('table[dataitemidval="'+srcPosID+'"]');
                 if(!cvtIndexELdom)return;
                 this.contentTableVirtListSelItems= this.contentTableVirtListSelItems||[];
                 for(var i=0; i<this.contentTableVirtListSelItems.length;i++) this.contentTableVirtListSelItems[i].classList.remove('mobile-table-selectedRow');
                 this.contentTableVirtListSelItems= [];
                 for(var i=0; i<cvtIndexELdom.length;i++){
-                    var cvtIndexEL= cvtIndexELdom[i];
+                    var cvtIndexEL= cvtIndexELdom[i];                                            console.log("cvtIndexEL",cvtIndexEL,cvtIndexEL.clientHeight);//console.dir(cvtIndexEL);
                     cvtIndexEL.classList.add('mobile-table-selectedRow');
                     this.contentTableVirtListSelItems.push(cvtIndexEL);
-                    if(params&&params.setScroll) this.setScroll(cvtIndexEL);
+                    if(params&&params.setScroll&&cvtIndexEL.clientHeight) this.setScroll(cvtIndexEL);
                 }
-            },
-            findAndSelContentVTableDataRow: function(srcPosID){
-                var cvtIndex= this.contentTableDataIndexByTSrcPosID[srcPosID];
-                if(cvtIndex==null)return;
-                this.contentTableVirtList.scrollToItem(cvtIndex);
-                this.selContentVTableDataRow(srcPosID,{setScroll:true});
             },
             contentTableTDNewQtyOnClick: function(e,ownerTD,contentTableDataItem,self){
                 if(this.isDocReadOnly())return;
