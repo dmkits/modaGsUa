@@ -1,7 +1,7 @@
 var startDateTime= new Date(), startTime= startDateTime.getTime();                                  console.log('STARTING at',startDateTime );//test
 try{
     var ENV= process.env.NODE_ENV;                                                                  if(ENV=="development") console.log("START IN DEVELOPMENT MODE");
-    var common= require('./common'), appStartupParams= common.getStartupParams();                   console.log('Started with startup params:',appStartupParams);//test
+    var systemFuncs= require('./systemFuncs'), appStartupParams= systemFuncs.getStartupParams();    console.log('Started with startup params:',appStartupParams);//test
     var logDebug= (ENV=='development' || (appStartupParams && appStartupParams.logDebug));          if(logDebug) console.log("DEBUG LOG ON");
     module.exports.logDebug = logDebug;
     var path= require('path'), fs= require('fs'), dateformat= require('dateformat'),
@@ -56,7 +56,7 @@ global.sysConfigPath= path.join(__dirname,'/../','');
 var sysConfig=null;
 function loadSysConfig(){
     try{
-        sysConfig= common.loadConfig(appStartupParams.mode+'.cfg');
+        sysConfig= systemFuncs.loadConfig(appStartupParams.mode+'.cfg');
     }catch(e){
         sysConfig= null;
         log.error("Failed to load system configuration! Reason:",e.message);
@@ -69,7 +69,7 @@ module.exports.getSysConfig= function(){ return sysConfig };
 module.exports.setSysConfig= function(newSysConfig){ sysConfig= newSysConfig; };
 
 var getAppConfigName= function(){ return (sysConfig&&sysConfig.configName)?sysConfig.configName:'config';},
-    appConfig= JSON.parse(common.getJSONWithoutComments(fs.readFileSync('./'+getAppConfigName()+'.json','utf-8')));
+    appConfig= JSON.parse(systemFuncs.getJSONWithoutComments(fs.readFileSync('./'+getAppConfigName()+'.json','utf-8')));
 module.exports.getAppConfigName= getAppConfigName;
 module.exports.getAppConfig= function(){ return appConfig; };
 module.exports.getConfigAppMenu= function(){ return (appConfig&&appConfig.appMenu)?appConfig.appMenu:null; };

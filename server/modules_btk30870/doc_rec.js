@@ -1,12 +1,12 @@
-var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
-    dateFormat = require('dateformat');
+var dataModel= require(appDataModelPath), database= require("../databaseMSSQL"),
+    dateFormat= require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
 var z_Sys= require(appDataModelPath+"z_Sys"),
     r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
     r_Secs= require(appDataModelPath+"r_Secs"),
     //r_States= require(appDataModelPath+"r_States"),
-    r_Prods=require(appDataModelPath+"r_Prods");
+    r_Prods= require(appDataModelPath+"r_Prods");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([t_Rec,t_RecD,z_Sys,r_Ours,r_Stocks,r_Comps,r_Currs,r_Secs,/*r_States,*/r_Prods], errs,

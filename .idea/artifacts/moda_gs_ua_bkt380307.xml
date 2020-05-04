@@ -20,7 +20,7 @@
           <element id="dir-copy" path="$PROJECT_DIR$/server/modules_btk380307" />
         </element>
         <element id="file-copy" path="$PROJECT_DIR$/server/access.js" />
-        <element id="file-copy" path="$PROJECT_DIR$/server/common.js" />
+        <element id="file-copy" path="$PROJECT_DIR$/server/systemFuncs.js" />
         <element id="file-copy" path="$PROJECT_DIR$/server/databaseMSSQL.js" />
         <element id="file-copy" path="$PROJECT_DIR$/server/server.js" />
       </element>

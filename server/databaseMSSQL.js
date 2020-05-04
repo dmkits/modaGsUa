@@ -1,5 +1,5 @@
 var mssql= require('mssql');
-var common= require('./common'), server= require('./server'), log= server.log;
+var server= require('./server'), log= server.log;
 
 /**
  * connections= { uuid: {user:<user>, connection: <connection> } }

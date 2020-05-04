@@ -2,7 +2,7 @@ var path= require('path'), fs= require('fs');
 var server= require("./server"), log= server.log,
     appStartupParams= server.getAppStartupParams(), getSysConfig= server.getSysConfig,
     getAppConfigName= server.getAppConfigName, getAppConfig= server.getAppConfig,
-    database= require("./databaseMSSQL"), common= require("./common"),
+    database= require("./databaseMSSQL"), systemFuncs= require("./systemFuncs"),
     appModules= require(appModulesPath), sysadmin= require(appModulesPath+"sysadmin");
 
 var sysadminsList={};
@@ -243,7 +243,7 @@ module.exports= function(app){
             res.send({ error:{error:"Authorisation failed! No login or password!",userMessage:"Пожалуйста введите имя и пароль."} });
             return;
         }
-        var uuid = common.getUIDNumber();
+        var uuid = systemFuncs.getUIDNumber();
         database.createNewUserDBConnection({uuid:uuid,login:userName,password:userPswrd}, function(err,result){
             var isSysadmin=false, sysConfig= getSysConfig(),
                 appMode= (appStartupParams)?appStartupParams.mode:null,

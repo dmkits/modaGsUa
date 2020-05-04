@@ -1,6 +1,6 @@
 var server= require("../server"), log= server.log;
-var dateFormat = require('dateformat'), path=require('path'), moment=require('moment');
-var common=require("../common");
+var dateFormat = require('dateformat'), path=require('path');
+var systemFuncs= require("../systemFuncs");
 var database= require("../databaseMSSQL");
 
 var dataModelChanges= [], validatedDataModels={};
@@ -978,7 +978,7 @@ function _insDataItem(connection, params, resultCallback){
  * callback = function(result,params), result= { data, error,errorMessage }
  */
 function _calcNewIDValueOnInsDataItemWithNewID(params,callback){
-    if(params.insData&&params.idFieldName) params.insData[params.idFieldName]=common.getUIDNumber();
+    if(params.insData&&params.idFieldName) params.insData[params.idFieldName]=systemFuncs.getUIDNumber();
     callback({data:params.insData},params);
 }
 /**
@@ -1349,7 +1349,7 @@ function _updTableDataItem(connection, params, resultCallback){
  * callback = function(params)
  */
 function _calcNewIDValueOnStoreTableDataItem(params, callback){
-    if(params.storeTableData&&params.idFieldName) params.storeTableData[params.idFieldName]=common.getUIDNumber();
+    if(params.storeTableData&&params.idFieldName) params.storeTableData[params.idFieldName]=systemFuncs.getUIDNumber();
     callback(params);
 }
 /**

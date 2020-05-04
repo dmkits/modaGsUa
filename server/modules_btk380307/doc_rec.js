@@ -1,17 +1,15 @@
-var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
-    dateFormat = require('dateformat');
+var dataModel= require(appDataModelPath), database= require("../databaseMSSQL"),
+    dateFormat= require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
 var r_DBIs= require(appDataModelPath+"r_DBIs"),
     r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
     r_States= require(appDataModelPath+"r_States"),
-    r_Prods=require(appDataModelPath+"r_Prods");
+    r_Prods= require(appDataModelPath+"r_Prods");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([t_Rec,t_RecD,r_DBIs,r_Ours,r_Stocks,r_Comps,r_Currs,r_States,r_Prods], errs,
-        function(){
-            nextValidateModuleCallback();
-        });
+        function(){ nextValidateModuleCallback(); });
 };
 
 module.exports.moduleViewURL = "/docs/rec";
@@ -45,7 +43,7 @@ module.exports.init = function(app){
         {data: "CodeID4", name: "Признак 4", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"},
         {data: "CodeID5", name: "Признак 5", width: 60, type: "text", readOnly:true, visible:false, dataSource:"t_Rec"}
     ];
-    app.get("/docs/rec/getDataForRecsListTable", function(req, res){
+    app.get("/docs/rec/getDataForRecsListTable",function(req,res){
         var conditions={};
         for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
         t_Rec.getDataForTable(req.dbUC,{tableColumns:tRecsListTableColumns, identifier:tRecsListTableColumns[0].data,
@@ -54,7 +52,7 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-    app.get("/docs/rec/getRecData", function(req, res){
+    app.get("/docs/rec/getRecData",function(req,res){
         var conditions={};
         for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
         t_Rec.getDataItemForTable(req.dbUC,{tableColumns:tRecsListTableColumns,
@@ -63,7 +61,7 @@ module.exports.init = function(app){
                 res.send(result);
             });
     });
-    app.get("/docs/rec/getNewRecData", function(req, res){
+    app.get("/docs/rec/getNewRecData",function(req,res){
         r_DBIs.getNewDocID(req.dbUC,"t_Rec",function(newDocID){
             var newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
             r_Ours.getDataItem(req.dbUC,{fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
@@ -93,7 +91,7 @@ module.exports.init = function(app){
             });
         });
     });
-    app.post("/docs/rec/storeRecData", function(req, res){
+    app.post("/docs/rec/storeRecData",function(req,res){
         var storeData=req.body;
         r_Ours.getDataItem(req.dbUC,{fields:["OurID"],conditions:{"OurName=":storeData["OurName"]}}, function(result){
             if(!result.item){
@@ -143,7 +141,7 @@ module.exports.init = function(app){
             });
         });
     });
-    app.post("/docs/rec/deleteRecData", function(req, res){
+    app.post("/docs/rec/deleteRecData",function(req,res){
         var delData=req.body;
         t_Rec.delTableDataItem(req.dbUC,{idFieldName:"ChID", delTableData:delData},
             function(result){
@@ -193,7 +191,7 @@ module.exports.init = function(app){
         {data: "PriceCC", name: "Цена продажи", width: 65, type: "numeric2", dataSource:"t_RecD"}
         //{data: "PRICELIST_PRICE", name: "Цена по прайс-листу", width: 75, type: "numeric2"},
     ];
-    app.get("/docs/rec/getDataForRecDTable", function(req, res){
+    app.get("/docs/rec/getDataForRecDTable",function(req,res){
         var conditions={};
         for(var condItem in req.query)
             if(condItem.indexOf("ParentChID")==0) conditions["t_RecD.ChID="]=req.query[condItem];
@@ -266,7 +264,8 @@ module.exports.init = function(app){
             });
         });
     };
-    app.post("/docs/rec/storeRecDTableData", function(req, res){
+    if(!r_Prods.storeNewProdWithProdMQandProdPP0) throw new Error('NO r_Prods.storeNewProdWithProdMQandProdPP0!');
+    app.post("/docs/rec/storeRecDTableData",function(req,res){
         var storeData=req.body, prodID=storeData["ProdID"];
         if(prodID===undefined||prodID===null){
             var prodData={"ProdName":storeData["ProdName"], "UM":storeData["UM"], "Article1":storeData["Article1"],
@@ -289,18 +288,10 @@ module.exports.init = function(app){
             return;
         }
         var iProdID=parseInt(prodID);
-        if(isNaN(iProdID)){
-            res.send({error:"Non correct ProdID!",errorMessage:"Не корректный код товара!"});
-            return;
-        }
-        t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
-            res.send(result);
-        });
+        if(isNaN(iProdID)){ res.send({error:"Non correct ProdID!",errorMessage:"Не корректный код товара!"}); return; }
+        t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){ res.send(result); });
     });
-    app.post("/docs/rec/deleteRecDTableData", function(req, res){
-        t_RecD.delTableDataItem(req.dbUC,{idFields:["ChID","SrcPosID"],delTableData:req.body},
-            function(result){
-                res.send(result);
-            });
+    app.post("/docs/rec/deleteRecDTableData",function(req,res){
+        t_RecD.delTableDataItem(req.dbUC,{idFields:["ChID","SrcPosID"],delTableData:req.body}, function(result){ res.send(result); });
     });
 };

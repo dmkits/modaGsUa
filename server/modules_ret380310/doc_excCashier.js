@@ -1,7 +1,6 @@
-var dataModel=require(appDataModelPath), database= require("../databaseMSSQL"), common= require("../common"),
-    dateFormat = require('dateformat');
-var t_Exc= require(appDataModelPath+"t_Exc"), t_ExcD= require(appDataModelPath+"t_ExcD");
-    r_Prods=require(appDataModelPath+"r_Prods");
+var dataModel= require(appDataModelPath), database= require("../databaseMSSQL");
+var t_Exc= require(appDataModelPath+"t_Exc"), t_ExcD= require(appDataModelPath+"t_ExcD"),
+    r_Prods= require(appDataModelPath+"r_Prods");
 var r_DBIs= require(appDataModelPath+"r_DBIs"),
     r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_Currs= require(appDataModelPath+"r_Currs"),
@@ -11,9 +10,7 @@ var r_DBIs= require(appDataModelPath+"r_DBIs"),
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([t_Exc,t_ExcD,r_DBIs,r_Ours,r_Stocks,r_Comps,r_Currs,r_States,r_StateDocs,r_StateDocsChange,zf_CanChangeDoc,r_Prods], errs,
-        function(){
-            nextValidateModuleCallback();
-        });
+        function(){ nextValidateModuleCallback(); });
 };
 
 module.exports.moduleViewURL = "/docs/excCashier";

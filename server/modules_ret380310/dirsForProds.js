@@ -1,17 +1,15 @@
-var dataModel=require(appDataModelPath),database= require("../databaseMSSQL"), common= require("../common");
-var r_Prods= require(appDataModelPath+"r_Prods"),r_ProdMQ= require(appDataModelPath+"r_ProdMQ"),
-    r_ProdC= require(appDataModelPath+"r_ProdC"),r_ProdG= require(appDataModelPath+"r_ProdG"),
+var dataModel= require(appDataModelPath), database= require("../databaseMSSQL"), systemFuncs= require("../systemFuncs");
+var r_Prods= require(appDataModelPath+"r_Prods"), r_ProdMQ= require(appDataModelPath+"r_ProdMQ"),
+    r_ProdC= require(appDataModelPath+"r_ProdC"), r_ProdG= require(appDataModelPath+"r_ProdG"),
     r_ProdG1= require(appDataModelPath+"r_ProdG1"), r_ProdG2= require(appDataModelPath+"r_ProdG2"),
     r_ProdG3= require(appDataModelPath+"r_ProdG3"),
-    t_PInP= require(appDataModelPath+"t_PInP"),r_DBIs=require(appDataModelPath+"r_DBIs"),
+    t_PInP= require(appDataModelPath+"t_PInP"), r_DBIs= require(appDataModelPath+"r_DBIs"),
     r_CRUniInput= require(appDataModelPath+"r_CRUniInput");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([r_Prods,r_ProdMQ,r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,
             t_PInP,r_DBIs,r_CRUniInput], errs,
-        function(){
-            nextValidateModuleCallback();
-        });
+        function(){ nextValidateModuleCallback(); });
 };
 
 module.exports.init= function(app){
@@ -552,7 +550,7 @@ module.exports.init= function(app){
                             callback({error:"Non correct ProdID for barcode!"});
                             return;
                         }
-                        barcode= common.getEAN13Barcode(iProdID,23);
+                        barcode= systemFuncs.getEAN13Barcode(iProdID,23);
                     }
                     r_Prods.addProdMQ(dbUC,{"ProdID":prodID,"UM":insProdData["UM"],"Barcode":barcode}, function(resultAddProdMQ){
                         if(resultAddProdMQ.error){

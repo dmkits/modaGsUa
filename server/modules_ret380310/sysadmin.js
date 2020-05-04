@@ -1,22 +1,20 @@
-var path = require('path'), fs = require('fs'),
-    moment=require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron')*/;
-var server=require('../server'), getLoadInitModulesError=server.getLoadInitModulesError, log = server.log,
-    appStartupParams=server.getAppStartupParams(),
-    getSysConfig=server.getSysConfig, setSysConfig=server.setSysConfig,loadSysConfig=server.loadSysConfig,
-    getAppConfig=server.getAppConfig;
-var common=require('../common'), database=require('../databaseMSSQL');
-var appModules=require(appModulesPath), getDBValidateError=appModules.getValidateError,
-    dataModel=require(appDataModelPath), querySysDBUserInfo= require(appDataModelPath+"querySysDBUserInfo"),
+var path= require('path'), fs= require('fs'),
+    moment= require('moment') /*dateFormat = require('dateformat'), cron = require('node-cron')*/;
+var server= require('../server'), getLoadInitModulesError= server.getLoadInitModulesError, log= server.log,
+    appStartupParams= server.getAppStartupParams(),
+    getSysConfig= server.getSysConfig, setSysConfig= server.setSysConfig,loadSysConfig= server.loadSysConfig,
+    getAppConfig= server.getAppConfig;
+var systemFuncs= require('../systemFuncs'), database= require('../databaseMSSQL');
+var appModules= require(appModulesPath), getDBValidateError= appModules.getValidateError,
+    dataModel= require(appDataModelPath), querySysDBUserInfo= require(appDataModelPath+"querySysDBUserInfo"),
     changeLog= require(appDataModelPath+"change_log"),
     r_Users= require(appDataModelPath+"r_Users"),ir_UserData= require(appDataModelPath+"ir_UserData"),
     r_Emps= require(appDataModelPath+"r_Emps"),r_Uni= require(appDataModelPath+"r_Uni"),
-    sysusers=require(appDataModelPath+"sysusers"), sys_server_principals=require(appDataModelPath+"sys_server_principals");
+    sysusers= require(appDataModelPath+"sysusers"), sys_server_principals= require(appDataModelPath+"sys_server_principals");
 
 module.exports.validateModule = function(errs,nextValidateModuleCallback){
     dataModel.initValidateDataModels([querySysDBUserInfo, changeLog,r_Users,ir_UserData,r_Emps,r_Uni,sysusers,sys_server_principals], errs,
-        function(){
-            nextValidateModuleCallback();
-        });
+        function(){ nextValidateModuleCallback(); });
 };
 
 module.exports.modulePageURL = "/sysadmin";
@@ -98,7 +96,7 @@ module.exports.init = function(app){
     app.post("/sysadmin/sysConfig/storeSysConfigAndReconnectToDB",function(req,res){
         var newSysConfig = req.body,
             currentDbName=server.getSysConfig().database, currentDbHost=server.getSysConfig().host;
-        common.saveConfig(appStartupParams.mode+".cfg", newSysConfig, function(err){
+        systemFuncs.saveConfig(appStartupParams.mode+".cfg", newSysConfig, function(err){
             var outData = {};
             if(err){
                 outData.error = "Failed to store system config. Reason: "+err+". New system config not applied!";
@@ -181,7 +179,7 @@ module.exports.init = function(app){
         checkIfChangeLogExists(function(tableData){
             if(tableData.error&&  tableData.error.indexOf("Invalid object name")>=0){
                 outData.noTable = true;
-                var arr=dataModel.getModelChanges(), items=common.sortArray(arr);
+                var arr=dataModel.getModelChanges(), items=systemFuncs.sortArray(arr);
                 for(var i in items){
                     var item=items[i];
                     item.type="new";
@@ -192,7 +190,7 @@ module.exports.init = function(app){
                 return;
             }
             if(tableData.error){ outData.error= tableData.error; res.send(outData); return; }
-            var arr=dataModel.getModelChanges(), logsData= common.sortArray(arr);
+            var arr=dataModel.getModelChanges(), logsData= systemFuncs.sortArray(arr);
             matchLogData(logsData, outData, 0, function(outData){ res.send(outData); });
         });
     });
