@@ -9,8 +9,8 @@ var r_Prods= require(appDataModelPath+"r_Prods"), r_ProdMQ= require(appDataModel
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([r_Prods,r_ProdMQ,r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdColors,ir_ProdSizes,
-            t_PInP,r_DBIs,r_CRUniInput], errs,
-        function(){ nextValidateModuleCallback(); });
+            t_PInP,r_DBIs,r_CRUniInput],
+        errs, function(){ nextValidateModuleCallback(); });
 };
 
 module.exports.init= function(app){
@@ -54,67 +54,49 @@ module.exports.init= function(app){
 
     app.get("/dirsProds/getDataForArticle1Combobox", function(req, res){
         r_Prods.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"Article1":"Article1"}, order:"Article1"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPCatNameCombobox", function(req, res){
         r_ProdC.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PCatName":"PCatName","PCatID":"PCatID"},
                 conditions:{"PCatID>0":null}, order:"PCatName"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPGrNameCombobox", function(req, res){
         r_ProdG.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName":"PGrName","PGrID":"PGrID"},
                 conditions:{"PGrID>0":null}, order:"PGrName"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPGrName1Combobox", function(req, res){
         r_ProdG1.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName1":"PGrName1","PGrID1":"PGrID1"},
                 conditions:{"PGrID1>0":null}, order:"PGrName1"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPGrName2Combobox", function(req, res){
         r_ProdG2.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName2":"PGrName2","PGrID2":"PGrID2"},
                 conditions:{"PGrID2>0":null}, order:"PGrName2"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPGrName3Combobox", function(req, res){
         r_ProdG3.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName3":"PGrName3","PGrID3":"PGrID3"},
                 conditions:{"PGrID3>0":null}, order:"PGrName3"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForColorNameCombobox", function(req, res){
         ir_ProdColors.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"ColorName":"ColorName"},
                 conditions:{"ChID>0":null}, order:"ColorName"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForSizeNameCombobox", function(req, res){
         ir_ProdSizes.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"SizeName":"SizeName"},
                 conditions:{"ChID>0":null}, order:"SizeName"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getProdDataByIDName",function(req,res){
         var conditions={};
-        if(req.query["ProdID"])conditions["r_Prods.ProdID="]=req.query["ProdID"];
-        if(req.query["ProdName"])conditions["r_Prods.ProdName="]=req.query["ProdName"];
+        if(req.query["ProdID"]) conditions["r_Prods.ProdID="]=req.query["ProdID"];
+        if(req.query["ProdName"]) conditions["r_Prods.ProdName="]=req.query["ProdName"];
         r_Prods.getDataItemForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:conditions},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     /** used in mobile inventory
      * conditions = { <conditions> }
@@ -441,10 +423,7 @@ module.exports.init= function(app){
             if(prodPPData[fieldName]!==undefined) insProdMQData[fieldName]=prodPPData[fieldName];
         r_ProdMQ.insDataItem(connection,{insData:insProdMQData},
             function(insResult){
-                if(insResult.error||insResult.updateCount!=1){
-                    callback({error:"Failed create prodMQ!"});
-                    return;
-                }
+                if(insResult.error||insResult.updateCount!=1){ callback({error:"Failed create prodMQ!"}); return; }
                 callback({resultItem:insProdMQData});
             });
     };
@@ -462,10 +441,7 @@ module.exports.init= function(app){
         var ppIUD=prodPPData["PPID"];
         if(ppIUD!==undefined){
             t_PInP.insDataItem(connection,{insData:insProdPPData},function(insResult){
-                if(insResult.error||insResult.updateCount!=1){
-                    callback({error:"Failed create prod PP by PPID="+ppIUD+"!"});
-                    return;
-                }
+                if(insResult.error||insResult.updateCount!=1){ callback({error:"Failed create prod PP by PPID="+ppIUD+"!"}); return; }
                 callback({resultItem:insProdPPData});
             });
             return;
@@ -474,10 +450,7 @@ module.exports.init= function(app){
             if(err){ callback({error:"Failed calc new PPID!"}); return; }
             insProdPPData["PPID"]=newPPID;
             t_PInP.insDataItem(connection,{insData:insProdPPData},function(insResult){
-                if(insResult.error||insResult.updateCount!=1){
-                    callback({error:"Failed create prod PP by new PPID="+newPPID+"!"});
-                    return;
-                }
+                if(insResult.error||insResult.updateCount!=1){ callback({error:"Failed create prod PP by new PPID="+newPPID+"!"}); return; }
                 callback({resultItem:insProdPPData});
             });
         });

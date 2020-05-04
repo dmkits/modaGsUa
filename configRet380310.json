@@ -8,9 +8,9 @@
     "print",
     "system",
     "main",
-    "commonDirsF",
-    "dirsForDocs",
-    "dirsForProds",
+    "commonDirs",
+    "commonDirsForDocs",
+    "commonDirsForProds",
     "dir_products",
     "doc_rec",
     /*"doc_exc",*/
