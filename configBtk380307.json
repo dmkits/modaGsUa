@@ -8,7 +8,8 @@
     "print",
     "system",
     "main",
-    "dirsCommon",
+    "commonDirsF",
+    "commonDocsF",
     "dirsForDocs",
     "dirsForProds",
     /*"doc_rec",*/
@@ -58,10 +59,15 @@
       "menu":["menuBarItemHelpAbout","menuBarItemClose"],
       "mobile":["mDoc_ExcFromStock"]
     },
+    "createRec":{
+      "menu":["menuBarItemHelpAbout","menuBarItemClose"],
+      "mobile":["mDoc_Rec"]
+    },
     "cashier":{
       "menu":["menuBarItemReportsCashier","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
       "mobile":["mRep_Cashier"]
     }
+
   }
 }
