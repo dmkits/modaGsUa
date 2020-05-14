@@ -70,50 +70,38 @@ module.exports.init= function(app){
 
     app.get("/dirsProds/getDataForArticle1Combobox",function(req,res){
         r_Prods.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"Article1":"Article1"}, order:"Article1"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPCatNameCombobox",function(req,res){
         r_ProdC.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PCatName":"PCatName","PCatID":"PCatID"},
                 conditions:{"PCatID>0":null}, order:"PCatName"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPGrNameCombobox",function(req,res){
         r_ProdG.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName":"PGrName","PGrID":"PGrID"},
                 conditions:{"PGrID>0":null}, order:"PGrName"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPGrName1Combobox",function(req,res){
         r_ProdG1.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName1":"PGrName1","PGrID1":"PGrID1"},
                 conditions:{"PGrID1>0":null}, order:"PGrName1"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPGrName2Combobox",function(req,res){
         r_ProdG2.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName2":"PGrName2","PGrID2":"PGrID2"},
                 conditions:{"PGrID2>0":null}, order:"PGrName2"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/dirsProds/getDataForPGrName3Combobox",function(req,res){
         r_ProdG3.getDataItemsForTableCombobox(req.dbUC,{comboboxFields:{"PGrName3":"PGrName3","PGrID3":"PGrID3"},
                 conditions:{"PGrID3>0":null}, order:"PGrName3"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     /** finding product by Barcode/ProdID/ProdName
      * fieldsValues = { "Barcode":<value>, "ProdID":<value>, "ProdName":<value> }
      * callback = function(result={prodData, error,errorMessage})
      */
-    r_Prods.findProdByFieldsValues= function(dbUC,fieldsValues,callback){//finding by Barcode/ProdID/ProdName
+    r_Prods.findProdByBCIDNameValues= function(dbUC,fieldsValues,callback){//finding by Barcode/ProdID/ProdName
         var conditions={}, findByBarcode=false;
         if(fieldsValues["Barcode"]){ conditions["Barcode="]=fieldsValues["Barcode"]; findByBarcode=true; }
         if(fieldsValues["ProdID"])conditions["r_Prods.ProdID="]=fieldsValues["ProdID"];
@@ -130,7 +118,7 @@ module.exports.init= function(app){
             });
     };
     app.get("/dirsProds/getProdDataByProdBarcodeIDName",function(req,res){
-        r_Prods.findProdByFieldsValues(req.dbUC,req.query,function(findProdResult){
+        r_Prods.findProdByBCIDNameValues(req.dbUC,req.query,function(findProdResult){
             if(findProdResult&&findProdResult.error){
                 res.send({error:{error:findProdResult.error,userMesssage:findProdResult.userMesssage}});
                 return;
@@ -227,9 +215,9 @@ module.exports.init= function(app){
                 callback(null,prodData);
             });
     };
-    app.get("/dirsProds/getProdProdAttrsAndNameByArticle1",function(req,res){
+    app.get("/dirsProds/getProdNameAndAttrsByArticle1",function(req,res){
         var prodData=req.query, prodArticle1=prodData["Article1"], sendResult={};
-        if(prodArticle1===undefined||prodArticle1===null||prodArticle1.trim()===""){
+        if(prodArticle1==null||prodArticle1.trim()===""){
             r_Prods.getNewProdNameByAttrs(req.dbUC,prodData,function(err,prodNameData){
                 if(prodNameData) sendResult.itemProdName={"ProdName":prodNameData["ProdName"],"UM":req.dbUserParams["DefaultUM"]};
                 if(err)sendResult.errorProdName=err;
@@ -422,8 +410,8 @@ module.exports.init= function(app){
                 }
                 var sOldUMBarcode= resultFindProdMQUM.item["UM"], sNewUMBarcode= prodMQData["UM"],
                     updProdMQData={"Barcode":prodMQData["Barcode"], "UM":sNewUMBarcode},
-                    updProdMQFileds=["Qty","Weight","Notes","ProdBarcode","PLID"];
-                for(var fieldName of updProdMQFileds)
+                    updProdMQFields=["Qty","Weight","Notes","ProdBarcode","PLID"];
+                for(var fieldName of updProdMQFields)
                     if(prodMQData[fieldName]!==undefined) updProdMQData[fieldName]=prodMQData[fieldName];
                 r_ProdMQ.updDataItem(dbUC,{updData:updProdMQData,conditions:{"ProdID=":prodID,"Barcode=":sOldBarcode}}, function(resultUpdProdMQ){
                     if(resultUpdProdMQ.error||resultUpdProdMQ.updateCount!=1){ callback({error:"Failed update prodMQ!"}); return; }
@@ -729,10 +717,9 @@ module.exports.init= function(app){
         //
         //});
 
-        r_Prods.findProdByFieldsValues(dbUC,{"ProdName":prodName},function(resultFindProdByName){//finding by ProdName
+        r_Prods.findProdByBCIDNameValues(dbUC,{"ProdName":prodName},function(resultFindProdByName){//finding by ProdName
             if(resultFindProdByName.error){ callback(resultFindProdByName); return; }
-            var existsProdIDByProdName=null, existsProdBaseBarcodeByProdName=null,
-                existsProdUMByProdName=null;
+            var existsProdIDByProdName=null, existsProdBaseBarcodeByProdName=null, existsProdUMByProdName=null;
             if(resultFindProdByName.prodData){
                 existsProdIDByProdName= resultFindProdByName.prodData["ProdID"];
                 existsProdBaseBarcodeByProdName= resultFindProdByName.prodData["Barcode"];

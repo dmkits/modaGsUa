@@ -142,7 +142,7 @@ module.exports.init = function(app){
         var oldProdBarcode=prodData["_Barcode_"];//oldProdBarcode used in product directories for update product barcode
         r_Prods.checkProdByOldBarcode(dbUC,oldProdBarcode,prodData,function(resultFindProdByOldBarcode){
             if(resultFindProdByOldBarcode.error){ callback(resultFindProdByOldBarcode); return; }
-            r_Prods.findProdByFieldsValues(dbUC,{"ProdName":prodName},function(resultFindProdByName){//finding by ProdName
+            r_Prods.findProdByBCIDNameValues(dbUC,{"ProdName":prodName},function(resultFindProdByName){//finding by ProdName
                 if(resultFindProdByName.error){ callback(resultFindProdByName); return; }
                 var existsProdIDByProdName=null, existsProdBaseBarcodeByProdName=null,
                     existsProdUMByProdName=null;

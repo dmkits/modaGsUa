@@ -53,18 +53,14 @@ module.exports.init = function(app){
         for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
         t_Rec.getDataForTable(req.dbUC,{tableColumns:tRecsListTableColumns, identifier:tRecsListTableColumns[0].data,
                 conditions:conditions, order:"DocDate, DocID"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/docs/rec/getRecData",function(req,res){
         var conditions={};
         for(var condItem in req.query) conditions["t_Rec."+condItem]=req.query[condItem];
         t_Rec.getDataItemForTable(req.dbUC,{tableColumns:tRecsListTableColumns,
                 conditions:conditions},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/docs/rec/getNewRecData",function(req,res){
         r_DBIs.getNewDocID(req.dbUC,"t_Rec",function(newDocID){
@@ -86,9 +82,7 @@ module.exports.init = function(app){
                                                     "TQty","TSumCC_wt", "StateCode","StateName"],
                                                 values:[newDocID,newDocDate,ourName,stockName,currName,1,1,compName,
                                                     0,0, 0,stateName]},
-                                            function(result){
-                                                res.send(result);
-                                            });
+                                            function(result){ res.send(result); });
                                     });
                                 });
                         });
@@ -137,9 +131,7 @@ module.exports.init = function(app){
                                                 callback(params);
                                             });
                                         }},
-                                    function(result){
-                                        res.send(result);
-                                    });
+                                    function(result){ res.send(result); });
                             });
                     });
                 });
@@ -148,10 +140,7 @@ module.exports.init = function(app){
     });
     app.post("/docs/rec/deleteRecData",function(req,res){
         var delData=req.body;
-        t_Rec.delTableDataItem(req.dbUC,{idFieldName:"ChID", delTableData:delData},
-            function(result){
-                res.send(result);
-            });
+        t_Rec.delTableDataItem(req.dbUC,{idFieldName:"ChID", delTableData:delData}, function(result){ res.send(result); });
     });
     app.post("/docs/rec/updRecDataState",function(req,res){
         var storeData=req.body, chID=storeData["ChID"];
@@ -161,9 +150,7 @@ module.exports.init = function(app){
         }
         t_Rec.updTableDataItem(req.dbUC,{tableColumns:tRecsListTableColumns, idFieldName:"ChID",
                 updFields:["StateCode"], updTableData:{"ChID":chID,"StateCode":storeData["StateCode"]}},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
 
     var tRecDTableColumns=[
@@ -209,9 +196,7 @@ module.exports.init = function(app){
             else conditions["t_RecD."+condItem]=req.query[condItem];
         t_RecD.getDataForDocTable(req.dbUC,{tableColumns:tRecDTableColumns, identifier:tRecDTableColumns[0].data,
                 conditions:conditions, order:"SrcPosID"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     t_RecD.setRecDTaxPriceCCnt=function(dbUC,prodID,recChID,recDData,callback){
         database.selectParamsQuery(dbUC,
@@ -239,9 +224,7 @@ module.exports.init = function(app){
                     {"ProdID":prodID,"ProdDate":recData["DocDate"],"CompID":recData["CompID"],"Article":"",
                         "PriceCC_In":priceCC_wt,"CostCC":priceCC_wt,"PriceMC":priceCC_wt,
                         "CurrID":recData["CurrID"], "PriceMC_In":priceCC_wt,"CostAC":priceCC_wt},
-                    function(result){
-                        callback(result);
-                    });
+                    function(result){ callback(result); });
             });
     };
     /**
@@ -281,8 +264,7 @@ module.exports.init = function(app){
     app.post("/docs/rec/storeRecDTableData",function(req,res){
         var storeData=req.body,
             prodData={"ProdID":storeData["ProdID"], "ProdName":storeData["ProdName"], "UM":storeData["UM"], "InRems":1,
-                "Article1":storeData["Article1"],
-                "Country":storeData["Country"], "Notes":storeData["ProdName"],
+                "Article1":storeData["Article1"], "Country":storeData["Country"], "Notes":storeData["ProdName"],
                 "PCatName":storeData["PCatName"], "PGrName":storeData["PGrName"],
                 "PGrName1":storeData["PGrName1"],"PGrName2":storeData["PGrName2"],"PGrName3":storeData["PGrName3"],
                 "Barcode":storeData["Barcode"], "BCUM":storeData["BCUM"]};
@@ -302,15 +284,10 @@ module.exports.init = function(app){
                 res.send({error:"Non correct ProdID!",errorMessage:"Не корректный код товара!"});
                 return;
             }
-            t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
-                res.send(result);
-            });
+            t_RecD.storeRecD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){ res.send(result); });
         });
     });
     app.post("/docs/rec/deleteRecDTableData",function(req,res){
-        t_RecD.delTableDataItem(req.dbUC,{idFields:["ChID","SrcPosID"],delTableData:req.body},
-            function(result){
-                res.send(result);
-            });
+        t_RecD.delTableDataItem(req.dbUC,{idFields:["ChID","SrcPosID"],delTableData:req.body}, function(result){ res.send(result); });
     });
 };

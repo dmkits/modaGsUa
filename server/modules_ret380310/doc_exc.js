@@ -50,49 +50,43 @@ module.exports.init = function(app){
         for(var condItem in req.query) conditions["t_Exc."+condItem]=req.query[condItem];
         t_Exc.getDataForTable(req.dbUC,{tableColumns:tRecsListTableColumns, identifier:tRecsListTableColumns[0].data,
                 conditions:conditions, order:"DocDate, DocID"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     app.get("/docs/exc/getExcData", function(req, res){
         var conditions={};
         for(var condItem in req.query) conditions["t_Exc."+condItem]=req.query[condItem];
-        t_Exc.getDataItemForTable(req.dbUC,{tableColumns:tRecsListTableColumns,
-                conditions:conditions},
-            function(result){
-                res.send(result);
-            });
+        t_Exc.getDataItemForTable(req.dbUC,{tableColumns:tRecsListTableColumns, conditions:conditions}, function(result){ res.send(result); });
     });
-    app.get("/docs/exc/getNewRecData", function(req, res){
-        r_DBIs.getNewDocID(req.dbUC,"t_Exc",function(newDocID){
-            var newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
-            r_Ours.getDataItem(req.dbUC,{fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
-                var ourName=(result&&result.item)?result.item["OurName"]:"";
-                r_Stocks.getDataItem(req.dbUC,{fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
-                    var stockName=(result&&result.item)?result.item["StockName"]:"";
-                    r_Currs.getDataItem(req.dbUC,{fields:["CurrName"], conditions:{"CurrID=":"1"} },
-                        function(result){
-                            var currName=(result&&result.item)?result.item["CurrName"]:"";
-                            r_Comps.getDataItem(req.dbUC,{fields:["CompName"], conditions:{"CompID=":"1"} },
-                                function(result){
-                                    var compName=(result&&result.item)?result.item["CompName"]:"";
-                                    r_States.getDataItem(req.dbUC,{fields:["StateName"],conditions:{"StateCode=":"0"}}, function(result){
-                                        var stateName=(result&&result.item)?result.item["StateName"]:"";
-                                        t_Exc.setDataItem({
-                                                fields:["DocID","DocDate","OurName","StockName","CurrName","KursCC","KursMC","CompName",
-                                                    "TQty","TSumCC_wt", "StateName"],
-                                                values:[newDocID,newDocDate,ourName,stockName,currName,1,1,compName,
-                                                    0,0, stateName]},
-                                            function(result){
-                                                res.send(result);
-                                            });
-                                    });
-                                });
-                        });
-                });
-            });
-        });
-    });
+    //app.get("/docs/exc/getNewRecData", function(req, res){
+    //    r_DBIs.getNewDocID(req.dbUC,"t_Exc",function(newDocID){
+    //        var newDocDate=dateFormat(new Date(),"yyyy-mm-dd");
+    //        r_Ours.getDataItem(req.dbUC,{fields:["OurName"],conditions:{"OurID=":"1"}}, function(result){
+    //            var ourName=(result&&result.item)?result.item["OurName"]:"";
+    //            r_Stocks.getDataItem(req.dbUC,{fields:["StockName"],conditions:{"StockID=":"1"}}, function(result){
+    //                var stockName=(result&&result.item)?result.item["StockName"]:"";
+    //                r_Currs.getDataItem(req.dbUC,{fields:["CurrName"], conditions:{"CurrID=":"1"} },
+    //                    function(result){
+    //                        var currName=(result&&result.item)?result.item["CurrName"]:"";
+    //                        r_Comps.getDataItem(req.dbUC,{fields:["CompName"], conditions:{"CompID=":"1"} },
+    //                            function(result){
+    //                                var compName=(result&&result.item)?result.item["CompName"]:"";
+    //                                r_States.getDataItem(req.dbUC,{fields:["StateName"],conditions:{"StateCode=":"0"}}, function(result){
+    //                                    var stateName=(result&&result.item)?result.item["StateName"]:"";
+    //                                    t_Exc.setDataItem({
+    //                                            fields:["DocID","DocDate","OurName","StockName","CurrName","KursCC","KursMC","CompName",
+    //                                                "TQty","TSumCC_wt", "StateName"],
+    //                                            values:[newDocID,newDocDate,ourName,stockName,currName,1,1,compName,
+    //                                                0,0, stateName]},
+    //                                        function(result){
+    //                                            res.send(result);
+    //                                        });
+    //                                });
+    //                            });
+    //                    });
+    //            });
+    //        });
+    //    });
+    //});
     app.post("/docs/exc/storeExcData", function(req, res){
         var storeData=req.body;
         r_Ours.getDataItem(req.dbUC,{fields:["OurID"],conditions:{"OurName=":storeData["OurName"]}}, function(result){
@@ -134,9 +128,7 @@ module.exports.init = function(app){
                                                 callback(params);
                                             });
                                         }},
-                                    function(result){
-                                        res.send(result);
-                                    });
+                                    function(result){ res.send(result); });
                             });
                     });
                 });
@@ -145,10 +137,7 @@ module.exports.init = function(app){
     });
     app.post("/docs/exc/deleteExcData", function(req, res){
         var delData=req.body;
-        t_Exc.delTableDataItem(req.dbUC,{idFieldName:"ChID", delTableData:delData},
-            function(result){
-                res.send(result);
-            });
+        t_Exc.delTableDataItem(req.dbUC,{idFieldName:"ChID", delTableData:delData}, function(result){ res.send(result); });
     });
 
     var tRecDTableColumns=[
@@ -185,9 +174,7 @@ module.exports.init = function(app){
             else conditions["t_ExcD."+condItem]=req.query[condItem];
         t_ExcD.getDataForDocTable(req.dbUC,{tableColumns:tRecDTableColumns, identifier:tRecDTableColumns[0].data,
                 conditions:conditions, order:"SrcPosID"},
-            function(result){
-                res.send(result);
-            });
+            function(result){ res.send(result); });
     });
     //t_ExcD.setExcDTaxPriceCCnt=function(connection,prodID,recChID,recDData,callback){
     //    database.selectParamsQuery(connection,
@@ -258,14 +245,9 @@ module.exports.init = function(app){
             res.send({error:"Non correct ProdID!",userMessage:"Не корректный код товара!"});
             return;
         }
-        t_ExcD.storeExcD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){
-            res.send(result);
-        });
+        t_ExcD.storeExcD(req.dbUC,prodID,storeData,req.dbUserParams,function(result){ res.send(result); });
     });
     app.post("/docs/exc/deleteExcDTableData", function(req, res){
-        t_ExcD.delTableDataItem(req.dbUC,{idFields:["ChID","SrcPosID"],delTableData:req.body},
-            function(result){
-                res.send(result);
-            });
+        t_ExcD.delTableDataItem(req.dbUC,{idFields:["ChID","SrcPosID"],delTableData:req.body}, function(result){ res.send(result); });
     });
 };
