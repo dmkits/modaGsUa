@@ -102,6 +102,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
     dataModel.updDataItem= _updDataItem;
     dataModel.storeDataItem= _storeDataItem;
     dataModel.delDataItem= _delDataItem;
+    dataModel.checkDataItemVal= _checkDataItemVal;
     dataModel.findDataItemByOrCreateNew= _findDataItemByOrCreateNew;
     dataModel.insTableDataItem= _insTableDataItem;
     dataModel.updTableDataItem= _updTableDataItem;
@@ -204,16 +205,16 @@ var getConUUID= database.getConUUID, getConU= database.getConU;
  * fieldsFunctions[].function: "maxPlus1" / "concat"
  * resultCallback = function(err, recordset)
  */
-function _getSelectItems(connection, params,resultCallback){                                                    //log.debug("_getSelectItems params:",params,{});//test
-    if(!params){                                                                                                log.error("FAILED _getSelectItems! Reason: no function parameters!");//test
+function _getSelectItems(dbCon, params,resultCallback){                                                         //log.debug("_getSelectItems params:",params,{});//test
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getSelectItems! Reason: no function parameters!");//test
         resultCallback("FAILED _getSelectItems! Reason: no function parameters!");
         return;
     }
-    if(!params.source){                                                                                         log.error("FAILED _getSelectItems! Reason: no source!");//test
+    if(!params.source){                                                                                         log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getSelectItems! Reason: no source!");//test
         resultCallback("FAILED _getSelectItems! Reason: no source!");
         return;
     }
-    if(!params.fields){                                                                                         log.error("FAILED _getSelectItems from source:"+params.source+"! Reason: no source fields!");//test
+    if(!params.fields){                                                                                         log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getSelectItems from source:"+params.source+"! Reason: no source fields!");//test
         resultCallback("FAILED _getSelectItems from source:"+params.source+"! Reason: no source fields!");
         return;
     }
@@ -334,17 +335,17 @@ function _getSelectItems(connection, params,resultCallback){                    
             queryResultFields+= ", "+ params.fieldsResultFunctions[fieldResultName]+" as "+fieldResultName;
         selectQuery="select "+queryResultFields+" from ("+selectQuery+") mres";
     }
-    if(params.order) selectQuery+= " order by "+params.order;                                                   //log.debug('_getSelectItems selectQuery:',selectQuery);//test
+    if(params.order) selectQuery+= " order by "+params.order;                                                   //log.debug(getConUUID(dbCon),getConU(dbCon),'_getSelectItems selectQuery:',selectQuery);//test
     if(queryValues.length==0)
-        database.selectQuery(connection, selectQuery, function(err,recordset,count,fields){
-            if(err){                                                                                            log.error("FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
+        database.selectQuery(dbCon, selectQuery, function(err,recordset,count,fields){
+            if(err){                                                                                            log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             }else
                 resultCallback(null,recordset);
         });
     else
-        database.selectParamsQuery(connection, selectQuery,queryValues, function(err,recordset,count,fieldsMetadata){
-            if(err){                                                                                            log.error("FAILED _getSelectItems selectParamsQuery! Reason:",err.message,"!");//test
+        database.selectParamsQuery(dbCon, selectQuery,queryValues, function(err,recordset,count,fieldsMetadata){
+            if(err){                                                                                            log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getSelectItems selectParamsQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             }else{
                 resultCallback(null, recordset);
@@ -361,12 +362,13 @@ module.exports.getSelectItems= _getSelectItems;
  *              { function:<function>, source:<functionSource>, sourceField:<functionSourceField>, fields:[ <functionBodySourceFieldName> ] },
  *      ... },
  *      fieldsResultFunctions = { <fieldName>:"<function>" },
- *      conditions={ <condition>:<conditionValue>, ... } or withoutConditions=true/false,
+ *      conditions={ <condition>:<conditionValue>, ... } or withoutConditions=true/false, default withoutConditions=false,
+ *      ignoreUndefConditions=true/false, default ignoreUndefConditions=false,
  *      order = "<orderFieldsList>"
  * }
  * resultCallback = function(result), result = { items:[ {<tableFieldName>:<value>,...}, ... ], error, errorCode } )
  */
-function _getDataItems(connection, params, resultCallback){                                                     //log.debug('_getDataItems: params:',params,{});//test
+function _getDataItems(dbCon, params, resultCallback){                                                          log.debug(getConUUID(dbCon),getConU(dbCon),'_getDataItems: params:',params,{});//test
     if(!params) params={};
     if(!params.source) params.source= this.source;
     if(!params.sourceName) params.sourceName= this.sourceName;
@@ -374,29 +376,31 @@ function _getDataItems(connection, params, resultCallback){                     
     if(!params.sourceParamsNames) params.sourceParamsNames= this.sourceParamsNames;
     if(!params.sourceParams) params.sourceParams= this.sourceParams;
     if(!params.fields) params.fields=this.fields;
-    if(!params.withoutConditions&&!params.conditions){                                                          log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!");//test
+    if(!params.withoutConditions&&!params.conditions){                                                          log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!");//test
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no conditions!"});
         return;
     }
-    var condition={}, hasCondition=false;
+    var hasCondition=false, hasUndefCondition=false;
     for(var condItem in params.conditions){
-        var condValue= params.conditions[condItem];
-        if(condValue!==undefined){
-            condition[condItem]= condValue;
-            hasCondition= true;
-        }
+        hasCondition= true;
+        if(params.conditions[condItem]===undefined){ hasUndefCondition= true; break; }
     }
-    if(!params.withoutConditions&&!hasCondition){                                                               log.error("FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!");//test
+    if(!params.withoutConditions&&!hasCondition){                                                               log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!");//test
         resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: no data conditions!"});
         return;
     }
-    _getSelectItems(connection, params, function(err,recordset){
+    if(!params.ignoreUndefConditions&&hasUndefCondition){                                                       log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItems from source:"+params.source+"! Reason: has undefined conditions!");//test
+        resultCallback({error:"FAILED _getDataItems from source:"+params.source+"! Reason: has undefined conditions!"});
+        return;
+    }else if(params.ignoreUndefConditions&&hasUndefCondition){                                                  log.info(getConUUID(dbCon),getConU(dbCon),"WARNING _getDataItems from source:"+params.source+" has undefined conditions!");//test
+    }
+    _getSelectItems(dbCon, params, function(err,recordset){
         var selectResult={};
         if(err){
             selectResult.error= "Failed get data items! Reason:"+err.message; selectResult.message= err.message;
             selectResult.errorCode= err.code;
         }
-        if(recordset) selectResult.items= recordset;                                                            //log.debug('_getDataItems: _getSelectItems: result:',selectResult,{});//test
+        if(recordset) selectResult.items= recordset;                                                            //log.debug(getConUUID(dbCon),getConU(dbCon),'_getDataItems: _getSelectItems: result:',selectResult,{});//test
         resultCallback(selectResult);
     });
 }
@@ -414,7 +418,7 @@ function _getDataItems(connection, params, resultCallback){                     
  *      <function>: "maxPlus1"
  * resultCallback = function(result), result = { item:{<tableFieldName>:<value>,...}, error, errorCode } )
  */
-function _getDataItem(connection, params, resultCallback){
+function _getDataItem(dbCon, params, resultCallback){                                                           log.debug(getConUUID(dbCon),getConU(dbCon),'_getDataItem: params:',params,{});//test
     if(!params) params={};
     if(!params.source) params.source= this.source;
     if(!params.sourceName) params.sourceName= this.sourceName;
@@ -422,7 +426,7 @@ function _getDataItem(connection, params, resultCallback){
     if(!params.sourceParamsNames) params.sourceParamsNames= this.sourceParamsNames;
     if(!params.sourceParams) params.sourceParams= this.sourceParams;
     if(!params.fields) params.fields=this.fields;
-    _getDataItems(connection, params, function(result){                                                         log.debug(getConUUID(connection),getConU(connection),'_getDataItem: _getDataItems: result:',JSON.stringify(result));//test
+    _getDataItems(dbCon, params, function(result){                                                              //log.debug(getConUUID(dbCon),getConU(dbCon),'_getDataItem: _getDataItems: result:',JSON.stringify(result));//test
         var getDataItemResult={};
         if(result.error) getDataItemResult.error= result.error;
         if(result.errorCode!==undefined) getDataItemResult.errorCode= result.errorCode;
@@ -440,12 +444,12 @@ function _getDataItem(connection, params, resultCallback){
  * data
  * callback = function(data,err)
  */
-function _getIDByFiledValue(connection, params, data, callback){
+function _getIDByFiledValue(dbCon, params, data, callback){
     var idValue=data[params.idFieldName];
     if(idValue!==undefined&&idValue!==null){ callback(data); return; }
     var condition={};
     condition[params.findFieldName+"="]= data[params.findFieldName];
-    this.getDataItem(connection, {fields:[params.idFieldName],conditions:condition}, function(result){
+    this.getDataItem(dbCon, {fields:[params.idFieldName],conditions:condition}, function(result){
         if(!result.item){
             callback(data,"Failed finded "+params.idFieldName+" by "+params.findFieldName+"!");
             return;
@@ -466,12 +470,12 @@ function _getIDByFiledValue(connection, params, data, callback){
  *      result = { items:[ {value:<valueOfValueField>,label:<valueOfLabelField>}, ... ], error, errorCode } )
  *      if no labelField label=<valueOfValueField>
  */
-function _getDataItemsForSelect(connection, params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _getDataItemsForSelect! Reason: no function parameters!");//test
+function _getDataItemsForSelect(dbCon, params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItemsForSelect! Reason: no function parameters!");//test
         resultCallback("FAILED _getDataItemsForSelect! Reason: no function parameters!");
         return;
     }
-    if(!params.valueField){                                                                                     log.error("FAILED _getDataItemsForSelect! Reason: no value field!");//test
+    if(!params.valueField){                                                                                     log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItemsForSelect! Reason: no value field!");//test
         resultCallback("FAILED _getDataItemsForSelect! Reason: no value field!");
         return;
     }
@@ -483,7 +487,7 @@ function _getDataItemsForSelect(connection, params, resultCallback){
         params.fields.push(params.labelField);
         params.fieldsSources[params.labelField]= params.source+"."+params.labelField;
     }
-    _getDataItems(connection, params, function(result){
+    _getDataItems(dbCon, params, function(result){
         if(result.items){
             var resultItems=result.items;
             result.items=[];
@@ -507,12 +511,12 @@ function _getDataItemsForSelect(connection, params, resultCallback){
  * if !params.conditions returns all items
  * resultCallback = function(result), result = { items:[ {<tableComboboxFieldName>:<value>, ... }, ... ], error, errorCode } )
  */
-function _getDataItemsForTableCombobox(connection, params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _getDataItemsForTableCombobox! Reason: no function parameters!");//test
+function _getDataItemsForTableCombobox(dbCon, params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItemsForTableCombobox! Reason: no function parameters!");//test
         resultCallback("FAILED _getDataItemsForTableCombobox! Reason: no function parameters!");
         return;
     }
-    if(!params.comboboxFields){                                                                                 log.error("FAILED _getDataItemsForTableCombobox! Reason: no comboboxFields!");//test
+    if(!params.comboboxFields){                                                                                 log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItemsForTableCombobox! Reason: no comboboxFields!");//test
         resultCallback("FAILED _getDataItemsForTableCombobox! Reason: no comboboxFields!");
         return;
     }
@@ -551,7 +555,7 @@ function _getDataItemsForTableCombobox(connection, params, resultCallback){
             if(joinedSourceMetadata) params.joinedSources[joinedSourceName]= joinedSourceMetadata;
         }
     }
-    _getDataItems(connection,params,function(result){
+    _getDataItems(dbCon,params,function(result){
         if(result.items){
             for(var i in result.items){
                 var resultItemData= result.items[i];
@@ -613,16 +617,28 @@ function _getDSAlias(sDataSource){
  * resultCallback = function(tableData)
  *      tableData = { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...], error:errorMessage } )
  */
-function _getDataItemsForTable(connection, params, resultCallback){
+function _getDataItemsForTable(dbCon, params, resultCallback){
     var tableData={};
-    if(!params){                                                                                                log.error("FAILED _getDataItemsForTable! Reason: no function parameters!");//test
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItemsForTable! Reason: no function parameters!");//test
         tableData.error= "FAILED _getDataItemsForTable! Reason: no function parameters!";
         resultCallback(tableData);
         return;
     }
     if(params.tableData) tableData=params.tableData;
-    if(!params.tableColumns){                                                                                   log.error("FAILED _getDataItemsForTable! Reason: no table columns!");//test
+    if(!params.tableColumns){                                                                                   log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItemsForTable! Reason: no table columns!");//test
         tableData.error= "FAILED _getDataItemsForTable! Reason: no table columns!";
+        resultCallback(tableData);
+        return;
+    }
+    if(!params.conditions){                                                                                     log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItemsForTable! Reason: no conditions!");//test
+        tableData.error= "FAILED _getDataItemsForTable! Reason: no conditions!";
+        resultCallback(tableData);
+        return;
+    }
+    var hasConditions= false;
+    for(var condItem in params.conditions){ hasConditions=true;break; }
+    if(!hasConditions){                                                                                         log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataItemsForTable! Reason: no conditions items!");//test
+        tableData.error= "FAILED _getDataItemsForTable! Reason: no conditions items!";
         resultCallback(tableData);
         return;
     }
@@ -711,14 +727,14 @@ function _getDataItemsForTable(connection, params, resultCallback){
     }
     params.fieldsFunctions=fieldsFunctions; params.fieldsResultFunctions=fieldsResultFunctions;
     if(groupedFieldsList.length>0) params.groupedFields= groupedFieldsList;
-    _getSelectItems(connection, params, function(err,recordset){
+    _getSelectItems(dbCon, params, function(err,recordset){
         if(err) tableData.error= "Failed get data for table! Reason:"+err.message;
         tableData.items= recordset;
         resultCallback(tableData);
     });
 }
-function _getDataItemForTable(connection, params, resultCallback){
-    this.getDataItemsForTable(connection, params,function(tableData){
+function _getDataItemForTable(dbCon, params, resultCallback){
+    this.getDataItemsForTable(dbCon, params,function(tableData){
         var tableDataItem={};
         for(var itemName in tableData){
             if(itemName!="items"){
@@ -733,7 +749,7 @@ function _getDataItemForTable(connection, params, resultCallback){
                 continue;
             }
             tableDataItem.item= tableDataItems[0];
-        }                                                                                                       //log.debug('_getDataItemForTable: getDataItemsForTable: tableDataItem:',tableDataItem,{});//test
+        }                                                                                                       //log.debug(getConUUID(dbCon),getConU(dbCon),'_getDataItemForTable: getDataItemsForTable: tableDataItem:',tableDataItem,{});//test
         resultCallback(tableDataItem);
     });
 }
@@ -834,14 +850,14 @@ function _getTableColumnsDataForHTable(tableColumns){
  * resultCallback = function(tableData)
  *      tableData= { columns:tableColumns, identifier:identifier, items:[ {<tableFieldName>:<value>,...}, {}, {}, ...], error:errorMessage } )
  */
-function _getDataForTable(connection, params, resultCallback){
+function _getDataForTable(dbCon, params, resultCallback){
     var tableData={};
-    if(!params){                                                                                                log.error("FAILED _getDataForTable! Reason: no function parameters!");//test
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataForTable! Reason: no function parameters!");//test
         tableData.error= "FAILED _getDataForTable! Reason: no function parameters!";
         resultCallback(tableData);
         return;
     }
-    if(!params.tableColumns){                                                                                   log.error("FAILED _getDataForTable! Reason: no table columns!");//test
+    if(!params.tableColumns){                                                                                   log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataForTable! Reason: no table columns!");//test
         tableData.error= "FAILED _getDataForTable! Reason: no table columns!";
         resultCallback(tableData);
         return;
@@ -854,7 +870,7 @@ function _getDataForTable(connection, params, resultCallback){
     if(!hasConditions){ resultCallback(tableData); return; }
     if(params.aconditions) for(var acondItem in params.aconditions){ params.conditions[acondItem]= params.aconditions[acondItem]; }
     params.tableData=tableData;
-    this.getDataItemsForTable(connection, params, resultCallback);
+    this.getDataItemsForTable(dbCon, params, resultCallback);
 }
 /**
  * set column width and type for tableColumnItem.data containing "QTY"/"PRICE"/"SUM"/"NUMBER"/"DATE"
@@ -888,14 +904,14 @@ function _getTableColumnsDataForDocHTable(tableColumns){
     }
     return tableColumns;
 }
-function _getDataForDocTable(connection, params, resultCallback){
+function _getDataForDocTable(dbCon, params, resultCallback){
     var tableData={};
-    if(!params){                                                                                                log.error("FAILED _getDataForDocTable! Reason: no function parameters!");//test
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataForDocTable! Reason: no function parameters!");//test
         tableData.error= "FAILED _getDataForDocTable! Reason: no function parameters!";
         resultCallback(tableData);
         return;
     }
-    if(!params.tableColumns){                                                                                   log.error("FAILED _getDataForDocTable! Reason: no table columns!");//test
+    if(!params.tableColumns){                                                                                   log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getDataForDocTable! Reason: no table columns!");//test
         tableData.error= "FAILED _getDataForDocTable! Reason: no table columns!";
         resultCallback(tableData);
         return;
@@ -910,7 +926,7 @@ function _getDataForDocTable(connection, params, resultCallback){
     for(var conditionItem in params.conditions) tableConditions[conditionItem]= params.conditions[conditionItem];
     params.conditions=tableConditions;
     params.tableData=tableData;
-    this.getDataItemsForTable(connection, params, resultCallback);
+    this.getDataItemsForTable(dbCon, params, resultCallback);
 }
 /**
  * params = {
@@ -935,13 +951,13 @@ function _setDataItemForTable(params, resultCallback){
  * <value> instanceof Date converted to sting by format yyyy-mm-dd HH:MM:ss !!!
  * resultCallback = function(result), result = { updateCount, error,errorMessage }
  */
-function _insDataItem(connection, params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _insDataItem! Reason: no parameters!");//test
+function _insDataItem(dbCon, params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insDataItem! Reason: no parameters!");//test
         resultCallback({error:"Failed insert data item! Reason:no function parameters!"});
         return;
     }
     if(!params.tableName&&this.source) params.tableName= this.source;
-    if(!params.tableName){                                                                                      log.error("FAILED _insDataItem! Reason: no table name!");//test
+    if(!params.tableName){                                                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insDataItem! Reason: no table name!");//test
         resultCallback({error:"Failed insert data item! Reason:no table name for insert!"});
         return;
     }
@@ -962,7 +978,7 @@ function _insDataItem(connection, params, resultCallback){
         queryInputParams.push(insDataItemValue);
     }
     var insQuery="insert into "+params.tableName+"("+queryFields+") values("+queryFieldsValues+")";
-    database.executeParamsQuery(connection, insQuery,queryInputParams,function(err,updateCount){
+    database.executeParamsQuery(dbCon, insQuery,queryInputParams,function(err,updateCount){
         if(err){
             resultCallback({error:"Failed insert data item! Reason:"+(err.message||"UNKNOWN")});
             return;
@@ -989,29 +1005,29 @@ function _calcNewIDValueOnInsDataItemWithNewID(params,callback){
  * }
  * resultCallback = function(result), result = { updateCount, error,errorMessage }
  */
-function _insDataItemWithNewID(connection,params,resultCallback){
-    if(!params){                                                                                                log.error("FAILED _insDataItemWithNewID! Reason: no parameters!");//test
+function _insDataItemWithNewID(dbCon,params,resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insDataItemWithNewID! Reason: no parameters!");//test
         resultCallback({error:"Failed insert data item with new ID! Reason:no function parameters!"});
         return;
     }
     var idFieldName= params.idFieldName;
-    if(!idFieldName){                                                                                           log.error("FAILED _insDataItemWithNewID "+params.tableName+"! Reason: no id field!");//test
+    if(!idFieldName){                                                                                           log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insDataItemWithNewID "+params.tableName+"! Reason: no id field!");//test
         resultCallback({error:"Failed insert data item with new ID! Reason:no id field name!"});
         return;
     }
     if(!params.calcNewIDValue) params.calcNewIDValue= this.calcNewIDValueOnInsDataItemWithNewID;
     var thisInstance=this;
     params.calcNewIDValue(params, function(result,params){
-        if(!result||!result.data){                                                                              log.error("FAILED _insDataItemWithNewID calcNewIDValue "+((params)?params.tableName:params)+"! Reason: no result of calcNewIDValue!");//test
+        if(!result||!result.data){                                                                              log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insDataItemWithNewID calcNewIDValue "+((params)?params.tableName:params)+"! Reason: no result of calcNewIDValue!");//test
             resultCallback({error:"Failed calc new ID value! Reason: no calc result."});
             return;
         }
-        if(result.error){                                                                                       log.error("FAILED _insDataItemWithNewID calcNewIDValue "+((params)?params.tableName:params)+"! Reason:"+result.error);//test
+        if(result.error){                                                                                       log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insDataItemWithNewID calcNewIDValue "+((params)?params.tableName:params)+"! Reason:"+result.error);//test
             resultCallback({error:result.error,errorMessage:result.errorMessage});
             return;
         }
         params.insData= result.data;//equals
-        thisInstance.insDataItem(connection, {tableName:params.tableName, insData:params.insData}, function(result){
+        thisInstance.insDataItem(dbCon, {tableName:params.tableName, insData:params.insData}, function(result){
             if(result&&result.updateCount>0) result.resultItem= params.insData;
             resultCallback(result);
         });
@@ -1025,21 +1041,21 @@ function _insDataItemWithNewID(connection,params,resultCallback){
  * }
  * resultCallback = function(result), result = { updateCount, error,errorMessage })
  */
-function _updDataItem(connection, params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _updDataItem! Reason: no parameters!");//test
+function _updDataItem(dbCon, params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _updDataItem! Reason: no parameters!");//test
         resultCallback({error:"Failed update data item! Reason:no function parameters!"});
         return;
     }
     if(!params.tableName&&this.source) params.tableName=this.source;
-    if(!params.tableName){                                                                                      log.error("FAILED _updDataItem! Reason: no table name!");//test
+    if(!params.tableName){                                                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _updDataItem! Reason: no table name!");//test
         resultCallback({error:"Failed update data item! Reason:no table name for update!"});
         return;
     }
-    if(!params.updData){                                                                                        log.error("FAILED _updDataItem "+params.tableName+"! Reason: no data for update!");//test
+    if(!params.updData){                                                                                        log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _updDataItem "+params.tableName+"! Reason: no data for update!");//test
         resultCallback({error:"Failed update data item! Reason:no data for update!"});
         return;
     }
-    if(!params.conditions){                                                                                     log.error("FAILED _updDataItem "+params.tableName+"! Reason: no conditions!");//test
+    if(!params.conditions){                                                                                     log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _updDataItem "+params.tableName+"! Reason: no conditions!");//test
         resultCallback({error:"Failed update data item! Reason:no update conditions!"});
         return;
     }
@@ -1060,7 +1076,7 @@ function _updDataItem(connection, params, resultCallback){
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     updQuery+= " where "+queryConditions;
-    database.executeParamsQuery(connection,updQuery,fieldsValues,function(err,updateCount){
+    database.executeParamsQuery(dbCon,updQuery,fieldsValues,function(err,updateCount){
         if(err){
             resultCallback({error:err.message,errorMessage:"Failed update data item! Reason:"+err.message});
             return;
@@ -1076,36 +1092,36 @@ function _updDataItem(connection, params, resultCallback){
  * }
  * resultCallback = function(result), result = { updateCount, resultItem, error } )
  */
-function _storeDataItem(connection, params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _storeDataItem! Reason: no parameters!");//test
+function _storeDataItem(dbCon, params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeDataItem! Reason: no parameters!");//test
         resultCallback({ error:"Failed store data item! Reason:no function parameters!"});
         return;
     }
     if(!params.tableName) params.tableName= this.source;
-    if(!params.tableName){                                                                                      log.error("FAILED _storeDataItem! Reason: no table name!");//test
+    if(!params.tableName){                                                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeDataItem! Reason: no table name!");//test
         resultCallback({ error:"Failed store data item! Reason:no table name for store!"});
         return;
     }
-    if(!params.storeData){                                                                                      log.error("FAILED _storeDataItem "+params.tableName+"! Reason: no data for store!");//test
+    if(!params.storeData){                                                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeDataItem "+params.tableName+"! Reason: no data for store!");//test
         resultCallback({error:"Failed store data item! Reason:no data for store!"});
         return;
     }
 
     var idFieldName= params.idFieldName;
-    if(!idFieldName){                                                                                           log.error("FAILED _storeDataItem "+params.tableName+"! Reason: no id field!");//test
+    if(!idFieldName){                                                                                           log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeDataItem "+params.tableName+"! Reason: no id field!");//test
         resultCallback({error:"Failed store data item! Reason:no id field name!"});
         return;
     }
     var idValue= params.storeData[idFieldName];
     if(idValue===undefined||idValue===null){//insert
-        this.insDataItemWithNewID(connection, {idFieldName:idFieldName, insData:params.storeData}, resultCallback);
+        this.insDataItemWithNewID(dbCon, {idFieldName:idFieldName, insData:params.storeData}, resultCallback);
         return;
     }
     //update
     var updData= {}, updCondition={}; updCondition[idFieldName]= params.storeData[idFieldName];
     for(var storeItemName in params.storeData)
         if(storeItemName!=idFieldName) updData[storeItemName]= params.storeData[storeItemName];
-    this.updDataItem(connection, {idFieldName:idFieldName, updData:updData, conditions:updCondition}, function(result){
+    this.updDataItem(dbCon, {idFieldName:idFieldName, updData:updData, conditions:updCondition}, function(result){
         if(result&&result.updateCount>0) result.resultItem= params.storeData;
         resultCallback(result);
     });
@@ -1116,17 +1132,17 @@ function _storeDataItem(connection, params, resultCallback){
  * }
  * resultCallback = function(result), result = { updateCount, error })
  */
-function _delDataItem(connection, params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _delDataItem! Reason: no parameters!");//test
+function _delDataItem(dbCon, params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _delDataItem! Reason: no parameters!");//test
         resultCallback({error:"Failed delete data item! Reason:no function parameters!"});
         return;
     }
     if(!params.tableName&&this.source) params.tableName=this.source;
-    if(!params.tableName){                                                                                      log.error("FAILED _delDataItem! Reason: no table name!");//test
+    if(!params.tableName){                                                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _delDataItem! Reason: no table name!");//test
         resultCallback({error:"Failed delete data item! Reason:no table name for delete!"});
         return;
     }
-    if(!params.conditions){                                                                                     log.error("FAILED _delDataItem "+params.tableName+"! Reason: no conditions!");//test
+    if(!params.conditions){                                                                                     log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _delDataItem "+params.tableName+"! Reason: no conditions!");//test
         resultCallback({error:"Failed delete data item! Reason:no delete conditions!"});
         return;
     }
@@ -1138,7 +1154,7 @@ function _delDataItem(connection, params, resultCallback){
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     delQuery+= " where "+queryConditions;
-    database.executeParamsQuery(connection,delQuery,fieldsValues,function(err,updateCount){
+    database.executeParamsQuery(dbCon,delQuery,fieldsValues,function(err,updateCount){
         var delResult= {};
         if(err){
             delResult.error="Failed delete data item! Reason:"+err.message;
@@ -1150,7 +1166,34 @@ function _delDataItem(connection, params, resultCallback){
         resultCallback(delResult);
     });
 }
+/**
+ * checkType - hasValue, isNumber, isNumberNull
+ * sErr - system error message
+ * sUErr - user error message
+ */
+function _checkDataItemVal(dataItems,dataItemName,checkType,sErr,sUErr, callback){
+    var val= dataItems[dataItemName];
+    if(checkType=="hasValue"){
+        if(val==null||val.toString().trim()==""){
+            callback({error:sErr,errorMessage:sUErr});
+            return false;
+        }
+    }else if(checkType=="isNumber"){
+        if(isNaN(val-0)){
+            callback({error:sErr,errorMessage:sUErr});
+            return false;
+        }
+        dataItems[dataItemName]= val-0;
+    }else if(checkType=="isNumberNull"){
+        if(val!=null&&isNaN(val-0)){
+            callback({error:sErr,errorMessage:sUErr});
+            return false;
+        }
+        if(val!=null) dataItems[dataItemName]= val-0;
+    }
+    return true;
 
+}
 /**
  * params = { tableName, resultFields, findByFields, idFieldName,
  *      fieldsValues = {<tableFieldName>:<value>,<tableFieldName>:<value>,<tableFieldName>:<value>,...},
@@ -1160,24 +1203,24 @@ function _delDataItem(connection, params, resultCallback){
  * resultCallback = function(result), result = { resultItem, error } )
  * result.resultItem = fieldsDefValues where no fieldsValues or values of fieldsValues item is undefined
  */
-function _findDataItemByOrCreateNew(connection, params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _findDataItemByOrCreateNew! Reason: no parameters!");//test
+function _findDataItemByOrCreateNew(dbCon, params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _findDataItemByOrCreateNew! Reason: no parameters!");//test
         resultCallback({error:"Failed find/create data item! Reason:no function parameters!"});
         return;
     }
-    if(!params.resultFields||!params.resultFields.length){                                                      log.error("FAILED _findDataItemByOrCreateNew! Reason: no result fields!");//test
+    if(!params.resultFields||!params.resultFields.length){                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _findDataItemByOrCreateNew! Reason: no result fields!");//test
         resultCallback({error:"Failed find/create data item! Reason:no result fields!"});
         return;
     }
-    if(!params.findByFields||!params.findByFields.length){                                                      log.error("FAILED _findDataItemByOrCreateNew! Reason: no fields for find condition!");//test
+    if(!params.findByFields||!params.findByFields.length){                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _findDataItemByOrCreateNew! Reason: no fields for find condition!");//test
         resultCallback({error:"Failed find/create data item! Reason:no fields for find condition!"});
         return;
     }
-    if(!params.idFieldName){                                                                                    log.error("FAILED _findDataItemByOrCreateNew! Reason: no id field!");//test
+    if(!params.idFieldName){                                                                                    log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _findDataItemByOrCreateNew! Reason: no id field!");//test
         resultCallback({error:"Failed find/create data item! Reason:no id field!"});
         return;
     }
-    if(!params.fieldsValues){                                                                                   log.error("FAILED _findDataItemByOrCreateNew! Reason: no fields values!");//test
+    if(!params.fieldsValues){                                                                                   log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _findDataItemByOrCreateNew! Reason: no fields values!");//test
         resultCallback({error:"Failed find/create data item! Reason:no fields values!"});
         return;
     }
@@ -1195,13 +1238,13 @@ function _findDataItemByOrCreateNew(connection, params, resultCallback){
         return;
     }
     var thisInstance=this;
-    this.getDataItem(connection, {fields:params.resultFields,conditions:findCondition}, function(result){
+    this.getDataItem(dbCon, {fields:params.resultFields,conditions:findCondition}, function(result){
         if(result.error){
             resultCallback({error:"Failed find/create data item! Reason:"+result.error});
             return;
         }
         if(!result.item){
-            thisInstance.insDataItemWithNewID(connection,
+            thisInstance.insDataItemWithNewID(dbCon,
                 {idFieldName:params.idFieldName,insData:params.fieldsValues,calcNewIDValue:params.calcNewIDValue},
                 resultCallback);
             return;
@@ -1216,22 +1259,22 @@ function _findDataItemByOrCreateNew(connection, params, resultCallback){
  * }
  * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
  */
-function _insTableDataItem(connection, params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _insTableDataItem! Reason: no parameters!");//test
+function _insTableDataItem(dbCon, params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insTableDataItem! Reason: no parameters!");//test
         resultCallback({error:"Failed insert table data item! Reason:no parameters!"});
         return;
     }
     if(!params.tableName&&this.source) params.tableName=this.source;
-    if(!params.tableName){                                                                                      log.error("FAILED _insTableDataItem! Reason: no table name!");//test
+    if(!params.tableName){                                                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insTableDataItem! Reason: no table name!");//test
         resultCallback({error:"Failed insert table data item! Reason:no table name!"});
         return;
     }
-    if(!params.insTableData){                                                                                   log.error("FAILED _insTableDataItem "+params.tableName+"! Reason: no data for insert!");//test
+    if(!params.insTableData){                                                                                   log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insTableDataItem "+params.tableName+"! Reason: no data for insert!");//test
         resultCallback({error:"Failed insert table data item! Reason:no data for insert!"});
         return;
     }
     var idFieldName= params.idFieldName, idFields= params.idFields;
-    if(!idFieldName&&!idFields){                                                                                log.error("FAILED _insTableDataItem "+params.tableName+"! Reason: no id field!");//test
+    if(!idFieldName&&!idFields){                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _insTableDataItem "+params.tableName+"! Reason: no id field!");//test
         resultCallback({error:"Failed insert table data item! Reason:no id fields name!"});
         return;
     }
@@ -1247,7 +1290,7 @@ function _insTableDataItem(connection, params, resultCallback){
         }
     } else params.insData= params.insTableData;
     var thisInstance=this;
-    _insDataItem(connection, params, function(insResult){
+    _insDataItem(dbCon, params, function(insResult){
         if(insResult.error){
             resultCallback(insResult);
             return;
@@ -1262,7 +1305,7 @@ function _insTableDataItem(connection, params, resultCallback){
                 var idFieldNameItem=idFields[i];
                 getResultConditions[params.tableName+"."+idFieldNameItem+"="]=params.insTableData[idFieldNameItem];
             }
-        thisInstance.getDataItemForTable(connection, {source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
+        thisInstance.getDataItemForTable(dbCon, {source:params.tableName, tableColumns:params.tableColumns, conditions:getResultConditions},
             function(result){
                 if(result.error) insResult.error= "Failed get result inserted data item! Reason:"+result.error;
                 if(result.item) insResult.resultItem= result.item;
@@ -1283,22 +1326,22 @@ function _insTableDataItem(connection, params, resultCallback){
  * if exists resultItemConditions resultItem data returned by resultItemConditions
  * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error })
  */
-function _updTableDataItem(connection, params, resultCallback){
-    if(!params) {                                                                                               log.error("FAILED _updTableDataItem! Reason: no parameters!");//test
+function _updTableDataItem(dbCon, params, resultCallback){
+    if(!params) {                                                                                               log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _updTableDataItem! Reason: no parameters!");//test
         resultCallback({error:"Failed update table data item! Reason:no function parameters!"});
         return;
     }
     if(!params.tableName&&this.source) params.tableName=this.source;
-    if(!params.tableName) {                                                                                     log.error("FAILED _updTableDataItem! Reason: no table name!");//test
+    if(!params.tableName) {                                                                                     log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _updTableDataItem! Reason: no table name!");//test
         resultCallback({error:"Failed update table data item! Reason:no table name!"});
         return;
     }
-    if(!params.updTableData&&!params.updTableFieldsData){                                                       log.error("FAILED _updTableDataItem "+params.tableName+"! Reason: no data for update!");//test
+    if(!params.updTableData&&!params.updTableFieldsData){                                                       log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _updTableDataItem "+params.tableName+"! Reason: no data for update!");//test
         resultCallback({error:"Failed update table data item! Reason:no data for update!"});
         return;
     }
     var idFieldName= params.idFieldName,idFields= params.idFields;
-    if(!idFieldName&&!idFields){                                                                                log.error("FAILED _updTableDataItem "+params.tableName+"! Reason: no id field!");//test
+    if(!idFieldName&&!idFields){                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _updTableDataItem "+params.tableName+"! Reason: no id field!");//test
         resultCallback({error:"Failed update table data item! Reason:no id fields name!"});
         return;
     }
@@ -1336,9 +1379,9 @@ function _updTableDataItem(connection, params, resultCallback){
             params.conditions[params.tableName+"."+idFieldNameItem+"="]= idFieldVal;
         }
     var thisInstance=this;
-    _updDataItem(connection, params, function(updResult){
+    _updDataItem(dbCon, params, function(updResult){
         if(updResult.error){ resultCallback(updResult); return; }
-        thisInstance.getDataItemForTable(connection, {source:params.tableName, tableColumns:params.tableColumns, conditions:params.resultItemConditions||params.conditions},
+        thisInstance.getDataItemForTable(dbCon, {source:params.tableName, tableColumns:params.tableColumns, conditions:params.resultItemConditions||params.conditions},
             function(result){
                 if(result.error) updResult.error= "Failed get result updated data item! Reason:"+result.error;
                 if(result.item) updResult.resultItem= result.item;
@@ -1360,37 +1403,37 @@ function _calcNewIDValueOnStoreTableDataItem(params, callback){
  * }
  * resultCallback = function(result), result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
  */
-function _storeTableDataItem(connection,params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _storeTableDataItem! Reason: no parameters!");//test
+function _storeTableDataItem(dbCon,params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeTableDataItem! Reason: no parameters!");//test
         resultCallback({error:"Failed store table data item! Reason:no function parameters!"});
         return;
     }
     if(!params.tableName) params.tableName= this.source;
-    if(!params.tableName){                                                                                      log.error("FAILED _storeTableDataItem! Reason: no table name!");//test
+    if(!params.tableName){                                                                                      log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeTableDataItem! Reason: no table name!");//test
         resultCallback({error:"Failed store table data item! Reason:no table name for store!"});
         return;
     }
-    if(!params.storeTableData){                                                                                 log.error("FAILED _storeTableDataItem "+params.tableName+"! Reason: no data for store!");//test
+    if(!params.storeTableData){                                                                                 log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeTableDataItem "+params.tableName+"! Reason: no data for store!");//test
         resultCallback({error:"Failed store table data item! Reason:no data for store!"});
         return;
     }
     var idFieldName= params.idFieldName,idFields= params.idFields;
-    if(!idFieldName&&!idFields){                                                                                log.error("FAILED _storeTableDataItem "+params.tableName+"! Reason: no id field!");//test
+    if(!idFieldName&&!idFields){                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeTableDataItem "+params.tableName+"! Reason: no id field!");//test
         resultCallback({error:"Failed store table data item! Reason:no id fields name!"});
         return;
     }
-    if(!params.tableColumns){                                                                                   log.error("FAILED _storeTableDataItem "+params.tableName+"! Reason: no table columns!");//test
+    if(!params.tableColumns){                                                                                   log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _storeTableDataItem "+params.tableName+"! Reason: no table columns!");//test
         resultCallback({error:"Failed store table data item! Reason:no table columns!"});
         return;
     }
     var isInsert=false;
     if(idFieldName){
         var idValue=params.storeTableData[idFieldName];
-        isInsert= (idValue===undefined||idValue===null);
+        isInsert= (idValue==null);
     }else{
         for(var i in idFields){
             var idFieldNameItem= idFields[i], idValueItem= params.storeTableData[idFieldNameItem];
-            isInsert= (idValueItem===undefined||idValueItem===null);
+            isInsert= (idValueItem==null);
             if(isInsert) break;
         }
     }
@@ -1398,13 +1441,13 @@ function _storeTableDataItem(connection,params, resultCallback){
         if(!params.calcNewIDValue) params.calcNewIDValue= this.calcNewIDValueOnStoreTableDataItem;
         var thisInstance=this;
         params.calcNewIDValue(params, function(params){
-            thisInstance.insTableDataItem(connection, {tableName:params.tableName, idFieldName:idFieldName,idFields:idFields,
+            thisInstance.insTableDataItem(dbCon, {tableName:params.tableName, idFieldName:idFieldName,idFields:idFields,
                 tableColumns:params.tableColumns,insTableData:params.storeTableData}, resultCallback);
         });
         return;
     }
     //update
-    this.updTableDataItem(connection, {tableName:params.tableName, idFieldName:idFieldName,idFields:idFields,
+    this.updTableDataItem(dbCon, {tableName:params.tableName, idFieldName:idFieldName,idFields:idFields,
         tableColumns:params.tableColumns,updTableData:params.storeTableData}, resultCallback);
 }
 
@@ -1414,18 +1457,18 @@ function _storeTableDataItem(connection,params, resultCallback){
  * }
  * resultCallback = function(result), result = { updateCount, error })
  */
-function _delTableDataItem(connection,params, resultCallback){
-    if(!params){                                                                                                log.error("FAILED _delTableDataItem! Reason: no parameters!");//test
+function _delTableDataItem(dbCon,params, resultCallback){
+    if(!params){                                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _delTableDataItem! Reason: no parameters!");//test
         resultCallback({error:"Failed delete table data item! Reason:no function parameters!"});
         return;
     }
     if(!params.tableName) params.tableName= this.source;
-    if(!params.delTableData){                                                                                   log.error("FAILED _delTableDataItem "+params.tableName+"! Reason: no data for delete!");//test
+    if(!params.delTableData){                                                                                   log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _delTableDataItem "+params.tableName+"! Reason: no data for delete!");//test
         resultCallback({error:"Failed delete table data item! Reason:no data for delete!"});
         return;
     }
     var idFieldName= params.idFieldName,idFields= params.idFields;
-    if(!idFieldName&&!idFields){                                                                                log.error("FAILED _delTableDataItem "+params.tableName+"! Reason: no id field!");//test
+    if(!idFieldName&&!idFields){                                                                                log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _delTableDataItem "+params.tableName+"! Reason: no id field!");//test
         resultCallback({error:"Failed delete table data item! Reason:no id fields name!"});
         return;
     }
@@ -1441,7 +1484,7 @@ function _delTableDataItem(connection,params, resultCallback){
             params.conditions[params.tableName+"."+idFieldsNameItem+"="]= idFieldValueItem;
             resultItem[idFieldsNameItem]= idFieldValueItem;
         }
-    _delDataItem(connection,params, function(delResult){
+    _delDataItem(dbCon,params, function(delResult){
         if(delResult.updateCount==1) delResult.resultItem= resultItem;
         resultCallback(delResult);
     });

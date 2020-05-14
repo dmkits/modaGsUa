@@ -1,0 +1,387 @@
+<!--suppress ALL, JSAnnotator -->
+<template>
+<div class="page page-with-subnavbar" data-name="pageRecDProdSrcData">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link back">
+                    <i class="icon icon-back"></i><i class="icon icon-back"></i>
+                    <!--<span class="ios-only">Назад</span>-->
+                </a>
+            </div>
+            <div class="title docHeaderTitle">
+                <span class="title docHeaderTitle">{{#if actionAddNewPosition}}Новая позиция{{/if}}{{#if actionEditPosition}}Изменение позиции {{srcPosData.SrcPosID}}{{/if}}{{#if actionDeletePosition}}Удаление позиции {{srcPosData.SrcPosID}}{{/if}}{{#if actionUnknown}}Неизвестная операция позиции {{srcPosData.SrcPosID}}{{/if}}</span><br>
+                <span style="font-size:14px;font-weight:normal"> прихода товара {{docData.DocID}} от {{docData.SDocDate}}</span>
+            </div>
+            <div class="subnavbar docHeaderTitle" id="pageRecDProdSrcDataToolbar" style="width:100%;border-top-style:solid;border-top-width:1px">
+                <div class="subnavbar-inner">
+                    <div class="row" style="padding-left:16px;padding-right:16px;width:100%">
+                        <button class="col button button-outline button-round" id="pageRecDProdSrcDataBtnStore">Сохранить</button>
+                        <button class="col button button-outline button-round" id="pageRecDProdSrcDataBtnCancel">Отменить</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="page-content pageContentProdSrcData" id="pageContentRecDProdSrcData">
+        <div class="list inline-labels" style="margin-top:0;font-size:14px">
+            <div class="block-header" style="margin-top:10px;margin-bottom:0">Атрибуты товара</div>
+            <ul>
+                <li>
+                    <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_Article1">
+                        <!--<input type="text">-->
+                        <div class="item-inner pageContentProdDataItemInner">
+                            <div class="item-title item-label">Артикул 1:</div>
+                            <div class="item-after">
+                                <input id="pageContentRecDProdSrcData_inputArticle1" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_PCatName">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Брэнд товара:</div>
+                            <div class="item-after">
+                                <input id="pageContentRecDProdSrcData_inputPCatName" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_PGrName">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Коллекция товара:</div>
+                            <div class="item-after">
+                                <input id="pageContentRecDProdSrcData_inputPGrName" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_PGrName1">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Линия товара:</div>
+                            <div class="item-after">
+                                <input id="pageContentRecDProdSrcData_inputPGrName1" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_PGrName2">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Тип товара:</div>
+                            <div class="item-after">
+                                <input id="pageContentRecDProdSrcData_inputPGrName2" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_PGrName3">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Вид товара:</div>
+                            <div class="item-after">
+                                <input id="pageContentRecDProdSrcData_inputPGrName3" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_ColorName">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Цвет товара:</div>
+                            <div class="item-after">
+                                <input id="pageContentRecDProdSrcData_inputColorName" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_SizeName">
+                        <div class="item-inner">
+                            <div class="item-title item-label">Размер товара:</div>
+                            <div class="item-after">
+                                <input id="pageContentRecDProdSrcData_inputSizeName" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+            <div class="block-header" style="margin-top:10px;margin-bottom:0">Данные товара</div>
+            <ul>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Наименование товара</div>
+                        <div class="item-input-wrap">
+                            <input id="pageContentRecDProdSrcData_inputProdName" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                            <!--<span class="input-clear-button"></span>-->
+                        </div>
+                    </div>
+                </li>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Ед.изм. товара</div>
+                        <div class="item-input-wrap">
+                            <input id="pageContentRecDProdSrcData_inputUM" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                        </div>
+                    </div>
+                </li>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Код товара</div>
+                        <div class="item-input-wrap">
+                            <input id="pageContentRecDProdSrcData_inputProdID" type="text" validate pattern="[0-9]*" data-error-message="Должно быть числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                        </div>
+                    </div>
+                </li>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Штрихкод товара</div>
+                        <div class="item-input-wrap">
+                            <input id="pageContentRecDProdSrcData_inputBarcode" type="text" validate pattern="[0-9]*" data-error-message="Должно быть числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                        </div>
+                    </div>
+                </li>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Кол-во прихода</div>
+                        <div class="item-input-wrap">
+                            <input id="pageContentRecDProdSrcData_inputQty" type="text" required validate pattern="[0-9.]*" data-error-message="Обязательно должно быть указано числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                        </div>
+                    </div>
+                </li>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Цена прихода, грн</div>
+                        <div class="item-input-wrap">
+                            <input id="pageContentRecDProdSrcData_inputPriceCC_wt" type="text" required validate pattern="[0-9.]*" data-error-message="Обязательно должно быть указано числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                        </div>
+                    </div>
+                </li>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Наценка, %</div>
+                        <div class="item-input-wrap">
+                            <input id="pageContentRecDProdSrcData_inputExtra" type="text" required validate pattern="[0-9.]*" data-error-message="Обязательно должно быть указано числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                        </div>
+                    </div>
+                </li>
+                <li class="item-content item-input">
+                    <div class="item-inner">
+                        <div class="item-title item-label">Цена продажи, грн</div>
+                        <div class="item-input-wrap">
+                            <input id="pageContentRecDProdSrcData_inputPriceCC" type="text" required validate pattern="[0-9.]*" data-error-message="Обязательно должно быть указано числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+    return {
+        on: {
+            pageInit: function(e,page){
+                this.pageRecDProdSrcDataBtnStore= $$('#pageRecDProdSrcDataToolbar #pageRecDProdSrcDataBtnStore');
+                this.pageRecDProdSrcDataBtnCancel= $$('#pageRecDProdSrcDataToolbar #pageRecDProdSrcDataBtnCancel');
+                this.recDProdActionName= this.$route.params.action;
+                if(this.recDProdActionName=="del") this.pageRecDProdSrcDataBtnStore.text("Удалить");
+                var self=this;
+                this.pageRecDProdSrcDataBtnStore.on('click',function(){
+                    self.storeDelProdToRecD(function(recDProdData){
+                        if(!recDProdData) return;
+                        app7.data.pageRecDProdSrcData= recDProdData;
+                        app7.router.back();
+                    });
+                });
+                this.pageRecDProdSrcDataBtnCancel.on('click',function(){ app7.router.back(); });
+                this.pageContentRecDProdSrcData= $$('#pageContentRecDProdSrcData');
+                this.pageContentRecDProdSrcData_inputProdName= $$(this.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputProdName');
+                $$(this.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputPriceCC_wt').on('input',function(){
+                    var priceCC_wt=this.value, extra= $$(self.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputExtra').val(), priceCC=null;
+                    if(priceCC_wt!=null&&priceCC_wt.trim()!=""&&!isNaN(priceCC_wt-0)&&extra!=null&&extra.trim()!=""&&!isNaN(extra-0))
+                        priceCC= Math.round((priceCC_wt*(1+extra/100))*100)/100;
+                    $$(self.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputPriceCC').val(priceCC);
+                });
+                $$(this.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputExtra').on('input',function(){
+                    var extra=this.value, priceCC_wt= $$(self.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputPriceCC_wt').val(), priceCC=null;
+                    if(extra!=null&&extra.trim()!=""&&!isNaN(extra-0)&&priceCC_wt!=null&&priceCC_wt.trim()!=""&&!isNaN(priceCC_wt-0))
+                        priceCC= Math.round((priceCC_wt*(1+extra/100))*100)/100;
+                    $$(self.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputPriceCC').val(priceCC);
+                });
+                $$(this.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputPriceCC').on('input',function(){
+                    var priceCC=this.value, priceCC_wt= $$(self.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputPriceCC_wt').val(), extra=null;
+                    if(priceCC!=null&&priceCC.trim()!=""&&!isNaN(priceCC-0)&&priceCC_wt!=null&&priceCC_wt.trim()!=""&&!isNaN(priceCC_wt-0))
+                        extra= Math.round((priceCC/priceCC_wt-1)*1000)/10;
+                    $$(self.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputExtra').val(extra);
+                });
+                this.setContentState();
+                this.loadRecProdSrcData(function(){ self.setContentState(); });
+            },
+            pageAfterOut: function(e,page){
+                if(this.progressBarEl)this.$app.progressbar.hide(this.progressBarEl);
+            },
+        },
+        data: function data(){
+            var recData={};
+            if(!this.$route.params) return {docData:recData};
+            var listRecsData= app7.data.pageDocRecDocsList.listDocs, recChID=this.$route.params.recChID;
+            if(!listRecsData||recChID==null) return {docData:recData};
+            for(var ind in listRecsData){
+                var itemRecData=listRecsData[ind];
+                if(itemRecData&&itemRecData.ChID==recChID){ recData=itemRecData; break; }
+            }
+            var action=this.$route.params.action, srcPosID=this.$route.params.srcPosID;
+            if(action=="new"){
+                return {docData:recData,actionAddNewPosition:true,srcPosData:{SrcPosID:null}};
+            }else if(action=="edit"){
+                return {docData:recData,actionEditPosition:true,srcPosData:{SrcPosID:srcPosID}};
+            }else if(action=="del"){
+                return {docData:recData,actionDeletePosition:true,srcPosData:{SrcPosID:srcPosID}};
+            }
+            return {docData:recData,actionUnknown:true,srcPosData:{}};
+        },
+        methods: {
+            createContentAutocompletes: function(){
+                var self=this,
+                    autocompleteOnChangeInput= function(){
+                        self.getProdAttrsNameByArticle1(function(prodAttrsDataByArticle1,prodNameDataByAttrs){
+                            if(!prodNameDataByAttrs) return;
+                            self.getProdDataByName();
+                        });
+                    };
+                app7.createAutocomplete({openerElName:"pageContentRecDProdSrcDataAutocomplete_Article1", textProperty:"Article1",
+                    self:self, dataItemsName:"contentDataProdAttrs", onChangeInput:autocompleteOnChangeInput});
+                app7.createAutocomplete({openerElName:"pageContentRecDProdSrcDataAutocomplete_PCatName", textProperty:"PCatName",
+                    self:self, dataItemsName:"contentDataProdAttrs", onChangeInput:autocompleteOnChangeInput});
+                app7.createAutocomplete({openerElName:"pageContentRecDProdSrcDataAutocomplete_PGrName", textProperty:"PGrName",
+                    self:self, dataItemsName:"contentDataProdAttrs", onChangeInput:autocompleteOnChangeInput});
+                app7.createAutocomplete({openerElName:"pageContentRecDProdSrcDataAutocomplete_PGrName1", textProperty:"PGrName1",
+                    self:self, dataItemsName:"contentDataProdAttrs", onChangeInput:autocompleteOnChangeInput});
+                app7.createAutocomplete({openerElName:"pageContentRecDProdSrcDataAutocomplete_PGrName2", textProperty:"PGrName2",
+                    self:self, dataItemsName:"contentDataProdAttrs", onChangeInput:autocompleteOnChangeInput});
+                app7.createAutocomplete({openerElName:"pageContentRecDProdSrcDataAutocomplete_PGrName3", textProperty:"PGrName3",
+                    self:self, dataItemsName:"contentDataProdAttrs", onChangeInput:autocompleteOnChangeInput});
+                app7.createAutocomplete({openerElName:"pageContentRecDProdSrcDataAutocomplete_ColorName", textProperty:"ColorName",
+                    self:self, dataItemsName:"contentDataProdAttrs", onChangeInput:autocompleteOnChangeInput});
+                app7.createAutocomplete({openerElName:"pageContentRecDProdSrcDataAutocomplete_SizeName", textProperty:"SizeName",
+                    self:self, dataItemsName:"contentDataProdAttrs", onChangeInput:autocompleteOnChangeInput});
+            },
+            setContentState: function(){
+                if(this.recDProdActionName=="del"){
+                    $$(this.pageContentRecDProdSrcData).find("input").attr("disabled",true);
+                    return;
+                }
+                this.createContentAutocompletes();
+            },
+            loadRecProdSrcData: function(callback){
+                var recData=this.docData, recChID=recData.ChID;
+                if(recChID===null||recChID===undefined) return;
+                var srcPosID= (this.srcPosData)?this.srcPosData["SrcPosID"]:null, self=this;
+                app7.preloader.show();
+                app7.srvRequestJSON({url:'/mobile/docRec/getDataForRecDSrcPos',conditions:{'docChID=':recChID,"SrcPosID=":srcPosID},
+                            errorDialogMsg:"Не удалось получить данные товара из прихода товара с сервера!"},
+                        function(result,error){
+                            app7.preloader.hide();
+                            var resultItem= (result)?result.item:null;
+                            self.contentData= resultItem; self.contentDataProdAttrs= (result)?result.itemsProdAttrs:null;
+                            self.fillRecDProdSrcData(resultItem);
+                            if(callback) callback(resultItem);
+                        });
+            },
+            fillProdDataByArticle1: function(prodSrcData){
+                this.setContentProdSrcData(prodSrcData,"PCatName");
+                this.setContentProdSrcData(prodSrcData,"PGrName"); this.setContentProdSrcData(prodSrcData,"PGrName1");
+                this.setContentProdSrcData(prodSrcData,"PGrName2"); this.setContentProdSrcData(prodSrcData,"PGrName3");
+            },
+            fillProdNameUM: function(prodData){
+                this.setContentProdSrcData(prodData,"ProdName"); this.setContentProdSrcData(prodData,"UM");
+            },
+            fillProdDataByName: function(prodData){
+                this.setContentProdSrcData(prodData,"ProdID"); this.setContentProdSrcData(prodData,"Barcode");
+            },
+            fillProdData: function(prodData){
+                this.fillProdDataByArticle1(prodData);
+                this.setContentProdSrcData(prodData,"ColorName"); this.setContentProdSrcData(prodData,"SizeName");
+                this.fillProdNameUM(prodData);
+                this.fillProdDataByName(prodData);
+                this.setContentProdSrcData(prodData,"Article1");
+            },
+            fillRecDProdSrcData: function(recProdSrcData){
+                this.fillProdData(recProdSrcData);
+                this.setContentProdSrcData(recProdSrcData,"PriceCC_wt"); this.setContentProdSrcData(recProdSrcData,"Qty");
+                this.setContentProdSrcData(recProdSrcData,"Extra"); this.setContentProdSrcData(recProdSrcData,"PriceCC");
+            },
+            setContentProdSrcData: function(prodSrcData,dataItemName){
+                var val= (prodSrcData)?prodSrcData[dataItemName]:null;
+                $$('#pageContentRecDProdSrcData #pageContentRecDProdSrcData_input'+dataItemName).val(val);
+            },
+            getProdSrcData: function(){
+                var prodSrcData={};
+                prodSrcData["ProdID"]= this.getContentProdSrcData("ProdID"); prodSrcData["Barcode"]= this.getContentProdSrcData("Barcode");
+                prodSrcData["ProdName"]= this.getContentProdSrcData("ProdName"); prodSrcData["UM"]= this.getContentProdSrcData("UM");
+                prodSrcData["PriceCC_wt"]= this.getContentProdSrcData("PriceCC_wt"); prodSrcData["Qty"]= this.getContentProdSrcData("Qty");
+                prodSrcData["Extra"]= this.getContentProdSrcData("Extra"); prodSrcData["PriceCC"]= this.getContentProdSrcData("PriceCC");
+                prodSrcData["Article1"]= this.getContentProdSrcData("Article1");
+                prodSrcData["PCatName"]= this.getContentProdSrcData("PCatName");
+                prodSrcData["PGrName"]= this.getContentProdSrcData("PGrName"); prodSrcData["PGrName1"]= this.getContentProdSrcData("PGrName1");
+                prodSrcData["PGrName2"]= this.getContentProdSrcData("PGrName2"); prodSrcData["PGrName3"]= this.getContentProdSrcData("PGrName3");
+                prodSrcData["ColorName"]= this.getContentProdSrcData("ColorName"); prodSrcData["SizeName"]= this.getContentProdSrcData("SizeName");
+                return prodSrcData;
+            },
+            getContentProdSrcData: function(dataItemName){
+                return $$('#pageContentRecDProdSrcData #pageContentRecDProdSrcData_input'+dataItemName).val();
+            },
+            /**
+             * callback= function(prodAttrsDataByArticle1,prodNameDataByAttrs)
+             */
+            getProdAttrsNameByArticle1: function(callback){
+                var self=this;
+                app7.preloader.show();
+                app7.srvRequestJSON({url:'/docsProdsRec/getProdAttrsAndNameByArticle1',data:this.getProdSrcData(),
+                            errorDialogMsg:"Не удалось получить данные товара по артикулу 1 с сервера!"},
+                        function(result,error){
+                            app7.preloader.hide();
+                            var resultItem= (result)?result.item:null, resultItemProdName= (result)?result.itemProdName:null;
+                            if(resultItem) self.fillProdDataByArticle1(resultItem);
+                            self.fillProdNameUM(resultItemProdName);
+                            self.fillRecDProdSrcData((result)?result.itemProdLastRecPrice:null);
+                            if(callback) callback(resultItem,resultItemProdName);
+                        });
+            },
+            getProdDataByName: function(callback){
+                var prodNameVal= this.pageContentRecDProdSrcData_inputProdName.val(), self=this;
+                app7.preloader.show();
+                app7.srvRequestJSON({url:'/dirsProds/getProdDataByProdBarcodeIDName',data:{"ProdName=":prodNameVal},
+                            errorDialogMsg:"Не удалось получить данные товара по имени товара с сервера!"},
+                        function(result,error){
+                            app7.preloader.hide();
+                            var resultItem= (result)?result.item:null;
+                            if(resultItem) self.fillProdData(resultItem); else self.fillProdDataByName(resultItem);
+                            if(callback) callback(resultItem);
+                        });
+            },
+            /**
+             * callback = function(recDProdData,err)
+             */
+            storeDelProdToRecD:function(callback){
+                var self=this,
+                    url= (this.recDProdActionName!="del")?"/mobile/docRec/storeProdDataToRecD":"/mobile/docRec/delProdDataFromRecD",
+                    data={docChID:this.docData.ChID, prodData:this.getProdSrcData()},
+                    actionNameMsg= (this.recDProdActionName!="del")?"сохранить товар в приход товара":"удалить товар из прихода товара",
+                    srcPosID= (this.srcPosData)?this.srcPosData["SrcPosID"]:null;
+                if(srcPosID!=null&&data.prodData) data.prodData["SrcPosID"]= srcPosID;
+                app7.preloader.show();
+                app7.srvPostRequestJSON({url:url,data:data,userErrorMsg:"Не удалось "+actionNameMsg+"!"},
+                        function(result,errmsg){
+                            app7.preloader.hide();// Hide Preloader
+                            callback((result)?result.resultItem:null);
+                        })
+            }
+        }
+    }
+</script>

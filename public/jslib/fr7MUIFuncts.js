@@ -8,6 +8,7 @@ var framework7MUIFunctions= {
         app7.innerPageFillTableDataProgress= this.innerPageFillTableDataProgress;
         app7.setDocumentKeyActions= this.setDocumentKeyActions;
         app7.getVListTemplate= this.getVListTemplate;
+        app7.createAutocomplete= this.createAutocomplete;
     },
     /**
      * params = { method, url, data/conditions, showRequestErrorDialog, errorDialogMsg }
@@ -176,11 +177,19 @@ var framework7MUIFunctions= {
                 };
             }else if(rowSelecting)
                 newTR.onclick= selectOnClickFunction;
+
             for(var newTD of newTR.children){
                 var contentTableDataItemName= newTD.getAttribute("dataItemName"), val;
-                if(contentTableDataItemName!==undefined) val= contentTableDataItem[contentTableDataItemName];
-                var newTDText=newTD.firstChild||newTD;
-                newTDText.innerText= (val==null)?"":val.toString();
+                if(contentTableDataItemName!=null){
+                    val= contentTableDataItem[contentTableDataItemName];
+                    newTD.innerText= (val==null)?"":val.toString();
+                }else{
+                    for(var newTDchildNode of newTD.childNodes){
+                        contentTableDataItemName= newTDchildNode.getAttribute("dataItemName");
+                        if(contentTableDataItemName!==undefined) val= contentTableDataItem[contentTableDataItemName];
+                        newTDchildNode.innerText= (val==null)?"":val.toString();
+                    }
+                }
                 var tdOnCreatedMethodName= newTD.getAttribute("onCreated"), tdOnClickMethodName= newTD.getAttribute("onClick");
                 if(tdOnCreatedMethodName){
                     var methods={};
@@ -373,5 +382,55 @@ var framework7MUIFunctions= {
         };
         fillElsTTextProcess(vListTemplateEl);
         return vListTemplateEl.outerHTML;
+    },
+    /**
+     * params= { openerElName, valueProperty, textProperty, limit, self, dataItemsName, dataItemName, onChangeInput }
+     *      params.self[params.dataItemsName] = [ {}, ... ],
+     *      params.onChangeInput= function()
+     *
+     */
+    createAutocomplete: function(params){
+        if(!params) return null;
+        if(!params.limit) params.limit=50;
+        params.valueProperty= params.valueProperty||params.textProperty;
+        var openerEl= "#"+params.openerElName, dataItemName= params.dataItemName||params.valueProperty;
+        var autocomplete= app7.autocomplete.create({
+            openIn: 'page', //open in page
+            openerEl: openerEl, //link that opens autocomplete
+            pageBackLinkText:"Назад",
+            expandInput:true,
+            popupCloseLinkText:"Закрыть",
+            closeOnSelect: true, //go back after we select something
+            // value:[""],
+            valueProperty:params.valueProperty,
+            textProperty:params.textProperty,
+            requestSourceOnOpen:true,
+            limit:50,
+            notFoundText:"Ничего не найдено",
+            searchbarPlaceholder:"Текст для поиска",
+            autoFocus: true,
+            searchbarDisableText:"Оменить поиск",
+            //sheetPush:true,
+            source: function(query,render){
+                var data= (params.self&&params.dataItemsName&&params.self[params.dataItemsName])?params.self[params.dataItemsName][dataItemName]:null;
+                if(query.length===0||!data||data.length==0){ render([]); return; }
+                var results = [];
+                for(var i=0;i<data.length;i++){// Find matched items
+                    var dataItem= data[i], dataItemVal= dataItem[params.textProperty];
+                    if(dataItemVal&&dataItemVal.toLowerCase().indexOf(query.toLowerCase())>=0) results.push(dataItem);
+                }
+                render(results);// Render items by passing array with result items
+            },
+            on: {
+                change: function(valueItems){
+                    var value= valueItems[0][params.textProperty];
+                    $$(openerEl).find('input').val(value);// Add item value to input value
+                    $$(openerEl).find('input')[0].focus();
+                    if(params.onChangeInput) params.onChangeInput(value,valueItems);
+                }
+            }
+        });
+        $$(openerEl+' input[type="text"]').on('input',function(){ if(params.onChangeInput) params.onChangeInput(); });
+        return autocomplete;
     }
 };

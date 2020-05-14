@@ -1,15 +1,14 @@
-var dataModel= require(appDataModelPath),database= require("../databaseMSSQL"), systemFuncs= require("../systemFuncs");
+var dataModel= require(appDataModelPath), database= require("../databaseMSSQL");
 var r_Prods= require(appDataModelPath+"r_Prods"), r_ProdMQ= require(appDataModelPath+"r_ProdMQ"),
     r_ProdC= require(appDataModelPath+"r_ProdC"), r_ProdG= require(appDataModelPath+"r_ProdG"),
     r_ProdG1= require(appDataModelPath+"r_ProdG1"), r_ProdG2= require(appDataModelPath+"r_ProdG2"),
     r_ProdG3= require(appDataModelPath+"r_ProdG3"),
     ir_ProdColors= require(appDataModelPath+"ir_ProdColors"), ir_ProdSizes= require(appDataModelPath+"ir_ProdSizes"),
-    t_PInP= require(appDataModelPath+"t_PInP"), r_DBIs= require(appDataModelPath+"r_DBIs"),
     r_CRUniInput= require(appDataModelPath+"r_CRUniInput");
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
-    dataModel.initValidateDataModels([r_Prods,r_ProdMQ,r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdColors,ir_ProdSizes,
-            t_PInP,r_DBIs,r_CRUniInput],
+    dataModel.initValidateDataModels(
+        [r_Prods,r_ProdMQ,r_ProdC,r_ProdG,r_ProdG1,r_ProdG2,r_ProdG3,ir_ProdColors,ir_ProdSizes, r_CRUniInput],
         errs, function(){ nextValidateModuleCallback(); });
 };
 
@@ -153,39 +152,9 @@ module.exports.init= function(app){
             });
     };
 
-    /**
-     *
-     * callback = function(error, prodData), error = {error,errorMessage}
-     */
-    r_Prods.getNewProdNameByAttrs= function(dbUC,prodData,callback){
-        //if_GetProdNameByMaskValues(ProdID, PCatName,PGrName1,PGrName3,PGrSName3,Article1,Article2,Article3, ColorName,ColorSName, SizeName,ValidSizes, Growth)
-        database.selectParamsQuery(dbUC,
-            "select ProdName="+
-            "LTRIM(RTRIM("+
-            "dbo.if_GetProdNameByMaskValues(@p0, @p1,@p2,@p3,@p4, @p5,@p6,@p7, @p8,@p9, @p10,@p11, @p12) ))",
-            [prodData["ProdID"], prodData["PCatName"],prodData["PGrName1"],prodData["PGrName3"],prodData["PGrSName3"],
-                prodData["Article1"],prodData["Article2"],prodData["Article3"],
-                prodData["ColorName"],prodData["ColorSName"], prodData["SizeName"],prodData["ValidSizes"], prodData["Growth"]],
-            function(err, recordset, rowsCount, fieldsTypes){
-                if(err){
-                    callback({error:err.message});
-                    return;
-                }
-                if(recordset&&recordset.length>0)prodData["ProdName"]=recordset[0]["ProdName"];
-                callback(null,prodData);
-            });
-    };
-    app.get("/dirsProds/getProdAttrsAndNameByProdData",function(req,res){
-        var prodData=req.query, prodArticle1=prodData["Article1"], sendResult={};
-        if(prodArticle1===undefined||prodArticle1===null||prodArticle1.trim()===""){
-            r_Prods.getNewProdNameByAttrs(req.dbUC,prodData,function(err,prodNameData){
-                if(prodNameData) sendResult.itemProdName={"ProdName":prodNameData["ProdName"],"UM":req.dbUserParams["DefaultUM"]};
-                if(err)sendResult.errorProdName=err;
-                res.send(sendResult);
-            });
-            return;
-        }
-        r_Prods.getDataItemsForTable(req.dbUC,{tableColumns:prodsTableColumns, conditions:{"r_Prods.Article1=":prodArticle1}},
+    r_Prods.getProdDataWithAttrsByArticle1= function(dbUC,prodData,callback){
+        var prodArticle1= prodData["Article1"], resultProdDataWithAttrs={};
+        r_Prods.getDataItemsForTable(dbUC,{tableColumns:prodsTableColumns, conditions:{"r_Prods.Article1=":prodArticle1}},
             function(result){
                 var resultProdAttrs=null;
                 if(result.items&&result.items.length>0) {
@@ -193,267 +162,11 @@ module.exports.init= function(app){
                     resultProdAttrs["PCatName"]=resultItem["PCatName"]; resultProdAttrs["PGrName"]=resultItem["PGrName"];
                     resultProdAttrs["PGrName1"]=resultItem["PGrName1"]; resultProdAttrs["PGrName2"]=resultItem["PGrName2"];
                     resultProdAttrs["PGrName3"]=resultItem["PGrName3"];
-                    for(var fieldName in resultProdAttrs) prodData[fieldName]=resultProdAttrs[fieldName];
                 }
-                if(resultProdAttrs) sendResult.item=resultProdAttrs;
-                if(result.error)sendResult.error=result.error;
-                r_Prods.getNewProdNameByAttrs(req.dbUC,prodData,function(err,prodNameData){
-                    if(prodNameData) sendResult.itemProdName={"ProdName":prodNameData["ProdName"],"UM":req.dbUserParams["DefaultUM"]};
-                    if(err)sendResult.errorProdName=err;
-                    res.send(sendResult);
-                });
+                if(resultProdAttrs) resultProdDataWithAttrs.item= resultProdAttrs;
+                if(result.error) resultProdDataWithAttrs.error= result.error;
+                callback(resultProdDataWithAttrs);
             });
-    });
-    //app.get("/dirsProds/getProdNameByAttrs",function(req,res){
-    //    var conditions={}, prodData=req.query;
-    //    r_Prods.getNewProdNameByAttrs(req.dbUC,
-    //        {"Article1":prodData["ProdArticle1"],
-    //            "PCatName":prodData["PCatName"],"PGrName":prodData["PGrName"],
-    //            "PGrName1":prodData["PGrName1"],"PGrName2":prodData["PGrName2"],"PGrName3":prodData["PGrName3"],
-    //            "ColorName":prodData["ProdColor"],"Size":prodData["ProdSize"]},
-    //        function(err,prodNameData){
-    //            if(err){
-    //                res.send({error:err});
-    //                return
-    //            }
-    //            if(prodNameData)prodData["ProdName"]=prodNameData["ProdName"];
-    //            if(prodNameData)prodData["UM"]=req.dbUserParams["DefaultUM"];
-    //            res.send({item:prodData});
-    //        });
-    //});
-    /**
-     * callback = function(result), result= { prodData, error,errorMessage }
-     */
-    r_Prods.getAttrIDorCreateNewByName= function(dbUC,params,callback){
-        if(!params||!params.prodData){
-            callback({error:"No prod attributes!",errorMessage:"Нет данных атрибутов товара для создания нового товара!"});
-            return;
-        }
-        var prodData=params.prodData;
-        var pCatID=prodData["PCatID"],pCatName=prodData["PCatName"];
-        if((pCatID===undefined||pCatID===null)&&(pCatName===undefined||pCatName===null||pCatName.trim()==="")){
-            callback({prodData:prodData, error:"No PCatID on PCatName!",errorMessage:"Не указан бренд для создания нового товара!"});
-            return;
-        }
-        r_ProdC.findDataItemByOrCreateNew(dbUC,{resultFields:["PCatID"],findByFields:["PCatName"],
-                idFieldName:"PCatID",fieldsValues:{"PCatName":pCatName},
-                calcNewIDValue:function(params,callback){
-                    r_DBIs.getNewChID(dbUC,"r_ProdC",function(chID,err){
-                        if(!err) params.insData["ChID"]=chID;
-                        r_DBIs.getNewRefID(dbUC,"r_ProdC","PCatID",function(refID,err){
-                            if(!err) params.insData["PCatID"]=refID;
-                            callback({data:params.insData},params);
-                        })
-                    })
-                }},
-            function(result){
-                if(result.error){
-                    callback({prodData:prodData, error:result.error,errorMessage:"Не удалось найти и/или создать новый бренд товара:"+pCatName+"!"});
-                    return;
-                }
-                prodData["PCatID"]=result.resultItem["PCatID"];
-                var pGrID=prodData["PGrID"],pGrName=prodData["PGrName"];
-                if((pGrID===undefined||pGrID===null)&&(pGrName===undefined||pGrName===null||pGrName.trim()==="")){
-                    callback({prodData:prodData, error:"No PGrID on PGrName!",errorMessage:"Не указана коллекция для создания нового товара!"});
-                    return;
-                }
-                r_ProdG.findDataItemByOrCreateNew(dbUC,{resultFields:["PGrID"],findByFields:["PGrName"],
-                        idFieldName:"PGrID",fieldsValues:{"PGrName":pGrName},
-                        calcNewIDValue:function(params,callback){
-                            r_DBIs.getNewChID(dbUC,"r_ProdG",function(chID,err){
-                                if(!err){ params.insData["ChID"]=chID; }
-                                r_DBIs.getNewRefID(dbUC,"r_ProdG","PGrID",function(refID,err){
-                                    if(!err) params.insData["PGrID"]=refID;
-                                    callback({data:params.insData},params);
-                                })
-                            })
-                        }},
-                    function(result){
-                        if(result.error){
-                            callback({prodData:prodData, error:result.error,errorMessage:"Не удалось найти и/или создать новую коллекцию товара:"+pGrName+"!"});
-                            return;
-                        }
-                        prodData["PGrID"]=result.resultItem["PGrID"];
-                        var pGrID1=prodData["PGrID1"],pGrName1=prodData["PGrName1"];
-                        if((pGrID1===undefined||pGrID1===null)&&(pGrName1===undefined||pGrName1===null||pGrName1.trim()==="")){
-                            callback({prodData:prodData, error:"No PGrID1 on PGrName1!",errorMessage:"Не указана линия для создания нового товара!"});
-                            return;
-                        }
-                        r_ProdG1.findDataItemByOrCreateNew(dbUC,{resultFields:["PGrID1"],findByFields:["PGrName1"],
-                                idFieldName:"PGrID1",fieldsValues:{"PGrName1":pGrName1},
-                                calcNewIDValue:function(params,callback){
-                                    r_DBIs.getNewChID(dbUC,"r_ProdG1",function(chID,err){
-                                        if(!err) params.insData["ChID"]=chID;
-                                        r_DBIs.getNewRefID(dbUC,"r_ProdG1","PGrID1",function(refID,err){
-                                            if(!err) params.insData["PGrID1"]=refID;
-                                            callback({data:params.insData},params);
-                                        })
-                                    })
-                                }},
-                            function(result){
-                                if(result.error){
-                                    callback({prodData:prodData, error:result.error,errorMessage:"Не удалось найти и/или создать новую линию товара:"+pGrName1+"!"});
-                                    return;
-                                }
-                                prodData["PGrID1"]=result.resultItem["PGrID1"];
-                                var pGrID2=prodData["PGrID2"],pGrName2=prodData["PGrName2"];
-                                if((pGrID2===undefined||pGrID2===null)&&(pGrName2===undefined||pGrName2===null||pGrName2.trim()==="")){
-                                    callback({prodData:prodData, error:"No PGrID2 on PGrName2!",errorMessage:"Не указан тип для создания нового товара!"});
-                                    return;
-                                }
-                                r_ProdG2.findDataItemByOrCreateNew(dbUC,{resultFields:["PGrID2"],findByFields:["PGrName2"],
-                                        idFieldName:"PGrID2",fieldsValues:{"PGrName2":pGrName2},
-                                        calcNewIDValue:function(params,callback){
-                                            r_DBIs.getNewChID(dbUC,"r_ProdG2",function(chID,err){
-                                                if(!err) params.insData["ChID"]=chID;
-                                                r_DBIs.getNewRefID(dbUC,"r_ProdG2","PGrID2",function(refID,err){
-                                                    if(!err) params.insData["PGrID2"]=refID;
-                                                    callback({data:params.insData},params);
-                                                })
-                                            })
-                                        }},
-                                    function(result){
-                                        if(result.error){
-                                            callback({prodData:prodData, error:result.error,errorMessage:"Не удалось найти и/или создать новый тип товара:"+pGrName2+"!"});
-                                            return;
-                                        }
-                                        prodData["PGrID2"]=result.resultItem["PGrID2"];
-                                        var pGrID3=prodData["PGrID3"],pGrName3=prodData["PGrName3"];
-                                        if((pGrID3===undefined||pGrID3===null)&&(pGrName3===undefined||pGrName3===null||pGrName3.trim()==="")){
-                                            callback({prodData:prodData, error:"No PGrID3 on PGrName3!",errorMessage:"Не указан вид для создания нового товара!"});
-                                            return;
-                                        }
-                                        r_ProdG3.findDataItemByOrCreateNew(dbUC,{resultFields:["PGrID3"],findByFields:["PGrName3"],
-                                                idFieldName:"PGrID3",fieldsValues:{"PGrName3":pGrName3},
-                                                calcNewIDValue:function(params,callback){
-                                                    r_DBIs.getNewChID(dbUC,"r_ProdG3",function(chID,err){
-                                                        if(!err) params.insData["ChID"]=chID;
-                                                        r_DBIs.getNewRefID(dbUC,"r_ProdG3","PGrID3",function(refID,err){
-                                                            if(!err) params.insData["PGrID3"]=refID;
-                                                            callback({data:params.insData},params);
-                                                        })
-                                                    })
-                                                }},
-                                            function(result){
-                                                if(result.error){
-                                                    callback({prodData:prodData, error:result.error,errorMessage:"Не удалось найти и/или создать новый вид товара:"+pGrName3+"!"});
-                                                    return;
-                                                }
-                                                prodData["PGrID3"]=result.resultItem["PGrID3"];
-                                                r_Prods.getColorOrCreateNew(dbUC,prodData,function(result){
-                                                    if(result&&result.error){ callback(result); return; }
-                                                    r_Prods.setSizeOrCreateNew(dbUC,prodData,function(result){
-                                                        if(result&&result.error){ callback(result); return; }
-                                                        callback({prodData:prodData});
-                                                    })
-                                                });
-                                            })
-                                    })
-                            })
-                    })
-            })
-    };
-
-    /**
-     * callback = function(result = {prodData, error,errorMessage})
-     */
-    r_Prods.getColorOrCreateNew= function(dbUC,prodData,callback){
-        var colorID=prodData["ColorID"],colorName=prodData["ColorName"];
-        if((colorID===undefined||colorID===null)&&(colorName===undefined||colorName===null||colorName.trim()==="")){
-            prodData["ColorID"]=0;
-            callback({prodData:prodData});
-            return;
-        }
-        ir_ProdColors.findDataItemByOrCreateNew(dbUC, {resultFields:["ColorID"],findByFields:["ColorName"],
-                idFieldName:"ColorID",fieldsValues:{"ColorName":colorName},
-                calcNewIDValue:function(params,callback){
-                    r_DBIs.getNewChID(dbUC,"ir_ProdColors",function(chID,err){
-                        if(!err) params.insData["ChID"]=chID;
-                        r_DBIs.getNewRefID(dbUC,"ir_ProdColors","ColorID",function(refID,err){
-                            if(!err) params.insData["ColorID"]=refID;
-                            callback({data:params.insData},params);
-                        })
-                    })
-                }},
-            function(result){
-                if(result.error){
-                    callback({prodData:prodData,error:result.error,errorMessage:"Не удалось найти и/или создать новый цвет товара:"+colorName+"!"});
-                    return;
-                }
-                prodData["ColorID"]=result.resultItem["ColorID"];
-                callback({prodData:prodData});
-            })
-    };
-    /**
-     * callback = function(result = {prodData, error,errorMessage})
-     */
-    r_Prods.setSizeOrCreateNew= function(dbUC,prodData,callback){
-        var sizeName=prodData["SizeName"];
-        if(sizeName===undefined||sizeName===null||sizeName.trim()===""){
-            prodData["SizeName"]="Размер не указан";
-            callback({prodData:prodData});
-            return;
-        }
-        ir_ProdSizes.findDataItemByOrCreateNew(dbUC,
-            {resultFields:["SizeName"],findByFields:["SizeName"],idFieldName:"SizeName",fieldsValues:{"SizeName":sizeName},
-                calcNewIDValue:function(params,callback){
-                    r_DBIs.getNewChID(dbUC,"ir_ProdSizes",function(chID,err){
-                        if(!err) params.insData["ChID"]=chID;
-                        callback({data:params.insData},params);
-                    })
-                }},
-            function(result){
-                if(result.error){
-                    callback({prodData:prodData,error:result.error,errorMessage:"Не удалось найти и/или создать новый размер товара:"+sizeName+"!"});
-                    return;
-                }
-                prodData["SizeName"]=result.resultItem["SizeName"];
-                callback({prodData:prodData});
-            })
-    };
-    /**
-     * callback = function(result), result= { resultItem, error,errorMessage }
-     */
-    r_Prods.storeProdMQ=function(connection,prodPPData,callback){
-        var qty =prodPPData["Qty"];
-        if(qty===undefined)qty=1;
-        var insProdMQData={"ProdID":prodPPData["ProdID"],"UM":prodPPData["UM"],"Qty":qty,
-            "Weight":0.000,"Notes":null,"Barcode":prodPPData["Barcode"],"ProdBarcode":null,"PLID":0};
-        for(var fieldName in insProdMQData)
-            if(prodPPData[fieldName]!==undefined) insProdMQData[fieldName]=prodPPData[fieldName];
-        r_ProdMQ.insDataItem(connection,{insData:insProdMQData},
-            function(insResult){
-                if(insResult.error||insResult.updateCount!=1){ callback({error:"Failed create prodMQ!"}); return; }
-                callback({resultItem:insProdMQData});
-            });
-    };
-    /**
-     * callback = function(result), result= { resultItem, error,errorMessage }
-     */
-    r_Prods.storeProdPP=function(connection,prodPPData,callback){
-        var prodID= prodPPData["ProdID"];
-        var insProdPPData={"PPID":0,"ProdID":prodID,"PPDesc":"","Priority":0,
-            "ProdDate":null,"ProdPPDate":null,"CompID":0,"Article":"","PPWeight":0,"PPDelay":0,"IsCommission":0,
-            "PriceCC_In":0.00,"CostCC":0.00,"PriceMC":0.00, "CurrID":0, "PriceMC_In":0.00,"CostAC":0.00,
-            "File1":null,"File2":null,"File3":null, "CstProdCode":"","CstDocCode":"", "ParentDocCode":0,"ParentChID":0};
-        for(var fieldName in insProdPPData)
-            if(prodPPData[fieldName]!==undefined) insProdPPData[fieldName]=prodPPData[fieldName];
-        var ppIUD=prodPPData["PPID"];
-        if(ppIUD!==undefined){
-            t_PInP.insDataItem(connection,{insData:insProdPPData},function(insResult){
-                if(insResult.error||insResult.updateCount!=1){ callback({error:"Failed create prod PP by PPID="+ppIUD+"!"}); return; }
-                callback({resultItem:insProdPPData});
-            });
-            return;
-        }
-        r_DBIs.getNewPPID(connection,prodID,function(newPPID,err){
-            if(err){ callback({error:"Failed calc new PPID!"}); return; }
-            insProdPPData["PPID"]=newPPID;
-            t_PInP.insDataItem(connection,{insData:insProdPPData},function(insResult){
-                if(insResult.error||insResult.updateCount!=1){ callback({error:"Failed create prod PP by new PPID="+newPPID+"!"}); return; }
-                callback({resultItem:insProdPPData});
-            });
-        });
     };
     /**
      * callback = function(result), result= { resultItem, error,errorMessage }
@@ -466,87 +179,173 @@ module.exports.init= function(app){
     /**
      * callback = function(result), result= { resultItem, error,errorMessage }
      */
-    r_Prods.storeNewProdWithProdMQandProdPP0= function(dbUC,prodData,dbUserParams,callback){
-        r_Prods.getAttrIDorCreateNewByName(dbUC,prodData,function(result){
-            if(result&&result.error){
-                callback({error:"Failed get product attribute ID! Reason:"+result.error,errorMessage:result.errorMessage||result.error});
+    r_Prods.checkExistsProdID= function(dbUC,prodID,existsProdIDByProdName,prodName,callback){
+        if(!prodID || prodID==existsProdIDByProdName){ callback({}); return; }
+        r_Prods.getDataItemForTable(dbUC,{tableColumns:prodsTableColumns,conditions:{"r_Prods.ProdID=":prodID,"r_Prods.ProdName<>":prodName}},
+            function(resultFindProdByProdID){
+                if(resultFindProdByProdID.error){ callback(resultFindProdByProdID); return; }
+                if(resultFindProdByProdID.item){
+                    callback({error:"ProdID already exists!",errorMessage:"Для товара неверно указан код товара!"+
+                        " Товар с указанным кодом уже существует для товара с наименованием \""+resultFindProdByProdID.item["ProdName"]+"\""});
+                    return;
+                }
+                callback({});
+            });
+    };
+    var prodsWAllBarcodesTableColumns=[
+        {data:"ProdID", name:"ProdID", width:80, type:"text", readOnly:true, visible:false},
+        {data:"ProdName", name:"Наименование товара", width:350, type:"text" },
+        {data:"UM", name:"Осн. Ед.изм.", width:55, type:"text", align:"center" },
+        {data:"Article1", name:"Артикул1 товара", width:200, type:"text", sourceField:"Article1" },
+        {data:"Barcode", name:"Штрихкод", width:50, type:"text",
+            dataSource:"r_ProdMQ", sourceField:"barcode", linkCondition:"r_Prods.ProdID=r_ProdMQ.ProdID" },
+        {data:"BCUM", name:"Ед.изм. ШК", width:55, type:"text", align:"center", dataSource:"r_ProdMQ", sourceField:"UM" },
+        {data:"PCatName", name:"Категория товара", width:140,
+            type:"comboboxWN", sourceURL:"/dirsProds/getDataForPCatNameCombobox",
+            dataSource:"r_ProdC", sourceField:"PCatName", linkCondition:"r_ProdC.PCatID=r_Prods.PCatID"},
+        {data:"PGrName", name:"Группа товара", width:95,
+            type:"comboboxWN", sourceURL:"/dirsProds/getDataForPGrNameCombobox",
+            dataSource:"r_ProdG", sourceField:"PGrName", linkCondition:"r_ProdG.PGrID=r_Prods.PGrID"},
+        {data:"PGrName1", name:"Подгруппа 1 товара", width:90,
+            type:"comboboxWN", sourceURL:"/dirsProds/getDataForPGrName1Combobox",
+            dataSource:"r_ProdG1", sourceField:"PGrName1", linkCondition:"r_ProdG1.PGrID1=r_Prods.PGrID1"},
+        {data:"PGrName2", name:"Подгруппа 2 товара", width:140,
+            type:"comboboxWN", sourceURL:"/dirsProds/getDataForPGrName2Combobox",
+            dataSource:"r_ProdG2", sourceField:"PGrName2", linkCondition:"r_ProdG2.PGrID2=r_Prods.PGrID2"},
+        {data:"PGrName3", name:"Подгруппа 3 товара", width:150,
+            type:"comboboxWN", sourceURL:"/dirsProds/getDataForPGrName3Combobox",
+            dataSource:"r_ProdG3", sourceField:"PGrName3", linkCondition:"r_ProdG3.PGrID3=r_Prods.PGrID3"}
+    ];
+    /** find product with all product barcodes
+     * conditions = { <conditions> }
+     * callback = function(result={prodData, error,errorMessage})
+     */
+    r_Prods.findProdWAllBCsByCondition= function(dbUC,conditions,callback){
+        r_Prods.getDataItemForTable(dbUC,{tableColumns:prodsWAllBarcodesTableColumns, conditions:conditions},
+            function(result){
+                if(result&&result.error){
+                    callback({error:"Failed find r_Prods with barcode prod data by conditions! Reason:"+result.error,
+                        errorMessage:"Не удалось найти товар со штрихкодом!"});
+                    return;
+                }
+                callback({prodData:result.item});
+            });
+    };
+    /** finding product by Barcode/ProdID/ProdName
+     * findConditions = { "Barcode=":<value>, "ProdID=":<value>, "ProdName=":<value> }
+     * callback = function(result={prodData, error,errorMessage})
+     */
+    r_Prods.findProdByBCIDNameValues= function(dbUC,findConditions,callback){//finding by Barcode/ProdID/ProdName
+        var conditions={}, findByBarcode=false;
+        if(findConditions["Barcode="]){ conditions["Barcode="]= findConditions["Barcode="]; findByBarcode=true; }
+        if(findConditions["ProdID="]) conditions["r_Prods.ProdID="]= findConditions["ProdID="];
+        if(findConditions["ProdName="]) conditions["r_Prods.ProdName="]= findConditions["ProdName="];
+        r_Prods.getDataItemForTable(dbUC,{tableColumns:(findByBarcode)?prodsWAllBarcodesTableColumns:prodsTableColumns,
+                conditions:conditions},
+            function(result){
+                if(result&&result.error){
+                    callback({error:"Failed find r_Prods prod data by ProdID/ProdName/Barcode! Reason:"+result.error,
+                        errorMessage:"Не удалось найти товар по значениям (Код/Наименование/Штрихкод)!"});
+                    return;
+                }
+                callback({prodData:result.item});
+            });
+    };
+    /**
+     * params = Barcode=<value> & ProdID=<value> & ProdName=<value>
+     */
+    app.get("/dirsProds/getProdDataByProdBarcodeIDName",function(req,res){
+        r_Prods.findProdByBCIDNameValues(req.dbUC,req.query,function(findProdResult){
+            if(findProdResult&&findProdResult.error){
+                res.send({error:{error:findProdResult.error,userMesssage:findProdResult.userMesssage}});
                 return;
             }
-            var prodUM=prodData["UM"];
-            if(!prodUM||prodUM.trim()==="")prodUM=dbUserParams["DefaultUM"];
-            var insProdData={"ChID":chID,"ProdID":prodID, "ProdName":"", "UM":prodUM,
-                "Country":"", "Notes":"", "Note1":null, "Note2":null, "Note3":null,
-                "Article1":null, "Article2":null, "Article3":null, "Weight":null, "Age":null,
-                "InRems":1, "IsDecQty":0, "InStopList":0,
-                "PCatID":null, "PGrID":null, "PGrID1":null, "PGrID2":null, "PGrID3":null,
-                "ColorID":null, "SizeName":null, "ValidSizes":null,
-                "PGrAID":0, "PBGrID":0,
-                "MinPriceMC":0.00,"MaxPriceMC":0.00,"MinRem":0.000, "CstDty":0.0,"CstPrc":0.0,"CstExc":0.0,
-                "StdExtraR":0,"StdExtraE":0,"MaxExtra":0.0,"MinExtra":0.0,
-                "UseAlts":0,"UseCrts":0, "LExpSet":0,"EExpSet":0, "File1":null,"File2":null,"File3":null, "AutoSet":0,
-                "Extra1":0.0,"Extra2":0.0,"Extra3":0.0,"Extra4":0.0,"Extra5":0.0,
-                "Norma1":0.0,"Norma2":0.0,"Norma3":0.0,"Norma4":0.0,"Norma5":0.0,
-                "RecMinPriceCC":0.00,"RecMaxPriceCC":0.00,"RecStdPriceCC":0.00,"RecRemQty":0.000,
-                "PrepareTime":null, "Producer":null, "Growth":0.0, "Volume":0.0,"Length":0.0,
-                "ScaleGrID":0,"ScaleStandard":null,"ScaleConditions":null,"ScaleComponents":null};
-            for(var fieldName in insProdData) {
-                var value=prodData[fieldName];
-                if(value!==undefined)insProdData[fieldName]=value;
+            res.send({item:findProdResult.prodData});
+        });
+    });
+    /**
+     * callback = function(result), result= { resultItem, error,errorMessage }
+     */
+    r_Prods.checkExistsProdBarcode= function(dbUC,prodBarcode,prodName,callback){
+        if(prodBarcode==null){ callback({}); return; }
+        r_Prods.findProdWAllBCsByCondition(dbUC,{"Barcode=":prodBarcode},function(resultFindProdByBarcode){
+            if(resultFindProdByBarcode.error){ callback(resultFindProdByBarcode); return; }
+            if( resultFindProdByBarcode.prodData && resultFindProdByBarcode.prodData["ProdName"]!=prodName ){
+                callback({error:"Barcode already exists!",errorMessage:"Для товара неверно указан штрихкод товара!"+
+                    " Товар с указанным штрихкодом уже существует для товара с наименованием \""+resultFindProdByBarcode.prodData["ProdName"]+"\""});
+                return;
             }
-            r_Prods.insDataItemWithNewID(dbUC,{insData:insProdData,idFieldName:"ProdID",
-                    calcNewIDValue:function(params,callback){
-                        r_DBIs.getNewChID(dbUC,"r_Prods",function(newChID,err){
-                            if(err){
-                                callback({error:err.message,errorMessage:"Не удалось получить новый ключ для создания нового товара!"});
+            callback({resultItem:resultFindProdByBarcode.prodData});
+        });
+    };
+    /**
+     * prodMQData = { ProdID, Barcode, UM,Qty, Weight, Notes, ProdBarcode, PLID }
+     * callback = function(result), result= { resultItem, error,errorMessage }
+     */
+    r_Prods.addProdMQ= function(dbUC,prodMQData,callback){
+        if(!prodMQData) prodMQData={};
+        var qty= prodMQData["Qty"];
+        if(qty===undefined) qty=1;
+        var insProdMQData={"ProdID":prodMQData["ProdID"],"UM":prodMQData["UM"], "Barcode":prodMQData["Barcode"], "Qty":qty,
+            "Weight":0.000,"Notes":null,"ProdBarcode":null,"PLID":0};
+        for(var fieldName in insProdMQData)
+            if(prodMQData[fieldName]!==undefined) insProdMQData[fieldName]=prodMQData[fieldName];
+        r_ProdMQ.insDataItem(dbUC,{insData:insProdMQData}, function(resultInsProdMQ){
+            if(resultInsProdMQ.error||resultInsProdMQ.updateCount!=1){
+                callback({error:"Failed create prodMQ! Reason:"+(resultInsProdMQ.error||"UNKNOWN!")});
+                return;
+            }
+            callback({resultItem:insProdMQData});
+        });
+    };
+    /**
+     * eProdID - exists ProdID, eBCUM - exists ProdMQ UM,
+     * prodMQData = { ProdID, UM, Qty, Weight, Notes, Barcode, ProdBarcode, PLID }
+     * In this do not change ProdID!
+     * callback = function(result), result= { resultItem, error,errorMessage, resultItemUpdProdUM = {UM:<updated prod UM>} }
+     * if updated r_Prods.UM result contain resultItemUpdProdUM
+     */
+    r_Prods.updProdMQ= function(dbUC,eProdID,eBCUM,prodName,prodMQData,callback){
+        if(!eProdID){
+            callback({error:"Failed update prodMQ! No exists ProdID data!",
+                errorMessage:" Не удалось изменить штрихкод (вид упаковки) товара! Нет данных по существующему товару (Код товара)."});
+            return;
+        }
+        if(!prodMQData) prodMQData={};
+        var prodID= prodMQData["ProdID"];
+            if(eProdID!=prodID){
+            callback({error:"Failed update prodMQ! Do not change ProdID!",
+                errorMessage:" Не удалось изменить штрихкод (вид упаковки) товара! Нельзя изменять существующий код товара ШК (вида упаковки)."});
+            return;
+        }
+        var sBCUM= prodMQData["UM"], sProdBarcode= prodMQData["Barcode"];
+        r_ProdMQ.getDataItem(dbUC,{fields:["Barcode"],conditions:{"ProdID=":prodID,"UM=":sBCUM,"UM!=":eBCUM}},
+            function(resultFindProdMQByUM){
+                if(resultFindProdMQByUM.error){
+                    callback({error:"Failed update prodMQ! Cannot get Prod barcode UM by ProdID="+prodID+". Reason:"+resultFindProdMQByUM.error+"."});
+                    return;
+                }
+                if(resultFindProdMQByUM.item){
+                    callback({error:"Failed update prodMQ! UM already exists by ProdID="+prodID+".",
+                        errorMessage:"Не удалось изменить штрихкод \""+sProdBarcode+"\" для товара \""+prodName+"\"!"+" У товара уже есть указанная еденица измерениия."});
+                    return;
+                }
+                var sNewBCUM= prodMQData["UM"], updProdMQData={"Barcode":sProdBarcode, "UM":sNewBCUM}, updProdMQFields=["Qty","Weight","Notes","ProdBarcode","PLID"];
+                for(var fieldName of updProdMQFields)
+                    if(prodMQData[fieldName]!==undefined) updProdMQData[fieldName]= prodMQData[fieldName];
+                r_ProdMQ.updDataItem(dbUC,{updData:updProdMQData,conditions:{"ProdID=":prodID,"UM=":eBCUM}}, function(resultUpdProdMQ){
+                    if(resultUpdProdMQ.error||resultUpdProdMQ.updateCount!=1){ callback({error:"Failed update prodMQ!"}); return; }
+                    var resultUpdProdMQ= {resultItem:updProdMQData};
+                    r_Prods.updDataItem(dbUC,{updData:{"UM":sNewBCUM},conditions:{"ProdID=":prodID},ignoreErrorNoUpdate:true},
+                        function(resultUpdProdUM){
+                            if(resultUpdProdUM.error){
+                                callback({error:"Failed update prod UM to value=\""+sNewBCUM+"\"! Reason:"+resultUpdProdUM.error});
                                 return;
                             }
-                            params.insData["ChID"]=newChID;
-                            var prodID= params.insData["ProdID"];
-                            if(prodID&&prodID.toString().trim()!=""){ callback({data:params.insData},params); return; }
-                            r_DBIs.getNewRefID(dbUC,"r_Prods","ProdID",function(newProdID,err){
-                                if(err){
-                                    callback({error:err.message,errorMessage:"Не удалось получить новый код для создания нового товара!"});
-                                    return;
-                                }
-                                params.insData["ProdID"]= newProdID;
-                                callback({data:params.insData},params)
-                            });
-                        });
-                    }
-                },
-                function(resultStoreProd){
-                    if(!resultStoreProd.resultItem||resultStoreProd.error||!resultStoreProd.updateCount>0){
-                        callback({updateCount:resultStoreProd.updateCount, error:resultStoreProd.error,errorMessage:"Не удалось создать новый товар!"});
-                        return;
-                    }
-                    var resultItem= resultStoreProd.resultItem, prodID= resultItem["ProdID"], barcode= prodData["Barcode"];
-                    if(barcode===undefined||barcode===null||barcode.trim()==""){
-                        var iProdID=parseInt(prodID);
-                        if(isNaN(iProdID)){
-                            r_Prods.delete(dbUC,prodID);
-                            callback({error:"Non correct ProdID for barcode!"});
-                            return;
-                        }
-                        barcode= systemFuncs.getEAN13Barcode(iProdID,23);
-                    }
-                    r_Prods.storeProdMQ(dbUC,{"ProdID":prodID,"UM":insProdData["UM"],"Barcode":barcode},
-                        function(resultStoreProdMQ){
-                            if(resultStoreProdMQ.error){
-                                callback({error:resultStoreProdMQ.error});
-                                r_Prods.delete(dbUC,prodID);
-                                return;
-                            }
-                            insProdData["Barcode"]=barcode;
-                            r_Prods.storeProdPP(dbUC,{"ProdID":prodID,"PPID":0},function(resultStorePP0){
-                                if(resultStorePP0.error){
-                                    r_Prods.delete(dbUC,prodID);
-                                    callback({error:resultStorePP0.error});
-                                    return;
-                                }
-                                callback({resultItem:insProdData});
-                            });
+                            if(resultUpdProdUM.updateCount) resultUpdProdMQ.resultItemUpdProdUM= {"UM":sNewBCUM};
+                            callback(resultUpdProdMQ);
                         });
                 });
-        });
-    }
+            });
+    };
 };

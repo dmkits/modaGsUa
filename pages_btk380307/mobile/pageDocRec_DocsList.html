@@ -44,13 +44,13 @@
                 {{#each listDocs}}
                 <li>
                     <a class="item-link item-content" href="/pageDocRecProdsData/{{ChID}}"
-                            style="background-color:{{#if IsStateWork}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
+                       style="background-color:lightgrey;background-color:{{#if IsStateCreated}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row" style="padding-right:16px">
-                                <div class="item-title" style="width:100%;font-weight:normal{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
-                                    <div class="item-title" style="font-weight:inherit">
-                                        <div class="item-header" style="display:inline-block;float:left;max-width:150px;font-weight:inherit">{{DocID}} от {{SDocDate}}</div>
-                                        <div class="item-header" style="display:inline-block;float:right;max-width:130px;font-weight:inherit">{{StateName}}</div>
+                                <div class="item-title" style="width:100%">
+                                    <div class="item-title">
+                                        <div class="item-header" style="display:inline-block;float:left;max-width:90px;font-weight:inherit">{{DocID}}<br>от {{SDocDate}}</div>
+                                        <div class="item-header" style="display:inline-block;float:right;max-width:160px;text-align:right;font-weight:inherit">{{StateName}}</div>
                                     </div>
                                     <div class="item-title docsListStockName" style="font-weight:normal">{{StockName}}</div>
                                 </div>

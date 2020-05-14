@@ -175,6 +175,25 @@ tfoot td{
 .table-total{
 
 }
+.pageContentProdSrcData{
+
+}
+.ios .pageContentProdSrcData .item-link, .ios .pageContentProdSrcData .item-content,
+.ios .pageContentProdSrcData .item-inner{
+    height: 36px;
+    min-height: 36px;!important;
+}
+.ios .pageContentProdSrcData input{
+    font-weight: bold;
+}
+.ios .pageContentProdSrcData .item-label{
+    padding-top: 0;
+    font-size: 14px;
+    max-width:150px;
+}
+.ios .pageContentProdSrcData .item-after{
+    width:100%
+}
 
 .tableReport{
     line-height: 1.5;

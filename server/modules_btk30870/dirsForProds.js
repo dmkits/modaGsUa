@@ -199,7 +199,7 @@ module.exports.init= function(app){
                 callback(null,prodData);
             });
     };
-    app.get("/dirsProds/getProdAttrsAndNameByProdData",function(req,res){
+    app.get("/dirsProds/getProdNameAndAttrsByArticle1",function(req,res){
         var prodData=req.query, prodArticle1=prodData["Article1"], sendResult={};
         if(prodArticle1==null||prodArticle1.trim()==""){
             r_Prods.getNewProdNameByAttrs(req.dbUC,prodData,function(err,prodNameData){
