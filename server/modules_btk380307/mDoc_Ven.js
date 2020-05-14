@@ -1,9 +1,8 @@
-var dataModel=require(appDataModelPath);
+var dataModel= require(appDataModelPath);
 var t_Ven= require(appDataModelPath+"t_Ven"), t_VenA= require(appDataModelPath+"t_VenA"),
-    // r_DBIs= require(appDataModelPath+"r_DBIs"),
     r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     r_Comps= require(appDataModelPath+"r_Comps"), r_States= require(appDataModelPath+"r_States"),
-    r_Prods=require(appDataModelPath+"r_Prods");
+    r_Prods= require(appDataModelPath+"r_Prods");
 
 module.exports.validateModule= function(errs,nextValidateModuleCallback){
     dataModel.initValidateDataModels([t_Ven,t_VenA,r_Ours,r_Stocks,r_Comps,r_States,r_Prods], errs,
@@ -204,6 +203,7 @@ module.exports.init = function(app){
                     });
         });
     };
+    if(!r_Prods.findProdByCRUniInput) throw new Error('NO r_Prods.findProdByCRUniInput!');//commonDirsForProds
     app.post("/mobile/docVen/storeProdDataByCRUniInput",function(req,res){
         var storingData= req.body, value= (storingData)?storingData["value"]:null, docChID= storingData["docChID"];
         r_Prods.findProdByCRUniInput(req.dbUC,value,function(resultFindProd){
@@ -220,6 +220,7 @@ module.exports.init = function(app){
         t_VenA.findAndStoreProdInVenA(req.dbUC,docChID,venAData,storingData["TNewQty"],
             function(result){ res.send(result); });
     });
+    if(!r_Prods.findProdByCondition) throw new Error('NO r_Prods.findProdByCondition!');//commonDirsForProds
     app.get("/mobile/docVen/findProdDataByBarcode",function(req,res){
         var barcode= req.query["Barcode~"], docChID= req.query["docChID~"];
         r_Prods.findProdByCondition(req.dbUC,{"Barcode=":barcode},function(resultFindProd){
