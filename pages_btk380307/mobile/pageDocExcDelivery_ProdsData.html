@@ -221,10 +221,10 @@
             }
         },
         data: function(){
-            var excData={},listExcs= app7.data.pageDocExcDeliveryList.listDocs;
             if(!this.$route.params) return {};
-            var excChID= this.$route.params.excChID;
+            var listExcs= app7.data.pageDocExcDeliveryList.listDocs, excChID= this.$route.params.excChID;
             if(!listExcs||excChID===null||excChID===undefined) return {};
+            var excData={};
             for(var itemExcData of listExcs)
                 if(itemExcData&&itemExcData["ChID"]==excChID){ excData=itemExcData; break; }
             return {docData:excData};

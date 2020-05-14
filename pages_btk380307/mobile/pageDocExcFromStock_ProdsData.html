@@ -94,6 +94,7 @@
                 <td id="totalRows" width="40px"><span class="table-total">0</span></td>
                 <td><span class="table-total"></span></td>
                 <td id="totalQty" width="50px"><span class="table-total">0</span></td>
+                <td width="150px"><span class="table-total"></span></td>
             </tr>
             </tfoot>
         </table>
@@ -216,10 +217,10 @@
             }
         },
         data: function(){
-            var excData={},listExcs= this.$app.data.pageDocExcFromStockDocsList.listDocs;
             if(!this.$route.params)return {};
-            var excChID= this.$route.params.excChID;
+            var listExcs= this.$app.data.pageDocExcFromStockDocsList.listDocs, excChID= this.$route.params.excChID;
             if(!listExcs||excChID===null||excChID===undefined)return {};
+            var excData={};
             for(var ind in listExcs){
                 var itemExcData= listExcs[ind];
                 if(itemExcData&&itemExcData.ChID==excChID){ excData= itemExcData; break; }

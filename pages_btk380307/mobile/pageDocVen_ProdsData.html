@@ -190,10 +190,10 @@
             },
         },
         data: function(){
-            var venData={}, listVensData= app7.data.pageDocVenDocsList.listDocs;
             if(!this.$route.params) return {};
-            var venChID= this.$route.params.venChID;
+            var listVensData= app7.data.pageDocVenDocsList.listDocs, venChID= this.$route.params.venChID;
             if(!listVensData||venChID===null||venChID===undefined) return {};
+            var venData={};
             for(var ind in listVensData){
                 var itemInventData= listVensData[ind];
                 if(itemInventData&&itemInventData["ChID"]==venChID){ venData= itemInventData; break; }
