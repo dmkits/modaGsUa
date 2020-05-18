@@ -42,15 +42,15 @@
             </thead>
             <tbody style="display:none">
             <tr rowSelecting="true" onCreated="contentTableTROnCreated">
-                <td rowSpan="2" width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
-                <td colSpan="4" class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
+                <td rowSpan="2" width="40px" class="tdSrcPosID"><div class="table-text" dataItemName="SrcPosID"></div></td>
+                <td colSpan="4" class="tdProdName"><div class="table-text" dataItemName="ProdName"></div></td>
             </tr>
             <tr rowSelecting="true" onCreated="contentTableTROnCreated">
-                <td class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
-                <!--<td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>-->
-                <td width="140px" class="text-centered" dataItemName="NewSecName"><div class="table-text"></div></td>
-                <td width="55px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
-                <td width="55px" class="tdNewQty" dataItemName="NewQty" onClick="contentTableTDQtyOnClick"><div class="table-text"></div></td>
+                <td class="text-centered"><div class="table-text" dataItemName="ProdID"></div></td>
+                <!--<td width="50px" class="text-centered"><div class="table-text" dataItemName="UM"></div></td>-->
+                <td width="140px" class="text-centered"><div class="table-text" dataItemName="NewSecName"></div></td>
+                <td width="55px" class="tdQty"><div class="table-text" dataItemName="Qty"></div></td>
+                <td width="55px" class="tdNewQty" onClick="contentTableTDQtyOnClick"><div class="table-text" dataItemName="NewQty"></div></td>
             </tr>
             </tbody>
         </table>
@@ -80,14 +80,14 @@
             </thead>
             <tbody style="display:none">
             <tr rowSelecting="true" onCreated="contentTableTROnCreated">
-                <td width="40px" class="tdSrcPosID" dataItemName="SrcPosID"><div class="table-text"></div></td>
-                <td width="110px" style="min-width:110px" class="text-centered" dataItemName="Barcode"><div class="table-text"></div></td>
-                <td width="50px" class="text-centered" dataItemName="ProdID"><div class="table-text"></div></td>
-                <td class="tdProdName" dataItemName="ProdName"><div class="table-text"></div></td>
-                <td width="50px" class="text-centered" dataItemName="UM"><div class="table-text"></div></td>
-                <td width="50px" class="tdQty" dataItemName="Qty"><div class="table-text"></div></td>
-                <td width="50px" class="tdNewQty" dataItemName="NewQty" onClick="contentTableTDQtyOnClick"><div class="table-text"></div></td>
-                <td width="150px" class="text-centered" dataItemName="NewSecName"><div class="table-text"></div></td>
+                <td width="40px" class="tdSrcPosID"><div class="table-text" dataItemName="SrcPosID"></div></td>
+                <td width="110px" style="min-width:110px" class="text-centered"><div class="table-text" dataItemName="Barcode"></div></td>
+                <td width="50px" class="text-centered"><div class="table-text" dataItemName="ProdID"></div></td>
+                <td class="tdProdName"><div class="table-text" dataItemName="ProdName"></div></td>
+                <td width="50px" class="text-centered"><div class="table-text" dataItemName="UM"></div></td>
+                <td width="50px" class="tdQty"><div class="table-text" dataItemName="Qty"></div></td>
+                <td width="50px" class="tdNewQty" onClick="contentTableTDQtyOnClick"><div class="table-text" dataItemName="NewQty"></div></td>
+                <td width="150px" class="text-centered"><div class="table-text" dataItemName="NewSecName"></div></td>
             </tr>
             </tbody>
         </table>
@@ -368,7 +368,7 @@
                     this.setTotalInfo(qty-oldQty,newQty-oldNewQty);
                 }
                 for(var ctTR of ctTRs){
-                    $$(ctTR).find("td[dataItemName=Qty] div").text(qty); $$(ctTR).find("td[dataItemName=NewQty] div").text(newQty);
+                    $$(ctTR).find("td div[dataItemName=Qty]").text(qty); $$(ctTR).find("td div[dataItemName=NewQty]").text(newQty);
                     if(ctTR.doSelect) ctTR.doSelect();
                     if(ctTR.clientHeight==0||ctTR.clientWidth==0) continue;
                     this.setScroll(ctTR);
@@ -382,7 +382,7 @@
                             function(storeExcDResultItem,errMsg){
                                 if(errMsg){ if(actionError) actionError(errMsg); return; }
                                 var srcPosID= contentTableDataItem["SrcPosID"], ctTRs= self.contentTableDataDomTRs[srcPosID];
-                                for(var ctTR of ctTRs) $$(ctTR).find("td[dataItemName=NewQty] div").text(inputValNewQty);
+                                for(var ctTR of ctTRs) $$(ctTR).find("td div[dataItemName=NewQty]").text(inputValNewQty);
                                 var oldNewQty= contentTableDataItem["NewQty"];
                                 contentTableDataItem["NewQty"]= inputValNewQty;
                                 self.setTotalInfo(0,inputValNewQty-oldNewQty);

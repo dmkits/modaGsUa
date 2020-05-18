@@ -32,7 +32,7 @@
                     <a class="item-link item-content" href="#" id="pageContentRecDProdSrcDataAutocomplete_Article1">
                         <!--<input type="text">-->
                         <div class="item-inner pageContentProdDataItemInner">
-                            <div class="item-title item-label">Артикул 1:</div>
+                            <div class="item-title item-label">Артикул 1 товара:</div>
                             <div class="item-after">
                                 <input id="pageContentRecDProdSrcData_inputArticle1" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
                             </div>
@@ -114,7 +114,7 @@
             <ul>
                 <li class="item-content item-input">
                     <div class="item-inner">
-                        <div class="item-title item-label">Наименование товара</div>
+                        <div class="item-title item-label">Наименование товара:</div>
                         <div class="item-input-wrap">
                             <input id="pageContentRecDProdSrcData_inputProdName" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
                             <!--<span class="input-clear-button"></span>-->
@@ -123,7 +123,7 @@
                 </li>
                 <li class="item-content item-input">
                     <div class="item-inner">
-                        <div class="item-title item-label">Ед.изм. товара</div>
+                        <div class="item-title item-label">Ед.изм. товара:</div>
                         <div class="item-input-wrap">
                             <input id="pageContentRecDProdSrcData_inputUM" type="text" placeholder="(нет значения)" style="height:24px;font-size:14px">
                         </div>
@@ -131,7 +131,7 @@
                 </li>
                 <li class="item-content item-input">
                     <div class="item-inner">
-                        <div class="item-title item-label">Код товара</div>
+                        <div class="item-title item-label">Код товара:</div>
                         <div class="item-input-wrap">
                             <input id="pageContentRecDProdSrcData_inputProdID" type="text" validate pattern="[0-9]*" data-error-message="Должно быть числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
                         </div>
@@ -139,7 +139,7 @@
                 </li>
                 <li class="item-content item-input">
                     <div class="item-inner">
-                        <div class="item-title item-label">Штрихкод товара</div>
+                        <div class="item-title item-label">Штрихкод товара:</div>
                         <div class="item-input-wrap">
                             <input id="pageContentRecDProdSrcData_inputBarcode" type="text" validate pattern="[0-9]*" data-error-message="Должно быть числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
                         </div>
@@ -147,7 +147,7 @@
                 </li>
                 <li class="item-content item-input">
                     <div class="item-inner">
-                        <div class="item-title item-label">Кол-во прихода</div>
+                        <div class="item-title item-label">Кол-во прихода:</div>
                         <div class="item-input-wrap">
                             <input id="pageContentRecDProdSrcData_inputQty" type="text" required validate pattern="[0-9.]*" data-error-message="Обязательно должно быть указано числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
                         </div>
@@ -155,7 +155,7 @@
                 </li>
                 <li class="item-content item-input">
                     <div class="item-inner">
-                        <div class="item-title item-label">Цена прихода, грн</div>
+                        <div class="item-title item-label">Цена прихода,грн:</div>
                         <div class="item-input-wrap">
                             <input id="pageContentRecDProdSrcData_inputPriceCC_wt" type="text" required validate pattern="[0-9.]*" data-error-message="Обязательно должно быть указано числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
                         </div>
@@ -163,7 +163,7 @@
                 </li>
                 <li class="item-content item-input">
                     <div class="item-inner">
-                        <div class="item-title item-label">Наценка, %</div>
+                        <div class="item-title item-label">Наценка,%:</div>
                         <div class="item-input-wrap">
                             <input id="pageContentRecDProdSrcData_inputExtra" type="text" required validate pattern="[0-9.]*" data-error-message="Обязательно должно быть указано числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
                         </div>
@@ -171,7 +171,7 @@
                 </li>
                 <li class="item-content item-input">
                     <div class="item-inner">
-                        <div class="item-title item-label">Цена продажи, грн</div>
+                        <div class="item-title item-label">Цена продажи,грн:</div>
                         <div class="item-input-wrap">
                             <input id="pageContentRecDProdSrcData_inputPriceCC" type="text" required validate pattern="[0-9.]*" data-error-message="Обязательно должно быть указано числовое значение!" placeholder="(нет значения)" style="height:24px;font-size:14px">
                         </div>
@@ -200,6 +200,7 @@
                 });
                 this.pageRecDProdSrcDataBtnCancel.on('click',function(){ app7.router.back(); });
                 this.pageContentRecDProdSrcData= $$('#pageContentRecDProdSrcData');
+                this.updContentBySmallSize();
                 this.pageContentRecDProdSrcData_inputProdName= $$(this.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputProdName');
                 $$(this.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputPriceCC_wt').on('input',function(){
                     var priceCC_wt=this.value, extra= $$(self.pageContentRecDProdSrcData).find('#pageContentRecDProdSrcData_inputExtra').val(), priceCC=null;
@@ -246,6 +247,16 @@
             return {docData:recData,actionUnknown:true,srcPosData:{}};
         },
         methods: {
+            updContentBySmallSize: function(){
+                if(!this.pageContentRecDProdSrcData) return;
+                var pageContentRecDProdSrcDataEl= this.pageContentRecDProdSrcData[0];
+                if(!pageContentRecDProdSrcDataEl||pageContentRecDProdSrcDataEl.clientWidth>450) return;
+                var cElems= this.pageContentRecDProdSrcData.find("div.item-title.item-label");
+                for(var i=0;i<cElems.length;i++){
+                    var cElem= cElems[i];
+                    cElem.textContent= cElem.textContent.replace(" товара","");
+                }
+            },
             createContentAutocompletes: function(){
                 var self=this,
                     autocompleteOnChangeInput= function(){
