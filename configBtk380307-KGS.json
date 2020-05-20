@@ -1,5 +1,5 @@
-{ "appID":"sinta", "appVer":"3.3.3", "appCVer":"3.3",
-  "title":"SINTA.UA",
+{ "appID":"gabis", "appVer":"3.3.3", "appCVer":"3.3",
+  "title":"GABIS.UA",
   "icon32x32":"/imgs/ico32-logo-GS-red-min-whiteBG-77x32.jpg",
   "imageSmall":"/imgs/logo-pageTitle-GS-red-small-129x54.jpg",
   "imageMain":"/imgs/logo-pageTitle-GS-red-small-129x54.jpg",
@@ -18,7 +18,7 @@
     /*"mainPage",*/
     "rep_products",
     "rep_cashier",
-    "mobile",
+    "mobile-KGS",
     "mDoc_Ven",
     "mDoc_ExcDelivery",
     "mDoc_ExcFromStock",

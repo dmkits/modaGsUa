@@ -27,7 +27,7 @@
       <element id="directory" name="scripts">
         <element id="dir-copy" path="$PROJECT_DIR$/scripts" />
       </element>
-      <element id="file-copy" path="$PROJECT_DIR$/configBtk380307.json" />
+      <element id="file-copy" path="$PROJECT_DIR$/configBtk380307-KGS.json" />
       <element id="file-copy" path="$PROJECT_DIR$/debugBtk380307.cfg" />
       <element id="file-copy" path="$PROJECT_DIR$/package.json" />
       <element id="file-copy" path="$PROJECT_DIR$/start-btk380307-8080.cmd" />
