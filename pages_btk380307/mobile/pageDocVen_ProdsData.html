@@ -336,7 +336,7 @@
             selContentVTableDataRow: function(srcPosID,params){
                 if(params&&params.setScroll){
                     var cvtIndex= (params&&params.cvtIndex!=null)?params.cvtIndex:this.contentTableDataIndexByTSrcPosID[srcPosID];
-                    if(cvtIndex!=null) this.contentTableVirtList.scrollToItem(cvtIndex);                                            console.log("cvtIndex",cvtIndex);
+                    if(cvtIndex!=null) this.contentTableVirtList.scrollToItem(cvtIndex);
                 }
                 var cvtIndexELdom= this.contentTableVirtList.$el.find('table[dataitemidval="'+srcPosID+'"]');
                 if(!cvtIndexELdom)return;
@@ -344,7 +344,7 @@
                 for(var i=0; i<this.contentTableVirtListSelItems.length;i++) this.contentTableVirtListSelItems[i].classList.remove('mobile-table-selectedRow');
                 this.contentTableVirtListSelItems= [];
                 for(var i=0; i<cvtIndexELdom.length;i++){
-                    var cvtIndexEL= cvtIndexELdom[i];                                            console.log("cvtIndexEL",cvtIndexEL,cvtIndexEL.clientHeight);//console.dir(cvtIndexEL);
+                    var cvtIndexEL= cvtIndexELdom[i];
                     cvtIndexEL.classList.add('mobile-table-selectedRow');
                     this.contentTableVirtListSelItems.push(cvtIndexEL);
                     if(params&&params.setScroll&&cvtIndexEL.clientHeight) this.setScroll(cvtIndexEL);
