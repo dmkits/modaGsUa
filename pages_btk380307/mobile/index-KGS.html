@@ -25,8 +25,15 @@
     <link rel="stylesheet" type="text/css" href="../css/mobileIndex.css">
     <link rel="stylesheet" type="text/css" href="../css/mobileIcons.css">
     <link rel="stylesheet" type="text/css" href="../css/mobileApp.css">
-    <title>SINTA Mobile</title>
-    <link rel="shortcut icon" href="../img/ico-app-min-128.png">
+    <title>GABIS Mobile</title>
+    <link rel="shortcut icon" href="../img/ico-app-min-128-KGS.png">
+    <style>/*custom icons,images and other styles*/
+        .main-logo{
+            background-image: url("../img/logo-app-pageMain-min-189x79-KGS.jpg");
+            width:189px;
+            height:79px;
+        }
+    </style>
 </head>
 <body>
 <div id="app">
@@ -58,7 +65,7 @@
                 { path:'/pageMAppSettingsCommon', componentUrl:'/mobile/pageMAppSettingsCommon'}
             ],
             app7= new Framework7({// Framework7 App main instance
-                id:'io.framework7.mobile.sinta', version:"3.3.3",
+                id:'io.framework7.mobile.gabis', version:"3.3.2",
                 root: '#app', // app7 root element
                 theme: 'ios', //for mobile app gabis ios!!! //'auto' - Automatic theme detection, Can be md, ios or aurora
                 routes: baseRoutes,
@@ -89,8 +96,8 @@
     };
     app7.setMAppRoutes(baseRoutes);
     app7.convertRoutesForMApp(baseRoutes);                                                                      //app7.dialog.alert('<span style="font-size:8px">'+JSON.stringify(result,null,2)+'</span>','debug');//IT'S FOR TEST
-    app7.appName= "SINTA.UA mobile";
-    app7.data={uuid:"", aidcn:"sinta"};//aidcn - application id config name
+    app7.appName= "GABIS.UA mobile";
+    app7.data={uuid:"", aidcn:"gabis"};//aidcn - application id config name
     app7.request.setup({ headers: {'uuid':app7.data.uuid,'aidcn':app7.data.aidcn} });
     app7.mAppAcceessToServer= function(uuid){
         app7.request.setup({ headers:{'uuid':uuid} });

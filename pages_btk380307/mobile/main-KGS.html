@@ -19,12 +19,19 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <!--<link rel="stylesheet" href="/jslib/framework7/css/framework7.min.css">-->
-    <link rel="stylesheet" href="/jslib/framework7/css/framework7.ios.min.css">
+    <link rel="stylesheet" href="../framework7/css/framework7.ios.min.css">
     <link rel="stylesheet" type="text/css" href="/cssm/mobileIndex.css">
     <link rel="stylesheet" type="text/css" href="/cssm/mobileIcons.css">
     <link rel="stylesheet" type="text/css" href="/cssm/mobileApp.css">
-    <title>SINTA Mobile</title>
-    <link rel="shortcut icon" href="/img/ico-app-min-128.png">
+    <title>GABIS Mobile</title>
+    <link rel="shortcut icon" href="/img/ico-app-min-128-KGS.png">
+    <style>/*custom icons,images and other styles*/
+        .main-logo{
+            background-image: url("/img/logo-app-pageMain-min-189x79-KGS.jpg");
+            width:189px;
+            height:79px;
+        }
+    </style>
 </head>
 <body>
 <div id="app">
@@ -51,7 +58,7 @@
                 { path:'(.*)', url:'/mobile/actionError' }// Default route (404 page). MUST BE THE LAST
             ],
             app7= new Framework7({// Framework7 App main instance
-                id:'io.framework7.mobile.sinta', version:"3.3.3",
+                id:'io.framework7.mobile.gabis', version:"3.3.2",
                 root: '#app', // app7 root element
                 theme: 'ios', // 'auto' - Automatic theme detection, Can be md, ios or aurora
                 routes: baseRoutes,

@@ -23,15 +23,12 @@
   word-wrap: normal;
   white-space: nowrap;
   direction: ltr;
-
   /* Support for all WebKit browsers. */
   -webkit-font-smoothing: antialiased;
   /* Support for Safari and Chrome. */
   text-rendering: optimizeLegibility;
-
   /* Support for Firefox. */
   -moz-osx-font-smoothing: grayscale;
-
   /* Support for IE. */
   font-feature-settings: 'liga';
 }
@@ -69,7 +66,7 @@
   text-align: center;
 }
 .main-logo{
-  background-image: url("../img/logoGS-red-min-whiteBG.jpg");
-  width:189px;
-  height:79px;
+  background-image: url("../img/logo-app-pageMain-min-128.png");
+  width:128px;
+  height:128px;
 }
