@@ -10,5 +10,7 @@ module.exports.changeLog = [
     {changeID:"r_Uni__3", changeDatetime:"2019-11-15 15:47:00", changeObj:"r_Uni",
         changeVal:"update r_Uni set Notes='excDelivery' where RefTypeID=10606 and RefID=3 and RefName='Доставка перемещений' and Notes='sendExcs'"},
     {changeID:"r_Uni__4", changeDatetime:"2020-04-24 17:40:00", changeObj:"r_Uni",
-        changeVal:"insert into r_Uni(RefTypeID,RefID,RefName,Notes)values(10606,5,'Оператор прихода товара','createRec')"}
+        changeVal:"insert into r_Uni(RefTypeID,RefID,RefName,Notes)values(10606,5,'Оператор прихода товара','createRec')"},
+    {changeID:"r_Uni__5", changeDatetime:"2020-05-21 11:48:00", changeObj:"r_Uni",
+        changeVal:"insert into r_Uni(RefTypeID,RefID,RefName,Notes)values(10606,7,'Инвентаризация','inventory')"}
 ];
