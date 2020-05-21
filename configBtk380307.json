@@ -22,7 +22,7 @@
     "mDoc_Ven",
     "mDoc_ExcDelivery",
     "mDoc_ExcFromStock",
-    "mDoc_Rec",
+    "mDoc_RecBtk",
     "mRep_Cashier"
   ],
   "appMenu":[
@@ -43,7 +43,7 @@
     "manager":{
       "menu":["menuBarItemReportsCashier","menuBarItemRec","menuBarItemExc","menuBarItemExcCashier","menuBarItemHelpAbout","menuBarItemClose"],
       "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
-      "mobile":["mDoc_Ven","mDoc_Rec","mRep_Cashier"]
+      "mobile":["mDoc_Ven","mDoc_RecBtk","mRep_Cashier"]
     },
     "operatorRec":{
       "menu":["menuBarItemRec","menuBarItemHelpAbout","menuBarItemClose"],
@@ -61,7 +61,7 @@
     },
     "createRec":{
       "menu":["menuBarItemHelpAbout","menuBarItemClose"],
-      "mobile":["mDoc_Rec"]
+      "mobile":["mDoc_RecBtk"]
     },
     "inventory":{
       "menu":["menuBarItemHelpAbout","menuBarItemClose"],

@@ -139,17 +139,17 @@
                 if(this.isDocReadOnly()){ this.loadRecProdsData(); return; }
                 var self=this;
                 this.pageDocRecProdsDataBtnNewPos.on('click',function(){
-                    app7.router.navigate("/pageDocRecProdSrcData/"+self.docData["ChID"]+"/new/null",{})
+                    app7.router.navigate("/pageDocRecBtkProdSrcData/"+self.docData["ChID"]+"/new/null",{})
                 });
                 this.pageDocRecProdsDataBtnEdtSel.on('click',function(){
                     var selTableRow= (self.selectedContentTableItemData)?self.selectedContentTableItemData["SrcPosID"]:null;
                     if(!selTableRow) return;
-                    app7.router.navigate("/pageDocRecProdSrcData/"+self.docData["ChID"]+"/edit/"+selTableRow,{})
+                    app7.router.navigate("/pageDocRecBtkProdSrcData/"+self.docData["ChID"]+"/edit/"+selTableRow,{})
                 });
                 this.pageDocRecProdsDataBtnDelSel.on('click',function(){
                     var selTableRow= (self.selectedContentTableItemData)?self.selectedContentTableItemData["SrcPosID"]:null;
                     if(!selTableRow) return;
-                    app7.router.navigate("/pageDocRecProdSrcData/"+self.docData["ChID"]+"/del/"+selTableRow,{})
+                    app7.router.navigate("/pageDocRecBtkProdSrcData/"+self.docData["ChID"]+"/del/"+selTableRow,{})
                 });
             },
             pageAfterIn: function(e,page){
@@ -185,7 +185,7 @@
                 var self=this;
                 self.setToolbarByState();
                 app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/docRec/getDataForRecDTable',conditions:{'docChID=':recChID},
+                app7.srvRequestJSON({url:'/mobile/docRecBtk/getDataForRecDTable',conditions:{'docChID=':recChID},
                             errorDialogMsg:"Не удалось получить список товаров прихода товара с сервера!"},
                         function(result,error){
                             app7.preloader.hide();

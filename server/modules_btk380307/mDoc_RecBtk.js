@@ -14,22 +14,22 @@ module.exports.validateModule= function(errs,nextValidateModuleCallback){
 };
 
 module.exports.routes=[//-- App routes --
-    { path:'/pageDocRec', componentUrl:'/mobile/pageDocRec_DocsList', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
-    { path:'/pageDocRecProdsData/:recChID', componentUrl:'/mobile/pageDocRec_ProdsData', options:{ignoreCache:true} },
-    { path:'/pageDocRecProdSrcData/:recChID/:action/:srcPosID', componentUrl:'/mobile/pageDocRec_ProdSrcData', options:{ignoreCache:true} },
-    { path:'/pageDocRecSettings', componentUrl:'/mobile/pageDocRec_Settings', options:{ignoreCache:true} }
+    { path:'/pageDocRecBtk', componentUrl:'/mobile/pageDocRecBtk_DocsList', options:{clearPreviousHistory:true,ignoreCache:true}, define:true },
+    { path:'/pageDocRecBtkProdsData/:recChID', componentUrl:'/mobile/pageDocRecBtk_ProdsData', options:{ignoreCache:true} },
+    { path:'/pageDocRecBtkProdSrcData/:recChID/:action/:srcPosID', componentUrl:'/mobile/pageDocRecBtk_ProdSrcData', options:{ignoreCache:true} },
+    { path:'/pageDocRecBtkSettings', componentUrl:'/mobile/pageDocRecBtk_Settings', options:{ignoreCache:true} }
 ];
-module.exports.moduleViewURL= "/mobile/pageDocRec_DocsList";
-module.exports.moduleViewPath= "mobile/pageDocRec_DocsList.html";
+module.exports.moduleViewURL= "/mobile/pageDocRecBtk_DocsList";
+module.exports.moduleViewPath= "mobile/pageDocRecBtk_DocsList.html";
 module.exports.init = function(app){
-    app.get("/mobile/pageDocRec_Settings", function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageDocRec_Settings.html');
+    app.get("/mobile/pageDocRecBtk_Settings", function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageDocRecBtk_Settings.html');
     });
-    app.get("/mobile/pageDocRec_ProdsData", function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageDocRec_ProdsData.html');
+    app.get("/mobile/pageDocRecBtk_ProdsData", function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageDocRecBtk_ProdsData.html');
     });
-    app.get("/mobile/pageDocRec_ProdSrcData", function(req,res){
-        res.sendFile(appViewsPath+'mobile/pageDocRec_ProdSrcData.html');
+    app.get("/mobile/pageDocRecBtk_ProdSrcData", function(req,res){
+        res.sendFile(appViewsPath+'mobile/pageDocRecBtk_ProdSrcData.html');
     });
     var tRecsListTableColumns=[
         {data:"ChID", name:"ChID", width:85, type:"text", readOnly:true, visible:false, dataSource:"t_Rec"},
@@ -63,7 +63,7 @@ module.exports.init = function(app){
         {data:"StateInfo", name:"Информация статуса", width:50, type:"text", readOnly:true, visible:false,
             dataFunction:"CASE When t_Rec.StateCode not in (0,52,58,62) Then 'Изменение запрещено' Else 'Изменение разрешено' END" }
     ];
-    app.get("/mobile/docRec/getDataForRecsList",function(req,res){
+    app.get("/mobile/docRecBtk/getDataForRecsList",function(req,res){
         var conditions={}, top="";
         for(var condItem in req.query){
             var condVal=req.query[condItem];
@@ -123,7 +123,7 @@ module.exports.init = function(app){
         {data:"PriceCC", name:"Цена продажи", width:65, type:"numeric2", dataSource:"t_RecD"}
         //{data:"PRICELIST_PRICE", name:"Цена по прайс-листу", width:75, type:"numeric2"},
     ];
-    app.get("/mobile/docRec/getDataForRecDTable",function(req,res){
+    app.get("/mobile/docRecBtk/getDataForRecDTable",function(req,res){
         var conditions={};
         for(var condItem in req.query){
             var value= req.query[condItem];
@@ -170,7 +170,7 @@ module.exports.init = function(app){
                     });
             });
     };
-    app.get("/mobile/docRec/getDataForRecDSrcPos",function(req,res){
+    app.get("/mobile/docRecBtk/getDataForRecDSrcPos",function(req,res){
         var conditions={};
         for(var condItem in req.query){
             var value= req.query[condItem];
@@ -184,12 +184,12 @@ module.exports.init = function(app){
         });
     });
     if(!t_RecD.checkStoreProdAndCheckStoreRecD) throw new Error('NO t_RecD.checkStoreProdAndCheckStoreRecD!');//commonDocsProdsRec
-    app.post("/mobile/docRec/storeProdDataToRecD",function(req,res){
+    app.post("/mobile/docRecBtk/storeProdDataToRecD",function(req,res){
         var storeData=req.body["prodData"]; storeData=storeData||{};
         storeData["ChID"]=req.body["docChID"];
         t_RecD.checkStoreProdAndCheckStoreRecD(req.dbUC,storeData,req.dbUserParams,tRecDTableColumns,function(result){ res.send(result); })
     });
-    app.post("/mobile/docRec/delProdDataFromRecD",function(req,res){
+    app.post("/mobile/docRecBtk/delProdDataFromRecD",function(req,res){
         var delData=req.body["prodData"]; delData=delData||{};
         delData["ChID"]=req.body["docChID"];
         t_RecD.delTableDataItem(req.dbUC,{tableColumns:tRecDTableColumns, idFields:["ChID","SrcPosID"],delTableData:delData},

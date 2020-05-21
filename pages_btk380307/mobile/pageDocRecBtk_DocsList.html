@@ -43,7 +43,7 @@
             <ul>
                 {{#each listDocs}}
                 <li>
-                    <a class="item-link item-content" href="/pageDocRecProdsData/{{ChID}}"
+                    <a class="item-link item-content" href="/pageDocRecBtkProdsData/{{ChID}}"
                        style="background-color:lightgrey;background-color:{{#if IsStateCreated}}lightgreen{{/if}}{{#if IsStateOnConfirmation}}yellow{{/if}}{{#if IsStateReturned}}lightpink{{/if}}{{#if IsStateOnConfirmation}};font-weight:bold{{/if}}{{#if IsStateClosedOrConfirmed}};font-weight:bold{{/if}}">
                         <div class="item-inner" style="padding-top:4px;padding-bottom:0px;">
                             <div class="item-title-row" style="padding-right:16px">
@@ -70,7 +70,7 @@
 <script>
     return {
         on: {
-            pageAfterIn: function(e,page){                                                                      //console.log("app7.data.pageDocRecDocsList",app7.data.pageDocRecDocsList);
+            pageAfterIn: function(e,page){
                 var self=this;
                 $$('#pageDocRecDocsList .ptr-content').on('ptr:refresh',function(e){
                     setTimeout(function(){
@@ -101,7 +101,7 @@
                 app7.preloader.show();
                 var conditions= {top:app7.data['docRecDocsListCount']};
                 if(stockIDFilter=='') conditions['StockID>']=0; else conditions['StockID=']=stockIDFilter;
-                app7.srvRequestJSON({url:'/mobile/docRec/getDataForRecsList',conditions:conditions,
+                app7.srvRequestJSON({url:'/mobile/docRecBtk/getDataForRecsList',conditions:conditions,
                         errorDialogMsg:"Не удалось получить список приходов товара с сервера!"},
                     function(result,error){
                         app7.preloader.hide();
@@ -110,7 +110,7 @@
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,
                             listDocs:result.listRecsByStockID
-                        };                                                                                      //console.log('pageDocRec_DocsList.html pageAfterIn app.data.pageDocRecDocsList 2=',app.data.pageDocRecDocsList);
+                        };
                         cInstance.$setState({
                             listStocks:result.listStocks,
                             stockIDFilter:stockIDFilter, stockNameFilter:stockNameFilter,

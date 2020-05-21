@@ -294,7 +294,7 @@
                 if(recChID===null||recChID===undefined) return;
                 var srcPosID= (this.srcPosData)?this.srcPosData["SrcPosID"]:null, self=this;
                 app7.preloader.show();
-                app7.srvRequestJSON({url:'/mobile/docRec/getDataForRecDSrcPos',conditions:{'docChID=':recChID,"SrcPosID=":srcPosID},
+                app7.srvRequestJSON({url:'/mobile/docRecBtk/getDataForRecDSrcPos',conditions:{'docChID=':recChID,"SrcPosID=":srcPosID},
                             errorDialogMsg:"Не удалось получить данные товара из прихода товара с сервера!"},
                         function(result,error){
                             app7.preloader.hide();
@@ -381,7 +381,7 @@
              */
             storeDelProdToRecD:function(callback){
                 var self=this,
-                    url= (this.recDProdActionName!="del")?"/mobile/docRec/storeProdDataToRecD":"/mobile/docRec/delProdDataFromRecD",
+                    url= (this.recDProdActionName!="del")?"/mobile/docRecBtk/storeProdDataToRecD":"/mobile/docRecBtk/delProdDataFromRecD",
                     data={docChID:this.docData.ChID, prodData:this.getProdSrcData()},
                     actionNameMsg= (this.recDProdActionName!="del")?"сохранить товар в приход товара":"удалить товар из прихода товара",
                     srcPosID= (this.srcPosData)?this.srcPosData["SrcPosID"]:null;
