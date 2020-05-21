@@ -84,10 +84,12 @@
         <table class="mobile-table-small-size" width="100%" style="position:fixed;left:0px;bottom:0px;z-index:100">
             <tfoot>
             <tr>
-                <td id="totalRows" width="40px" style="max-width:50px">0</td>
+                <td id="totalRows" width="40px" style="min-width:40px;max-width:40px">0</td>
                 <td></td>
-                <td id="totalQty" width="50px" style="max-width:50px">0</td>
-                <td id="totalNewQty" width="50px" style="max-width:50px">0</td>
+                <td width="114px" style="max-width:114px" class="tdTextOverflowHidden"><div>Излишек:</div><div id="totalOvrQty" class="tdTextOverflowHidden">0</div></td>
+                <td width="114px" style="max-width:114px" class="tdTextOverflowHidden"><div>Недостача:</div><div id="totalDfcQty" class="tdTextOverflowHidden">0</div></td>
+                <td id="totalQty" width="50px" style="min-width:50px;max-width:50px" class="tdTextOverflowHidden">0</td>
+                <td id="totalNewQty" width="50px" style="min-width:50px;max-width:50px" class="tdTextOverflowHidden">0</td>
             </tr>
             </tfoot>
         </table>
@@ -96,8 +98,11 @@
             <tr>
                 <td id="totalRows" width="40px" style="max-width:40px">0</td>
                 <td></td>
-                <td id="totalQty" width="50px" style="max-width:50px">0</td>
-                <td id="totalNewQty" width="50px" style="max-width:50px">0</td>
+                <td width="204px" style="max-width:250px" class="tdTextOverflowHidden"><span>Излишек: </span><span id="totalOvrQty" class="tdTextOverflowHidden">0</span></td>
+                <td width="205px" style="max-width:250px" class="tdTextOverflowHidden"><span>Недостача: </span><span id="totalDfcQty" class="tdTextOverflowHidden">0</span></td>
+                <td width="50px" style="max-width:50px"></td>
+                <td id="totalQty" width="50px" style="max-width:50px" class="tdTextOverflowHidden">0</td>
+                <td id="totalNewQty" width="50px" style="max-width:50px" class="tdTextOverflowHidden">0</td>
             </tr>
             </tfoot>
         </table>
@@ -246,8 +251,15 @@
                 if(tLoadedRows!==undefined) sTotalRows= tLoadedRows.toString()+"/<br>"+sTotalRows;
                 this.contentTableTotalData["totalQty"]= this.contentTableTotalData["totalQty"]||0; this.contentTableTotalData["totalQty"]+= qty;
                 this.contentTableTotalData["totalNewQty"]= this.contentTableTotalData["totalNewQty"]||0; this.contentTableTotalData["totalNewQty"]+= newQty;
+                var totalOvrQty= 0, totalDfcQty=0;
+                if(this.contentTableData)
+                    for(var i=0;i<this.contentTableData.length;i++){
+                        var ctDataItem= this.contentTableData[i], tQty= (ctDataItem)?ctDataItem["TQty"]:0,tNewQty=(ctDataItem)?ctDataItem["TNewQty"]:0;
+                        if(tQty<tNewQty>0) totalOvrQty+= tNewQty-tQty; else totalDfcQty+= tQty-tNewQty;
+                    }
                 app7.innerPageUpdateTotalTable([this.contentTableFootDomEl,this.contentTableLFootDomEl],
-                        {totalRows:sTotalRows,totalQty:this.contentTableTotalData["totalQty"],totalNewQty:this.contentTableTotalData["totalNewQty"]});
+                        {totalRows:sTotalRows,totalQty:this.contentTableTotalData["totalQty"],totalNewQty:this.contentTableTotalData["totalNewQty"],
+                            totalOvrQty:totalOvrQty, totalDfcQty:totalDfcQty});
             },
             /**
              * opts = { enable, disable, focus, val }
