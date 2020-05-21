@@ -155,6 +155,7 @@
             pageAfterIn: function(e,page){
                 var recDProdSrcData= app7.data.pageRecDProdSrcData;
                 if(recDProdSrcData){ this.selectedContentTableItemData= recDProdSrcData; app7.data.pageRecDProdSrcData= null; }
+                if(document.device&&document.device.hideNavBar) document.device.hideNavBar();
                 var self=this;
                 this.loadRecProdsData(function(){ self.findAndSelTableRow(); });
             },
