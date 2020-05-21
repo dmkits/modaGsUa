@@ -226,12 +226,12 @@ var framework7MUIFunctions= {
         if(!params)return;
         if(!Array.isArray(contentTableFootDomElVal)){
             var contentTableFootTR= $$(contentTableFootDomElVal).find("tr");
-            for(var valueName in params) contentTableFootTR.find("td#"+valueName).html(params[valueName]);
+            for(var valueName in params) contentTableFootTR.find("#"+valueName).html(params[valueName]);
             return;
         }
         for(var contentTableFootDomEl of contentTableFootDomElVal){
             var contentTableFootTR= $$(contentTableFootDomEl).find("tr");
-            for(var valueName in params) contentTableFootTR.find("td#"+valueName).html(params[valueName]);
+            for(var valueName in params) contentTableFootTR.find("#"+valueName).html(params[valueName]);
         }
     },
     /** IT'S USED IN INNER PAGE TEMPLATES
