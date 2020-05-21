@@ -72,6 +72,5 @@
       "autorun":["menuBarItemReportsCashier","menuBarItemExcCashier"],
       "mobile":["mRep_Cashier"]
     }
-
   }
 }
