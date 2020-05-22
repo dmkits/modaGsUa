@@ -1,6 +1,6 @@
 {
-  "name": "modaua",
-  "version": "1.0.0",
+  "name": "sinta",
+  "version": "3.3.3",
   "private": true,
   "scripts": {
     "start": "./server/server.js"
