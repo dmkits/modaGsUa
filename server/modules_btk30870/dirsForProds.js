@@ -1,4 +1,4 @@
-var dataModel= require(appDataModelPath),database= require("../databaseMSSQL"), systemFuncs= require("../systemFuncs");
+var dataModel= require(appDataModelPath), appDatabase= dataModel.appDatabase, systemFuncs= require("../systemFuncs");
 var r_Prods= require(appDataModelPath+"r_Prods"), r_ProdMQ= require(appDataModelPath+"r_ProdMQ"),
     r_ProdC= require(appDataModelPath+"r_ProdC"), r_ProdG= require(appDataModelPath+"r_ProdG"),
     r_ProdG1= require(appDataModelPath+"r_ProdG1"), r_ProdG2= require(appDataModelPath+"r_ProdG2"),
@@ -183,7 +183,7 @@ module.exports.init= function(app){
         //    @ColName varchar(200)/*Цвет*/, @Size varchar(200)/*Размер*/, @Sizes varchar(200)/*Доступные размеры*/)
 
         //if_GetProdNameByMaskValues(ProdID, PCatName,PGrName1,PGrName3,PGrSName3,Article1,Article2,Article3, ColorName,ColorSName, SizeName,ValidSizes, Growth)
-        database.selectParamsQuery(dbUC,
+        appDatabase.selectParamsQuery(dbUC,
             "select ProdName= LTRIM(RTRIM( dbo.if_GetProdNameByMaskValues(@p0, @p1,@p2,@p3,@p4,@p5, @p6,@p7, @p8,@p9,@p10, @p11,@p12,@p13) ))",
             [prodData["ProdID"], prodData["PCatName"],prodData["PCatSName"], prodData["PGrName"], prodData["PGrName1"],prodData["PGrSName1"],
                 prodData["PGrName2"], prodData["PGrName3"],

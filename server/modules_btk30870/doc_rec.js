@@ -1,4 +1,4 @@
-var dataModel= require(appDataModelPath), database= require("../databaseMSSQL"),
+var dataModel= require(appDataModelPath), appDatabase= dataModel.appDatabase,
     dateFormat= require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
 var z_Sys= require(appDataModelPath+"z_Sys"),
@@ -181,7 +181,7 @@ module.exports.init = function(app){
         );
     });
     t_RecD.setRecDTaxPriceCCnt=function(dbUC,prodID,recChID,recDData,callback){
-        database.selectParamsQuery(dbUC,
+        appDatabase.selectParamsQuery(dbUC,
             "select tax=dbo.zf_GetProdRecTax(@p0,OurID,CompID,DocDate) from t_Rec where ChID=@p1",[prodID,recChID],
             function(result){/* Возвращает ставку НДС для товара в зависимости от поставщика */
                 var tax= (result&&result.length>0)?result[0]["tax"]:0;

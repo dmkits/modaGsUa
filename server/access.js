@@ -1,8 +1,8 @@
 var path= require('path'), fs= require('fs');
 var server= require("./server"), log= server.log,
     appStartupParams= server.getAppStartupParams(), getSysConfig= server.getSysConfig,
-    getAppConfigName= server.getAppConfigName, getAppConfig= server.getAppConfig,
-    database= require("./databaseMSSQL"), systemFuncs= require("./systemFuncs"),
+    getAppConfigName= server.getAppConfigName, getAppConfig= server.getAppConfig, appDatabase= server.appDatabase,
+    systemFuncs= require("./systemFuncs"),
     appModules= require(appModulesPath), sysadmin= require(appModulesPath+"sysadmin");
 
 var sysadminsList={};
@@ -141,7 +141,7 @@ module.exports= function(app){
             });
             return;
         }
-        var userConnectionData= database.getUserConnectionData(uuid);
+        var userConnectionData= appDatabase.getUserConnectionData(uuid);
         if(sysadminName) req.dbSysadminName= sysadminName;
         if(sysadminName&&(req.originalUrl=="/sysadmin"||req.originalUrl.indexOf("/sysadmin/")==0)){
             req.dbUC= (userConnectionData)?userConnectionData.connection:null;
@@ -156,7 +156,7 @@ module.exports= function(app){
             });
             return;
         }
-        if(database.getSystemConnectionErr()){
+        if(appDatabase.getSystemConnectionErr()){
             var msg="Нет системного подключения к базе данных! <br>Обратитесь к системному администратору.";
             if(isReqJSON(req.method,req.headers)){
                 res.send({error:{error:"Failed to get data! Reason: failed get system connection to database!",userMessage:msg}});
@@ -244,7 +244,7 @@ module.exports= function(app){
             return;
         }
         var uuid = systemFuncs.getUIDNumber();
-        database.createNewUserDBConnection({uuid:uuid,login:userName,password:userPswrd}, function(err,result){
+        appDatabase.createNewUserDBConnection({uuid:uuid,login:userName,password:userPswrd}, function(err,result){
             var isSysadmin=false, sysConfig= getSysConfig(),
                 appMode= (appStartupParams)?appStartupParams.mode:null,
                 appModeIsDebug= !appMode

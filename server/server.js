@@ -90,6 +90,7 @@ global.appPagesPath= path.join(__dirname,'/../pages/','');
 global.appViewsPath= path.join(__dirname,'/../pages'+appServerComponentsVersion+'/','');
 
 var database= require('./databaseMSSQL');                                                           log.info('dataBase loaded on',new Date().getTime()-startTime);
+module.exports.appDatabase= database;
 try{
     var appModules= require(appModulesPath);                                                        log.info('application server modules loaded on',new Date().getTime()-startTime);
 }catch(e){

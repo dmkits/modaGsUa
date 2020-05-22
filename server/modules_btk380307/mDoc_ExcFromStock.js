@@ -1,4 +1,4 @@
-var dataModel= require(appDataModelPath), database= require("../databaseMSSQL");
+var dataModel= require(appDataModelPath), appDatabase= dataModel.appDatabase;
 var t_Exc= require(appDataModelPath+"t_Exc"), t_ExcD= require(appDataModelPath+"t_ExcD"),
     r_Ours= require(appDataModelPath+"r_Ours"), r_Stocks= require(appDataModelPath+"r_Stocks"),
     ir_EmpStockForExc= require(appDataModelPath+"ir_EmpStockForExc"),
@@ -160,7 +160,7 @@ module.exports.init = function(app){
         var qParams=[];
         qParams.push(params["DocCode"]); qParams.push(params["OurID"]); qParams.push(params["StockID"]); qParams.push(params["SecD"]);
         qParams.push(params["ProdID"]);
-        database.selectParamsQuery(dbUC,
+        appDatabase.selectParamsQuery(dbUC,
             "declare @MaxPPQty numeric(21, 9), @MaxQty numeric(21, 9), @PPID int, @AutoPPProdID int,\n"+
             "   @PPField int, @QtyField numeric (21, 9), @SetQty bit, @Msg varchar(200)\n"+
             "exec dbo.t_GetProdDetail @p0, @p1, @p2, @p3, @p4, '0', \n"+/*IgnorePPList='0'*/
@@ -189,7 +189,7 @@ module.exports.init = function(app){
         var qParams=[];
         qParams.push(params["DocCode"]); qParams.push(params["ChID"]); qParams.push(params["ProdID"]);
         qParams.push(params["PPID"]); qParams.push(params["RateMC"]); qParams.push(params["Discount"]); qParams.push(params["PLID"]);
-        database.selectParamsQuery(dbUC,
+        appDatabase.selectParamsQuery(dbUC,
             "declare @Result numeric(21,9)\n"+
             "exec dbo.t_GetPriceCC @p0, @p1, @p2, @p3, @p4, @p5, @p6, @Result OUTPUT\n"+
             "select PriceCC=@Result",qParams,
@@ -218,7 +218,7 @@ module.exports.init = function(app){
         if(prodID!=null) params["ProdID"]= prodID;
         var qParams=[];
         qParams.push(params["Price"]); qParams.push(params["ProdID"]); qParams.push(params["DocDate"]);
-        database.selectParamsQuery(dbUC, "select Tax=dbo.zf_GetProdPrice_wtTax(@p0,@p1,@p2)",qParams, function(err,rs){
+        appDatabase.selectParamsQuery(dbUC, "select Tax=dbo.zf_GetProdPrice_wtTax(@p0,@p1,@p2)",qParams, function(err,rs){
             if(err){
                 resultCallback({error:err.message, errorMessage:"Не удалось получить данные налога для документа!"});
                 return;

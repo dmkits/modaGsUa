@@ -1,4 +1,4 @@
-var dataModel= require(appDataModelPath), database= require("../databaseMSSQL");
+var dataModel= require(appDataModelPath);
 var t_Exc= require(appDataModelPath+"t_Exc"), t_ExcD= require(appDataModelPath+"t_ExcD"),
     r_Prods= require(appDataModelPath+"r_Prods");
 var r_DBIs= require(appDataModelPath+"r_DBIs"),

@@ -1,9 +1,9 @@
-var server= require("../server"), log= server.log;
+var server= require("../server"), log= server.log, appDatabase= server.appDatabase;
 var dateFormat= require('dateformat'), path= require('path');
 var systemFuncs= require("../systemFuncs");
-var database= require("../databaseMSSQL");
 
 var dataModelChanges= [], validatedDataModels={};
+module.exports.appDatabase= appDatabase;
 module.exports.getModelChanges= function(){ return dataModelChanges; };
 module.exports.resetModelChanges= function(){ dataModelChanges=[]; };
 module.exports.getValidatedDataModels= function(){ return validatedDataModels; };
@@ -152,7 +152,7 @@ function initValidateDataModel(dataModelName, dataModel, errs, nextValidateDataM
         validateCondition[idIsNullCondition]=null;
     }else if(functionName) withoutConditions=true;
     dataModel.doValidate= function(errs, resultCallback){
-        dataModel.getDataItems(database.getDBSystemConnection(),
+        dataModel.getDataItems(appDatabase.getDBSystemConnection(),
                 {sourceParams:sourceParams,conditions:validateCondition,withoutConditions:withoutConditions},
             function(result){
                 if(result.error){                                                                               log.error('FAILED validate data model:'+dataModelName+"! Reason:"+result.error+"!");//test
@@ -183,7 +183,7 @@ module.exports.initValidateDataModels= function(dataModelsList, errs, resultCall
     validateDataModelCallback(dataModelsList, 0, errs);
 };
 
-var getConUUID= database.getConUUID, getConU= database.getConU;
+var getConUUID= appDatabase.getConUUID, getConU= appDatabase.getConU;
 
 /**
  * params = { source, sourceType= table/view/query/function, sourceName, sourceParamsNames = [<param1Name>,...], sourceParams={<param1Name>:<value>,...},
@@ -337,14 +337,14 @@ function _getSelectItems(dbCon, params,resultCallback){                         
     }
     if(params.order) selectQuery+= " order by "+params.order;                                                   //log.debug(getConUUID(dbCon),getConU(dbCon),'_getSelectItems selectQuery:',selectQuery);//test
     if(queryValues.length==0)
-        database.selectQuery(dbCon, selectQuery, function(err,recordset,count,fields){
+        appDatabase.selectQuery(dbCon, selectQuery, function(err,recordset,count,fields){
             if(err){                                                                                            log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getSelectItems selectQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             }else
                 resultCallback(null,recordset);
         });
     else
-        database.selectParamsQuery(dbCon, selectQuery,queryValues, function(err,recordset,count,fieldsMetadata){
+        appDatabase.selectParamsQuery(dbCon, selectQuery,queryValues, function(err,recordset,count,fieldsMetadata){
             if(err){                                                                                            log.error(getConUUID(dbCon),getConU(dbCon),"FAILED _getSelectItems selectParamsQuery! Reason:",err.message,"!");//test
                 resultCallback(err);
             }else{
@@ -978,7 +978,7 @@ function _insDataItem(dbCon, params, resultCallback){
         queryInputParams.push(insDataItemValue);
     }
     var insQuery="insert into "+params.tableName+"("+queryFields+") values("+queryFieldsValues+")";
-    database.executeParamsQuery(dbCon, insQuery,queryInputParams,function(err,updateCount){
+    appDatabase.executeParamsQuery(dbCon, insQuery,queryInputParams,function(err,updateCount){
         if(err){
             resultCallback({error:"Failed insert data item! Reason:"+(err.message||"UNKNOWN")});
             return;
@@ -1076,7 +1076,7 @@ function _updDataItem(dbCon, params, resultCallback){
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     updQuery+= " where "+queryConditions;
-    database.executeParamsQuery(dbCon,updQuery,fieldsValues,function(err,updateCount){
+    appDatabase.executeParamsQuery(dbCon,updQuery,fieldsValues,function(err,updateCount){
         if(err){
             resultCallback({error:err.message,errorMessage:"Failed update data item! Reason:"+err.message});
             return;
@@ -1154,7 +1154,7 @@ function _delDataItem(dbCon, params, resultCallback){
         fieldsValues.push(params.conditions[fieldNameCondition]);
     }
     delQuery+= " where "+queryConditions;
-    database.executeParamsQuery(dbCon,delQuery,fieldsValues,function(err,updateCount){
+    appDatabase.executeParamsQuery(dbCon,delQuery,fieldsValues,function(err,updateCount){
         var delResult= {};
         if(err){
             delResult.error="Failed delete data item! Reason:"+err.message;

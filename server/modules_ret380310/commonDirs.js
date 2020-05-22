@@ -1,4 +1,4 @@
-var dataModel= require(appDataModelPath), database= require("../databaseMSSQL");
+var dataModel= require(appDataModelPath), appDatabase= dataModel.appDatabase;
 var r_DBIs= require(appDataModelPath+"r_DBIs");
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     dataModel.initValidateDataModels([r_DBIs], errs, function(){ nextValidateModuleCallback(); });
@@ -15,7 +15,7 @@ module.exports.init= function(app){
             "LEFT JOIN "+tableName+" t ON t.ChID between dbs.ChID_Start and dbs.ChID_End "+
             "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
             "GROUP BY dbs.ChID_Start, dbs.ChID_End";
-        database.selectQuery(dbUC,query,
+        appDatabase.selectQuery(dbUC,query,
             function(err, recordset){
                 var chID=null;
                 if(recordset&&recordset.length>0) chID=recordset[0]["NewChID"];
@@ -32,7 +32,7 @@ module.exports.init= function(app){
             "LEFT JOIN "+TableName+" t ON t."+fieldName+" between dbs.RefID_Start and dbs.RefID_End "+
             "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
             "GROUP BY dbs.RefID_Start, dbs.RefID_End";
-        database.selectQuery(dbUC,query,
+        appDatabase.selectQuery(dbUC,query,
             function(err, recordset){
                 var refID=null;
                 if(recordset&&recordset.length>0) refID=recordset[0]["NewRefID"];
@@ -49,7 +49,7 @@ module.exports.init= function(app){
             "LEFT JOIN "+TableName+" t ON t.DocID between dbs.DocID_Start and dbs.DocID_End "+
             "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
             "GROUP BY dbs.DocID_Start, dbs.DocID_End";
-        database.selectQuery(dbUC,query,
+        appDatabase.selectQuery(dbUC,query,
             function(err, recordset){
                 var docID=null;
                 if(recordset&&recordset.length>0) docID=recordset[0]["NewDocID"];
@@ -66,7 +66,7 @@ module.exports.init= function(app){
             "LEFT JOIN t_PInP pip ON pip.PPID between dbs.PPID_Start and dbs.PPID_End AND pip.ProdID=@p0 "+
             "WHERE dbs.DBiID = dbo.zf_Var('OT_DBiID') "+
             "GROUP BY dbs.PPID_Start, dbs.PPID_End";
-        database.selectParamsQuery(dbUC,query,[prodID],
+        appDatabase.selectParamsQuery(dbUC,query,[prodID],
             function(err, recordset){
                 var ppID=0;
                 if(recordset&&recordset.length>0) ppID=recordset[0]["NewPPID"];

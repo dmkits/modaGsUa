@@ -3,8 +3,8 @@ var path= require('path'), fs= require('fs'),
 var server= require('../server'), getLoadInitModulesError= server.getLoadInitModulesError, log= server.log,
     appStartupParams= server.getAppStartupParams(),
     getSysConfig= server.getSysConfig, setSysConfig= server.setSysConfig, loadSysConfig= server.loadSysConfig,
-    getAppConfig= server.getAppConfig;
-var systemFuncs= require('../systemFuncs'), database= require('../databaseMSSQL');
+    getAppConfig= server.getAppConfig, appDatabase= server.appDatabase;
+var systemFuncs= require('../systemFuncs');
 var appModules= require(appModulesPath), getDBValidateError= appModules.getValidateError,
     dataModel= require(appDataModelPath), z_Sys= require(appDataModelPath+"z_Sys"),
     changeLog= require(appDataModelPath+"change_log"),
@@ -58,7 +58,7 @@ module.exports.init = function(app){
         }
         outData.sysConfig= sysConfig;
         outData.appConfig=getAppConfig();
-        var dbSysConnErr= database.getSystemConnectionErr();
+        var dbSysConnErr= appDatabase.getSystemConnectionErr();
         if(dbSysConnErr){
             outData.dbSysConnErr= dbSysConnErr;
             outData.dbValidationErr = "Validation failed! Reason:No database system connection!";
@@ -91,7 +91,7 @@ module.exports.init = function(app){
         res.send(sysConfig);
     });
     app.get("/sysadmin/sysConfig/getDBList",function(req,res){
-        database.selectQuery(database.getDBSystemConnection(),
+        appDatabase.selectQuery(appDatabase.getDBSystemConnection(),
             "select	name from sys.databases "+
             "where name not in ('master','tempdb','model','msdb') and is_distributor = 0 and source_database_id is null "+
             "order by name",
@@ -116,9 +116,9 @@ module.exports.init = function(app){
                 res.send(outData);
                 return;
             }
-            if(!(currentDbName==newSysConfig.database) || !(currentDbHost==newSysConfig.host)) database.cleanConnectionPool();
+            if(!(currentDbName==newSysConfig.database) || !(currentDbHost==newSysConfig.host)) appDatabase.cleanConnectionPool();
             setSysConfig(newSysConfig);
-            database.setDBSystemConnection(newSysConfig, function(err,result){
+            appDatabase.setDBSystemConnection(newSysConfig, function(err,result){
                 if(err){
                     outData.message="System config stored and applied.";
                     outData.dbSysConnErr = "Failed connect to database! Reason: "+(err.errorMessage||err.error);
@@ -141,7 +141,7 @@ module.exports.init = function(app){
      * resultCallback = function(result={ item, error, errorCode })
      */
     var getChangeLogItemByID= function(id,resultCallback){
-        changeLog.getDataItem(database.getDBSystemConnection(),{conditions:{"ID=":id} }, resultCallback);
+        changeLog.getDataItem(appDatabase.getDBSystemConnection(),{conditions:{"ID=":id} }, resultCallback);
     };
     /**
      * result = true/false
@@ -217,7 +217,7 @@ module.exports.init = function(app){
      * resultCallback = function(result={ item, error, errorCode })
      */
     var checkIfChangeLogExists= function(resultCallback){
-        changeLog.getDataItems(database.getDBSystemConnection(),{conditions:{"ID IS NULL":null}}, resultCallback);
+        changeLog.getDataItems(appDatabase.getDBSystemConnection(),{conditions:{"ID IS NULL":null}}, resultCallback);
     };
     var changeLogTableColumns=[
         {data: "ID", name: "changeID", width: 150, type: "text"},
@@ -230,7 +230,7 @@ module.exports.init = function(app){
      * resultCallback = function(result = { updateCount, resultItem:{<tableFieldName>:<value>,...}, error } )
      */
     var insertToChangeLog= function(itemData,resultCallback){
-        changeLog.insTableDataItem(database.getDBSystemConnection(),{tableColumns:changeLogTableColumns,idFieldName:"ID", insTableData:itemData}, resultCallback);
+        changeLog.insTableDataItem(appDatabase.getDBSystemConnection(),{tableColumns:changeLogTableColumns,idFieldName:"ID", insTableData:itemData}, resultCallback);
     };
     app.post("/sysadmin/database/applyChange",function(req,res){
         var outData={}, fullModelChanges=dataModel.getModelChanges(),
@@ -247,7 +247,7 @@ module.exports.init = function(app){
         checkIfChangeLogExists(function(result){
            // if (result.error && (result.errorCode == "ER_NO_SUCH_TABLE")) {
             if (result.error&&  result.error.indexOf("Invalid object name")>=0) {  log.info("checkIfChangeLogExists  tableData.error:",result.error);
-                database.executeQuery(database.getDBSystemConnection(),CHANGE_VAL,function (err){
+                appDatabase.executeQuery(appDatabase.getDBSystemConnection(),CHANGE_VAL,function (err){
                     if(err){
                         outData.error = err.message;
                         res.send(outData);
@@ -286,7 +286,7 @@ module.exports.init = function(app){
                     res.send(outData);
                     return;
                 }
-                database.executeQuery(database.getDBSystemConnection(),CHANGE_VAL, function(err){
+                appDatabase.executeQuery(appDatabase.getDBSystemConnection(),CHANGE_VAL, function(err){
                     if(err){
                         outData.error = err.message;
                         res.send(outData);
@@ -404,7 +404,7 @@ module.exports.init = function(app){
             }
             var resultItems=result.items;
             if(!resultItems||resultItems.length==0){
-                database.executeQuery(dbUC,"create login "+login+" WITH PASSWORD = '"+lpass+"'",function(err, updateCount){
+                appDatabase.executeQuery(dbUC,"create login "+login+" WITH PASSWORD = '"+lpass+"'",function(err, updateCount){
                     if(prevResult.updateCount===undefined)prevResult.updateCount=1;
                     if(err){
                         prevResult.updateCount=0;
@@ -433,7 +433,7 @@ module.exports.init = function(app){
                 return;
             }
             if(!result.items||result.items.length==0){
-                database.executeQuery(dbUC,"CREATE USER "+suname+" FOR LOGIN "+login,function(err,updateCount){
+                appDatabase.executeQuery(dbUC,"CREATE USER "+suname+" FOR LOGIN "+login,function(err,updateCount){
                     if(prevResult.updateCount===undefined)prevResult.updateCount=1;
                     if(err){
                         prevResult.updateCount=0;
@@ -460,10 +460,10 @@ module.exports.init = function(app){
          go
          EXEC sp_change_users_login 'Update_One', 'kassir12', 'kassir12'
          go */
-        database.executeQuery(dbUC,"exec sp_addrolemember 'db_ddladmin', '"+suname+"'",function(err,updateCount){
-            database.executeQuery(dbUC,"exec sp_addrolemember 'db_owner', '"+suname+"'",function(err,updateCount){
-                database.executeQuery(dbUC,"ALTER LOGIN "+login+" WITH CHECK_POLICY=ON,CHECK_EXPIRATION=ON",function(err,updateCount){
-                    database.executeQuery(dbUC,"EXEC sp_change_users_login 'Update_One', '"+suname+"', '"+login+"'",function(err,updateCount){
+        appDatabase.executeQuery(dbUC,"exec sp_addrolemember 'db_ddladmin', '"+suname+"'",function(err,updateCount){
+            appDatabase.executeQuery(dbUC,"exec sp_addrolemember 'db_owner', '"+suname+"'",function(err,updateCount){
+                appDatabase.executeQuery(dbUC,"ALTER LOGIN "+login+" WITH CHECK_POLICY=ON,CHECK_EXPIRATION=ON",function(err,updateCount){
+                    appDatabase.executeQuery(dbUC,"EXEC sp_change_users_login 'Update_One', '"+suname+"', '"+login+"'",function(err,updateCount){
                         if(prevResult.updateCount===undefined)prevResult.updateCount=1;
                         if(err){
                             prevResult.updateCount=0;
@@ -473,7 +473,7 @@ module.exports.init = function(app){
                             return;
                         }
                         if(lpass!=userVisiblePass){
-                            database.executeQuery(dbUC,"alter login "+login+" WITH PASSWORD = '"+lpass+"'",function(err,updateCount){
+                            appDatabase.executeQuery(dbUC,"alter login "+login+" WITH PASSWORD = '"+lpass+"'",function(err,updateCount){
                                 if(err){
                                     prevResult.updateCount=0;
                                     prevResult.error="Failed update login password! Reason: password no strong!";

@@ -1,4 +1,4 @@
-var dataModel= require(appDataModelPath), database= require("../databaseMSSQL"),
+var dataModel= require(appDataModelPath), //appDatabase= dataModel.appDatabase,
     dateFormat= require('dateformat');
 var t_Exc= require(appDataModelPath+"t_Exc"), t_ExcD= require(appDataModelPath+"t_ExcD");
 var r_DBIs= require(appDataModelPath+"r_DBIs"),
@@ -177,7 +177,7 @@ module.exports.init = function(app){
             function(result){ res.send(result); });
     });
     //t_ExcD.setExcDTaxPriceCCnt=function(connection,prodID,recChID,recDData,callback){
-    //    database.selectParamsQuery(connection,
+    //    appDatabase.selectParamsQuery(connection,
     //        "select tax=dbo.zf_GetProdRecTax(@p0,OurID,CompID,DocDate) from t_Exc where ChID=@p1",[prodID,recChID],
     //        function (result) {/* Возвращает ставку НДС для товара в зависимости от поставщика */
     //            var tax=(result&&result.length>0)?result[0]["tax"]:0;

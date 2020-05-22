@@ -1,5 +1,6 @@
-var server= require("../server"), log= server.log, appParams= server.getAppStartupParams(), getAppConfig= server.getAppConfig;
-var database= require("../databaseMSSQL");
+var server= require("../server"), log= server.log,
+    appParams= server.getAppStartupParams(), getAppConfig= server.getAppConfig,
+    appDatabase= server.appDatabase;
 
 module.exports.validateModule = function(errs, nextValidateModuleCallback){
     nextValidateModuleCallback();
@@ -59,7 +60,7 @@ module.exports.init= function(app){
         outData.imageSmall=appConfig.imageSmall;
         outData.imageMain=appConfig.imageMain;
         setUserRoleMenu(outData, req.dbEmpRole, appConfig.usersRoles, appConfig.appMenu);
-        var dbSysConnErr=database.getSystemConnectionErr();
+        var dbSysConnErr=appDatabase.getSystemConnectionErr();
         if(dbSysConnErr){
             outData.dbSysConnErr= dbSysConnErr;
             res.send(outData);

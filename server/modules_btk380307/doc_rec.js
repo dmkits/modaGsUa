@@ -1,4 +1,4 @@
-var dataModel= require(appDataModelPath), database= require("../databaseMSSQL"),
+var dataModel= require(appDataModelPath),
     dateFormat= require('dateformat');
 var t_Rec= require(appDataModelPath+"t_Rec"), t_RecD= require(appDataModelPath+"t_RecD");
 var r_DBIs= require(appDataModelPath+"r_DBIs"),
