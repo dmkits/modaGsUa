@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="dataSourceStorage">
+  <data-source name="SQL Server - GMSDev38Btk380307GS@192.168.56.12" uuid="2ea65b6b-a474-474c-a755-7dc773aab887">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source name="SQL Server - GMSDev38Ret380310_Zdn@192.168.56.11" uuid="70c56160-1d53-47f7-bc7e-ffc7acfa382c">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source name="SQL Server - GMSDev35_Btk30870_Pdm@192.168.56.12" uuid="ea0870b2-af36-41cc-a85b-4fb7a1dfa314">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source name="SQL Server - GMSDev35_Btk30870_Pdm@192.168.56.12 [2]" uuid="bbfa946d-6e5e-49d1-91ff-d14244e06f5b">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+</component>
