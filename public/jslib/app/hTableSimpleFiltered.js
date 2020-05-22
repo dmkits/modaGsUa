@@ -25,7 +25,7 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
             var inputGlobalFilter = document.createElement("input"); this.globalFilter.input=inputGlobalFilter;
             inputGlobalFilter.id = this.id+"_inputGlobalFilter"; inputGlobalFilter.className="addedHeaderGlobalFilter";
             this.globalFilter.setGlobalFilter=function(value){
-                if(value!==null&&value.length>0){
+                if(value!=null&&value.toString().trim().length>0){
                     this.value= value.trim();
                     this.input.classList.add("addedHeaderGlobalFilterInUse"); this.label.classList.add("addedHeaderGlobalFilterInUse");
                 }else{
@@ -321,10 +321,11 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
             if(!this.htData||this.htData.length==0) return null;
             var filtered=false;
             var htColumns= this.htColumns, filteredData=[], globalFilterValue=this.globalFilter.value;
+            globalFilterValue= (globalFilterValue!=null)?globalFilterValue.trim():globalFilterValue;
             for(var rowInd=0; rowInd<this.htData.length; rowInd++){
                 var rowData= this.htData[rowInd];
                 if(!rowData) continue;
-                var rowVisible=true, rowVisibleByGlobalFilter=(globalFilterValue!==null)?false:true;
+                var rowVisible=true, rowVisibleByGlobalFilter=(globalFilterValue!==null&&globalFilterValue!="")?false:true;
                 for(var colIndex in htColumns){
                     var colProps = htColumns[colIndex];
                     if(colProps&&colProps.visible===false)continue;
@@ -357,12 +358,12 @@ define(["dojo/_base/declare", "app/hTableSimple"], function(declare, HTableSimpl
                             }
                         }
                         if(globalFilterValue!==null && !rowVisibleByGlobalFilter && itemVisible==true){
-                            var sdataItemVal=(dataItemVal)?dataItemVal.toString():"", sGlobalFilterVal=globalFilterValue.toString();
-                            if(sdataItemVal===sGlobalFilterVal||sdataItemVal.indexOf(" "+sGlobalFilterVal+" ")>=0) rowVisibleByGlobalFilter= true;
+                            var sDataItemVal=(dataItemVal)?dataItemVal.toString():"", sGlobalFilterVal=globalFilterValue.toString();
+                            if(sDataItemVal===sGlobalFilterVal||sDataItemVal.indexOf(" "+sGlobalFilterVal+" ")>=0) rowVisibleByGlobalFilter= true;
                         }
                     }else if(globalFilterValue!==null && !rowVisibleByGlobalFilter){
-                        var sdataItemVal=(dataItemVal)?dataItemVal.toString():"", sGlobalFilterVal=globalFilterValue.toString();
-                        if(sdataItemVal===sGlobalFilterVal||sdataItemVal.indexOf(" "+sGlobalFilterVal+" ")>=0) rowVisibleByGlobalFilter= true;
+                        var sDataItemVal=(dataItemVal)?dataItemVal.toString():"", sGlobalFilterVal=globalFilterValue.toString();
+                        if(sDataItemVal===sGlobalFilterVal||(" "+sDataItemVal+" ").indexOf(" "+sGlobalFilterVal+" ")>=0) rowVisibleByGlobalFilter= true;
                     }
                     rowVisible=rowVisible&&itemVisible;
                 }
